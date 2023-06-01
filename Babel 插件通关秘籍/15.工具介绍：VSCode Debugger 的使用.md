@@ -1,0 +1,146 @@
+> 想看懂复杂代码离不开 debugger，它是提升 Node.js 水平必备的能力。因为后面的案例代码都是有一定的复杂度的，建议同学们先学会使用 debugger 再去学后面的案例，结合 debugger 来看。
+
+这一节，我们来学习下 vscode debugger 的使用。
+
+首先，我们把[代码](https://github.com/QuarkGluonPlasma/babel-plugin-exercize)下载下来后，可以看到又一个 .vscode 的目录，里面有个 launch.json 的配置，这里面就是调试的配置。
+
+![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d04026afef6d4761ac4ff3dcf5d2f84d~tplv-k3u1fbpfcp-watermark.image)
+
+这个文件就是调试的配置，点开 debugger 的窗口，就可以看到启动调试的按钮。
+
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/205267d73fbc4e7dab7d76c9992b6a97~tplv-k3u1fbpfcp-watermark.image)
+
+可以在想断住的那一行左边点一下，就会打上断点，然后点击调试，就会以 debug 模式运行，到了断点就会停住，然后可以看到堆栈信息、断点等。
+
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dbd7b6f296ea4235825cea8bda6b84c5~tplv-k3u1fbpfcp-watermark.image)
+
+这是 vscode debugger 的使用方式。
+
+## vscode debugger 的配置
+
+会了怎么使用之后，我们来深入讲下怎么配置，希望能够让同学们的 nodejs 调试能力有所提升。
+
+点击这个齿轮，会打开 .vscode/launch.json 的内容来编辑，在这里写各种配置。
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6bfb71747d254624913047f5819c45a5~tplv-k3u1fbpfcp-watermark.image)
+
+点击右下角的按钮就会有一个菜单来选择配置的模版：
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/73942b78943f498fa4eb2190ca78e510~tplv-k3u1fbpfcp-watermark.image)
+
+运行环境有很多，比如 chrome、node.js 等，这里我们只需要 node.js 的环境。
+
+然后启动方式分为 launch 和 attach 两种。为什么是这两种呢？
+
+那是因为调试是分为客户端和服务端的，
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1e25d1a7e7114b1497558a18f3219ea2~tplv-k3u1fbpfcp-watermark.image)
+
+我们如果是启动 node.js 的调试模式，需要加上 --inspect  或者 --inspect-brk（在首行断住）参数，之后会启动一个 websocket server，等待客户端链接。
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2ff979331b7046faa1a0dc3a6ce28397~tplv-k3u1fbpfcp-watermark.image)
+
+两者之间是通过 v8 debug protocol 来通信的。
+
+比如：
+设置断点：
+```javascript
+{
+    "seq":117,
+    "type":"request",
+    "command":"setbreakpoint",
+    "arguments":{
+        "type":"function",
+        "target":"f"
+    }
+}
+```
+去掉断点：
+```javascript
+{
+    "seq":117,
+    "type":"request",
+    "command":"clearbreakpoint",
+    "arguments": {
+        "type":"function",
+        "breakpoint":1
+     }
+}
+```
+手动连接的话可以打开 chrome://inspect 页面，可以用 chrome devtools 的 debugger client 连上来调试。
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6d72a6152fe1402ca424a7c02d530c9f~tplv-k3u1fbpfcp-watermark.image)
+
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/21ba7e5435b14b798581401553c4d89f~tplv-k3u1fbpfcp-watermark.image)
+
+但是，用 vscode 不用这么麻烦，直接在 .vscode/launch.json 里面配置下就可以。
+
+前面提到 vsocde 的 debug 配置分为 launch 和 attach 两种：
+
+- launch： 把 nodejs 代码跑起来，启动 debugger server，然后用 client 来连接
+- attach：已经有了 debugger server，只需要启动一个 debugger client 连接上就行
+
+所以就可以看到 launch 的配置要指定运行什么 js 代码：
+
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6aaf1a267e224baaa09704e8a2263a82~tplv-k3u1fbpfcp-watermark.image)
+
+而 attach 则只需要指定 连接到哪个端口：
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6e047d1180ea44589147859fcfd0bd92~tplv-k3u1fbpfcp-watermark.image)
+
+当然，小册里的代码都通过 launch 的配置就可以，如果添加的话也是类似上面的方式添加调试配置，然后就可以调试了。
+
+
+vscode 提供了这几个控制按键（底层会发送 debug 协议的消息），点击按钮就可以让代码继续运行。
+
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9e3dbcb4cd2a4f39b1d433bff2cf58ff~tplv-k3u1fbpfcp-watermark.image)
+
+
+第一个是继续运行，到下一个断点停住
+
+第二个是运行下一步（单步运行）
+
+第三个可以在执行到某个函数调用的时候进入函数内部执行
+
+第四个是跳出当前函数调用，然后往下执行
+
+第五个是重新运行
+
+第六个是终止运行
+
+学会了 debugger 以后，api 不用记，打个断点都能看到：
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/408207297a514949b7b83ad0457ceedb~tplv-k3u1fbpfcp-watermark.image)
+
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3699f18e54404278a6cc6f6ececd4029~tplv-k3u1fbpfcp-watermark.image)
+
+## 总结
+
+debug 能力是一种很重要的能力，比起 console.log 来能精确的知道每一步的运行结果，更容易读懂代码。
+
+小册代码中有 vscode debugger 的配置，但是很多读者不会使用，所以这节来介绍了一下，主要是在 .vscode/launch.json 里面添加配置，然后在 debug 窗口来启动调试，之后就可以打断点和单步运行了。
+
+vscode debugger 的使用分为这几步：
+1. 在 .vscode/launch.json 里面添加对应 js 文件的调试配置
+2. 在要调试的那行左边打断点
+3. 点击调试窗口的调试按钮启动调试
+4. 点击下一步、下一个断点、进入函数内部等方式来部分执行代码
+
+debugger 的实现原理是分为一个 debugger server 和一个 debugger client，deubgger server 在 js 引擎里面，debugger client 包括 chrome devtools、vscode debugger 等，他们两者之间通过调试协议通信，比如 v8 debug protocol。
+
+launch 的方式就是启动一个 debugger server（websocket），然后用 debugger client 连接上，发送消息来控制单步执行、打断点等。
+
+而 attach 只是 启动 client，连上已有的 debugger server，后续流程一样。
+
+node --inspect xxx.js 就可以看到 ws://sss:111 的地址，这就是 websocket 的 debugger server 的地址。客户端用 chrome. devtools. 可以，用 vscode 或者其他 ide 都可以，因为他们都实现了 v8 debug protocol 的 websocket client，只是做了各自的 ui。（当然，原理做了解即可，了解原理的目的是为了更好的使用工具）。
+
+希望同学们能掌握 vscode debugger 的使用，对更好的理解案例代码有很大的帮助。
+
+扩展阅读（想更深入 debugger 的同学可以看下）：
+
+[用 VSCode 调试网页的 JS 代码有多香](https://juejin.cn/post/7010768454458277924)
+
+[如何让 Vue、React 代码的调试变得更爽](https://juejin.cn/post/7071219293249077256)
+
+
+[让你 nodejs 水平暴增的 debugger 技巧](https://juejin.cn/post/6981820158046109703)
+
