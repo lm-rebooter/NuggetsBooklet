@@ -1,0 +1,205 @@
+### 本资源由 itjc8.com 收集整理
+﻿我们通过 redis-cli 命令行和 RedisInsight 的 GUI 工具入门了 redis。
+
+那在 Node 里怎么操作 redis 呢？
+
+这就需要用 redis 的 node 的客户端了。
+
+redis 有很多的 [node 客户端的包](https://redis.io/resources/clients/#nodejs)：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-1.png)
+
+最流行的就是 redis 和 ioredis 这两个。
+
+我们创建个项目来试一下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-2.png)
+
+我们先试一下 redis，它是官方提供的 npm 包：
+
+    npm install redis
+
+然后在代码里连接 redis 服务，并执行命令：
+
+```javascript
+import { createClient } from 'redis';
+
+const client = createClient({
+    socket: {
+        host: 'localhost',
+        port: 6379
+    }
+});
+
+client.on('error', err => console.log('Redis Client Error', err));
+
+await client.connect();
+
+const value = await client.keys('*');
+
+console.log(value);
+
+await client.disconnect();
+```
+
+这里执行 keys 命令，获取所有的 key。
+
+因为用到了 es module、顶层 await，这些的启用需要在 package.json 里添加 type: module
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-3.png)
+
+然后 node 执行下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-4.png)
+
+用 RedisInsight 看下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-5.png)
+
+确实现在是有这些 key。
+
+我们再执行其他命令试试，比如 hset 创建一个 hash 表：
+
+```javascript
+await client.hSet('guangguang1', '111', 'value111');
+await client.hSet('guangguang1', '222', 'value222');
+await client.hSet('guangguang1', '333', 'value333');
+```
+
+执行以后是这样的：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-6.png)
+
+所有的 redis 命令都有对应的方法：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-7.png)
+
+和我们在命令行客户端里操作一样。
+
+这样我们就完成了 node 里操作 redis 的功能。
+
+再来试下 ioredis：
+
+    npm install ioredis
+
+然后连接 redis server 并执行 keys 命令：
+
+```javascript
+import Redis from "ioredis";
+
+const redis = new Redis();
+
+const res = await redis.keys('*');
+
+console.log(res);
+```
+
+结果如下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-8.png)
+
+其他命令也是这样执行：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-9.png)
+
+这些 node 包用起来还是很简单的，没啥学习成本。
+
+那 nest 里怎么操作 redis 呢？
+
+其实也是一样的：
+
+执行 nest new nest-redis 创建一个 nest 项目：
+
+    nest new nest-redis -p npm
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-10.png)
+
+当然，要先安装用到的 redis 的包。
+
+    npm install redis 
+
+然后在 AppModule 添加一个自定义的 provider：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-11.png)
+
+```javascript
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { createClient } from 'redis';
+
+@Module({
+  imports: [],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: 'REDIS_CLIENT',
+      async useFactory() {
+        const client = createClient({
+            socket: {
+                host: 'localhost',
+                port: 6379
+            }
+        });
+        await client.connect();
+        return client;
+      }
+    }
+  ],
+})
+export class AppModule {}
+```
+
+通过 useFactory 的方式动态创建 provider，token 为 REDIS\_CLIENT。
+
+然后注入到 service 里用就好了：
+
+```javascript
+import { Inject, Injectable } from '@nestjs/common';
+import { RedisClientType } from 'redis';
+
+@Injectable()
+export class AppService {
+
+  @Inject('REDIS_CLIENT')
+  private redisClient: RedisClientType;
+
+  async getHello() {
+    const value = await this.redisClient.keys('*');
+    console.log(value);
+
+    return 'Hello World!';
+  }
+}
+```
+
+因为 service 里加了 async、await，那 controller 里也得加一下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-12.png)
+
+这样就能在 nest 里操作 redis 了。
+
+我们把它跑起来，浏览器访问下：
+
+    nest start --watch
+
+可以看到控制台打印了 redis 命令的执行结果：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第52章-13.png)
+
+这就是在 Nest 里操作 redis 的方式。
+
+案例代码在小册仓库：
+
+[node 操作 redis](https://github.com/QuarkGluonPlasma/nestjs-course-code/tree/main/redis-node-test)
+
+[nest 操作 redis](https://github.com/QuarkGluonPlasma/nestjs-course-code/tree/main/nest-redis)
+
+## 总结
+
+通过 redis 的 npm 包（redis、ioredis 等）可以连接 redis server 并执行命令。
+
+如果在 nest 里，可以通过 useFactory 动态创建一个 provider，在里面使用 redis 的 npm 包创建连接。
+
+redis 是必备的中间件，后面的项目实战会大量用到。
