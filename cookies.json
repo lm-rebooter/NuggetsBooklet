@@ -1,7 +1,7 @@
 [
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556407,
+        "expirationDate": 1721357436.002544,
         "hostOnly": false,
         "httpOnly": true,
         "name": "uid_tt",
@@ -10,11 +10,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "20dc7b0486546420da725b2dd3cce714"
+        "value": "dbd526936044f7d1c7e045fb3f987409"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556419,
+        "expirationDate": 1721357436.002567,
         "hostOnly": false,
         "httpOnly": true,
         "name": "uid_tt_ss",
@@ -23,24 +23,11 @@
         "secure": true,
         "session": false,
         "storeId": null,
-        "value": "20dc7b0486546420da725b2dd3cce714"
+        "value": "dbd526936044f7d1c7e045fb3f987409"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1695004462.745381,
-        "hostOnly": false,
-        "httpOnly": false,
-        "name": "passport_csrf_token_default",
-        "path": "/",
-        "sameSite": null,
-        "secure": false,
-        "session": false,
-        "storeId": null,
-        "value": "10452c0a39056f7a3a94235016053cfe"
-    },
-    {
-        "domain": ".juejin.cn",
-        "expirationDate": 1690425362.036051,
+        "expirationDate": 1718950949.306872,
         "hostOnly": false,
         "httpOnly": false,
         "name": "msToken",
@@ -49,11 +36,11 @@
         "secure": true,
         "session": false,
         "storeId": null,
-        "value": "NRWkwkxZE5uwtT_y0z8oYO24yj3H3v1q0kQMpkHYSnIEBSEDAU8qfDrWY_f4pbYCE5Ucij3IPOyO3j70oed5znw61c-C-KdWHgx65anuZNi07G5UcLUmZME3TVDHkZU="
+        "value": "A41sEsiFWmGEjiWR7I46E8ixv2MaNit26u-Shyg85cH0uHxpc-C7r3UNF31c0r4KXAjmsm4QVvYJW4u13SUij6OO6-M600seHzLA-_-WjFmdZGr7tujnbb3Pm_M_ZcM="
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556501,
+        "expirationDate": 1721357437.926869,
         "hostOnly": false,
         "httpOnly": true,
         "name": "store-region",
@@ -66,7 +53,7 @@
     },
     {
         "domain": "juejin.cn",
-        "expirationDate": 1692426312,
+        "expirationDate": 1721714511,
         "hostOnly": true,
         "httpOnly": false,
         "name": "s_v_web_id",
@@ -75,11 +62,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "f1da2afb509e4945df72f0c4287103b169d6b61f933381393a"
+        "value": "verify_lwk9y321_3dkYgAiq_JRWk_4P9W_AYOA_4XdIApCrGnqJ"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556432,
+        "expirationDate": 1721357436.00259,
         "hostOnly": false,
         "httpOnly": true,
         "name": "sid_tt",
@@ -88,11 +75,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "4c33d4d5f98e462a3590b7f94e90a1b0"
+        "value": "190c00d0b37bd27becbf100681aa27a3"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1711791212.721997,
+        "expirationDate": 1746497028.456919,
         "hostOnly": false,
         "httpOnly": false,
         "name": "__tea_cookie_tokens_2608",
@@ -101,24 +88,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "%257B%2522web_id%2522%253A%25227203653127773373986%2522%252C%2522user_unique_id%2522%253A%25227203653127773373986%2522%252C%2522timestamp%2522%253A1677231212721%257D"
-    },
-    {
-        "domain": "juejin.cn",
-        "expirationDate": 1708767212,
-        "hostOnly": true,
-        "httpOnly": false,
-        "name": "ttcid",
-        "path": "/",
-        "sameSite": null,
-        "secure": false,
-        "session": false,
-        "storeId": null,
-        "value": "222783e268d54deebdf5aa2d5b9014f818"
+        "value": "%257B%2522user_unique_id%2522%253A%25227203653127773373986%2522%252C%2522web_id%2522%253A%25227203653127773373986%2522%252C%2522timestamp%2522%253A1711699620923%257D"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556481,
+        "expirationDate": 1721357436.002678,
         "hostOnly": false,
         "httpOnly": true,
         "name": "ssid_ucp_v1",
@@ -127,7 +101,7 @@
         "secure": true,
         "session": false,
         "storeId": null,
-        "value": "1.0.0-KDk4ZDQ3OTFiYTM3ZGU5MTY1YTdjN2NkZjg5NTRhYWEwNmZkY2M3ZDQKFwjutfC__fWRBBCPu-KlBhiwFDgCQPEHGgJsZiIgNGMzM2Q0ZDVmOThlNDYyYTM1OTBiN2Y5NGU5MGExYjA"
+        "value": "1.0.0-KDdmMTQwMGY4ZmJkNDA2YThhODRmYzMxMzcwOThmZjNiYzNjYzVjMWMKFwj-zLC__fWFARD8weKlBhiwFDgHQPQHGgJsZiIgMTkwYzAwZDBiMzdiZDI3YmVjYmYxMDA2ODFhYTI3YTM"
     },
     {
         "domain": ".juejin.cn",
@@ -144,7 +118,7 @@
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556512,
+        "expirationDate": 1721357437.926909,
         "hostOnly": false,
         "httpOnly": true,
         "name": "store-region-src",
@@ -157,7 +131,7 @@
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1690169804,
+        "expirationDate": 1726122148,
         "hostOnly": false,
         "httpOnly": false,
         "name": "_tea_utm_cache_2018",
@@ -166,7 +140,7 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "{%22utm_source%22:%22gold_browser_extension%22}"
+        "value": "{%22utm_source%22:%22course_list%22}"
     },
     {
         "domain": ".juejin.cn",
@@ -183,7 +157,7 @@
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556444,
+        "expirationDate": 1721357436.002613,
         "hostOnly": false,
         "httpOnly": true,
         "name": "sessionid",
@@ -192,11 +166,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "4c33d4d5f98e462a3590b7f94e90a1b0"
+        "value": "190c00d0b37bd27becbf100681aa27a3"
     },
     {
         "domain": "juejin.cn",
-        "expirationDate": 1690160183,
+        "expirationDate": 1718675718,
         "hostOnly": true,
         "httpOnly": false,
         "name": "_jj_ext",
@@ -209,7 +183,7 @@
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1724380560.802506,
+        "expirationDate": 1752906148.018658,
         "hostOnly": false,
         "httpOnly": false,
         "name": "_tea_utm_cache_2608",
@@ -218,63 +192,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "{%22utm_source%22:%22gold_browser_extension%22}"
+        "value": "{%22utm_source%22:%22course_list%22}"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1700188558.55632,
-        "hostOnly": false,
-        "httpOnly": true,
-        "name": "n_mh",
-        "path": "/",
-        "sameSite": null,
-        "secure": false,
-        "session": false,
-        "storeId": null,
-        "value": "66RTXutGTbApSOOKr8NYvbDARXzNK-zko655cUK8fE0"
-    },
-    {
-        "domain": ".juejin.cn",
-        "expirationDate": 1692412558.556363,
-        "hostOnly": false,
-        "httpOnly": true,
-        "name": "passport_auth_status",
-        "path": "/",
-        "sameSite": null,
-        "secure": false,
-        "session": false,
-        "storeId": null,
-        "value": "e4a225e595397cc39af4dd676b1dfbd4%2C"
-    },
-    {
-        "domain": ".juejin.cn",
-        "expirationDate": 1692412558.556376,
-        "hostOnly": false,
-        "httpOnly": true,
-        "name": "passport_auth_status_ss",
-        "path": "/",
-        "sameSite": "no_restriction",
-        "secure": true,
-        "session": false,
-        "storeId": null,
-        "value": "e4a225e595397cc39af4dd676b1dfbd4%2C"
-    },
-    {
-        "domain": ".juejin.cn",
-        "expirationDate": 1695004462.745342,
-        "hostOnly": false,
-        "httpOnly": false,
-        "name": "passport_csrf_token",
-        "path": "/",
-        "sameSite": "no_restriction",
-        "secure": true,
-        "session": false,
-        "storeId": null,
-        "value": "10452c0a39056f7a3a94235016053cfe"
-    },
-    {
-        "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556455,
+        "expirationDate": 1721357436.002633,
         "hostOnly": false,
         "httpOnly": true,
         "name": "sessionid_ss",
@@ -283,11 +205,11 @@
         "secure": true,
         "session": false,
         "storeId": null,
-        "value": "4c33d4d5f98e462a3590b7f94e90a1b0"
+        "value": "190c00d0b37bd27becbf100681aa27a3"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1720924558.556392,
+        "expirationDate": 1720925436.002517,
         "hostOnly": false,
         "httpOnly": true,
         "name": "sid_guard",
@@ -296,11 +218,11 @@
         "secure": false,
         "session": false,
         "storeId": null,
-        "value": "4c33d4d5f98e462a3590b7f94e90a1b0%7C1689820559%7C31536000%7CFri%2C+19-Jul-2024+02%3A35%3A59+GMT"
+        "value": "190c00d0b37bd27becbf100681aa27a3%7C1689821436%7C31536000%7CFri%2C+19-Jul-2024+02%3A50%3A36+GMT"
     },
     {
         "domain": ".juejin.cn",
-        "expirationDate": 1721356558.556468,
+        "expirationDate": 1721357436.002655,
         "hostOnly": false,
         "httpOnly": true,
         "name": "sid_ucp_v1",
@@ -309,19 +231,6 @@
         "secure": true,
         "session": false,
         "storeId": null,
-        "value": "1.0.0-KDk4ZDQ3OTFiYTM3ZGU5MTY1YTdjN2NkZjg5NTRhYWEwNmZkY2M3ZDQKFwjutfC__fWRBBCPu-KlBhiwFDgCQPEHGgJsZiIgNGMzM2Q0ZDVmOThlNDYyYTM1OTBiN2Y5NGU5MGExYjA"
-    },
-    {
-        "domain": "juejin.cn",
-        "expirationDate": 1712825641,
-        "hostOnly": true,
-        "httpOnly": false,
-        "name": "tt_scid",
-        "path": "/",
-        "sameSite": null,
-        "secure": false,
-        "session": false,
-        "storeId": null,
-        "value": "fcCS2vHHgrxRIAEwyo5GoPHo3zXsKpU5EGr68voSHgZbBx.L4JhpS2ZgIsHqqYpO0a69"
+        "value": "1.0.0-KDdmMTQwMGY4ZmJkNDA2YThhODRmYzMxMzcwOThmZjNiYzNjYzVjMWMKFwj-zLC__fWFARD8weKlBhiwFDgHQPQHGgJsZiIgMTkwYzAwZDBiMzdiZDI3YmVjYmYxMDA2ODFhYTI3YTM"
     }
 ]
