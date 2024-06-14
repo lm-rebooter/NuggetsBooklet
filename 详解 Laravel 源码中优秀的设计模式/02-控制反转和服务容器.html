@@ -1,0 +1,101 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">控制反转和服务容器</h1>
+<blockquote>
+<p>依赖注入模式：</p>
+<p>在面向接口编程时，控制反转和依赖倒置的实现方式。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">程序控制权</h3>
+<p>在我们目前最常用的冯·诺依曼结构的计算机中，控制器是处理核心中非常重要的一部分。
+计算机对数据的处理，都是在控制器的操控下完成的。
+这种流程控制逻辑，也影响到了我们在程序的编程实现中。
+在我们常用的面向过程、面向对象等包含控制操作的编程中，控制语句都是编程语言中最重要的一部分。
+通过在编程中加入控制思想，可以让程序更好的适应计算机的处理方式。</p>
+<p></p><figure><img alt="冯·诺依曼结构" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/18/1606a09354cafbaa?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="626" data-height="274" src="https://user-gold-cdn.xitu.io/2017/12/18/1606a09354cafbaa?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>所以，我们对程序的编写和运行，实际上是通过我们所编写的指令，操作计算机进行数据计算。</p>
+<p>在常规思维的指导下，我们按控制处理去编写程序，就会关系每一个相关类的创建和它依赖类的创建。
+这种我们通过操作一个类，驱动所有类的过程，就很像钟表里齿轮的运转，需要精细的进行控制。</p>
+<p></p><figure><img alt="普通齿轮" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/18/1606a0961c29c24f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="396" data-height="330" src="https://user-gold-cdn.xitu.io/2017/12/18/1606a0961c29c24f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>然而，这种程序结构设计，在面对越来越庞大和复杂的场景时，就会使得齿轮的数量越来越庞大。
+驱动类型各不相同，数量如此庞大的齿轮体系，如履薄冰，一点微小的偏差，都会使整个程序轰然崩塌。
+而维护这样的结构，并在此基础上增加新的功能，就完全靠开发者的知识和经验的积累了。</p>
+<p>当然，对于这些情况，我们也有另一种选择，就是使用框架。</p>
+<h3 class="heading" data-id="heading-2">框架与控制反转</h3>
+<p>对于任何一个业务型的框架来说，我们使用它的目的，都是为了简化开发的过程。
+而大多数这类框架为我们简化开发过程的方式，都是通过将业务所需的功能进行封装，使我们对这些功能的调用更加轻松。</p>
+<p>框架实现对开发流程的简化，其核心原理就是将控制权进行切换。
+通过把原来由程序开发者掌握的程序控制权，移交给了框架，来消除开发者对功能调用的负担。
+这个移交控制权的过程，就是控制扭转。</p>
+<p>通过将控制权移交给框架之后，程序结构的齿轮就发生了变化。</p>
+<p></p><figure><img alt="控制反转齿轮" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/18/1606a09b5d1f36fe?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="463" data-height="358" src="https://user-gold-cdn.xitu.io/2017/12/18/1606a09b5d1f36fe?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在移交控制权后，控制程序走向的任务，就落到了框架身上。
+由于框架的编写大多由对程序开发有强大理论储备和丰富经验的开发者来完成，所以我们极少需要关心他们操作那些工具齿轮的能力。</p>
+<p>正是因为通过这些改变能够让我们减轻开发的负担，利用框架更容易的完成对业务处理的代码编写，所以目前绝大多数业务型框架，都采用了控制反转的设计思想。</p>
+<h3 class="heading" data-id="heading-3">依赖注入模式</h3>
+<p>我们知道，对象与对象存在的依赖关系，我们通常通过将被依赖的对象通过方法调用等手段。
+而在实现控制反转的过程中，我们也会遇到对象依赖的问题，这就需要反转后的控制者，需要拥有对依赖管理的能力。</p>
+<p>对于依赖处理，常见的有两种实现思路：</p>
+<ul>
+<li>依赖注入 ( Dependency Injection )</li>
+<li>依赖查找 ( Dependency Lookup )</li>
+</ul>
+<p>在控制反转的程序结构中，我们最常用的就是依赖注入。
+在控制反转中，程序控制者拥有者对依赖管理的能力，所以可以很方便的为对象准备所需的依赖，这就能够让我们省略对以来处理的代码。</p>
+<p></p><figure><img alt="控制反转的实现方式" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/18/1606a0999fb96f6d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="589" data-height="315" src="https://user-gold-cdn.xitu.io/2017/12/18/1606a0999fb96f6d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>依赖注入的方式有很多，如构造器注入、调用注入、参数注入等等。
+在 Laravel 中，主要实现了构造器注入和调用注入。</p>
+<h3 class="heading" data-id="heading-4">Laravel 的服务容器</h3>
+<p>在依赖注入的过程中，依赖管理非常重要的一个环节，而容器 (Container) 正是为管理依赖而生。</p>
+<p>容器也可以称为依赖注入容器 ( Dependency Injection Container ) ，容器能够完成对象实例化和依赖注入的过程。
+而在这个过程中，被创建的对象本身，却并不知道容器的存在，也不知道自己正受到容器的管理。
+这样的实现，就让控制反转后，程序与控制者的耦合性降到了最低。</p>
+<p>正因为容器拥有着这样举足轻重的地位，所以目前各个语言最优秀的框架，几乎都离不开容器的支持。
+例如 Java 领域的 Spring ，以及我们的主角 Laravel ，都是以容器为核心进行设计的。</p>
+<p>在 Laravel 中，容器类 <code>\Illuminate\Container\Container</code> 实现构造器注入和调用注入两个方法分别为：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">/**
+ * 使用容器解析并返回对象
+ */</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resolve</span><span class="hljs-params">($abstract, $parameters = [])</span>
+</span>{
+    <span class="hljs-comment">// 当被解析的对象需要创建时，就会通过对象的构造方法进行依赖注入</span>
+}
+
+<span class="hljs-comment">/**
+ * 使用容器调用方法
+ */</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">call</span><span class="hljs-params">($callback, array $parameters = [], $defaultMethod = null)</span>
+</span>{
+    <span class="hljs-comment">// 对指定函数或方法的依赖参数进行注入，然后调用它并返回结果</span>
+}
+</code></pre><p>在 Laravel 中，将不同的模块以服务 ( Service ) 的形式进行封装，所以 Laravel 的容器，就成为服务容器 ( Service Container ) 。</p>
+<h3 class="heading" data-id="heading-5">容器对依赖注入的实现</h3>
+<p>依赖注入的关键部分，就是对依赖的分析。
+在 Laravel 的 <code>\Illuminate\Container\Container</code> 中，通过 <code>resolveDependencies</code> 来分析和查找依赖参数。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">/**
+ * 分析依赖参数
+ */</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resolveDependencies</span><span class="hljs-params">(array $dependencies)</span>
+</span>{
+    $results = [];
+
+    <span class="hljs-keyword">foreach</span> ($dependencies <span class="hljs-keyword">as</span> $dependency) {
+        <span class="hljs-comment">// 如果存在传入参数覆盖，使用自定义的参数</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">$this</span>-&gt;hasParameterOverride($dependency)) {
+            $results[] = <span class="hljs-keyword">$this</span>-&gt;getParameterOverride($dependency);
+            <span class="hljs-keyword">continue</span>;
+        }
+
+        <span class="hljs-comment">// 分析依赖参数的类型，根据不同的类型使用不同的参数解析方法</span>
+        $results[] = is_null($dependency-&gt;getClass())
+                        ? <span class="hljs-keyword">$this</span>-&gt;resolvePrimitive($dependency)
+                        : <span class="hljs-keyword">$this</span>-&gt;resolveClass($dependency);
+    }
+
+    <span class="hljs-keyword">return</span> $results;
+}
+</code></pre><p>在 Laravel 中，会根据依赖参数的类型，选择获取依赖的方式。
+其中，对于基础类型的参数，Laravel 会从传入参数和参数默认值中进行选择。
+而对于需要的对象，Laravel 则会继续从容器中查找。
+这样就形成了完整的通过容器，实现依赖处理逻辑。</p>
+<h3 class="heading" data-id="heading-6">小结</h3>
+<p>如果要解释我们为什么要使用依赖注入模式，那就是因为我们需要使用控制反转。
+控制反转的程序设计思想，完全符合程序设计的依赖倒置原则，能够帮助我们实现的解耦。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

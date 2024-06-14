@@ -1,0 +1,172 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">让观察者监听事件</h1>
+<blockquote>
+<p>观察者模式：</p>
+<p>定义对象间的的一对多的依赖关系，当一个对象状态发生改变时，通知依赖于它的对象，并使这些对象的状态得到更新。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">状态观察者</h3>
+<p>在我们以面向对象的思想，对系统进行设计时，会根据其内部不同的结构、功能等，将其拆解到不同的对象中。
+用对象封装不同的功能，能够让程序更容易断开不同功能模块间的耦合，使我们更轻松的开发出结构清晰、逻辑清楚的程序。
+不过，这种结构也带来了一定的负面影响。</p>
+<p>我们知道，一些对象虽然职责和功能不同，但却需要保持一定的联系。
+这就好像是汽车的方向盘和车轮的关系。
+当我们转动方向盘时，车轮应该根据方向盘的状态进行改变。</p>
+<p></p><figure><img alt="方向盘和车轮" class="lazyload inited loading" data-src="https://user-gold-cdn.xitu.io/2017/12/28/16098d4b0e3edf6e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1080" data-height="392" src="https://user-gold-cdn.xitu.io/2017/12/28/16098d4b0e3edf6e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>如果把这个场景转换到面向对象的编程中来，就是一个对象需要根据另外一个对象状态的改变，对自身进行更新。
+说得在明确一些，就是让对象监控另外一个对象，一旦被监控对象的状态发生改变，就触发自身进行一些逻辑处理。
+也许监控这个词略带贬义，用观察显得更为恰当，所以这种行为场景的设计，就可以称为观察者模式。</p>
+<h3 class="heading" data-id="heading-2">观察者的实现</h3>
+<p>虽然从名字上来理解，观察者模式就是让对象去观察另外一个对象的改变，但实际上，这种持续观察另外一个对象状态的设计，不但实时性较差，而且会枉费很多的资源。
+所以通常来说，在实现观察者模式的过程中，我们会选择采用相反的信号传递逻辑。
+即让对象主动将自己状态的更新通知到观察者，而不是让观察者进行持续的监听。</p>
+<p>以刚才我们举的方向盘与轮子的例子，可以这样设计我们的代码：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SteeringWheel</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 方向盘旋转角度
+     */</span>
+    <span class="hljs-keyword">protected</span> $degree;
+
+    <span class="hljs-comment">/**
+     * 轮子
+     */</span>
+    <span class="hljs-keyword">protected</span> $wheel;
+
+    <span class="hljs-comment">/**
+     * 设置方向盘旋转角度
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setDegree</span><span class="hljs-params">($degree)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;degree = $degree;
+
+        <span class="hljs-comment">// 通知轮子进行旋转</span>
+        <span class="hljs-keyword">$this</span>-&gt;wheel-&gt;update();
+    }
+}
+</code></pre><p>这也就是方向盘发生转动时，通知轮子自己的状态，并使轮子做相应的变动。</p>
+<p>不过，这种实现存在一种弊端，就是可扩展性差。
+举个例子来说，在方向盘回正时，转向灯能够自动关闭。
+要实现这个功能，我们就需要增加转向灯对方向盘的监听。</p>
+<p>为了改进这种现象，我们需要对观察者进行接口定义，并让被观察的对象面向接口进行通知。
+这样的话，我们只需要维护一个观察者数组，就能随意增减观察者。
+而由于进行了面向接口的编程，我们在新增或更新观察者时，不需要改动主体对象的任何代码。
+这种设计形式，就使得在进行状态关联的过程中，任然保证了主体对象与观察者对象的耦合保持非常低的状态。</p>
+<p>观察者模式的这种结构，体现到建模语言上就是：</p>
+<p></p><figure><img alt="观察者模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/28/16098d4ef74f953f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1200" data-height="464" src="https://user-gold-cdn.xitu.io/2017/12/28/16098d4ef74f953f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在观察者模式中，主要包含四种角色：</p>
+<ul>
+<li>Subject : 主体对象抽象</li>
+<li>ConcreteSubject : 主体对象实体，即被观察的对象</li>
+<li>Observer : 观察者对象抽象</li>
+<li>ConcreteObserver : 具体观察者</li>
+</ul>
+<h3 class="heading" data-id="heading-3">无处不在的观察者</h3>
+<p>与迭代器模式一样，观察者模式也是我们能在程序设计中常用到的行为型设计模式之一。
+其实在很多的场景，观察者模式都有着不同的体现。</p>
+<p>我们常见的几种设计结构，都包含着观察者行为的体现：</p>
+<ul>
+<li>发布 - 订阅 ( Publisher - Subscriber )</li>
+<li>模型 - 视图 ( Model - View )</li>
+<li>事件 - 监听 ( Event - Listener )</li>
+<li>...</li>
+</ul>
+<p>下面我们主要以事件监听模型为例。</p>
+<p>事件监听模型的核心，是事件总线 ( Event Bus ) 。
+事件总线的工作，就是收集系统各处发生的事件，再将其推送到监听这些事件的事件观察者。由于担任着事件分发的工作，所以事件总线也被称为事件分发器 ( Event Dispatcher ) 。</p>
+<p>通过在系统中融入这样的结构，可以从整体上消除事件所发生模块与事件处理模块的关联。</p>
+<p></p><figure><img alt="消息总线" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/28/16098d5247a33533?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1189" data-height="456" src="https://user-gold-cdn.xitu.io/2017/12/28/16098d5247a33533?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在事件监听模型中，被观察的主体对象是事件分发器 ( Event Dispatcher ) ，而观察者对象就是事件的监听器 ( Event Listener ) 。</p>
+<p>在事件分发器中，存放着事件的集合，这个集合的内容事件监听器所观察的对象状态。
+当新的事件被推入到事件分发器中时，分发器中的事件集合就发生了改变，而同时，事件分发器也会把事件通知给所有关联到分发器的事件监听器上。</p>
+<h3 class="heading" data-id="heading-4">Laravel 的事件模块</h3>
+<p>事件模块是 Laravel 中非常重要的模块之一，从它被列入 Laravel 应用的基础服务就能看出其地位。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Application</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Container</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 注册基础服务
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerBaseServiceProviders</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// 三大基础服务之一：事件服务</span>
+        <span class="hljs-keyword">$this</span>-&gt;register(<span class="hljs-keyword">new</span> EventServiceProvider(<span class="hljs-keyword">$this</span>));
+
+        <span class="hljs-comment">// 三大基础服务之一：日志服务</span>
+        <span class="hljs-keyword">$this</span>-&gt;register(<span class="hljs-keyword">new</span> LogServiceProvider(<span class="hljs-keyword">$this</span>));
+
+        <span class="hljs-comment">// 三大基础服务之一：路由服务</span>
+        <span class="hljs-keyword">$this</span>-&gt;register(<span class="hljs-keyword">new</span> RoutingServiceProvider(<span class="hljs-keyword">$this</span>));
+    }
+}
+</code></pre><p>事件机制可以很好的帮助我们在 PHP 中完成面向切面的编程，这对于控制反转后我们能够非常方便的切入到框架所控制的处理流程中，在一些关键性位置增加我们的处理代码。</p>
+<p></p><figure><img alt="事件监听流程 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/28/16098d560ab5db31?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="539" src="https://user-gold-cdn.xitu.io/2017/12/28/16098d560ab5db31?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在事件模块中，<code>Illuminate\Events\Dispatcher</code> 是 <code>Illuminate\Contracts\Events\Dispatcher</code> 的实现，其担任的就是事件的调度和分发作用。</p>
+<p>事件模块帮助 Laravel 在框架的处理流程中，实现状态改变通知与观察者对象的解耦与分离。</p>
+<p>在提供事件处理的同时，也就意味着我们能在事件发生的过程中，得到运行我们指定程序的能力。
+这样设计让框架提供了更多的可扩展性，也让我们能够更方便的对框架执行过程进行跟踪。</p>
+<h3 class="heading" data-id="heading-5">事件分发</h3>
+<p>在 Laravel 中，事件分发过程的核心代码如下：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Events</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dispatcher</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DispatcherContract</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 事件监听器集合
+     */</span>
+    <span class="hljs-keyword">protected</span> $listeners = [];
+
+    <span class="hljs-comment">/**
+     * 注册事件监听
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listen</span><span class="hljs-params">($events, $listener)</span>
+    </span>{
+        <span class="hljs-keyword">foreach</span> ((<span class="hljs-keyword">array</span>) $events <span class="hljs-keyword">as</span> $event) {
+            <span class="hljs-keyword">if</span> (Str::contains($event, <span class="hljs-string">'*'</span>)) {
+                <span class="hljs-keyword">$this</span>-&gt;setupWildcardListen($event, $listener);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">$this</span>-&gt;listeners[$event][] = <span class="hljs-keyword">$this</span>-&gt;makeListener($listener);
+            }
+        }
+    }
+
+    <span class="hljs-comment">/**
+     * 分发事件
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span><span class="hljs-params">($event, $payload = [], $halt = false)</span>
+    </span>{
+        <span class="hljs-comment">// 解析事件信息</span>
+        <span class="hljs-keyword">list</span>($event, $payload) = <span class="hljs-keyword">$this</span>-&gt;parseEventAndPayload(
+            $event, $payload
+        );
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">$this</span>-&gt;shouldBroadcast($payload)) {
+            <span class="hljs-keyword">$this</span>-&gt;broadcastEvent($payload[<span class="hljs-number">0</span>]);
+        }
+
+        $responses = [];
+
+        <span class="hljs-comment">// 逐一通知监听器</span>
+        <span class="hljs-keyword">foreach</span> (<span class="hljs-keyword">$this</span>-&gt;getListeners($event) <span class="hljs-keyword">as</span> $listener) {
+            $response = $listener($event, $payload);
+
+            <span class="hljs-comment">// 如果中断参数为真，则监听器存在返回结果时，就直接返回结果</span>
+            <span class="hljs-keyword">if</span> ($halt &amp;&amp; ! is_null($response)) {
+                <span class="hljs-keyword">return</span> $response;
+            }
+
+            <span class="hljs-keyword">if</span> ($response === <span class="hljs-keyword">false</span>) {
+                <span class="hljs-keyword">break</span>;
+            }
+
+            <span class="hljs-comment">// 收集每个监听器的结果</span>
+            $responses[] = $response;
+        }
+
+        <span class="hljs-keyword">return</span> $halt ? <span class="hljs-keyword">null</span> : $responses;
+    }
+}
+</code></pre><h3 class="heading" data-id="heading-6">小结</h3>
+<p>在对象间需要进行状态关联时，引入观察者能够很好地降低关联对象之间的耦合。
+同时，观察者模式让对象状态的关联关系倾向于观察者，其实也就是状态的依赖者。
+这完全符合依赖倒置原则，能够给下层开发提供更稳定的基础结构。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

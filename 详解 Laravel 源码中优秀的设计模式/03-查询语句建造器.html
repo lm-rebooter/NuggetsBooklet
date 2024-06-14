@@ -1,0 +1,102 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">查询语句建造器</h1>
+<blockquote>
+<p>建造者模式：</p>
+<p>将一个复杂对象的构建与实体表示分离，使得同样的构建过程可以创建不同的实体表示。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">建造者模式浅析</h3>
+<p>对象是对真实世界事物的抽象，那在面向对象的编程中，我们遇到像真实世界中存在的一些复杂事物一样，遇到比较复杂的对象。
+这就如同是汽车，如果我们对它进行建模并设计对象，我们就会发现，汽车是由方向盘、发动机、车轮等等成百上千的部件所组成。</p>
+<p></p><figure><img alt="车与人的关系" class="lazyload inited loading" data-src="https://user-gold-cdn.xitu.io/2017/12/17/16063bc1be57afa5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="724" data-height="477" src="https://user-gold-cdn.xitu.io/2017/12/17/16063bc1be57afa5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>对于普通用户来说，我们仅仅是使用汽车这个对象，对于它是如何有这些部件组装而来的其实并不关心。
+但要获得汽车对象，又必须了解所有部件的组合装配方式，这就让使用者必须去了解一个自己并不关心的流程，也就是违反最少知识原则（见附录 1 设计模式的七大原则）的典型例子。
+在这种场景下，如果汽车的任何一个组件结构发生了改变，那即使汽车的功能没有任何的变化，使用者都需要去改变自己的代码，以适配这个改动。
+这就是在这种场景下，会发生严重耦合的机理。</p>
+<p>在这种时候，我们通常趋向于将对象的对象的组装过程进行分拆，也就是让专业的师傅负责汽车的组装，而我们只负责驾驶汽车。
+这种将对象的构建与对象成品进行分离的思想，就是建造者模式。
+而独立出来，专门负责对象构建的对象，就是建造者对象。</p>
+<h3 class="heading" data-id="heading-2">建造者模式的结构</h3>
+<p>在建造者模式中，通常设计有四种角色：</p>
+<ul>
+<li>Builder : 建造者抽象表示。</li>
+<li>ConcreteBuilder : 实现 Builder 接口，负责对象的构造和各部件的装配。</li>
+<li>Director : 建造者创建对象的指挥者。</li>
+<li>Product : 被构造的复杂对象。</li>
+</ul>
+<p></p><figure><img alt="建造者模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/17/16063bc7e00761d5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="815" data-height="421" src="https://user-gold-cdn.xitu.io/2017/12/17/16063bc7e00761d5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>当我们需要使用一个复杂对象时，只需要通过 Director 对 Builder 进行配置，使 Builder 准备好 Product 的所有部件。
+之后，我们就可以直接从 Builder 中取出完整的 Product 对象了。</p>
+<h3 class="heading" data-id="heading-3">SQL 的组成</h3>
+<p>说到 SQL ，大家肯定不会感到陌生。
+SQL 是用于管理和操作关系型数据库管理系统（ RDBMS ）的领域特定语言（ DSL ）。</p>
+<p></p><figure><img alt="SQL 的组成" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/17/16063bd1d6a4ca27?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="670" data-height="330" src="https://user-gold-cdn.xitu.io/2017/12/17/16063bd1d6a4ca27?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>如果从语法上分析，我们可以将 SQL 归纳为几种语法元素：</p>
+<ul>
+<li>表达式 ( Expression ) : 产生标量值，或是指定数据表中行列记录。</li>
+<li>谓词 ( Predicate ) : 通过得到 SQL 三值逻辑（ 3VL : true, false, unknown ）或布尔真值来限制语句和查询的效果，改变程序流程走向。</li>
+<li>查询 ( Query ) : 基于特定条件检索数据。</li>
+<li>子句 ( Clause ) : 语句的组成部分。</li>
+<li>语句 ( Statement ) : 可以持久地影响结构和数据，也可以控制数据库事务、程序流程、连接、会话或分析。</li>
+<li>空白符 ( Whitespace ) : 优化 SQL 显示效果，便于阅读。</li>
+</ul>
+<p>虽然 SQL 的语法元素仅仅只有几种，语法词也仅仅不到百个，但通过排列组合，能够衍生出无穷无尽的变化。</p>
+<p></p><figure><img alt="SQL 的组合" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/17/16063bcd8b76d874?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="534" data-height="357" src="https://user-gold-cdn.xitu.io/2017/12/17/16063bcd8b76d874?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>就拿我们最常用的 WHERE 条件子句来说，通过加入不同的条件，我们就能通过 SQL 语句让数据库得到不同的结果。</p>
+<p>如果我们把 SQL 语句看成是一个对象，那么操作、列选择、查询条件、连表、排序等等，都是组成 SQL 的部件。
+由于这些部件本身就有无限的可变性，所有组成的 SQL 也会各不相同，所以这个 SQL 对象，就是我们前面谈到的典型的复杂对象。</p>
+<h3 class="heading" data-id="heading-4">Laravel 中的查询构造器</h3>
+<p>查询构造器 ( Query Builder ) 是 Laravel 数据库模块中非常重要，同时也是我们最常用的功能之一。
+一言以蔽之，查询构造器最大的能力和优势，就是将复杂的 SQL 编写过程简化成了简单的方法调用。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">// 普通 SQL 写法</span>
+<span class="hljs-comment">// select `users`.*, `contacts`.`phone`, `orders`.`price` from `users`</span>
+<span class="hljs-comment">// inner join `contacts` on `users`.`id` = `contacts`.`user_id`</span>
+<span class="hljs-comment">// inner join `orders` on `users`.`id` = `orders`.`user_id`</span>
+
+<span class="hljs-comment">// 使用查询构造器的写法</span>
+$sql = DB::query()
+    -&gt;table(<span class="hljs-string">'users'</span>)
+    -&gt;join(<span class="hljs-string">'contacts'</span>, <span class="hljs-string">'users.id'</span>, <span class="hljs-string">'='</span>, <span class="hljs-string">'contacts.user_id'</span>)
+    -&gt;join(<span class="hljs-string">'orders'</span>, <span class="hljs-string">'users.id'</span>, <span class="hljs-string">'='</span>, <span class="hljs-string">'orders.user_id'</span>)
+    -&gt;select(<span class="hljs-string">'users.*'</span>, <span class="hljs-string">'contacts.phone'</span>, <span class="hljs-string">'orders.price'</span>)
+    -&gt;toSql();
+</code></pre><p>如果我们将 SQL 本身作为对象，而查询构造器作为 SQL 的建造者，那么很容易就能看出，Laravel 中对查询构造器的设计，正是符合了构造器模式的设计思想。</p>
+<p>通过查询构造器，我们可以把精力聚焦到组装 SQL 的每一个部件中去，而不再需要全局考量 SQL 的每个地方。
+就如这里我们看到的，在我们链式调用查询构造器的不同方法时，其实我们就在对不同的 SQL 部件的内容进行定义。
+比如我们在调用 table 方法时，我们关注的就是 SQL 的表选择部分。</p>
+<p>正是因为 SQL 本身逻辑结构复杂，而查询构造器能够大幅简化我们直接书写 SQL 时繁琐的语法、依赖等处理的时间。
+所以在 Laravel 中，查询构造器被大量的使用就不足为奇了。</p>
+<h3 class="heading" data-id="heading-5">查询构造器和建造者模式</h3>
+<p>查询构造器是 Laravel 中建造者模式的最佳诠释，不过在我们的分析中，大家会发现，之前我们介绍建造者模式时，讲到了建造者模式中四种关键角色。
+而在 Laravel 数据库模块的查询构造器中，只有孤零零的 <code>\Illuminate\Database\Query\Builder</code> 这一个类去体现。
+这是为什么呢？</p>
+<p>对于我们说到的四种角色中的产品 ( Product ) 对象，在查询构造相关流程中的体现，就是最终的 SQL 语句。
+虽然在程序里 SQL 语句不是以对象而是以字符串存在，但归结起来说，它具有了完全可以对象化的能力，只是我们没有专门建立 SQL 语句类而已。</p>
+<p>而四种角色中的建造者抽象 ( Builder ) ，由于建造者模式的建造者实现，通常情况下都是只适配于一种对象的构建的。
+所以对建造者进行建模抽象，在这种场景下其实存在的意义并不是特别大，所以这里直接合并了抽象和实现，减少我们的开发维护成本。</p>
+<p>而在构建 SQL 的过程中，我们一般习惯于直接指定 SQL 中各个部件的内容，也就让协调者 ( Director ) 的作用变得非常低。
+所以在查询构造器的使用部分，我们就见不到它的身影了。</p>
+<h3 class="heading" data-id="heading-6">Laravel 中构造协调者的体现</h3>
+<p>虽然在我们使用查询构造器时，没有能够直接出现协调者 ( Director ) 角色的体现，但在其他部分，我们还是能看到它的身影。</p>
+<p>比如在我们通过模型操作数据增减时，这个方法就根据我们的传入的列名和增减值等数据，分别通过查询构造器设置了 SQL 的表选择、查询条件、更新内容等组成部件的内容。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">/**
+ * 增减数据值
+ */</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">incrementOrDecrement</span><span class="hljs-params">($column, $amount, $extra, $method)</span>
+</span>{
+    $query = <span class="hljs-keyword">$this</span>-&gt;newQuery();
+
+    <span class="hljs-keyword">if</span> (! <span class="hljs-keyword">$this</span>-&gt;exists) {
+        <span class="hljs-keyword">return</span> $query-&gt;{$method}($column, $amount, $extra);
+    }
+
+    <span class="hljs-keyword">$this</span>-&gt;incrementOrDecrementAttributeValue($column, $amount, $extra, $method);
+
+    <span class="hljs-keyword">return</span> $query-&gt;where(
+        <span class="hljs-keyword">$this</span>-&gt;getKeyName(), <span class="hljs-keyword">$this</span>-&gt;getKey()
+    )-&gt;{$method}($column, $amount, $extra);
+}
+</code></pre><p>虽然并不是完全符合协调者角色的特征，但我们任然可以将其看作是协调者的体现。</p>
+<h3 class="heading" data-id="heading-7">小结</h3>
+<p>建造者模式的核心思想是将对象的构造代码与表示代码进行除了拆分，通过这种拆分，消除创建与使用对象之间的耦合。
+这就可以使得在改变一个对象，特别是复杂对象内部组成的过程中，消除或减少对使用者的影响。
+同时，通过对象构造过程的独立，我们能够对所有构造过程进行控制，达到对生成对象更加精细化定义的目的。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

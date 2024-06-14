@@ -1,0 +1,97 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">通过策略选择驱动</h1>
+<blockquote>
+<p>策略模式：</p>
+<p>将一系列程序处理过程逐一独立封装起来，使它们之间可以独立于使用者而相互替换。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">策略与抉择</h3>
+<p>对于一些程序处理的过程，我们往往能够提供多套解决方案，对于每一种方案，我们都可以称之为一个策略。</p>
+<p>在程序设计中，会经常出现需要我们根据实际的运行环境、业务类型、参数条件去选择不同处理过程、程序算法的场景。
+换句话说，这就是我们选择策略的过程。</p>
+<p>举一个现实的场景，对数据进行排序有多种算法，它们各有优劣，在不同的场景下成绩各不相同。</p>
+<p></p><figure><img alt="排序算法" class="lazyload inited loaded" data-src="https://user-gold-cdn.xitu.io/2017/12/21/1607928130664dca?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="679" data-height="242" src="https://user-gold-cdn.xitu.io/2017/12/21/1607928130664dca?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>我们需要实现一个功能，就是根据需要排序的数据，选择合适的排序算法。
+这就是一个非常典型的根据不同参数条件选择不同处理过程的场景。</p>
+<p>如果我们用面向过程的思想去实现这种代码，其写法通常是这样的：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">if</span> (count($array) &gt; <span class="hljs-number">10000</span>) {
+    <span class="hljs-comment">// 算法一</span>
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">elseif</span> (max($array) &lt; <span class="hljs-number">100</span>) {
+    <span class="hljs-comment">// 算法二</span>
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">elseif</span> (end($array) &gt; <span class="hljs-number">500</span>) {
+    <span class="hljs-comment">// 算法三</span>
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre><p>这种书写代码的方式，我们通常称为硬编码 ( Hard Coding ) 。</p>
+<p>无需赘言，大家都知道这是一个反面的例子，它具有很明显的弊端：</p>
+<ul>
+<li>如果把算法的内容增加上，这段程序将冗长而复杂，不利于实现和维护。</li>
+<li>算法的实现与程序调用连成一体，在需要新增算法或改变现有算法时，将无比艰巨和困难。</li>
+</ul>
+<p>这种面向过程的粗陋写法，在我们面向对象的程序设计中，当然是需要摒弃的。</p>
+<h3 class="heading" data-id="heading-2">策略模式浅析</h3>
+<p>为了解决需要根据不同的场景、条件选择和使用不同处理过程的问题，我们就需要引入策略模式这种设计思想了。</p>
+<p>策略模式其实并不难理解，就是将不同的处理过程进行独立的封装，通过接口暴露它们的功能。
+而这些过程的使用者，只需要根据暴露的接口进行编程，不再需要考虑策略的选择。</p>
+<p>首先我们来认识一下策略模式中，必要主要的三种角色：</p>
+<ul>
+<li><code>Context</code> : 环境类，负责根据不同的环境信息，选择不同的策略实现。</li>
+<li><code>Strategy</code> : 策略抽象类，对不同策略处理过程中，关键调用的抽象。</li>
+<li><code>ConcreteStrategy</code> : 策略实现类，策略处理过程的具体实现。</li>
+</ul>
+<h3 class="heading" data-id="heading-3">Laravel 中的驱动</h3>
+<p>熟悉 Laravel 的朋友们都知道，Laravel 中许多的模块都包含驱动 ( Driver ) 这个概念。
+通过驱动，让我们在使用 Laravel 的这些模块时，能够很快的切换模块的具体实现方式。</p>
+<p>其实这种驱动选择的实现，就是策略模式的体现。</p>
+<p>这里我们以 Laravel 的队列模块 ( Queue ) 为例。
+在 Laravel 的队列模块中，目前支持了六种不同的驱动去处理队列任务：</p>
+<ul>
+<li><code>SyncQueue</code> : 同步队列。</li>
+<li><code>DatabaseQueue</code> : 数据库队列。</li>
+<li><code>BeanstalkdQueue</code> : Beanstalk 队列。</li>
+<li><code>SqsQueue</code> : Amazon SQS 队列。</li>
+<li><code>RedisQueue</code> : Redis 队列。</li>
+<li><code>NullQueue</code> : 空队列。</li>
+</ul>
+<p>通过在队列模块中融入策略模式，我们就实现了使用队列和队列实现的解耦。
+在我们向队列中推送任务时，不需要考虑队列具体使用了哪种处理逻辑和实现方式，只需要简单的调用推送方法即可。</p>
+<p>而当我们需要选择驱动时，是需要通过修改 <code>./config/queue.php</code> 配置文件中相关的队列连接，就能实现队列实现的切换。</p>
+<p>具体的配置方法这里我们就不展开了，大家可以参考 Laravel 中的配置示例：
+<a target="_blank" href="https://link.juejin.im?target=https%3A%2F%2Fgithub.com%2Flaravel%2Flaravel%2Fblob%2Fmaster%2Fconfig%2Fqueue.php" rel="nofollow noopener noreferrer">./config/queue.php</a></p>
+<h3 class="heading" data-id="heading-4">队列模块中的策略模式</h3>
+<p>如果我们将队列模式中的策略模式提取出来，可以根据其中的对象关系，得到一张体现策略模式的 UML 图：</p>
+<p></p><figure><img alt="策略模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/21/1607927eba9073b6?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="476" src="https://user-gold-cdn.xitu.io/2017/12/21/1607927eba9073b6?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在图中，<code>Illuminate\Queue\QueueManager</code> 其实就是策略模式中的环境类 ( Context ) ，它负责根据我们的配置，实例化不同的队列驱动并进行策略操作。
+而 <code>Illuminate\Contracts\Queue\Queue</code> 则是策略抽象 ( Strategy ) ，在它其中包含了队列操作的定义，我们操作队列代码的编写，其实就是面向它的抽象定义进行的。
+在 <code>Illuminate\Queue\RedisQueue</code> 等类中，就是策略的具体实现 ( ConcreteStrategy ) ，它们各自根据自己所要对接的队列实现方式 ( Redis, SQS, Database, etc. ) ，实现了队列操作的抽象定义。</p>
+<p>当我们通过队列外观 ( <code>Illuminate\Support\Facades\Queue</code> ) 等方式调用到 <code>QueueManager</code> 时，它就会根据配置和其中绑定关系，创建队列驱动的实现类。
+之后，它会将我们的调用，传递到队列驱动的实现类中，通过具体的实现来完成我们的操作。</p>
+<p>通过利用 <code>__call</code> 这个魔术方法，<code>QueueManager</code> 可以非常容易的将调用传递到队列的实现对象中：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Queue</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueueManager</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 将队列的方法调用传递到默认的队列实现中
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__call</span><span class="hljs-params">($method, $parameters)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;connection()-&gt;$method(...$parameters);
+    }
+}
+</code></pre><h3 class="heading" data-id="heading-5">策略模式的使用场景</h3>
+<p>如果我们所要设计的系统中，存在所许多算法或行为不同，但又可以互相替换的处理过程，我们就可以使用策略模式来指导我们的程序设计。</p>
+<p>特别是这些处理过程特别复杂时，策略模式能够很好的隔离使用者和处理过程本身。</p>
+<p>需要注意，我们使用策略模式时，并不受限于所有策略的处理结果是一致还是不一致。
+例如，通过不同的排序算法进行排序，其排序的结果是一致的，切换不同的排序算法我们可以使用策略模式。
+而购物中的优惠计算，不同的优惠计算的结果也不一样，但我们依然可以使用策略模式来封装不同的优惠计算。</p>
+<p></p><figure><img alt="不同结果的处理过程" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/21/160792b43215c6ab?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="568" data-height="363" src="https://user-gold-cdn.xitu.io/2017/12/21/160792b43215c6ab?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>当然，策略模式也有一定的缺陷。
+如策略较多时，相关的策略类也会很多。
+同时，使用者也必须知道策略的所有实现，这样才能对策略进行选择。</p>
+<h3 class="heading" data-id="heading-6">小结</h3>
+<p>策略模式通过对相互平行的多个处理过程的封装，实现了调用和实现的解耦，提供了面向接口编程的环境。
+虽然整体思想并不复杂，但策略模式却完美的诠释了开闭原则、里氏替换原则等设计原则。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

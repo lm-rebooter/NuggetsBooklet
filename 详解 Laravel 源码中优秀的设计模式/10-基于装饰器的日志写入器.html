@@ -1,0 +1,97 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">基于装饰器的日志写入器</h1>
+<blockquote>
+<p>装饰器模式：</p>
+<p>不基于子类实现的方式，更灵活的给对象动态增加额外的功能。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">丰富对象功能</h3>
+<p>在开闭原则中，明确了在为系统增添功能的过程中，应当避免修改已有的对象来实现。
+这是因为对于已有的对象，系统中可能已经存在很多实用到它的对象，如果我们盲目修改，会导致这些对象的工作都会受到影响。
+由于这些对象本身处于我们修改的范围之外，对其修改不但增加了我们的工作量，还会因为难以统计它们而造成遗漏。</p>
+<p>即使我们能够修改所有的这些相关对象，那又会冒出新的问题，就是这些修改又会影响到引用这些对象的其他对象。
+任何一个对已有对象的修改，都可能造成牵一发动全身的系统性变动。
+所以直接修改对象来实现新的功能或修改原有的功能，是尽可能不要做的，因为这简直就是在制造一个系统的黑洞。</p>
+<p></p><figure><img alt="程序黑洞" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/6/160cc261d82b5452?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1200" data-height="300" src="https://user-gold-cdn.xitu.io/2018/1/6/160cc261d82b5452?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>那么在遵循开闭原则的情况下，我们可以通过两种维度为对象增加新的功能：</p>
+<ul>
+<li>垂直扩展：利用对象的继承机制，获得父类的所有方法和特性，进而通过子类中增添行为来实现扩展需要。</li>
+<li>水平扩展：将对象包裹到另一个对象中，通过在这个新对象中增添行为来实现扩展需要。</li>
+</ul>
+<p>对比两种实现扩展的方法，其实各有优劣。
+通过继承来实现新功能，由于子类可以接触更多父类的内容，所以能够改变的行为相对更多。
+而由于大多数语言是单继承形式的，所以通过继承来扩展行为的方式又缺乏一定的灵活性。</p>
+<p>通过对象包裹的形式来实现扩展，可以避免通过继承来实现的过程中子类定义过多等问题。
+这种水平扩展的实现思想，就是装饰器模式。
+而包裹原有对象的新对象，就是装饰器对象。</p>
+<h3 class="heading" data-id="heading-2">装饰器模式浅析</h3>
+<p>装饰器模式是一种能够很好指导对象功能扩展的设计模式。
+装饰器模式的初衷，就是在对象使用者不需要改变使用方法的情况下，改变或扩展对象的行为。</p>
+<p>在装饰器改变对象行为的过程中，我们应该保持装饰器与原有对象拥有一致的接口。
+这样能够保证装饰器能够直接替代原有对象进行工作，而不需要使用者再进行适配。
+这种做法保证了装饰器的嵌入和移除更加方便。</p>
+<p>用我们装修的过程来类比装饰器模式是再合适不过的了。</p>
+<p></p><figure><img alt="装饰" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/6/160cc26528e82fc3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1200" data-height="400" src="https://user-gold-cdn.xitu.io/2018/1/6/160cc26528e82fc3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>我们可以通过搭配不同风格的地板、布艺来改变我们房屋的展示效果，这就是对原有对象改进的过程。
+而床依然是躺在睡觉的，窗帘依然是拉开遮阳的，使用对象的方式没有进行改变。
+这就是类比装修过程的装饰器模式。</p>
+<p>在装饰器模式下，主要有四种角色：</p>
+<ul>
+<li>Component : 主体对象抽象</li>
+<li>ConcreteComponent : 主体对象实现类</li>
+<li>Decorator : 装饰器抽象</li>
+<li>ConcreteDecorator : 装饰器实现</li>
+</ul>
+<p>我们通常让装饰器实现原有对象的接口，这样就能帮助我们保证装饰器与原有对象保持接口一致。
+同时，这也方便我们进行面向接口的编程。</p>
+<p></p><figure><img alt="装饰器模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/6/160cc268cb53a31a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="499" src="https://user-gold-cdn.xitu.io/2018/1/6/160cc268cb53a31a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>由于没有继承关系的束缚，通过装饰器来扩展对象的功能更加方便。
+当然，由于硬性的束缚少，那么在使用装饰器思想进行设计时，我们就更新需要把握好对象之间的关系，避免跑偏。
+总而言之，在使用装饰器模式的过程中，永远记住装饰器永远只是饰品，它只是用来丰富对象行为、功能的，切不要喧宾夺主了。</p>
+<h3 class="heading" data-id="heading-3">扩展 Monolog 功能</h3>
+<p>在 Laravel 的日志模块中，装饰器模式得到了很好的体现。</p>
+<p>Laravel 并不是自己实现了日志的功能，而是借助于 Monolog 这个功能丰富的日志库。</p>
+<p>在引入 Monolog 实现日志写入的过程中，Laravel 还希望在写入日志的同时触发一个日志写入事件。
+这就是一个典型的为日志操作对象增加触发事件功能的过程，也是装饰器模式很好的用武之地。</p>
+<p></p><figure><img alt="Laravel 日志写入器 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/6/160cc26b974f31e7?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="430" src="https://user-gold-cdn.xitu.io/2018/1/6/160cc26b974f31e7?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>Laravel 通过 <code>Illuminate\Log\Writer</code> 来为 Monolog 的 <code>Monolog\Logger</code> 对象增加功能。
+两个对象都实现了 <code>Psr\Log\LoggerInterface</code> 接口来保证对日志写入接口调用的一致性。</p>
+<p>由于接口是一致的，我们写入日志的过程中，两个对象可以互相切换，这也就确保了装饰器对象的无缝对接。</p>
+<p>在 <code>Illuminate\Log\Writer</code> 中，我们可以找到被包裹的 Monolog 日志对象：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Log</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Writer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">LogContract</span>, <span class="hljs-title">PsrLoggerInterface</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Monolog 日志对象
+     */</span>
+    <span class="hljs-keyword">protected</span> $monolog;
+
+    <span class="hljs-comment">/**
+     * 事件分发器
+     */</span>
+    <span class="hljs-keyword">protected</span> $dispatcher;
+
+    <span class="hljs-comment">/**
+     * 记录日志
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">log</span><span class="hljs-params">($level, $message, array $context = [])</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;writeLog($level, $message, $context);
+    }
+
+    <span class="hljs-comment">/**
+     * 写入日志
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">writeLog</span><span class="hljs-params">($level, $message, $context)</span>
+    </span>{
+        <span class="hljs-comment">// 写入日之前触发日志事件</span>
+        <span class="hljs-keyword">$this</span>-&gt;fireLogEvent($level, $message = <span class="hljs-keyword">$this</span>-&gt;formatMessage($message), $context);
+
+        <span class="hljs-keyword">$this</span>-&gt;monolog-&gt;{$level}($message, $context);
+    }
+}
+</code></pre><p>在包裹了 Monolog 对象之后，就可以在日志写入时增加触发事件了。</p>
+<h3 class="heading" data-id="heading-4">小结</h3>
+<p>通过装饰器模式来实现对象功能的扩展，相比较于对象继承来说，更加的灵活。
+同时，由于装饰器与对象是水平结构的，避免了扩展时逐渐增加层次导致系统难以维护的问题。
+装饰器和原有对象的关联、耦合要比继承少很多，所以很容易实现与原有对象的热插拔。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

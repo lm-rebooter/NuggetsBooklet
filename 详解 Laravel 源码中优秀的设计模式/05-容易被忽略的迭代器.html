@@ -1,0 +1,137 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">容易被忽略的迭代器</h1>
+<blockquote>
+<p>迭代器模式：</p>
+<p>在不暴露对象内部结构和组成的情况下，提供一种顺序访问聚合在对象中的各个元素的方法。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">数据聚合的方式</h3>
+<p>既然对象是对现实世界的抽象，那么我们在程序设计中，对象也是能像现实事物一样进行无限拆分的。</p>
+<p>例如我们可以车作为对象，也能将引擎、轮子作为对象，甚至能继续拆分将一颗螺丝钉作为对象。
+当然，具体拆分（也就是抽象化）到什么程度，需要我们在程序设计中根据实际的效果、工作复杂度和回报率做抉择。</p>
+<p>这里我们谈对象的拆分，并不是要展开来解读如何拆分对象，而是要说明任何一个大型对象，其实也是由众多的小对象所组成的。
+（其实组成对象的并不一定就是小对象，也可能是更复杂的对象，这里为了方便大家理解，就暂且局限为小对象）</p>
+<p>根据对象的类型定义不同，组成对象的小对象的数量、关系等也各不相同。
+这就有点像有机物的组成，通过众多不同的小基团，通过不同的组合，形成了不同的有机物。</p>
+<p></p><figure><img alt="有机物的聚合" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/23/16082a0392649964?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="711" data-height="270" src="https://user-gold-cdn.xitu.io/2017/12/23/16082a0392649964?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在现实中，这样的组合造就了丰富多彩的世界，而在程序设计中，这样的组合让我们能够组装不同的类以完成不同的功能。</p>
+<h3 class="heading" data-id="heading-2">数据迭代器</h3>
+<p>对象是有众多的小对象或其他信息组成的，那么就会存在一种需求，我们可能需要罗列出组成对象的这些小对象或信息。
+对于这种需求，我们可以在对象中增加一个方法，让对象自己吐露自己的内容。
+但这显然违反了对象的单一职责原则，让对象在承担自己本身功能的情况下，还让对象承担了罗列自己内容的任务。</p>
+<p>那么为了完成一个优秀的设计，我们就需要引入一个专门用于对象数据迭代的对象了。
+这个对象，就是迭代器。</p>
+<p>说到迭代，不得不先说说 PHP 中的 <code>foreach</code> 了。
+<code>foreach</code> 可以说是我们最常用的控制语句之一了，它的作用我也无需赘言。
+通常，我们使用它来遍历数组的内容，不过，它可不仅仅有遍历数组的能力，还可以对对象里的数据进行遍历。</p>
+<p><code>foreach</code> 遍历对象内数据的方法，其实是通过对象的迭代器进行的。
+只要我们将对象的迭代器传入到 <code>foreach</code> 中，那么我们在 <code>foreach ($object as $key =&gt; $value)</code> 中，就能取到对象里每一个组成元素的键和值了。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">// 将对象的内容导出到数组中</span>
+<span class="hljs-keyword">foreach</span> ($object <span class="hljs-keyword">as</span> $key =&gt; $value) {
+    $values[$key] = $value;
+}
+</code></pre><p>在 PHP 中，迭代器的实现是通过集成和实现迭代器接口，来完成的。
+迭代器接口，也就是 <code>Iterator</code> 中，定义了用于对象迭代的几个必要过程所使用的方法。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Iterator</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Traversable</span> </span>{
+    <span class="hljs-comment">/**
+     * 判断当前迭代位置的元素是否可用
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-comment">/**
+     * 获得当前迭代位置的元素名
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">key</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-comment">/**
+     * 获得当前迭代位置的元素内容
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">current</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-comment">/**
+     * 将迭代游标移动到下一个迭代元素上
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-comment">/**
+     * 重置迭代游标到第一个元素
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rewind</span><span class="hljs-params">()</span></span>;
+}
+</code></pre><p>从迭代器接口中不难看出，迭代器的工作流程就是逐一顺序的获得元素，并返回给迭代的调用者。</p>
+<p>同时，这里可以引申说明一下，通过实现 PHP 中的迭代器接口，其实我们并不仅仅能够实现对象内元素的迭代，还能实现对数组、集合、数据库记录等具有可遍历属性的迭代。</p>
+<h3 class="heading" data-id="heading-3">Laravel 中的迭代器</h3>
+<p>在包含了众多优秀设计模式体现的 Laravel 中，自然也少不了迭代器模式的身影。</p>
+<p>这里我们就以 Laravel 中的集合 <code>Illuminate\Support\Collection</code> 为例。</p>
+<p>集合是 Laravel 中最常见的基础工具之一。
+顾名思义，集合就是用来存放数据的，而既然能够存放数据（对象以及其他各种类型的元素），就必须得有遍历其中所有数据的能力。
+所以，Laravel 就为集合对象，提供了迭代器。</p>
+<p></p><figure><img alt="迭代器模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2017/12/23/16082a0a833840ce?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="706" data-height="412" src="https://user-gold-cdn.xitu.io/2017/12/23/16082a0a833840ce?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>Laravel 集合所使用的迭代器，其实来源于 PHP 内部的一个数组迭代器的实现，即 <code>ArrayIterator</code> 。
+<code>ArrayIterator</code> 可以直接实现对数组的迭代。
+而 Laravel 集合中的数据，其实就是存放在其中的 <code>$items</code> 里，所以就可以拿来交给 <code>ArrayIterator</code> 了。</p>
+<p>在迭代器模式中，特别需要注意的是迭代器和被迭代对象的关系。
+比如在我们对 Laravel 集合进行遍历时，我们迭代所使用的并不是集合对象本身，而是它提供的 <code>ArrayIterator</code> 。
+这个关系，大家可以通过上面的 UML 图进行梳理。</p>
+<h3 class="heading" data-id="heading-4">对象的迭代</h3>
+<p>其实在 PHP 中，所有的对象都是可以迭代的，这也就是我们使用 <code>foreach</code> 可以取出对象内容的原因。
+默认情况下，我们进行 PHP 对象的迭代，PHP 会逐一返回 PHP 对象中的属性、方法等内容。
+而有些情况下，我们更希望自己掌握迭代的内容，这就需要我们去为对象定义迭代器了。</p>
+<p>我们注意到，在 Laravel 的集合中，实现了 <code>IteratorAggregate</code> 这个接口。
+这个接口是 PHP 中专门为可迭代对象而设计的接口，通过 <code>IteratorAggregate</code> 的内容我们就能看出它的工作内容了：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">IteratorAggregate</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Traversable</span> </span>{
+    <span class="hljs-comment">/**
+     * 获得对象迭代器
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getIterator</span><span class="hljs-params">()</span></span>;
+}
+</code></pre><p>所有实现 <code>IteratorAggregate</code> 接口的对象，都必须通过 <code>getIterator</code> 方法返回一个可用于迭代自身的迭代器。</p>
+<p>在 <code>foreach</code> 实现对象迭代的过程中，如果对象实现了 <code>IteratorAggregate</code> 接口，则会先通过 <code>getIterator</code> 方法取得对象的迭代器，然后操作迭代器来获取对象内的元素。
+（对于没有实现 <code>IteratorAggregate</code> 的对象，PHP 也提供一个默认的迭代器来实现对象的迭代）</p>
+<h3 class="heading" data-id="heading-5">PHP 的生成器语法</h3>
+<p>在 PHP 5.5 及以上的版本中，加入了生成器 ( Generator ) 语法。</p>
+<p>生成器提供了一种更简单的方式去创建迭代器，相比较于继承和实现 <code>Iterator</code> 接口，它在 PHP 中的性能开销和复杂度都会大幅降低。</p>
+<p>生成器语法并不复杂，相信对 PHP 或其他包含生成器语言有了解的人，都能轻松看懂。
+在代码体现上，生成器的表示其实与普通的函数或方法非常相似。
+与普通函数或方法仅有的区别就是，在生成器中，我们不是通过 <code>return</code> 来返回数据，而是通过 <code>yield</code> 来返回数据。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">xrange</span><span class="hljs-params">($start, $limit, $step = <span class="hljs-number">1</span>)</span> </span>{
+    <span class="hljs-keyword">for</span> ($i = $start; $i &lt;= $limit; $i += $step) {
+        <span class="hljs-keyword">yield</span> $i;
+    }
+}
+</code></pre><p>运行包含生成器语法的函数，我们就可以得到一个迭代器的实现。
+当我们使用这个迭代器进行迭代时，就能按照生成器中所定义的顺序和内容，逐一给出迭代结果。</p>
+<pre><code class="hljs php" lang="php">$numbers = [];
+
+<span class="hljs-keyword">foreach</span> (range(<span class="hljs-number">1</span>, <span class="hljs-number">9</span>, <span class="hljs-number">2</span>) <span class="hljs-keyword">as</span> $number) {
+    $numbers[] = $number;
+}
+
+<span class="hljs-comment">// 1 3 5 7 9</span>
+</code></pre><h3 class="heading" data-id="heading-6">数据游标和生成器</h3>
+<p>在 Laravel 中，我们也能找到一些通过生成器语法来简化需要逐一输出数据的场景。
+比如在数据库模块中，Laravel 通过生成器语法，制造了一个用于逐一返回数据库查询结果数据的迭代器。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Connection</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConnectionInterface</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 运行 SQL 语句，并返回一个数据游标
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cursor</span><span class="hljs-params">($query, $bindings = [], $useReadPdo = true)</span>
+    </span>{
+        $statement = <span class="hljs-keyword">$this</span>-&gt;run($query, $bindings, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($query, $bindings)</span> <span class="hljs-title">use</span> <span class="hljs-params">($useReadPdo)</span> </span>{
+            <span class="hljs-comment">// ...</span>
+        });
+
+        <span class="hljs-keyword">while</span> ($record = $statement-&gt;fetch()) {
+            <span class="hljs-keyword">yield</span> $record;
+        }
+    }
+}
+</code></pre><p>通过查询数据迭代器，既能让获取数据的过程由一次性全部获取拆分成多次获取，减少服务器短时间内的内存压力。
+同时，迭代器又能将这样的获取过程进行封装，让我们不需要取考虑数据是如何从数据库操作对象中取出来的。</p>
+<h3 class="heading" data-id="heading-7">小结</h3>
+<p>迭代器模式是程序设计中不可缺少的一道珍馐，但又因为太过常用，导致我们往往忽略了它的存在。
+迭代器模式并不仅仅指导我们如何去进行对象或数据聚合中元素的有序遍历，还能帮助我们理清对象或者数据聚合与迭代器的关系。
+作为正在专研程序设计的我们，切不可因为迭代器模式浅显易懂而忽视了它。
+它真正带给我们的，正是在如此细节的部分，都能展现设计模式对程序设计的指导意义。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

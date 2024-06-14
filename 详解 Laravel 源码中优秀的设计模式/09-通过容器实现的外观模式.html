@@ -1,0 +1,80 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">通过容器实现的外观模式</h1>
+<blockquote>
+<p>外观模式：</p>
+<p>为子系统提供统一的接口，使得对子系统的访问和使用变得更加轻松。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">子系统与外观</h3>
+<p>程序设计的过程，离不开对系统拆解的。
+将系统分解成子模块或子系统，有利于分清不同模块的职责和任务，划清模块与模块之间的界限。
+通过对系统的拆解和规划，有利于降低系统整体的复杂程度。</p>
+<p></p><figure><img alt="组件化" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/4/160c10bd2e921ad4?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="500" data-height="336" src="https://user-gold-cdn.xitu.io/2018/1/4/160c10bd2e921ad4?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在这些的实现过程中，整个系统的运行，其实是基于子模块或子系统的协作。</p>
+<p>在子系统的协作中，就会遇到这样的问题：
+子系统仍然是相对复杂的，外部对子系统的调用，也会千丝万缕，产生非常大的耦合。</p>
+<p></p><figure><img alt="混乱的子系统访问" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c10d10b251?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1150" data-height="500" src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c10d10b251?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>这样的耦合显然就违背了我们拆解系统的初衷，也让系统拆分失去了意义。</p>
+<p>事实上，子系统虽然复杂，我们所需要与其进行的交互其实是有限的。
+若把子系统比作一个函数，即使其中的算法多么复杂，我们不过是传入参数和得到结果而已。</p>
+<p>由于我们使用子系统的方法其实是有限且较少的，我们完全可以将子系统包裹起来，让它只暴露几个关键的接口，以供使用。
+这就好像是空调的遥控器，虽然我们只是按下了温度调整的按钮，但实际上空调内部，产生了非常多的调整和改变。</p>
+<p>子系统中的运转流程外界并不需要知道，我们只需要通过包含指定接口的对象来访问子系统即可。</p>
+<p></p><figure><img alt="改善子系统访问" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c429e97bc8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1150" data-height="500" src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c429e97bc8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>这就是我们说的外观模式，而装载子系统接口的对象，我们通常就成为外观对象。</p>
+<h3 class="heading" data-id="heading-2">Laravel 的外观对象</h3>
+<p>模块化是 Laravel 整体结构的特点之一，这也是使得 Laravel 非常容易扩展的原因。
+在 Laravel 中，就已经内置了缓存、数据库、文件系统、队列等等的模块。</p>
+<p>由于每个模块的功能各异，其内部的组成和复杂程度也各不相同。
+所以，为了提供每个模块最便捷的使用方法，Laravel 就引入了外观模式的实现。</p>
+<p>在 Laravel 中，所有的外观对象都继承于 <code>Illuminate\Support\Facades\Facade</code> 这个抽象类。
+这里我们拿缓存模块 ( Cache ) 与其外观对象为例：</p>
+<p></p><figure><img alt="Laravel 中的外观对象" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c8d08b8d78?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1150" data-height="500" src="https://user-gold-cdn.xitu.io/2018/1/4/160c10c8d08b8d78?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>在 Laravel 对几个主要模块的外观实现中，有两个显著的特点：</p>
+<ul>
+<li>外观对象中都包含了依赖注入容器，通过容器获取模块。</li>
+<li>模块都存在一个管理器对象，外观对象使用此对象与系统进行交互。</li>
+</ul>
+<h3 class="heading" data-id="heading-3">容器与外观对象</h3>
+<p>在 Laravel 对外观对象的实现中，最关键的部分就是外观对象中的容器了。</p>
+<p>在外观对象的基类中，我们可以找到为外观绑定容器的方法。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>;
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Facade</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 已绑定的容器
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> $app;
+
+    <span class="hljs-comment">/**
+     * 绑定容器实例
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setFacadeApplication</span><span class="hljs-params">($app)</span>
+    </span>{
+        <span class="hljs-keyword">static</span>::$app = $app;
+    }
+}
+</code></pre><p>我们知道，模块或者子系统相对来说都是比较复杂的，这种复杂主要就体现在模块中不同对象的关系上。
+而对象的关系很大程度上，就体现在了对象的依赖上。</p>
+<p>Laravel 本身就以依赖注入容器为核心，所以只需要引入依赖注入容器，便可以很好的解决对象依赖的问题。
+所以在处理外观调用模块的问题上，就采用。</p>
+<p>通过将容器引入外观对象中，可以让本身在外观对象中实现的子系统关系梳理转移到容器依赖解析上。
+这就使得 Laravel 中的外观对象实现变得非常的简洁。</p>
+<p>就以缓存外观为例，其中的代码只有简单的十几行：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cache</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Facade</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 获得模块在容器中的名称
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFacadeAccessor</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'cache'</span>;
+    }
+}
+</code></pre><h3 class="heading" data-id="heading-4">小结</h3>
+<p>外观对象是为子系统提供一个集中和简单的与外界沟通的渠道。
+通过外观对象，可以用更清晰、简洁的方式访问子系统。
+当然，需要注意的是，我们不应该通过实现或者继承一个外观类，为子系统添加新的功能。
+这是典型错误的做法，其违背了外观模式的初衷。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>

@@ -1,0 +1,101 @@
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"><meta name="google-site-verification" content="cCHsgG9ktuCTgWgYfqCJql8AeR4gAne4DTZqztPoirE"><meta name="apple-itunes-app" content="app-id=987739104"><meta name="baidu-site-verification" content="qiK2a1kcFc"><meta name="360-site-verification" content="4c3c7d57d59f0e1a308462fbc7fd7e51"><meta name="sogou_site_verification" content="c49WUDZczQ"><title data-vue-meta="true">详解 Laravel 源码中优秀的设计模式 - 有明 - 掘金小册</title><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/manifest.060adf3290877312ec3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/vendor.e6fd81aa1499049a5bee.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/js/app.a99a1e8180beec940a3f.js" as="script"><link rel="preload" href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" as="style"><link rel="apple-touch-icon" sizes="180x180" href="https://b-gold-cdn.xitu.io/favicons/v2/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon-16x16.png"><link rel="manifest" href="https://b-gold-cdn.xitu.io/favicons/v2/manifest.json"><link rel="mask-icon" href="https://b-gold-cdn.xitu.io/favicons/v2/safari-pinned-tab.svg" color="#5bbad5"><link rel="shortcut icon" href="https://b-gold-cdn.xitu.io/favicons/v2/favicon.ico"><meta name="msapplication-config" content="https://b-gold-cdn.xitu.io/favicons/v2/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="search" title="掘金" href="https://b-gold-cdn.xitu.io/conf/search.xml" type="application/opensearchdescription+xml"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://b-gold-cdn.xitu.io/asset/fw-icon/1.0.9/iconfont.css"><link href="https://b-gold-cdn.xitu.io/v3/static/css/app.b796f2cb9b18ed584e56cf5802f4527d.css" rel="stylesheet"><script src="https://www.googletagmanager.com/gtag/js?id=UA-93217128-6"></script><script async="" src="https://hm.baidu.com/hm.js?93bbd335a208870aa1f296bcd6842e5e"></script><script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://assets.growingio.com/vds.js"></script><script type="text/javascript" charset="utf-8" async="" src="https://b-gold-cdn.xitu.io/v3/static/js/8.6975c7d55979d107f394.js"></script><meta data-vmid="keywords" name="keywords" content="掘金,稀土,Vue.js,微信小程序,Kotlin,RxJava,React Native,Wireshark,敏捷开发,Bootstrap,OKHttp,正则表达式,WebGL,Webpack,Docker,MVVM" data-vue-meta="true"><meta data-vmid="description" name="description" content="掘金是一个帮助开发者成长的社区，是给开发者用的 Hacker News，给设计师用的 Designer News，和给产品经理用的 Medium。掘金的技术文章由稀土上聚集的技术大牛和极客共同编辑为你筛选出最优质的干货，其中包括：Android、iOS、前端、后端等方面的内容。用户每天都可以在这里找到技术世界的头条内容。与此同时，掘金内还有沸点、掘金翻译计划、线下活动、专栏文章等内容。即使你是 GitHub、StackOverflow、开源中国的用户，我们相信你也可以在这里有所收获。" data-vue-meta="true"></head><body><div data-v-41acfafa="" data-v-decff8c4="" class="section-content"><div data-v-41acfafa="" class="section-page book-section-view"><div data-v-41acfafa="" class="entry-content article-content"><h1 class="heading" data-id="heading-0">责任链和管道的协作</h1>
+<blockquote>
+<p>责任链模式：</p>
+<p>让多个对象都有就会处理请求，并且避免请求发送者和处理者之间的耦合。</p>
+</blockquote>
+<h3 class="heading" data-id="heading-1">责任与责任链</h3>
+<p>到政府部门办事，相信大家都有经历过。
+就拿办理户口迁移为例，在户口迁移中，根据办理者的身份不同，能够审批的公安局级别也有所区别。</p>
+<p>于是就会经常出现，办理前首先要到公安局里进行询问，再准备资料，之后再去拥有相应职权的分局或派出所办理。
+有时候还会因为对政策、规定理解不到位，要来回多跑几次腿。</p>
+<p></p><figure><img alt="政府责任链" class="lazyload inited loaded" data-src="https://user-gold-cdn.xitu.io/2018/1/1/160b261a3fef0650?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="966" data-height="190" src="https://user-gold-cdn.xitu.io/2018/1/1/160b261a3fef0650?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>当然，国家强调减少人民群众的负担，所以自然要改变这种境况。</p>
+<p>要解决这种问题，首先就是要分析这种问题产生的原因。
+简单来说，出现这种情况主要是由于普通群众对政府部门的规定不够了解，导致很多时候找错了部门，耽误了功夫。</p>
+<p>既然找到了问题原因，我们就来想解决问题的办法。
+办法其实也非常的简单，我们可以将整个政府串成一条流水线，再部署上传送带，将群众的诉求和材料递交到传送带上。
+接着，诉求和材料逐一通过政府部门，每路过一个部门，部门就检查自己是否能够处理群众的关切。
+如果可以，就拦截并处理掉。
+如果不行，就继续让材料沿着流水线传递。</p>
+<p>这个管理责任关系的流水线，我们就可以成为责任链。</p>
+<p>我们很高兴的看到，目前已经有很多的省份、城市，开始推行这种做法了。</p>
+<h3 class="heading" data-id="heading-2">责任链模式浅析</h3>
+<p>在程序设计上，我们也能遇到不少这样的场景：
+一个请求存在多个可以处理它的对象，我们又希望隐藏实际的处理者，避免请求与处理者之间的耦合。</p>
+<p></p><figure><img alt="请求和处理器" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/1/160b262288ebd031?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="295" src="https://user-gold-cdn.xitu.io/2018/1/1/160b262288ebd031?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>这种时候，责任链模式就能派上用场了。</p>
+<p>责任链模式的核心思想，是不再统一的分析“由谁来处理请求”这个问题，而是将对象的处理者串成链，由它们自己去分析是否可以处理请求。</p>
+<p>通过这样的设计，我们避免了请求需要了解所有处理者，以便选择处理者这样的大耦合场景。
+同时，非集中式的结构，也能让处理器更容易扩展。
+因为增加一个处理器，只需要将他放上责任链即可，不会影响请求对象和其他处理器对象。</p>
+<p></p><figure><img alt="责任链模式 UML 图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/1/160b2625790c44d5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="399" src="https://user-gold-cdn.xitu.io/2018/1/1/160b2625790c44d5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>责任链模式的处理逻辑非常简单：
+从第一个处理对象开始，责任链中的每个处理对象，要么亲自处理请求，要么就将其传递到下一个处理对象中。</p>
+<p>每个责任链上的处理器，还需要拥有一致的处理请求和访问后一个处理器的方法。
+统一的接口结构，使得责任链上的处理器之间相互独立，并且非常容易进行扩充。</p>
+<p>由于除了实际处理对象之外的其他处理对象，包括请求对象本身，都不知道哪一个处理器会实际处理请求。
+所以对于这种不明确性，我们也通常称对象有个隐式的处理器。</p>
+<h3 class="heading" data-id="heading-3">请求处理中间件</h3>
+<p>中间件 ( Middleware ) 是 Laravel 处理 Http 请求的核心模块之一。
+通过中间件处理请求，其实就是典型的责任链处理过程。</p>
+<p>Laravel 在收到请求时，会先将请求发送到已经定义的第一个中间件中，再由中间件逐一处理和传递，最后传递到控制器上。</p>
+<p></p><figure><img alt="中间件处理流程图" class="lazyload inited" data-src="https://user-gold-cdn.xitu.io/2018/1/1/160b2629eb8c92c5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" data-width="1280" data-height="419" src="https://user-gold-cdn.xitu.io/2018/1/1/160b2629eb8c92c5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1"><figcaption></figcaption></figure><p></p>
+<p>熟悉 Laravel 的朋友都知道，在 Laravel 中使用中间件非常的方便。
+首先，我们只需要新建一个中间件类，并增加一个处理请求的方法：</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-comment">/**
+ * 处理请求
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">($request, Closure $next)</span>
+</span>{
+    <span class="hljs-comment">// 判断逻辑</span>
+
+    <span class="hljs-keyword">return</span> $next($request);
+}
+</code></pre><p>从这个方法的定义上，我们就不难看出之前提到的责任链处理器需要包含的两个特性。
+其一，就是处理请求的方法，也就是这个方法本身。
+其二，就是访问下一个处理器的方法，这里不需要我们实现，而是直接通过 <code>$next</code> 传入了。</p>
+<p>之后，我们只要把这个中间件类，通过配置等方式进行定义。
+那么在收到请求时，Laravel 就会按照我们定义的中间件顺序，建立中间件链，并让请求通过中间件链，再到达控制器。</p>
+<p>当然，中间件机制和其过滤请求的方式，与标准的责任链模式还是存在一定的区别。
+例如，在中间件机制中，我们允许并经常在中间件的逻辑里对请求对象进行修改。
+这种方式会让产生中间件执行前后顺序改变而结果不一致的问题。
+也就是说，中间件之间产生了依赖和联系，这就增加了中间件之间的耦合。</p>
+<p>不过，在实际的业务场景中，这种形式更符合我们常见的需求，所以我们并没有感觉到不适。
+这也印证了，设计模式只是一种程序设计的指导思想，而非确定的结构，最佳的实践还是要根据真实的场景来设计。</p>
+<h3 class="heading" data-id="heading-4">Laravel 的管道机制</h3>
+<p>在 Laravel 中，通过管道类 <code>Illuminate\Pipeline\Pipeline</code> 来辅助实现责任链模式。</p>
+<p>请大家不要误解管道的作用，管道对象并不是用来管理请求如何通过中间件或者其他类似的责任链的，
+管道对象只是帮助我们去制造一个责任链，最终，我们不过是把对象传递到管道所制造的责任链中而已。</p>
+<pre><code class="hljs php" lang="php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Pipeline</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Pipeline</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">PipelineContract</span>
+</span>{
+    <span class="hljs-comment">/**
+     * 生成责任链并调用
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">then</span><span class="hljs-params">(Closure $destination)</span>
+    </span>{
+        $pipeline = array_reduce(
+            array_reverse(<span class="hljs-keyword">$this</span>-&gt;pipes), <span class="hljs-keyword">$this</span>-&gt;carry(), <span class="hljs-keyword">$this</span>-&gt;prepareDestination($destination)
+        );
+
+        <span class="hljs-keyword">return</span> $pipeline(<span class="hljs-keyword">$this</span>-&gt;passable);
+    }
+
+    <span class="hljs-comment">/**
+     * 获得一个能够包裹责任链中每个处理器的闭包，以便责任链中对象的传递
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">carry</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($stack, $pipe)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($passable)</span> <span class="hljs-title">use</span> <span class="hljs-params">($stack, $pipe)</span> </span>{
+                <span class="hljs-comment">// 传入请求对象 $passable ，调用处理器</span>
+            };
+        };
+    }
+}
+</code></pre><h3 class="heading" data-id="heading-5">小结</h3>
+<p>通过将对象沿责任链传递，并寻找其处理对象的方式，可以很轻松的解除请求和处理者的耦合。
+这在一个请求有多个处理者，而我们需要根据条件选择不同处理者的时候特别见效。
+由于对象并不知道自身实际的处理者，这就说明责任链模式能够很好的隐藏实际处理者。</p>
+</div><section data-v-41acfafa="" class="book-comments"><div data-v-41acfafa="" class="box-title">留言</div><div data-v-41acfafa="" class="comment-box"><div data-v-efcd2e56="" data-v-41acfafa="" class="comment-form comment-form" id="comment"><div data-v-b2db8566="" data-v-1b9df826="" data-v-efcd2e56="" data-src="https://avatars0.githubusercontent.com/u/8953279?v=4" class="lazy avatar avatar" title="" style="background-image: none;"></div><textarea data-v-efcd2e56="" placeholder="评论将在后台进行审核，审核通过后对所有人可见" class="content-input" style="overflow: hidden; overflow-wrap: break-word; height: 60px;"></textarea><div data-v-efcd2e56="" class="action-box" style="display: none;"><div data-v-54e3f196="" data-v-efcd2e56="" class="image-uploader image-uploader" style="display: none;"><input data-v-54e3f196="" type="file" class="input"><button data-v-54e3f196="" class="upload-btn"><i data-v-54e3f196="" class="icon ion-image"></i><span data-v-54e3f196="">上传图片</span></button></div><div data-v-efcd2e56="" class="submit-box"><span data-v-efcd2e56="" class="submit-text">Ctrl or ⌘ + Enter</span><button data-v-efcd2e56="" class="submit-btn">评论</button></div></div><!----></div></div><ul data-v-51163f89="" data-v-41acfafa="" st:block="commentList" class="comment-list comment-list"><!----></ul></section></div></div><!----><!----></body></html>
