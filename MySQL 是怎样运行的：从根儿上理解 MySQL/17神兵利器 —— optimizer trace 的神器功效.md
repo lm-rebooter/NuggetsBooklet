@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # otpimizer trace 表的神奇功效
 
 标签： MySQL 是怎样运行的
