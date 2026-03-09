@@ -1,0 +1,3581 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6700;&#x7b80;&#x5355;&#x7684;&#x538b;&#x7f29;&#x4ee3;&#x7801;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+/* From extension bierner.markdown-preview-github-styles */
+html,
+body,
+.github-markdown-body {
+    padding: 0 !important;
+    max-width: auto !important;
+}
+
+.github-markdown-body {
+    background-color: var(--color-canvas-default);
+    color: var(--color-fg-default);
+}
+
+.github-markdown-body {
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    margin: 0 auto;
+    width: 100% !important;
+}
+
+.github-markdown-content {
+    padding: 32px !important;
+    max-width: 980px;
+    min-width: 200px;
+    margin: 0 auto;
+}
+
+
+.vscode-body.scrollBeyondLastLine {
+    margin-bottom: 0;
+}
+.vscode-body.scrollBeyondLastLine .github-markdown-body {
+    padding-bottom: calc(100vh + 10px) !important;
+}
+
+.github-markdown-body blockquote {
+    background-color: initial;
+}
+
+.github-markdown-body pre {
+    color: initial;
+    border: none;
+}
+
+.github-markdown-body code {
+    color: inherit;
+}
+
+.github-markdown-body pre code {
+    color: initial;
+}
+
+.github-markdown-body code > div {
+    background: none
+}
+
+.github-markdown-body.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.github-markdown-body p,
+.github-markdown-body blockquote,
+.github-markdown-body ul,
+.github-markdown-body ol,
+.github-markdown-body dl,
+.github-markdown-body table,
+.github-markdown-body pre {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+    border-left: 3px solid var(--color-fg-default);
+}
+.github-markdown-body {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+  color: var(--fgColor-default, var(--color-fg-default));
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.github-markdown-body .octicon {
+  display: inline-block;
+  fill: currentColor;
+  vertical-align: text-bottom;
+}
+
+.github-markdown-body h1:hover .anchor .octicon-link:before,
+.github-markdown-body h2:hover .anchor .octicon-link:before,
+.github-markdown-body h3:hover .anchor .octicon-link:before,
+.github-markdown-body h4:hover .anchor .octicon-link:before,
+.github-markdown-body h5:hover .anchor .octicon-link:before,
+.github-markdown-body h6:hover .anchor .octicon-link:before {
+  width: 16px;
+  height: 16px;
+  content: ' ';
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+  mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+}
+
+.github-markdown-body details,
+.github-markdown-body figcaption,
+.github-markdown-body figure {
+  display: block;
+}
+
+.github-markdown-body summary {
+  display: list-item;
+}
+
+.github-markdown-body [hidden] {
+  display: none !important;
+}
+
+.github-markdown-body a {
+  background-color: transparent;
+  color: var(--fgColor-accent, var(--color-accent-fg));
+  text-decoration: none;
+}
+
+.github-markdown-body abbr[title] {
+  border-bottom: none;
+  text-decoration: underline dotted;
+}
+
+.github-markdown-body b,
+.github-markdown-body strong {
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.github-markdown-body dfn {
+  font-style: italic;
+}
+
+.github-markdown-body h1 {
+  margin: .67em 0;
+  font-weight: var(--base-text-weight-semibold, 600);
+  padding-bottom: .3em;
+  font-size: 2em;
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));
+}
+
+.github-markdown-body mark {
+  background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));
+  color: var(--fgColor-default, var(--color-fg-default));
+}
+
+.github-markdown-body small {
+  font-size: 90%;
+}
+
+.github-markdown-body sub,
+.github-markdown-body sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.github-markdown-body sub {
+  bottom: -0.25em;
+}
+
+.github-markdown-body sup {
+  top: -0.5em;
+}
+
+.github-markdown-body img {
+  border-style: none;
+  max-width: 100%;
+  box-sizing: content-box;
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+}
+
+.github-markdown-body code,
+.github-markdown-body kbd,
+.github-markdown-body pre,
+.github-markdown-body samp {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+.github-markdown-body figure {
+  margin: 1em 40px;
+}
+
+.github-markdown-body hr {
+  box-sizing: content-box;
+  overflow: hidden;
+  background: transparent;
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));
+  height: .25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: var(--borderColor-default, var(--color-border-default));
+  border: 0;
+}
+
+.github-markdown-body input {
+  font: inherit;
+  margin: 0;
+  overflow: visible;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.github-markdown-body [type=button],
+.github-markdown-body [type=reset],
+.github-markdown-body [type=submit] {
+  -webkit-appearance: button;
+}
+
+.github-markdown-body [type=checkbox],
+.github-markdown-body [type=radio] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.github-markdown-body [type=number]::-webkit-inner-spin-button,
+.github-markdown-body [type=number]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+.github-markdown-body [type=search]::-webkit-search-cancel-button,
+.github-markdown-body [type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+.github-markdown-body ::-webkit-input-placeholder {
+  color: inherit;
+  opacity: .54;
+}
+
+.github-markdown-body ::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+.github-markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.github-markdown-body ::placeholder {
+  color: var(--fgColor-muted, var(--color-fg-subtle));
+  opacity: 1;
+}
+
+.github-markdown-body hr::before {
+  display: table;
+  content: "";
+}
+
+.github-markdown-body hr::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.github-markdown-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.github-markdown-body td,
+.github-markdown-body th {
+  padding: 0;
+}
+
+.github-markdown-body details summary {
+  cursor: pointer;
+}
+
+.github-markdown-body details:not([open])>*:not(summary) {
+  display: none !important;
+}
+
+.github-markdown-body a:focus,
+.github-markdown-body [role=button]:focus,
+.github-markdown-body input[type=radio]:focus,
+.github-markdown-body input[type=checkbox]:focus {
+  outline: 2px solid var(--focus-outlineColor, var(--color-accent-fg));
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+.github-markdown-body a:focus:not(:focus-visible),
+.github-markdown-body [role=button]:focus:not(:focus-visible),
+.github-markdown-body input[type=radio]:focus:not(:focus-visible),
+.github-markdown-body input[type=checkbox]:focus:not(:focus-visible) {
+  outline: solid 1px transparent;
+}
+
+.github-markdown-body a:focus-visible,
+.github-markdown-body [role=button]:focus-visible,
+.github-markdown-body input[type=radio]:focus-visible,
+.github-markdown-body input[type=checkbox]:focus-visible {
+  outline: 2px solid var(--focus-outlineColor, var(--color-accent-fg));
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+.github-markdown-body a:not([class]):focus,
+.github-markdown-body a:not([class]):focus-visible,
+.github-markdown-body input[type=radio]:focus,
+.github-markdown-body input[type=radio]:focus-visible,
+.github-markdown-body input[type=checkbox]:focus,
+.github-markdown-body input[type=checkbox]:focus-visible {
+  outline-offset: 0;
+}
+
+.github-markdown-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  line-height: 10px;
+  color: var(--fgColor-default, var(--color-fg-default));
+  vertical-align: middle;
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle));
+  border: solid 1px var(--borderColor-neutral-muted, var(--color-neutral-muted));
+  border-bottom-color: var(--borderColor-neutral-muted, var(--color-neutral-muted));
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 var(--borderColor-neutral-muted, var(--color-neutral-muted));
+}
+
+.github-markdown-body h1,
+.github-markdown-body h2,
+.github-markdown-body h3,
+.github-markdown-body h4,
+.github-markdown-body h5,
+.github-markdown-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: var(--base-text-weight-semibold, 600);
+  line-height: 1.25;
+}
+
+.github-markdown-body h2 {
+  font-weight: var(--base-text-weight-semibold, 600);
+  padding-bottom: .3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));
+}
+
+.github-markdown-body h3 {
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: 1.25em;
+}
+
+.github-markdown-body h4 {
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: 1em;
+}
+
+.github-markdown-body h5 {
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: .875em;
+}
+
+.github-markdown-body h6 {
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: .85em;
+  color: var(--fgColor-muted, var(--color-fg-muted));
+}
+
+.github-markdown-body p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.github-markdown-body blockquote {
+  margin: 0;
+  padding: 0 1em;
+  color: var(--fgColor-muted, var(--color-fg-muted));
+  border-left: .25em solid var(--borderColor-default, var(--color-border-default));
+}
+
+.github-markdown-body ul,
+.github-markdown-body ol {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 2em;
+}
+
+.github-markdown-body ol ol,
+.github-markdown-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.github-markdown-body ul ul ol,
+.github-markdown-body ul ol ol,
+.github-markdown-body ol ul ol,
+.github-markdown-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.github-markdown-body dd {
+  margin-left: 0;
+}
+
+.github-markdown-body tt,
+.github-markdown-body code,
+.github-markdown-body samp {
+  font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  font-size: 12px;
+}
+
+.github-markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  font-size: 12px;
+  word-wrap: normal;
+}
+
+.github-markdown-body .octicon {
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.github-markdown-body input::-webkit-outer-spin-button,
+.github-markdown-body input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.github-markdown-body::before {
+  display: table;
+  content: "";
+}
+
+.github-markdown-body::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.github-markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.github-markdown-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+.github-markdown-body a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.github-markdown-body .absent {
+  color: var(--fgColor-danger, var(--color-danger-fg));
+}
+
+.github-markdown-body .anchor {
+  float: left;
+  padding-right: 4px;
+  margin-left: -20px;
+  line-height: 1;
+}
+
+.github-markdown-body .anchor:focus {
+  outline: none;
+}
+
+.github-markdown-body p,
+.github-markdown-body blockquote,
+.github-markdown-body ul,
+.github-markdown-body ol,
+.github-markdown-body dl,
+.github-markdown-body table,
+.github-markdown-body pre,
+.github-markdown-body details {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.github-markdown-body blockquote>:first-child {
+  margin-top: 0;
+}
+
+.github-markdown-body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.github-markdown-body h1 .octicon-link,
+.github-markdown-body h2 .octicon-link,
+.github-markdown-body h3 .octicon-link,
+.github-markdown-body h4 .octicon-link,
+.github-markdown-body h5 .octicon-link,
+.github-markdown-body h6 .octicon-link {
+  color: var(--fgColor-default, var(--color-fg-default));
+  vertical-align: middle;
+  visibility: hidden;
+}
+
+.github-markdown-body h1:hover .anchor,
+.github-markdown-body h2:hover .anchor,
+.github-markdown-body h3:hover .anchor,
+.github-markdown-body h4:hover .anchor,
+.github-markdown-body h5:hover .anchor,
+.github-markdown-body h6:hover .anchor {
+  text-decoration: none;
+}
+
+.github-markdown-body h1:hover .anchor .octicon-link,
+.github-markdown-body h2:hover .anchor .octicon-link,
+.github-markdown-body h3:hover .anchor .octicon-link,
+.github-markdown-body h4:hover .anchor .octicon-link,
+.github-markdown-body h5:hover .anchor .octicon-link,
+.github-markdown-body h6:hover .anchor .octicon-link {
+  visibility: visible;
+}
+
+.github-markdown-body h1 tt,
+.github-markdown-body h1 code,
+.github-markdown-body h2 tt,
+.github-markdown-body h2 code,
+.github-markdown-body h3 tt,
+.github-markdown-body h3 code,
+.github-markdown-body h4 tt,
+.github-markdown-body h4 code,
+.github-markdown-body h5 tt,
+.github-markdown-body h5 code,
+.github-markdown-body h6 tt,
+.github-markdown-body h6 code {
+  padding: 0 .2em;
+  font-size: inherit;
+}
+
+.github-markdown-body summary h1,
+.github-markdown-body summary h2,
+.github-markdown-body summary h3,
+.github-markdown-body summary h4,
+.github-markdown-body summary h5,
+.github-markdown-body summary h6 {
+  display: inline-block;
+}
+
+.github-markdown-body summary h1 .anchor,
+.github-markdown-body summary h2 .anchor,
+.github-markdown-body summary h3 .anchor,
+.github-markdown-body summary h4 .anchor,
+.github-markdown-body summary h5 .anchor,
+.github-markdown-body summary h6 .anchor {
+  margin-left: -40px;
+}
+
+.github-markdown-body summary h1,
+.github-markdown-body summary h2 {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.github-markdown-body ul.no-list,
+.github-markdown-body ol.no-list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.github-markdown-body ol[type="a s"] {
+  list-style-type: lower-alpha;
+}
+
+.github-markdown-body ol[type="A s"] {
+  list-style-type: upper-alpha;
+}
+
+.github-markdown-body ol[type="i s"] {
+  list-style-type: lower-roman;
+}
+
+.github-markdown-body ol[type="I s"] {
+  list-style-type: upper-roman;
+}
+
+.github-markdown-body ol[type="1"] {
+  list-style-type: decimal;
+}
+
+.github-markdown-body div>ol:not([type]) {
+  list-style-type: decimal;
+}
+
+.github-markdown-body ul ul,
+.github-markdown-body ul ol,
+.github-markdown-body ol ol,
+.github-markdown-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.github-markdown-body li>p {
+  margin-top: 16px;
+}
+
+.github-markdown-body li+li {
+  margin-top: .25em;
+}
+
+.github-markdown-body dl {
+  padding: 0;
+}
+
+.github-markdown-body dl dt {
+  padding: 0;
+  margin-top: 16px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.github-markdown-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.github-markdown-body table th {
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.github-markdown-body table th,
+.github-markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid var(--borderColor-default, var(--color-border-default));
+}
+
+.github-markdown-body table td>:last-child {
+  margin-bottom: 0;
+}
+
+.github-markdown-body table tr {
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  border-top: 1px solid var(--borderColor-muted, var(--color-border-muted));
+}
+
+.github-markdown-body table tr:nth-child(2n) {
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle));
+}
+
+.github-markdown-body table img {
+  background-color: transparent;
+}
+
+.github-markdown-body img[align=right] {
+  padding-left: 20px;
+}
+
+.github-markdown-body img[align=left] {
+  padding-right: 20px;
+}
+
+.github-markdown-body .emoji {
+  max-width: none;
+  vertical-align: text-top;
+  background-color: transparent;
+}
+
+.github-markdown-body span.frame {
+  display: block;
+  overflow: hidden;
+}
+
+.github-markdown-body span.frame>span {
+  display: block;
+  float: left;
+  width: auto;
+  padding: 7px;
+  margin: 13px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--borderColor-default, var(--color-border-default));
+}
+
+.github-markdown-body span.frame span img {
+  display: block;
+  float: left;
+}
+
+.github-markdown-body span.frame span span {
+  display: block;
+  padding: 5px 0 0;
+  clear: both;
+  color: var(--fgColor-default, var(--color-fg-default));
+}
+
+.github-markdown-body span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.github-markdown-body span.align-center>span {
+  display: block;
+  margin: 13px auto 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.github-markdown-body span.align-center span img {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.github-markdown-body span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.github-markdown-body span.align-right>span {
+  display: block;
+  margin: 13px 0 0;
+  overflow: hidden;
+  text-align: right;
+}
+
+.github-markdown-body span.align-right span img {
+  margin: 0;
+  text-align: right;
+}
+
+.github-markdown-body span.float-left {
+  display: block;
+  float: left;
+  margin-right: 13px;
+  overflow: hidden;
+}
+
+.github-markdown-body span.float-left span {
+  margin: 13px 0 0;
+}
+
+.github-markdown-body span.float-right {
+  display: block;
+  float: right;
+  margin-left: 13px;
+  overflow: hidden;
+}
+
+.github-markdown-body span.float-right>span {
+  display: block;
+  margin: 13px auto 0;
+  overflow: hidden;
+  text-align: right;
+}
+
+.github-markdown-body code,
+.github-markdown-body tt {
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  white-space: break-spaces;
+  background-color: var(--bgColor-neutral-muted, var(--color-neutral-muted));
+  border-radius: 6px;
+}
+
+.github-markdown-body code br,
+.github-markdown-body tt br {
+  display: none;
+}
+
+.github-markdown-body del code {
+  text-decoration: inherit;
+}
+
+.github-markdown-body samp {
+  font-size: 85%;
+}
+
+.github-markdown-body pre code {
+  font-size: 100%;
+}
+
+.github-markdown-body pre>code {
+  padding: 0;
+  margin: 0;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+.github-markdown-body .highlight {
+  margin-bottom: 16px;
+}
+
+.github-markdown-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.github-markdown-body .highlight pre,
+.github-markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  color: var(--fgColor-default, var(--color-fg-default));
+  background-color: var(--bgColor-muted, var(--color-canvas-subtle));
+  border-radius: 6px;
+}
+
+.github-markdown-body pre code,
+.github-markdown-body pre tt {
+  display: inline;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.github-markdown-body .csv-data td,
+.github-markdown-body .csv-data th {
+  padding: 5px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.github-markdown-body .csv-data .blob-num {
+  padding: 10px 8px 9px;
+  text-align: right;
+  background: var(--bgColor-default, var(--color-canvas-default));
+  border: 0;
+}
+
+.github-markdown-body .csv-data tr {
+  border-top: 0;
+}
+
+.github-markdown-body .csv-data th {
+  font-weight: var(--base-text-weight-semibold, 600);
+  background: var(--bgColor-muted, var(--color-canvas-subtle));
+  border-top: 0;
+}
+
+.github-markdown-body [data-footnote-ref]::before {
+  content: "[";
+}
+
+.github-markdown-body [data-footnote-ref]::after {
+  content: "]";
+}
+
+.github-markdown-body .footnotes {
+  font-size: 12px;
+  color: var(--fgColor-muted, var(--color-fg-muted));
+  border-top: 1px solid var(--borderColor-default, var(--color-border-default));
+}
+
+.github-markdown-body .footnotes ol {
+  padding-left: 16px;
+}
+
+.github-markdown-body .footnotes ol ul {
+  display: inline-block;
+  padding-left: 16px;
+  margin-top: 16px;
+}
+
+.github-markdown-body .footnotes li {
+  position: relative;
+}
+
+.github-markdown-body .footnotes li:target::before {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -24px;
+  pointer-events: none;
+  content: "";
+  border: 2px solid var(--borderColor-accent-emphasis, var(--color-accent-emphasis));
+  border-radius: 6px;
+}
+
+.github-markdown-body .footnotes li:target {
+  color: var(--fgColor-default, var(--color-fg-default));
+}
+
+.github-markdown-body .footnotes .data-footnote-backref g-emoji {
+  font-family: monospace;
+}
+
+.github-markdown-body [popover] {
+  background-color: canvas;
+  border: initial solid;
+  border-color: initial;
+  border-image: initial;
+  color: initial;
+  height: fit-content;
+  inset: 0;
+  margin: auto;
+  overflow: auto;
+  padding: .25em;
+  position: fixed;
+  width: fit-content;
+  z-index: 2147483647;
+}
+
+.github-markdown-body [popover]:not(.\:popover-open) {
+  display: none;
+}
+
+.github-markdown-body [popover]:is(dialog[open]) {
+  display: revert;
+}
+
+.github-markdown-body [anchor].\:popover-open {
+  inset: auto;
+}
+
+.github-markdown-body .pl-c {
+  color: var(--color-prettylights-syntax-comment);
+}
+
+.github-markdown-body .pl-c1,
+.github-markdown-body .pl-s .pl-v {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+.github-markdown-body .pl-e,
+.github-markdown-body .pl-en {
+  color: var(--color-prettylights-syntax-entity);
+}
+
+.github-markdown-body .pl-smi,
+.github-markdown-body .pl-s .pl-s1 {
+  color: var(--color-prettylights-syntax-storage-modifier-import);
+}
+
+.github-markdown-body .pl-ent {
+  color: var(--color-prettylights-syntax-entity-tag);
+}
+
+.github-markdown-body .pl-k {
+  color: var(--color-prettylights-syntax-keyword);
+}
+
+.github-markdown-body .pl-s,
+.github-markdown-body .pl-pds,
+.github-markdown-body .pl-s .pl-pse .pl-s1,
+.github-markdown-body .pl-sr,
+.github-markdown-body .pl-sr .pl-cce,
+.github-markdown-body .pl-sr .pl-sre,
+.github-markdown-body .pl-sr .pl-sra {
+  color: var(--color-prettylights-syntax-string);
+}
+
+.github-markdown-body .pl-v,
+.github-markdown-body .pl-smw {
+  color: var(--color-prettylights-syntax-variable);
+}
+
+.github-markdown-body .pl-bu {
+  color: var(--color-prettylights-syntax-brackethighlighter-unmatched);
+}
+
+.github-markdown-body .pl-ii {
+  color: var(--color-prettylights-syntax-invalid-illegal-text);
+  background-color: var(--color-prettylights-syntax-invalid-illegal-bg);
+}
+
+.github-markdown-body .pl-c2 {
+  color: var(--color-prettylights-syntax-carriage-return-text);
+  background-color: var(--color-prettylights-syntax-carriage-return-bg);
+}
+
+.github-markdown-body .pl-sr .pl-cce {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-string-regexp);
+}
+
+.github-markdown-body .pl-ml {
+  color: var(--color-prettylights-syntax-markup-list);
+}
+
+.github-markdown-body .pl-mh,
+.github-markdown-body .pl-mh .pl-en,
+.github-markdown-body .pl-ms {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-markup-heading);
+}
+
+.github-markdown-body .pl-mi {
+  font-style: italic;
+  color: var(--color-prettylights-syntax-markup-italic);
+}
+
+.github-markdown-body .pl-mb {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-markup-bold);
+}
+
+.github-markdown-body .pl-md {
+  color: var(--color-prettylights-syntax-markup-deleted-text);
+  background-color: var(--color-prettylights-syntax-markup-deleted-bg);
+}
+
+.github-markdown-body .pl-mi1 {
+  color: var(--color-prettylights-syntax-markup-inserted-text);
+  background-color: var(--color-prettylights-syntax-markup-inserted-bg);
+}
+
+.github-markdown-body .pl-mc {
+  color: var(--color-prettylights-syntax-markup-changed-text);
+  background-color: var(--color-prettylights-syntax-markup-changed-bg);
+}
+
+.github-markdown-body .pl-mi2 {
+  color: var(--color-prettylights-syntax-markup-ignored-text);
+  background-color: var(--color-prettylights-syntax-markup-ignored-bg);
+}
+
+.github-markdown-body .pl-mdr {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-meta-diff-range);
+}
+
+.github-markdown-body .pl-ba {
+  color: var(--color-prettylights-syntax-brackethighlighter-angle);
+}
+
+.github-markdown-body .pl-sg {
+  color: var(--color-prettylights-syntax-sublimelinter-gutter-mark);
+}
+
+.github-markdown-body .pl-corl {
+  text-decoration: underline;
+  color: var(--color-prettylights-syntax-constant-other-reference-link);
+}
+
+.github-markdown-body g-emoji {
+  display: inline-block;
+  min-width: 1ch;
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  font-size: 1em;
+  font-style: normal !important;
+  font-weight: var(--base-text-weight-normal, 400);
+  line-height: 1;
+  vertical-align: -0.075em;
+}
+
+.github-markdown-body g-emoji img {
+  width: 1em;
+  height: 1em;
+}
+
+.github-markdown-body .task-list-item {
+  list-style-type: none;
+}
+
+.github-markdown-body .task-list-item label {
+  font-weight: var(--base-text-weight-normal, 400);
+}
+
+.github-markdown-body .task-list-item.enabled label {
+  cursor: pointer;
+}
+
+.github-markdown-body .task-list-item+.task-list-item {
+  margin-top: 4px;
+}
+
+.github-markdown-body .task-list-item .handle {
+  display: none;
+}
+
+.github-markdown-body .task-list-item-checkbox {
+  margin: 0 .2em .25em -1.4em;
+  vertical-align: middle;
+}
+
+.github-markdown-body .contains-task-list:dir(rtl) .task-list-item-checkbox {
+  margin: 0 -1.6em .25em .2em;
+}
+
+.github-markdown-body .contains-task-list {
+  position: relative;
+}
+
+.github-markdown-body .contains-task-list:hover .task-list-item-convert-container,
+.github-markdown-body .contains-task-list:focus-within .task-list-item-convert-container {
+  display: block;
+  width: auto;
+  height: 24px;
+  overflow: visible;
+  clip: auto;
+}
+
+.github-markdown-body .QueryBuilder .qb-entity {
+  color: var(--color-prettylights-syntax-entity);
+}
+
+.github-markdown-body .QueryBuilder .qb-constant {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+.github-markdown-body ::-webkit-calendar-picker-indicator {
+  filter: invert(50%);
+}
+[data-color-mode=light][data-light-theme=light],
+[data-color-mode=dark][data-dark-theme=light],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=light],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=light] {
+  /*light*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=light] {
+  /*light*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=light] {
+  /*light*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #116329;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #953800;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #116329;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #116329;
+  --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+  --color-prettylights-syntax-markup-changed-text: #953800;
+  --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #1F2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #d1242f;
+}
+}
+
+[data-color-mode=light][data-light-theme=light_colorblind],
+[data-color-mode=dark][data-dark-theme=light_colorblind],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=light_colorblind],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=light_colorblind] {
+  /*light_colorblind*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #b35900;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #8a4600;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6f3800;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #6f3800;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #b35900;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #6f3800;
+  --color-prettylights-syntax-markup-deleted-bg: #fff5e8;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #8a4600;
+  --color-prettylights-syntax-markup-changed-bg: #ffddb0;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #b35900;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=light_colorblind] {
+  /*light_colorblind*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #b35900;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #8a4600;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6f3800;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #6f3800;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #b35900;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #6f3800;
+  --color-prettylights-syntax-markup-deleted-bg: #fff5e8;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #8a4600;
+  --color-prettylights-syntax-markup-changed-bg: #ffddb0;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #b35900;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=light_colorblind] {
+  /*light_colorblind*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #b35900;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #8a4600;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6f3800;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #6f3800;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #b35900;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #6f3800;
+  --color-prettylights-syntax-markup-deleted-bg: #fff5e8;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #8a4600;
+  --color-prettylights-syntax-markup-changed-bg: #ffddb0;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #b35900;
+}
+}
+
+[data-color-mode=light][data-light-theme=light_tritanopia],
+[data-color-mode=dark][data-dark-theme=light_tritanopia],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=light_tritanopia],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=light_tritanopia] {
+  /*light_tritanopia*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #a40e26;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #a40e26;
+  --color-prettylights-syntax-markup-changed-bg: #ffcecb;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #cf222e;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=light_tritanopia] {
+  /*light_tritanopia*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #a40e26;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #a40e26;
+  --color-prettylights-syntax-markup-changed-bg: #ffcecb;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #cf222e;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=light_tritanopia] {
+  /*light_tritanopia*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #6e7781;
+  --color-prettylights-syntax-constant: #0550ae;
+  --color-prettylights-syntax-entity: #6639ba;
+  --color-prettylights-syntax-storage-modifier-import: #24292f;
+  --color-prettylights-syntax-entity-tag: #0550ae;
+  --color-prettylights-syntax-keyword: #cf222e;
+  --color-prettylights-syntax-string: #0a3069;
+  --color-prettylights-syntax-variable: #a40e26;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+  --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+  --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+  --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+  --color-prettylights-syntax-carriage-return-bg: #cf222e;
+  --color-prettylights-syntax-string-regexp: #0550ae;
+  --color-prettylights-syntax-markup-list: #3b2300;
+  --color-prettylights-syntax-markup-heading: #0550ae;
+  --color-prettylights-syntax-markup-italic: #24292f;
+  --color-prettylights-syntax-markup-bold: #24292f;
+  --color-prettylights-syntax-markup-deleted-text: #82071e;
+  --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+  --color-prettylights-syntax-markup-inserted-text: #0550ae;
+  --color-prettylights-syntax-markup-inserted-bg: #ddf4ff;
+  --color-prettylights-syntax-markup-changed-text: #a40e26;
+  --color-prettylights-syntax-markup-changed-bg: #ffcecb;
+  --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+  --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+  --color-prettylights-syntax-meta-diff-range: #8250df;
+  --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+  --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+  --color-fg-default: #24292f;
+  --color-fg-muted: #57606a;
+  --color-fg-subtle: #6e7781;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-border-default: #d0d7de;
+  --color-border-muted: hsla(210,18%,87%,1);
+  --color-neutral-muted: rgba(175,184,193,0.2);
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #cf222e;
+}
+}
+
+[data-color-mode=light][data-light-theme=light_high_contrast],
+[data-color-mode=dark][data-dark-theme=light_high_contrast],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=light_high_contrast],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=light_high_contrast] {
+  /*light_high_contrast*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #66707b;
+  --color-prettylights-syntax-constant: #023b95;
+  --color-prettylights-syntax-entity: #512598;
+  --color-prettylights-syntax-storage-modifier-import: #0e1116;
+  --color-prettylights-syntax-entity-tag: #024c1a;
+  --color-prettylights-syntax-keyword: #a0111f;
+  --color-prettylights-syntax-string: #032563;
+  --color-prettylights-syntax-variable: #702c00;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6e011a;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #6e011a;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #a0111f;
+  --color-prettylights-syntax-string-regexp: #024c1a;
+  --color-prettylights-syntax-markup-list: #2e1800;
+  --color-prettylights-syntax-markup-heading: #023b95;
+  --color-prettylights-syntax-markup-italic: #0e1116;
+  --color-prettylights-syntax-markup-bold: #0e1116;
+  --color-prettylights-syntax-markup-deleted-text: #6e011a;
+  --color-prettylights-syntax-markup-deleted-bg: #fff0ee;
+  --color-prettylights-syntax-markup-inserted-text: #024c1a;
+  --color-prettylights-syntax-markup-inserted-bg: #d2fedb;
+  --color-prettylights-syntax-markup-changed-text: #702c00;
+  --color-prettylights-syntax-markup-changed-bg: #ffc67b;
+  --color-prettylights-syntax-markup-ignored-text: #e7ecf0;
+  --color-prettylights-syntax-markup-ignored-bg: #023b95;
+  --color-prettylights-syntax-meta-diff-range: #622cbc;
+  --color-prettylights-syntax-brackethighlighter-angle: #4b535d;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #88929d;
+  --color-prettylights-syntax-constant-other-reference-link: #032563;
+  --color-fg-default: #0e1116;
+  --color-fg-muted: #0e1116;
+  --color-fg-subtle: #66707b;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #e7ecf0;
+  --color-border-default: #20252c;
+  --color-border-muted: #88929d;
+  --color-neutral-muted: rgba(172,182,192,0.2);
+  --color-accent-fg: #0349b4;
+  --color-accent-emphasis: #0349b4;
+  --color-attention-subtle: #fcf7be;
+  --color-danger-fg: #d1242f;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=light_high_contrast] {
+  /*light_high_contrast*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #66707b;
+  --color-prettylights-syntax-constant: #023b95;
+  --color-prettylights-syntax-entity: #512598;
+  --color-prettylights-syntax-storage-modifier-import: #0e1116;
+  --color-prettylights-syntax-entity-tag: #024c1a;
+  --color-prettylights-syntax-keyword: #a0111f;
+  --color-prettylights-syntax-string: #032563;
+  --color-prettylights-syntax-variable: #702c00;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6e011a;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #6e011a;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #a0111f;
+  --color-prettylights-syntax-string-regexp: #024c1a;
+  --color-prettylights-syntax-markup-list: #2e1800;
+  --color-prettylights-syntax-markup-heading: #023b95;
+  --color-prettylights-syntax-markup-italic: #0e1116;
+  --color-prettylights-syntax-markup-bold: #0e1116;
+  --color-prettylights-syntax-markup-deleted-text: #6e011a;
+  --color-prettylights-syntax-markup-deleted-bg: #fff0ee;
+  --color-prettylights-syntax-markup-inserted-text: #024c1a;
+  --color-prettylights-syntax-markup-inserted-bg: #d2fedb;
+  --color-prettylights-syntax-markup-changed-text: #702c00;
+  --color-prettylights-syntax-markup-changed-bg: #ffc67b;
+  --color-prettylights-syntax-markup-ignored-text: #e7ecf0;
+  --color-prettylights-syntax-markup-ignored-bg: #023b95;
+  --color-prettylights-syntax-meta-diff-range: #622cbc;
+  --color-prettylights-syntax-brackethighlighter-angle: #4b535d;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #88929d;
+  --color-prettylights-syntax-constant-other-reference-link: #032563;
+  --color-fg-default: #0e1116;
+  --color-fg-muted: #0e1116;
+  --color-fg-subtle: #66707b;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #e7ecf0;
+  --color-border-default: #20252c;
+  --color-border-muted: #88929d;
+  --color-neutral-muted: rgba(172,182,192,0.2);
+  --color-accent-fg: #0349b4;
+  --color-accent-emphasis: #0349b4;
+  --color-attention-subtle: #fcf7be;
+  --color-danger-fg: #d1242f;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=light_high_contrast] {
+  /*light_high_contrast*/
+  color-scheme: light;
+  --color-prettylights-syntax-comment: #66707b;
+  --color-prettylights-syntax-constant: #023b95;
+  --color-prettylights-syntax-entity: #512598;
+  --color-prettylights-syntax-storage-modifier-import: #0e1116;
+  --color-prettylights-syntax-entity-tag: #024c1a;
+  --color-prettylights-syntax-keyword: #a0111f;
+  --color-prettylights-syntax-string: #032563;
+  --color-prettylights-syntax-variable: #702c00;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #6e011a;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #6e011a;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #a0111f;
+  --color-prettylights-syntax-string-regexp: #024c1a;
+  --color-prettylights-syntax-markup-list: #2e1800;
+  --color-prettylights-syntax-markup-heading: #023b95;
+  --color-prettylights-syntax-markup-italic: #0e1116;
+  --color-prettylights-syntax-markup-bold: #0e1116;
+  --color-prettylights-syntax-markup-deleted-text: #6e011a;
+  --color-prettylights-syntax-markup-deleted-bg: #fff0ee;
+  --color-prettylights-syntax-markup-inserted-text: #024c1a;
+  --color-prettylights-syntax-markup-inserted-bg: #d2fedb;
+  --color-prettylights-syntax-markup-changed-text: #702c00;
+  --color-prettylights-syntax-markup-changed-bg: #ffc67b;
+  --color-prettylights-syntax-markup-ignored-text: #e7ecf0;
+  --color-prettylights-syntax-markup-ignored-bg: #023b95;
+  --color-prettylights-syntax-meta-diff-range: #622cbc;
+  --color-prettylights-syntax-brackethighlighter-angle: #4b535d;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #88929d;
+  --color-prettylights-syntax-constant-other-reference-link: #032563;
+  --color-fg-default: #0e1116;
+  --color-fg-muted: #0e1116;
+  --color-fg-subtle: #66707b;
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #e7ecf0;
+  --color-border-default: #20252c;
+  --color-border-muted: #88929d;
+  --color-neutral-muted: rgba(172,182,192,0.2);
+  --color-accent-fg: #0349b4;
+  --color-accent-emphasis: #0349b4;
+  --color-attention-subtle: #fcf7be;
+  --color-danger-fg: #d1242f;
+}
+}
+
+[data-color-mode=light][data-light-theme=dark],
+[data-color-mode=dark][data-dark-theme=dark],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=dark],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=dark] {
+  /*dark*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #7ee787;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa657;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #7ee787;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+  --color-prettylights-syntax-markup-inserted-bg: #033a16;
+  --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+  --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #7d8590;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #2f81f7;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=dark] {
+  /*dark*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #7ee787;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa657;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #7ee787;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+  --color-prettylights-syntax-markup-inserted-bg: #033a16;
+  --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+  --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #7d8590;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #2f81f7;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=dark] {
+  /*dark*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #7ee787;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa657;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #7ee787;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+  --color-prettylights-syntax-markup-inserted-bg: #033a16;
+  --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+  --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #7d8590;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #2f81f7;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+}
+
+[data-color-mode=light][data-light-theme=dark_dimmed],
+[data-color-mode=dark][data-dark-theme=dark_dimmed],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=dark_dimmed],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=dark_dimmed] {
+  /*dark_dimmed*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #768390;
+  --color-prettylights-syntax-constant: #6cb6ff;
+  --color-prettylights-syntax-entity: #dcbdfb;
+  --color-prettylights-syntax-storage-modifier-import: #adbac7;
+  --color-prettylights-syntax-entity-tag: #8ddb8c;
+  --color-prettylights-syntax-keyword: #f47067;
+  --color-prettylights-syntax-string: #96d0ff;
+  --color-prettylights-syntax-variable: #f69d50;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #e5534b;
+  --color-prettylights-syntax-invalid-illegal-text: #cdd9e5;
+  --color-prettylights-syntax-invalid-illegal-bg: #922323;
+  --color-prettylights-syntax-carriage-return-text: #cdd9e5;
+  --color-prettylights-syntax-carriage-return-bg: #ad2e2c;
+  --color-prettylights-syntax-string-regexp: #8ddb8c;
+  --color-prettylights-syntax-markup-list: #eac55f;
+  --color-prettylights-syntax-markup-heading: #316dca;
+  --color-prettylights-syntax-markup-italic: #adbac7;
+  --color-prettylights-syntax-markup-bold: #adbac7;
+  --color-prettylights-syntax-markup-deleted-text: #ffd8d3;
+  --color-prettylights-syntax-markup-deleted-bg: #78191b;
+  --color-prettylights-syntax-markup-inserted-text: #b4f1b4;
+  --color-prettylights-syntax-markup-inserted-bg: #1b4721;
+  --color-prettylights-syntax-markup-changed-text: #ffddb0;
+  --color-prettylights-syntax-markup-changed-bg: #682d0f;
+  --color-prettylights-syntax-markup-ignored-text: #adbac7;
+  --color-prettylights-syntax-markup-ignored-bg: #255ab2;
+  --color-prettylights-syntax-meta-diff-range: #dcbdfb;
+  --color-prettylights-syntax-brackethighlighter-angle: #768390;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #545d68;
+  --color-prettylights-syntax-constant-other-reference-link: #96d0ff;
+  --color-fg-default: #adbac7;
+  --color-fg-muted: #768390;
+  --color-fg-subtle: #636e7b;
+  --color-canvas-default: #22272e;
+  --color-canvas-subtle: #2d333b;
+  --color-border-default: #444c56;
+  --color-border-muted: #373e47;
+  --color-neutral-muted: rgba(99,110,123,0.4);
+  --color-accent-fg: #539bf5;
+  --color-accent-emphasis: #316dca;
+  --color-attention-subtle: rgba(174,124,20,0.15);
+  --color-danger-fg: #e5534b;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=dark_dimmed] {
+  /*dark_dimmed*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #768390;
+  --color-prettylights-syntax-constant: #6cb6ff;
+  --color-prettylights-syntax-entity: #dcbdfb;
+  --color-prettylights-syntax-storage-modifier-import: #adbac7;
+  --color-prettylights-syntax-entity-tag: #8ddb8c;
+  --color-prettylights-syntax-keyword: #f47067;
+  --color-prettylights-syntax-string: #96d0ff;
+  --color-prettylights-syntax-variable: #f69d50;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #e5534b;
+  --color-prettylights-syntax-invalid-illegal-text: #cdd9e5;
+  --color-prettylights-syntax-invalid-illegal-bg: #922323;
+  --color-prettylights-syntax-carriage-return-text: #cdd9e5;
+  --color-prettylights-syntax-carriage-return-bg: #ad2e2c;
+  --color-prettylights-syntax-string-regexp: #8ddb8c;
+  --color-prettylights-syntax-markup-list: #eac55f;
+  --color-prettylights-syntax-markup-heading: #316dca;
+  --color-prettylights-syntax-markup-italic: #adbac7;
+  --color-prettylights-syntax-markup-bold: #adbac7;
+  --color-prettylights-syntax-markup-deleted-text: #ffd8d3;
+  --color-prettylights-syntax-markup-deleted-bg: #78191b;
+  --color-prettylights-syntax-markup-inserted-text: #b4f1b4;
+  --color-prettylights-syntax-markup-inserted-bg: #1b4721;
+  --color-prettylights-syntax-markup-changed-text: #ffddb0;
+  --color-prettylights-syntax-markup-changed-bg: #682d0f;
+  --color-prettylights-syntax-markup-ignored-text: #adbac7;
+  --color-prettylights-syntax-markup-ignored-bg: #255ab2;
+  --color-prettylights-syntax-meta-diff-range: #dcbdfb;
+  --color-prettylights-syntax-brackethighlighter-angle: #768390;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #545d68;
+  --color-prettylights-syntax-constant-other-reference-link: #96d0ff;
+  --color-fg-default: #adbac7;
+  --color-fg-muted: #768390;
+  --color-fg-subtle: #636e7b;
+  --color-canvas-default: #22272e;
+  --color-canvas-subtle: #2d333b;
+  --color-border-default: #444c56;
+  --color-border-muted: #373e47;
+  --color-neutral-muted: rgba(99,110,123,0.4);
+  --color-accent-fg: #539bf5;
+  --color-accent-emphasis: #316dca;
+  --color-attention-subtle: rgba(174,124,20,0.15);
+  --color-danger-fg: #e5534b;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=dark_dimmed] {
+  /*dark_dimmed*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #768390;
+  --color-prettylights-syntax-constant: #6cb6ff;
+  --color-prettylights-syntax-entity: #dcbdfb;
+  --color-prettylights-syntax-storage-modifier-import: #adbac7;
+  --color-prettylights-syntax-entity-tag: #8ddb8c;
+  --color-prettylights-syntax-keyword: #f47067;
+  --color-prettylights-syntax-string: #96d0ff;
+  --color-prettylights-syntax-variable: #f69d50;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #e5534b;
+  --color-prettylights-syntax-invalid-illegal-text: #cdd9e5;
+  --color-prettylights-syntax-invalid-illegal-bg: #922323;
+  --color-prettylights-syntax-carriage-return-text: #cdd9e5;
+  --color-prettylights-syntax-carriage-return-bg: #ad2e2c;
+  --color-prettylights-syntax-string-regexp: #8ddb8c;
+  --color-prettylights-syntax-markup-list: #eac55f;
+  --color-prettylights-syntax-markup-heading: #316dca;
+  --color-prettylights-syntax-markup-italic: #adbac7;
+  --color-prettylights-syntax-markup-bold: #adbac7;
+  --color-prettylights-syntax-markup-deleted-text: #ffd8d3;
+  --color-prettylights-syntax-markup-deleted-bg: #78191b;
+  --color-prettylights-syntax-markup-inserted-text: #b4f1b4;
+  --color-prettylights-syntax-markup-inserted-bg: #1b4721;
+  --color-prettylights-syntax-markup-changed-text: #ffddb0;
+  --color-prettylights-syntax-markup-changed-bg: #682d0f;
+  --color-prettylights-syntax-markup-ignored-text: #adbac7;
+  --color-prettylights-syntax-markup-ignored-bg: #255ab2;
+  --color-prettylights-syntax-meta-diff-range: #dcbdfb;
+  --color-prettylights-syntax-brackethighlighter-angle: #768390;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #545d68;
+  --color-prettylights-syntax-constant-other-reference-link: #96d0ff;
+  --color-fg-default: #adbac7;
+  --color-fg-muted: #768390;
+  --color-fg-subtle: #636e7b;
+  --color-canvas-default: #22272e;
+  --color-canvas-subtle: #2d333b;
+  --color-border-default: #444c56;
+  --color-border-muted: #373e47;
+  --color-neutral-muted: rgba(99,110,123,0.4);
+  --color-accent-fg: #539bf5;
+  --color-accent-emphasis: #316dca;
+  --color-attention-subtle: rgba(174,124,20,0.15);
+  --color-danger-fg: #e5534b;
+}
+}
+
+[data-color-mode=light][data-light-theme=dark_colorblind],
+[data-color-mode=dark][data-dark-theme=dark_colorblind],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=dark_colorblind],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=dark_colorblind] {
+  /*dark_colorblind*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ec8e2c;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #fdac54;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #d47616;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #6c3906;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #914d04;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffe2bb;
+  --color-prettylights-syntax-markup-deleted-bg: #4e2906;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffe2bb;
+  --color-prettylights-syntax-markup-changed-bg: #4e2906;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #d47616;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=dark_colorblind] {
+  /*dark_colorblind*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ec8e2c;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #fdac54;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #d47616;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #6c3906;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #914d04;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffe2bb;
+  --color-prettylights-syntax-markup-deleted-bg: #4e2906;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffe2bb;
+  --color-prettylights-syntax-markup-changed-bg: #4e2906;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #d47616;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=dark_colorblind] {
+  /*dark_colorblind*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ec8e2c;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #fdac54;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #d47616;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #6c3906;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #914d04;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffe2bb;
+  --color-prettylights-syntax-markup-deleted-bg: #4e2906;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffe2bb;
+  --color-prettylights-syntax-markup-changed-bg: #4e2906;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #d47616;
+}
+}
+
+[data-color-mode=light][data-light-theme=dark_tritanopia],
+[data-color-mode=dark][data-dark-theme=dark_tritanopia],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=dark_tritanopia],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=dark_tritanopia] {
+  /*dark_tritanopia*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa198;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffdcd7;
+  --color-prettylights-syntax-markup-changed-bg: #67060c;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=dark_tritanopia] {
+  /*dark_tritanopia*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa198;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffdcd7;
+  --color-prettylights-syntax-markup-changed-bg: #67060c;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=dark_tritanopia] {
+  /*dark_tritanopia*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #8b949e;
+  --color-prettylights-syntax-constant: #79c0ff;
+  --color-prettylights-syntax-entity: #d2a8ff;
+  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+  --color-prettylights-syntax-entity-tag: #a5d6ff;
+  --color-prettylights-syntax-keyword: #ff7b72;
+  --color-prettylights-syntax-string: #a5d6ff;
+  --color-prettylights-syntax-variable: #ffa198;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+  --color-prettylights-syntax-carriage-return-bg: #b62324;
+  --color-prettylights-syntax-string-regexp: #a5d6ff;
+  --color-prettylights-syntax-markup-list: #f2cc60;
+  --color-prettylights-syntax-markup-heading: #1f6feb;
+  --color-prettylights-syntax-markup-italic: #c9d1d9;
+  --color-prettylights-syntax-markup-bold: #c9d1d9;
+  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+  --color-prettylights-syntax-markup-deleted-bg: #67060c;
+  --color-prettylights-syntax-markup-inserted-text: #cae8ff;
+  --color-prettylights-syntax-markup-inserted-bg: #0c2d6b;
+  --color-prettylights-syntax-markup-changed-text: #ffdcd7;
+  --color-prettylights-syntax-markup-changed-bg: #67060c;
+  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+  --color-fg-default: #c9d1d9;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-neutral-muted: rgba(110,118,129,0.4);
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-attention-subtle: rgba(187,128,9,0.15);
+  --color-danger-fg: #f85149;
+}
+}
+
+[data-color-mode=light][data-light-theme=dark_high_contrast],
+[data-color-mode=dark][data-dark-theme=dark_high_contrast],
+.vscode-body.vscode-light [data-color-mode=auto][data-light-theme=dark_high_contrast],
+.vscode-body.vscode-dark [data-color-mode=auto][data-dark-theme=dark_high_contrast] {
+  /*dark_high_contrast*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #bdc4cc;
+  --color-prettylights-syntax-constant: #91cbff;
+  --color-prettylights-syntax-entity: #dbb7ff;
+  --color-prettylights-syntax-storage-modifier-import: #f0f3f6;
+  --color-prettylights-syntax-entity-tag: #72f088;
+  --color-prettylights-syntax-keyword: #ff9492;
+  --color-prettylights-syntax-string: #addcff;
+  --color-prettylights-syntax-variable: #ffb757;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #ff6a69;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #e82a2f;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #ff4445;
+  --color-prettylights-syntax-string-regexp: #72f088;
+  --color-prettylights-syntax-markup-list: #fbd669;
+  --color-prettylights-syntax-markup-heading: #409eff;
+  --color-prettylights-syntax-markup-italic: #f0f3f6;
+  --color-prettylights-syntax-markup-bold: #f0f3f6;
+  --color-prettylights-syntax-markup-deleted-text: #ffdedb;
+  --color-prettylights-syntax-markup-deleted-bg: #cc1421;
+  --color-prettylights-syntax-markup-inserted-text: #acf7b6;
+  --color-prettylights-syntax-markup-inserted-bg: #007728;
+  --color-prettylights-syntax-markup-changed-text: #ffe1b4;
+  --color-prettylights-syntax-markup-changed-bg: #a74c00;
+  --color-prettylights-syntax-markup-ignored-text: #f0f3f6;
+  --color-prettylights-syntax-markup-ignored-bg: #318bf8;
+  --color-prettylights-syntax-meta-diff-range: #dbb7ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #bdc4cc;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #7a828e;
+  --color-prettylights-syntax-constant-other-reference-link: #addcff;
+  --color-fg-default: #f0f3f6;
+  --color-fg-muted: #f0f3f6;
+  --color-fg-subtle: #9ea7b3;
+  --color-canvas-default: #0a0c10;
+  --color-canvas-subtle: #272b33;
+  --color-border-default: #7a828e;
+  --color-border-muted: #7a828e;
+  --color-neutral-muted: rgba(158,167,179,0.4);
+  --color-accent-fg: #71b7ff;
+  --color-accent-emphasis: #409eff;
+  --color-attention-subtle: rgba(224,155,19,0.15);
+  --color-danger-fg: #ff6a69;
+}
+@media (prefers-color-scheme: light) {
+  [data-color-mode='system'][data-light-theme=dark_high_contrast] {
+  /*dark_high_contrast*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #bdc4cc;
+  --color-prettylights-syntax-constant: #91cbff;
+  --color-prettylights-syntax-entity: #dbb7ff;
+  --color-prettylights-syntax-storage-modifier-import: #f0f3f6;
+  --color-prettylights-syntax-entity-tag: #72f088;
+  --color-prettylights-syntax-keyword: #ff9492;
+  --color-prettylights-syntax-string: #addcff;
+  --color-prettylights-syntax-variable: #ffb757;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #ff6a69;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #e82a2f;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #ff4445;
+  --color-prettylights-syntax-string-regexp: #72f088;
+  --color-prettylights-syntax-markup-list: #fbd669;
+  --color-prettylights-syntax-markup-heading: #409eff;
+  --color-prettylights-syntax-markup-italic: #f0f3f6;
+  --color-prettylights-syntax-markup-bold: #f0f3f6;
+  --color-prettylights-syntax-markup-deleted-text: #ffdedb;
+  --color-prettylights-syntax-markup-deleted-bg: #cc1421;
+  --color-prettylights-syntax-markup-inserted-text: #acf7b6;
+  --color-prettylights-syntax-markup-inserted-bg: #007728;
+  --color-prettylights-syntax-markup-changed-text: #ffe1b4;
+  --color-prettylights-syntax-markup-changed-bg: #a74c00;
+  --color-prettylights-syntax-markup-ignored-text: #f0f3f6;
+  --color-prettylights-syntax-markup-ignored-bg: #318bf8;
+  --color-prettylights-syntax-meta-diff-range: #dbb7ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #bdc4cc;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #7a828e;
+  --color-prettylights-syntax-constant-other-reference-link: #addcff;
+  --color-fg-default: #f0f3f6;
+  --color-fg-muted: #f0f3f6;
+  --color-fg-subtle: #9ea7b3;
+  --color-canvas-default: #0a0c10;
+  --color-canvas-subtle: #272b33;
+  --color-border-default: #7a828e;
+  --color-border-muted: #7a828e;
+  --color-neutral-muted: rgba(158,167,179,0.4);
+  --color-accent-fg: #71b7ff;
+  --color-accent-emphasis: #409eff;
+  --color-attention-subtle: rgba(224,155,19,0.15);
+  --color-danger-fg: #ff6a69;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode='system'][data-dark-theme=dark_high_contrast] {
+  /*dark_high_contrast*/
+  color-scheme: dark;
+  --color-prettylights-syntax-comment: #bdc4cc;
+  --color-prettylights-syntax-constant: #91cbff;
+  --color-prettylights-syntax-entity: #dbb7ff;
+  --color-prettylights-syntax-storage-modifier-import: #f0f3f6;
+  --color-prettylights-syntax-entity-tag: #72f088;
+  --color-prettylights-syntax-keyword: #ff9492;
+  --color-prettylights-syntax-string: #addcff;
+  --color-prettylights-syntax-variable: #ffb757;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #ff6a69;
+  --color-prettylights-syntax-invalid-illegal-text: #ffffff;
+  --color-prettylights-syntax-invalid-illegal-bg: #e82a2f;
+  --color-prettylights-syntax-carriage-return-text: #ffffff;
+  --color-prettylights-syntax-carriage-return-bg: #ff4445;
+  --color-prettylights-syntax-string-regexp: #72f088;
+  --color-prettylights-syntax-markup-list: #fbd669;
+  --color-prettylights-syntax-markup-heading: #409eff;
+  --color-prettylights-syntax-markup-italic: #f0f3f6;
+  --color-prettylights-syntax-markup-bold: #f0f3f6;
+  --color-prettylights-syntax-markup-deleted-text: #ffdedb;
+  --color-prettylights-syntax-markup-deleted-bg: #cc1421;
+  --color-prettylights-syntax-markup-inserted-text: #acf7b6;
+  --color-prettylights-syntax-markup-inserted-bg: #007728;
+  --color-prettylights-syntax-markup-changed-text: #ffe1b4;
+  --color-prettylights-syntax-markup-changed-bg: #a74c00;
+  --color-prettylights-syntax-markup-ignored-text: #f0f3f6;
+  --color-prettylights-syntax-markup-ignored-bg: #318bf8;
+  --color-prettylights-syntax-meta-diff-range: #dbb7ff;
+  --color-prettylights-syntax-brackethighlighter-angle: #bdc4cc;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #7a828e;
+  --color-prettylights-syntax-constant-other-reference-link: #addcff;
+  --color-fg-default: #f0f3f6;
+  --color-fg-muted: #f0f3f6;
+  --color-fg-subtle: #9ea7b3;
+  --color-canvas-default: #0a0c10;
+  --color-canvas-subtle: #272b33;
+  --color-border-default: #7a828e;
+  --color-border-muted: #7a828e;
+  --color-neutral-muted: rgba(158,167,179,0.4);
+  --color-accent-fg: #71b7ff;
+  --color-accent-emphasis: #409eff;
+  --color-attention-subtle: rgba(224,155,19,0.15);
+  --color-danger-fg: #ff6a69;
+}
+}
+
+/*!
+  Theme: GitHub
+  Description: Highlight-js port of github.com theme
+  Author: github.com
+  Maintainer: @SNDST00M, @mjbvz
+  Updated: 2021-12-08
+*/
+.markdown-body pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.markdown-body code.hljs {
+  padding: 3px 5px;
+}
+
+/*!
+  Theme: GitHub
+  Description: Theme as seen on github.com
+  Author: github.com
+  Maintainer: @Hirse
+  Updated: 2021-05-15
+
+  Outdated base version: https://github.com/primer/github-syntax-dark
+  Current colors taken from GitHub's CSS
+*/
+.markdown-body .hljs {
+  color: var(--color-fg-default);
+  background: var(--color-canvas-subtle);
+}
+
+.markdown-body .hljs-doctag,
+.markdown-body .hljs-keyword,
+.markdown-body .hljs-meta .hljs-keyword,
+.markdown-body .hljs-template-tag,
+.markdown-body .hljs-template-variable,
+.markdown-body .hljs-type,
+.markdown-body .hljs-variable.language_ {
+  color: var(--color-prettylights-syntax-keyword);
+}
+
+.markdown-body .hljs-title,
+.markdown-body .hljs-title.class_,
+.markdown-body .hljs-title.class_.inherited__,
+.markdown-body .hljs-title.function_ {
+  color: var(--color-prettylights-syntax-entity);
+}
+
+.markdown-body .hljs-attr,
+.markdown-body .hljs-attribute,
+.markdown-body .hljs-literal,
+.markdown-body .hljs-meta,
+.markdown-body .hljs-number,
+.markdown-body .hljs-operator,
+.markdown-body .hljs-selector-attr,
+.markdown-body .hljs-selector-class,
+.markdown-body .hljs-selector-id,
+.markdown-body .hljs-variable {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+.markdown-body .hljs-meta .hljs-string,
+.markdown-body .hljs-regexp,
+.markdown-body .hljs-string {
+  color: var(--color-prettylights-syntax-string);
+}
+
+.markdown-body .hljs-built_in,
+.markdown-body .hljs-symbol {
+  color: var(--color-prettylights-syntax-variable);
+}
+
+.markdown-body .hljs-code,
+.markdown-body .hljs-comment,
+.markdown-body .hljs-formula {
+  color: var(--color-prettylights-syntax-comment);
+}
+
+.markdown-body .hljs-name,
+.markdown-body .hljs-quote,
+.markdown-body .hljs-selector-pseudo,
+.markdown-body .hljs-selector-tag {
+  color: var(--color-prettylights-syntax-entity-tag);
+}
+
+.markdown-body .hljs-subst {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+.markdown-body .hljs-section {
+  color: var(--color-prettylights-syntax-markup-heading);
+  font-weight: bold;
+}
+
+.markdown-body .hljs-bullet {
+  color: var(--color-prettylights-syntax-markup-list);
+}
+
+.markdown-body .hljs-emphasis {
+  color: var(--color-prettylights-syntax-constant);
+  font-style: italic;
+}
+
+.markdown-body .hljs-strong {
+  color: var(--color-prettylights-syntax-constant);
+  font-weight: bold;
+}
+
+.markdown-body .hljs-addition {
+  color: var(--color-prettylights-syntax-markup-inserted-text);
+  background-color: var(--color-prettylights-syntax-markup-inserted-bg);
+}
+
+.markdown-body .hljs-deletion {
+  color: var(--color-prettylights-syntax-markup-deleted-text);
+  background-color: var(--color-prettylights-syntax-markup-deleted-bg);
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <div
+            class="github-markdown-body"
+            data-color-mode="auto"
+            data-light-theme="light"
+            data-dark-theme="dark"
+        >
+            <div class="github-markdown-content"><p>这里统称 <code>CompressionStream</code>，实际上代指 <code>CompressionStream</code> 与 <code>UncompressionStream</code>。类比前两篇文章，<code>zlib</code> 是 Legacy 的 Node.js API，而 <code>CompressionStream</code> 与 <code>UncompressionStream</code> 则是 Winter 中的 Minimum Common Web Platform API 之一。</p>
+<h2 id="共同之源zlib">共同之源——zlib</h2>
+<p><code>zlib</code> 这个名字并不是 Node.js 中特有的，而是说它用了一个 C 写的开源库 zlib。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9b892a2d83c2447a979785005eb35cad~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=369&amp;h=204&amp;s=52415&amp;e=png&amp;a=1&amp;b=306930" alt=""></p>
+<p>zlib 初版 0.9 版在 1995 年 5 月 1 日发表。其使用 DEFLATE 算法，最初是为 libpng 库所写的，后来普遍为许多软件所使用。</p>
+<p>Node.js 中的 <code>zlib</code> 模块就是对该库的一个封装。Node.js 中的 <code>CompressionStream</code> 与 <code>UncompressionStream</code> 同理。事实上，市面上绝大多数实现了该 API 的运行时（包括各浏览器在内）都使用了 <code>zlib</code> 去支持这俩 API。</p>
+<h3 id="最简单的压缩代码">最简单的压缩代码</h3>
+<p>在 zlib 库的官网中，教大家怎么依赖 zlib 用最简单的 C 语言编写一段压缩代码。这里展示出来给大家看一下。</p>
+<pre><code>#define CHUNK 16384
+
+int def(FILE *source, FILE *dest, int level)
+{
+    int ret, flush;
+    unsigned have;
+    z_stream strm;
+    unsigned char in[CHUNK];
+    unsigned char out[CHUNK];
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&amp;strm, level);
+    if (ret != Z_OK)
+        return ret;
+
+    do {
+        strm.avail_in = fread(in, 1, CHUNK, source);
+        if (ferror(source)) {
+            (void)deflateEnd(&amp;strm);
+            return Z_ERRNO;
+        }
+        flush = feof(source) ? Z_FINISH : Z_NO_FLUSH;
+        strm.next_in = in;
+
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = deflate(&amp;strm, flush);
+            assert(ret != Z_STREAM_ERROR);
+            have = CHUNK - strm.avail_out;
+            if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+                (void)deflateEnd(&amp;strm);
+                return Z_ERRNO;
+            }
+        } while (strm.avail_out == 0);
+        assert(strm.avail_in == 0);
+    } while (flush != Z_FINISH);
+    assert(ret == Z_STREAM_END);
+
+    (void)deflateEnd(&amp;strm);
+    return Z_OK;
+}
+</code></pre>
+<p>这里有几个局部变量需要说明一下：</p>
+<ul>
+<li>
+<p><code>ret</code>：zlib 操作完返回的各种状态码，比如 <code>Z_STREAM_END</code> 表示压缩或解压缩的数据流已经到达末尾；</p>
+</li>
+<li>
+<p><code>flush</code>：各次操作的 Flush 状态，有 <code>Z_FLUSH</code> 和 <code>Z_NO_FLUSH</code>；</p>
+<ul>
+<li><code>Z_FLUSH</code>：表示这是要压缩的最后一块输入数据；</li>
+<li><code>Z_NO_FLUSH</code>：表示我们仍然在未压缩数据的中间部分；</li>
+</ul>
+</li>
+<li>
+<p><code>strm</code>：用来向 zlib 传递信息，并从 zlib 获取信息，以及维持 <code>deflate()</code>（压缩）的状态；</p>
+</li>
+<li>
+<p><code>in</code> 和 <code>out</code>：<code>deflate()</code> 的输入和输出缓冲区。</p>
+</li>
+</ul>
+<p>首先使用 <code>deflateInit()</code> 来初始化 zlib 的压缩状态。初始化之前，我们设置了 <code>strm</code> 结构体中的 <code>zalloc</code>，<code>zfree</code> 和 <code>opaque</code> 字段，此处我们用 <code>Z_NULL</code> 来让 zlib 使用默认的内存分配方式。然后判断 <code>ret</code> 是否是 <code>Z_OK</code>。</p>
+<p>接下去是一个循环，循环每次都会从文件中读取指定长度的内容（<code>fread(in, 1, CHUNK, source)</code>）。此处 <code>in</code> 就是读入的 Buffer；<code>1</code> 表示读取一次；<code>CHUNK</code> 值为 <code>16384</code>，表示每次最多读取 16384 字节；<code>source</code> 则是输入文件的句柄。</p>
+<p><code>fread()</code> 的返回值是实际读取的内容长度。我们将其赋值给 <code>strm.avail_in</code>，以告诉 zlib 现在还剩 <code>avail_in</code> 的内容未被处理。</p>
+<p><code>flush = feof(source) ? Z_FINISH : Z_NO_FLUSH;</code> 这段代码的意思是，看看这次读完后 <code>source</code> 是不是就到最后（EOF）了。如果没到最后，则说明还没读完，没处理完，我们通过 <code>Z_NO_FLUSH</code> 来告知 zlib 我们后续还会有内容要处理；若读完了则通过 <code>Z_FLUSH</code> 告知 zlib 这是最后一批工作。</p>
+<p>接着将 <code>in</code> 这个 Buffer 赋值给 <code>strm.next_in</code>，告知 zlib 这次要处理的 Buffer 指针。</p>
+<p>某一块输入数据准备好了，接着又是一个 <code>do-while</code> 循环，分一次或多次去压缩这次读取的内容。每次进行压缩的时候，先设置好 <code>strm.next_out</code>，让 zlib 将压缩输出的内容导到 <code>out</code> 中，并告知这个 <code>out</code> 的容量（<code>strm.avail_out</code>）为 <code>CHUNK</code>。也就说，如果 <code>out</code> 填满了，这一段 <code>in</code> 还没压缩完，是会继续这个 <code>do-while</code> 循环的。</p>
+<p>输入输出都准备好后，就是 zlib 的核心 <code>ret = deflate(&amp;strm, flush)</code> 了。这一句的意思是通过 zlib 的 <code>deflate()</code> 函数来对我们刚设置好的 <code>strm</code> 输入输出进行压缩，并告知它的 <code>flush</code> 状态。在这个函数执行完之后，会去改变 <code>strm</code> 的 <code>next_in</code>、<code>next_out</code>、<code>avail_in</code>、<code>avail_out</code>，比如压缩到某个位置后输出 Buffer 满了，那么剩下没被压缩的长度会变成新的 <code>avail_in</code>，剩下没被压缩的内容会被变为 <code>next_in</code>。也就是说，如果 <code>avail_in</code> 变成了 <code>0</code>，就代表着此次输入全处理完了。</p>
+<p>执行 <code>deflate()</code> 压缩之后，先断言一下 <code>ret</code> 不是 <code>Z_STREAM_ERROR</code>。然后就是 <code>have</code>，<code>CHUNK</code> 减去还剩下可用的输出 Buffer 长度（<code>avail_out</code>），也就是此次压缩得到的输出长度：</p>
+<p>have（输出长度）= CHUNK（总长度）−avail_out（剩余长度）have（输出长度）= CHUNK（总长度）-avail\_out（剩余长度）have（输出长度）= CHUNK（总长度）−avail_out（剩余长度）</p>
+<p>然后把 <code>out</code> 输出 Buffer 中 <code>have</code> 长度的内容追加至输出文件（<code>fwrite(out, 1, have, dest)</code>）。该追加函数的返回值是实际写入长度，若实际写入长度短于 <code>have</code> 则报错。</p>
+<p>这个压缩的 <code>do-while</code> 循环的退出条件是 <code>strm.avail_out != 0</code>。因为如果 <code>strm.avail_out</code> 等于 <code>0</code> 了，表示此次压缩的输出内容被填满了，那么是否输入文件全被处理完我们尚未可知。但如果输出内容未被填满，则说明我们压缩到输入内容的最后，也没能填满输出 Buffer，则说明输入内容完全被处理完了。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/99d3bc61a1654215813f4892735f4981~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=1130&amp;h=330&amp;s=58547&amp;e=png&amp;b=fffaf9" alt="22流程图1.png"></p>
+<p>如上图，输入 Buffer 第一次只处理了一部分内容，就把输出 Buffer 给填满了，这个时候 <code>do-while</code> 中判断 <code>strm.avail_out == 0</code>，继续循环；第二轮循环中，输出 Buffer 只用了很少一部分的空间就把输入 Buffer 的内容压缩完了，这个时候 <code>strm.avail_out != 0</code>，代表输入 Buffer 完全被处理，退出本次循环。</p>
+<p>在输出 Buffer 自身总长度要短于输入 Buffer 长度的时候，我们通常的确是要好几轮才能处理完输入 Buffer。但是当输入 Buffer 和输出 Buffer 一样长的时候（就像上图），为什么也要做这些判断呢？压缩不应该输出肯定比输入短吗？</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b721237d4fd944ebad964c1253d163dd~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=225&amp;h=225&amp;s=18331&amp;e=png&amp;b=f5f5f5" alt=""></p>
+<p>zlib 的 <code>deflate()</code> 函数在压缩数据时，是有可能使得压缩后的数据比压缩前的数据要长。这种情况通常发生在你尝试压缩的数据已经是压缩过的，或者说这些数据无法进一步压缩。例如，如果你尝试压缩一份已经被压缩过的文件，或者是一份随机数据文件，那么压缩后的文件可能比原始文件要大。这是因为压缩算法需要添加一些额外的信息（如压缩头和校验和等）到压缩数据中，这些额外的信息可能会使得压缩后的数据大小超过了原始数据的大小。</p>
+<p>所以，哪怕输入 Buffer 和输出 Buffer 等长的情况下，我们仍需要用循环来处理可能得增长。那么如果输出 Buffer 大于输入 Buffer 呢？主要我们在完成压缩前，我们也不知道它到底会不会更大呀，你得跑了才知道，还是写个循环稳妥点——薛定谔的压缩。</p>
+<p>比如，上面的图我们再极端一点。</p>
+<p><img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ba26433c8328407184ddcc992aa6472d~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=1122&amp;h=286&amp;s=59833&amp;e=png&amp;b=fef8f7" alt="22流程图2.png"></p>
+<p>循环第二次后，虽然输入 Buffer 处理完了，但是输出 Buffer 也占满了。这个时候怎么办？那也没关系，我们还是通过 <code>avail_out</code> 来判断。我们目前认为它“也许还是没处理完”。等到第三次循环的时候，因为输入 Buffer 剩下的内容已经没了，这个时候处理完的输出 Buffer 会一个子儿也不占，所以第三轮处理完的时候，<code>avail_out</code> 会是输出 Buffer 的总长度，自然也达到了“退出循环”的条件。只不过多空跑一轮而已，问题不大。</p>
+<p>当我们一段输入 Buffer 处理完之后，我们得断言一下 <code>avail_in</code> 是不是 <code>0</code>，也就是是不是真的处理完了。如果输出 Buffer 没被充满，但是 <code>avail_in</code> 还没处理完，相当于代码逻辑私藏了——这逻辑肯定是错的，这种逻辑不应该存在，所以需要断言来退出程序。</p>
+<p>这些都做完之后，我们在上一层循环中的退出条件是本次的输入 Buffer 是不是最后一段输入 Buffer，也就是输入文件有没有被读完。我们在前面已经通过 <code>flush</code> 标识来表示有没有读完了，所以退出条件自然是 <code>flush == Z_FINISH</code>。</p>
+<p>输入文件读完、输出文件写完后，再通过 <code>deflateEnd()</code> 销毁 <code>strm</code> 的各种内容。最终返回 <code>Z_OK</code> 表示压缩成功。一个压缩效果不怎么好的过程会像下面这样：</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bc5c0b9ebd8547ec86ddc277efa39527~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=1716&amp;h=5610&amp;s=698442&amp;e=png&amp;b=ffffff" alt="22流程大图3.png"></p>
+<p><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/44b01c5e5fdc490db7d59dc9583eb225~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=1732&amp;h=5704&amp;s=861030&amp;e=png&amp;b=ffffff" alt="22流程大图4.png"></p>
+<p>说白了就是抄一段，然后找个地方打草稿，草稿打满了后把答案抄到试卷上。如果这个时候抄的这段还没弄完，那么打新草稿，继续抄答案到试卷上。直到抄的这段弄完，再抄一段新的，继续打草稿抄答案到试卷……</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8581c70694e54ac3a6a071747de5f706~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=800&amp;h=527&amp;s=466110&amp;e=png&amp;b=918778" alt=""></p>
+<p><code>def()</code> 函数写好后，接下去就主函数了。以 <code>stdin</code> 作为输入，<code>stdout</code> 作为输出。</p>
+<pre><code>int main(int argc, char **argv)
+{
+    int ret;
+
+    ret = def(stdin, stdout, Z_DEFAULT_COMPRESSION);
+    if (ret != Z_OK)
+      zerr(ret);
+    return ret;
+}
+</code></pre>
+<h3 id="最简单的解压代码">最简单的解压代码</h3>
+<p>解压与压缩类似，只不过压缩是 <code>deflate()</code>，解压是 <code>inflate()</code>。</p>
+<pre><code>int inf(FILE *source, FILE *dest)
+{
+    int ret;
+    unsigned have;
+    z_stream strm;
+    unsigned char in[CHUNK];
+    unsigned char out[CHUNK];
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = 0;
+    strm.next_in = Z_NULL;
+    ret = inflateInit(&amp;strm);
+    if (ret != Z_OK)
+        return ret;
+
+    do {
+        strm.avail_in = fread(in, 1, CHUNK, source);
+        if (ferror(source)) {
+            (void)inflateEnd(&amp;strm);
+            return Z_ERRNO;
+        }
+        if (strm.avail_in == 0)
+            break;
+        strm.next_in = in;
+
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+
+            ret = inflate(&amp;strm, Z_NO_FLUSH);
+            assert(ret != Z_STREAM_ERROR);
+            switch (ret) {
+            case Z_NEED_DICT:
+                ret = Z_DATA_ERROR;
+            case Z_DATA_ERROR:
+            case Z_MEM_ERROR:
+                (void)inflateEnd(&amp;strm);
+                return ret;
+            }
+
+            have = CHUNK - strm.avail_out;
+            if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+                (void)inflateEnd(&amp;strm);
+                return Z_ERRNO;
+            }
+        } while (strm.avail_out == 0);
+    } while (ret != Z_STREAM_END);
+
+    (void)inflateEnd(&amp;strm);
+    return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+}
+</code></pre>
+<p>一样，也是初始化、一段一段读入数据。每段数据读入后，同样开始不断解压填充输出。这里有几个不同的点是，由于压缩后的内容是有终止标识的，所以不需要你告诉 zlib 某一段是不是最后一段，所以统一传 <code>Z_NO_FLUSH</code> 就好了。另外，压缩时数据随意，不会出错；但是解压必定得是 zlib 特定算法压缩之后得到的特定内容格式，一旦格式不对就无法完成解压。所以 zlib 解压每段的时候都需要检测一遍此次解压的这段有没有问题。我们需要对每次 <code>inflate()</code> 之后得到的 <code>ret</code> 做一遍判断，它不能是各种错误码。</p>
+<h2 id="nodejs-中的-zlib">Node.js 中的 <code>zlib</code></h2>
+<p>在 Node.js 官方文档中是这么描述 <code>zlib</code> 的：</p>
+<blockquote>
+<p>The <code>node:zlib</code> module provides compression functionality implemented using Gzip, Deflate/Inflate, and Brotli.</p>
+</blockquote>
+<p>它提供了压缩功能，支持 Gzip、Deflate/Inflate 以及 Brotli。我们前面介绍过，zlib 使用的是 DEFLATE 算法。</p>
+<p>DEFLATE 是由 Lempel-Ziv 压缩（LZ77）和 Huffman 编码组合而成的一个无损数据压缩算法。它由 Phil Katz 在 1993 年为其 ZIP 压缩软件所设计，现已被广泛采用。而 INFLATE 则是它的解压缩。</p>
+<p>Gzip 格式则是在 DEFLATE 算法的基础上，加了一些额外的元数据，如原始文件的名称、原始文件的大小、以及文件的修改时间等。Gunzip 则是它的解压缩。Gzip 常常被用于 HTTP 协议中，以减少在网络上传输的数据量。</p>
+<p>而 Brotli 则是 Google 开发的一种无损数据压缩算法，基于 LZ77 算法的一个现代变体、霍夫曼编码和二阶上下文建模。它可以被用于压缩数据以进行网络传输，或者压缩文件以节省存储空间。Brotli 旨在对于网络传输的文本数据提供更高的压缩率。相较于 Gzip 和 DEFLATE，Brotli 压缩后的数据更小，能带来更快的页面加载速度和更低的数据使用。</p>
+<p>这几种能力中，Gzip、Deflate/Inflate 使用的是 zlib，而 Brotli 则用的谷歌写的 <a href="https://github.com/google/brotli" title="https://github.com/google/brotli">brotli 库</a>。但由于它们都是压缩解压缩的算法，而 Brotli 又是 Node.js v10 之后才出现的，所以跟 zlib 放到了一个模块下。但我们又不好给这个模块改名，不然就不向下兼容了。所以 Brotli 虽然不是 zlib 生的，但在 Node.js 中寄样在 zlib 模块下面。</p>
+<p>在 Node.js 的 zlib 中，有几个核心的类，它们分别提供了不同能力。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/352f073181244b4fa811828164ef7c27~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=300&amp;h=231&amp;s=1069339&amp;e=gif&amp;f=40&amp;b=4d78ce" alt=""></p>
+<ul>
+<li>
+<p><code>ZlibBase</code>：<code>zlib</code> 模块的基类，继承自 <code>stream</code> 模块的 <code>Transform</code> <a href="https://zhuanlan.zhihu.com/p/44809689#h_44809689_9" title="https://zhuanlan.zhihu.com/p/44809689#h_44809689_9">变形金刚流</a>；</p>
+</li>
+<li>
+<p><code>Zlib</code>：继承自 <code>ZlibBase</code>，<code>zlib</code> 模块中底层基于 <code>zlib</code> 库的那些类的基类（虽然有点拗口，但是回去看一下前面几段话就好理解了）；</p>
+</li>
+<li>
+<p><code>Brotli</code>：原型链继承自 <code>Zlib</code>，但是构造函数中的 <code>super</code> 却调用的 <code>ZlibBase</code>；</p>
+</li>
+<li>
+<p><code>Deflate</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>Inflate</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>Gunzip</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>Gzip</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>DeflateRaw</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>InflateRaw</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>Unzip</code>：继承自 <code>Zlib</code>；</p>
+</li>
+<li>
+<p><code>BrotliCompress</code>：继承自 <code>Brotli</code>；</p>
+</li>
+<li>
+<p><code>BrotliDecompress</code>：继承自 <code>Brotli</code>。</p>
+</li>
+</ul>
+<p>上面这些类中的后九项就是我们在 Node.js 文档中看到的暴露出来的那几个类了。这几个类画成关系图如下：</p>
+<p><img src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2ce20cbb3d4c44d18988ed48b79bf1c9~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=2768&amp;h=1446&amp;s=279988&amp;e=png&amp;b=fefefe" alt="22流程大图5.png"></p>
+<p>这里面的 <code>binding</code> 指 C++ 侧实现的类。<code>ZlibBase</code> 里面有一个 <code>_handle</code> 属性，是 <code>Zlib</code> 或者 <code>Brotli</code> 在初始化的时候生成的。其中 <code>Zlib</code> 在初始化的时候 <code>_handle</code> 为 <code>binding.Zlib</code> 实例；而 <code>Brotli</code> 在初始化的时候视当前是 <code>BrotliCompress</code> 还是 <code>BrotliDecompress</code> 而定为 <code>binding.BrotliEncoder</code> 还是 <code>binding.BrotliDecoder</code>。而无论是哪类 <code>_handle</code>，最终都是继承自 <code>binding.CompressStream</code>。</p>
+<p>这些类里面，<code>zlib</code> 中的那些类主要是实现一个变形金刚流，并且做相关的流程控制。而 <code>CompressionStream</code> 及其派生类都是针对单块内容的加解压时进行的异步多线程操作，在另外的线程调用形如我们在上一节中提到的 <code>inflate()</code> 和 <code>deflate()</code> 函数。</p>
+<p><strong>篇幅原因，</strong> <strong><code>Brotli</code></strong> <strong>相关内容我们就不讲了。</strong></p>
+<h3 id="zlibbase变形金刚流"><code>ZlibBase</code>——变形金刚流</h3>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e20a257abec940799b76cf2e8a17c8fd~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=474&amp;h=360&amp;s=714454&amp;e=gif&amp;f=12&amp;b=033c7c" alt=""></p>
+<p>让我们回到 <code>stream</code> 的官方文档中看看，如果要实现一个变形金刚流，<a href="https://nodejs.org/docs/latest-v18.x/api/stream.html#implementing-a-transform-stream" title="https://nodejs.org/docs/latest-v18.x/api/stream.html#implementing-a-transform-stream">都要做什么事</a>——<a href="https://nodejs.org/docs/latest-v18.x/api/stream.html#transform_transformchunk-encoding-callback" title="https://nodejs.org/docs/latest-v18.x/api/stream.html#transform_transformchunk-encoding-callback">实现 Transform._transform()</a>。</p>
+<blockquote>
+<p>All <code>Transform</code> stream implementations must provide a <code>_transform()</code> method to accept input and produce output. The <code>transform._transform()</code> implementation handles the bytes being written, computes an output, then passes that output off to the readable portion using the <code>transform.push()</code> method.</p>
+</blockquote>
+<p>看看 <code>ZlibBase</code> 是<a href="https://github.com/nodejs/node/blob/v18.16.0/lib/zlib.js#L412-L425" title="https://github.com/nodejs/node/blob/v18.16.0/lib/zlib.js#L412-L425">如何实现 _transform() 的吧</a>。</p>
+<pre><code>function processChunk(self, chunk, flushFlag, cb) {
+  const handle = self._handle;
+  if (!handle) return process.nextTick(cb);
+
+  handle.buffer = chunk;
+  handle.cb = cb;
+  handle.availOutBefore = self._chunkSize - self._outOffset;
+  handle.availInBefore = chunk.byteLength;
+  handle.inOff = 0;
+  handle.flushFlag = flushFlag;
+
+  handle.write(flushFlag,
+               chunk, // in
+               0, // in_off
+               handle.availInBefore, // in_len
+               self._outBuffer, // out
+               self._outOffset, // out_off
+               handle.availOutBefore); // out_len
+}
+
+ZlibBase.prototype._transform = function(chunk, encoding, cb) {
+  ...
+  processChunk(this, chunk, flushFlag, cb);
+};
+</code></pre>
+<p>处理一下参数然后调用 <code>processChunk()</code>。而 <code>processChunk()</code> 中对 <code>handle</code> 做了一些类似于前文对 <code>strm</code> 做的操作，接着调用了 <code>handle.write()</code>。</p>
+<p>这个 <code>handle</code> 就是前面类图中提到的，可能是 <code>binding.Zlib</code>、<code>binding.BrotliEncoder</code> 或者 <code>binding.BrotliDecoder</code> 的任意一项。它们都继承自 <code>binding.CompressionStream</code>，它们的 <code>write()</code> 都是在另一个线程中执行加解压一块内容的操作。</p>
+<h3 id="bindingzlib"><code>binding.Zlib</code></h3>
+<p>除了 <code>BrotliCompress</code> 和 <code>BrotliDecompress</code>，剩下的 zlib 相关类中的 <code>_handle</code> 都是 <code>binding.Zlib</code> 类的实例。该实例会在 <code>zlib.Zlib</code> 类的构造函数中被初始化。</p>
+<pre><code>function Zlib(opts, mode) {
+  ...
+  const handle = new binding.Zlib(mode);
+  handle.init(windowBits,
+              level,
+              memLevel,
+              strategy,
+              this._writeState,
+              processCallback,
+              dictionary);
+
+  // 将 handle 传给 ZlibBase，以此将其作为 `this._handle`
+  ZlibBase.call(this, ..., handle, ...);
+}
+
+function Deflate(opts) {
+  ...
+  Zlib.call(this, opts, DEFLATE);
+}
+
+...
+</code></pre>
+<p>可以看出来，不同类只是 <code>mode</code> 不同。比如 <code>Deflate</code> 类，它传递给父类的 <code>mode</code> 就是 <code>DEFLATE</code>。<code>binding.Zlib</code> 就是根据不同 <code>mode</code> 的值区分不同的内容的。</p>
+<p>这个 <code>mode</code> 怎么就能起到指定是 <code>Deflate</code>、<code>DeflateRaw</code>、<code>Gzip</code>、<code>Gunzip</code>、<code>Unzip</code>、<code>Inflate</code>、<code>InflateRaw</code> 的区别呢？我们先来看看它们的不同：</p>
+<ul>
+<li>
+<p><code>Deflate</code> 与 <code>Inflate</code>：用 DEFLATE 压缩与解压；</p>
+</li>
+<li>
+<p><code>DeflateRaw</code> 与 <code>InflateRaw</code>：也是用 DEFLATE 加解压，但是压缩内容中不附加 <code>zlib</code> 的头，解压的格式也不应该有；</p>
+</li>
+<li>
+<p><code>Gzip</code> 与 <code>Gunzip</code>：用 gzip 来加解压；</p>
+</li>
+<li>
+<p><code>Unzip</code>：可自动探测内容是被 <code>Deflate</code> 压缩的还是被 <code>Gzip</code> 压缩的，并进行相关解压。</p>
+</li>
+</ul>
+<h4 id="write"><code>write()</code></h4>
+<p><code>binding.Zlib::write()</code> 最终是体现在 <code>handle.write()</code> 上的。上面讲的几种类型，最终调用的都是 <code>binding.Zlib::write()</code>。在该函数中，最终调用的是其父类 <code>PoolThreadWork</code> 的 <code>ScheduleWork</code>。里面是通过 <code>uv_queue_work()</code> 去调用 <code>handle.doThreadPoolWork()</code>。</p>
+<blockquote>
+<p>还记得第二十一章中介绍的 <code>uv_queue_work()</code> 吗？它是在一个线程池中依次执行任务，并在执行完毕后通过 <code>uv_async_t</code> 将“任务完成”的信息吸附回主事件循环以进行后续逻辑。</p>
+</blockquote>
+<p>在 <code>binding.Zlib::DoThreadWork()</code>，也就是线程池任务逻辑中，我们可以看到一些熟悉的逻辑。</p>
+<blockquote>
+<p>这里实际上不是 Zlib，而是它模板类中的一些内容。情况有些复杂，但大家只要理解为 <code>Zlib</code> 的 <code>DoThreadWork()</code> 最终调用的是 <code>ZlibContext::DoThreadPoolWork()</code> 就好了。不然还得绕挺多 C++ 逻辑的，你也不想这样吧。</p>
+</blockquote>
+<pre><code>constexpr uint8_t GZIP_HEADER_ID1 = 0x1f;
+constexpr uint8_t GZIP_HEADER_ID2 = 0x8b;
+
+void ZlibContext::DoThreadPoolWork() {
+  ...
+
+  const Bytef* next_expected_header_byte = nullptr;
+  switch (mode_) {
+    case DEFLATE:
+    case GZIP:
+    case DEFLATERAW:
+      err_ = deflate(&amp;strm_, flush_);
+      break;
+    case UNZIP:
+      if (strm_.avail_in &gt; 0) {
+        next_expected_header_byte = strm_.next_in;
+      }
+
+      switch (gzip_id_bytes_read_) {
+        case 0:
+          if (next_expected_header_byte == nullptr) {
+            break;
+          }
+
+          if (*next_expected_header_byte == GZIP_HEADER_ID1) {
+            gzip_id_bytes_read_ = 1;
+            next_expected_header_byte++;
+
+            if (strm_.avail_in == 1) {
+              // The only available byte was already read.
+              break;
+            }
+          } else {
+            mode_ = INFLATE;
+            break;
+          }
+
+          [[fallthrough]];
+        case 1:
+          if (next_expected_header_byte == nullptr) {
+            break;
+          }
+
+          if (*next_expected_header_byte == GZIP_HEADER_ID2) {
+            gzip_id_bytes_read_ = 2;
+            mode_ = GUNZIP;
+          } else {
+            // There is no actual difference between INFLATE and INFLATERAW
+            // (after initialization).
+            mode_ = INFLATE;
+          }
+
+          break;
+        default:
+          UNREACHABLE(&quot;invalid number of gzip magic number bytes read&quot;);
+      }
+
+      [[fallthrough]];
+    case INFLATE:
+    case GUNZIP:
+    case INFLATERAW:
+      err_ = inflate(&amp;strm_, flush_);
+
+      // If data was encoded with dictionary (INFLATERAW will have it set in
+      // SetDictionary, don't repeat that here)
+      if (mode_ != INFLATERAW &amp;&amp;
+          err_ == Z_NEED_DICT &amp;&amp;
+          !dictionary_.empty()) {
+        // Load it
+        err_ = inflateSetDictionary(&amp;strm_,
+                                    dictionary_.data(),
+                                    dictionary_.size());
+        if (err_ == Z_OK) {
+          // And try to decode again
+          err_ = inflate(&amp;strm_, flush_);
+        } else if (err_ == Z_DATA_ERROR) {
+          // Both inflateSetDictionary() and inflate() return Z_DATA_ERROR.
+          // Make it possible for After() to tell a bad dictionary from bad
+          // input.
+          err_ = Z_NEED_DICT;
+        }
+      }
+
+      while (strm_.avail_in &gt; 0 &amp;&amp;
+             mode_ == GUNZIP &amp;&amp;
+             err_ == Z_STREAM_END &amp;&amp;
+             strm_.next_in[0] != 0x00) {
+        ...
+        err_ = inflate(&amp;strm_, flush_);
+      }
+      break;
+    default:
+      UNREACHABLE();
+  }
+}
+</code></pre>
+<p>根据 <code>mode</code> 不同，这里的代码我们分几块看。</p>
+<p>第一块，<code>DEFLATE</code>、<code>GZIP</code> 与 <code>DEFLATERAW</code> 逻辑一致，都是直接 <code>deflate(&amp;strm_, flush_)</code> 了事。</p>
+<p>第二块，<code>UNZIP</code>。前文说过，<code>Unzip</code> 可自动探测内容是被 <code>Deflate</code> 压缩的还是被 <code>Gzip</code> 压缩的，并进行相关解压。在 Gzip 文件格式中，文件头的前两个字节应该是 <code>0x1f</code> 和 <code>0x8b</code>。这两个值在 Gzip 文件中是固定的，用来表明这个文件是一个 Gzip 文件。所以，最开始的两个常量就是用来和读取到的文件头部进行比对，从而判断该文件是否为 Gzip 文件。所以在 <code>UNZIP</code> 中，把内部的 <code>switch-case</code> 解释一下，就是判断头两位是否是 <code>0x1f</code>、<code>0x8b</code>，若是，则将 <code>mode</code>设置成为 <code>GUNZIP</code>，否则设置为 <code>INFLATE</code>，然后跳出内部的 <code>switch-case</code>。这里注意，外层的 <code>switch-case</code> 在 <code>UNZIP</code> 中并没有被 <code>break</code>，而是加了一个 <code>[[fallthrough]]</code> 的属性。</p>
+<blockquote>
+<p>在 C++ 的 <code>switch</code> 语句中，如果在一个 <code>case</code> 分支末尾没有使用 <code>break</code>，控制流就会“贯穿”到下一个 <code>case</code>。这通常被视为编程错误，因为这样的行为可能会导致预期之外的结果。然而，在某些情况下，程序员可能有意为之，让控制流贯穿到下一个 <code>case</code>。这种时候，就可以使用 <code>[[fallthrough]]</code> 属性来消除编译器的警告，表明这种贯穿行为是有意的。</p>
+</blockquote>
+<p>为什么这里要“贯穿”呢？因为当我们读了两个字节确定了它是 <code>INFLATE</code> 还是 <code>GUNZIP</code> 后，我们就重设了 <code>mode</code>，然后流控会继续往下面去匹配。而 <code>INFLATE</code> 和 <code>GUNZIP</code> 刚好是在 <code>UNZIP</code> 之后，是会被正常匹配到，并执行相应后续逻辑的。所以这里的 <code>switch-case</code> 顺序也是有讲究的——如果我们把 <code>UNZIP</code> 这个 <code>case</code> 写到了 <code>INFLATE</code> 或者 <code>GUNZIP</code> 之后，就不会被后续匹配到了。</p>
+<p>上面这段逻辑就是我们之前讲的“<code>Unzip</code> 可自动探测内容是被 <code>Deflate</code> 压缩的还是被 <code>Gzip</code> 压缩的，并进行相关解压”。</p>
+<p>第三块，剩下的三个解压方式都是通过 <code>inflate(&amp;strm_, flush_)</code> 了事。如果第一遍解压失败，那我们看看是不是因为没加字典。如果需要字典且外部调用并没有提供字典（外部调用的 <code>options</code> 参数中的 <code>dictionary</code> 字段），那么就是 <code>Z_NEED_DICT</code> 错误；如果有提供字典，那么通过 <code>inflateSetDictionary()</code> 设置字典，然后重新进行一遍 <code>inflate(&amp;strm_, flush_)</code>。接着就是循环调用 <code>inflate()</code> 直到本次这块内容解压完成。</p>
+<p>大家可能比较奇怪，为什么我们最开始介绍的压缩是用内外两层 <code>do-while</code> 进行不断压缩，而这里每次 <code>DoThreadWork()</code> 时，只做一次，毫不恋战呢？因为这些不断读取、压缩的流程控制已经在 JavaScript 侧的 <code>Transform</code> 层就做了的。而每次 <code>DoThreadWork()</code> 进行压缩之后，<code>strm</code> 中的状态（相当于之前画中的白纸记录的临时状态）是会被存下来，供下一次 <code>DoThreadWork()</code> 使用的。</p>
+<p>看起来好像讲差不多了。但是有没有发现一个问题，为什么 <code>DEFLATE</code>、<code>GZIP</code> 和 <code>DEFLATERAW</code> 用的都是 <code>inflate()</code>，甚至参数都一样，zlib 库是怎么区分这三种类型的呢？解压的三个方法同理。这就涉及到下面的内容了。</p>
+<h4 id="init"><code>init()</code></h4>
+<p>每次构造一个 <code>binding.Zlib</code> 时，都会调用 <a href="https://github.com/nodejs/node/blob/v18.16.0/src/node_zlib.cc#L958-L1003" title="https://github.com/nodejs/node/blob/v18.16.0/src/node_zlib.cc#L958-L1003">ZlibContext::Init()</a> 进行初始化。</p>
+<pre><code>    void ZlibContext::Init(...) {
+      ...
+
+      if (mode_ == GZIP || mode_ == GUNZIP) {
+        window_bits_ += 16;
+      }
+
+      if (mode_ == UNZIP) {
+        window_bits_ += 32;
+      }
+
+      if (mode_ == DEFLATERAW || mode_ == INFLATERAW) {
+        window_bits_ *= -1;
+      }
+
+      ...
+    }
+</code></pre>
+<p>摘除一些不重要的逻辑，这里剩下上面这几行代码。如果 <code>mode</code> 是 <code>GZIP</code> 或者 <code>GUNZIP</code>，则将 <code>window_bits_</code> 值加上 <code>16</code>；如果是 <code>UNZIP</code> 则加 <code>32</code>；如果是 <code>DEFLATERAW</code> 或者 <code>INFLATERAW</code>，则取负数。</p>
+<p>这是什么科学道理呢？</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f6ccce72d6de4c8cbbb22e1f48b77074~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=440&amp;h=440&amp;s=99935&amp;e=png&amp;b=fafafa" alt=""></p>
+<p>首先，<code>window_bits</code> 是窗口大小（历史缓冲区的大小）的以 <code>2</code> 为底的对数。例如，当 <code>window_bits</code> 为 <code>8</code> 时，窗口大小就是 <code>256</code> 字节。这个 <code>window_bits</code> 在 Node.js 中是可以作为参数传给 zlib 的各种类的。</p>
+<p>对于现版本 Node.js（v18.16.0）所使用的 zlib 版本（v1.2.11）来说，<code>window_bits</code> 值应该在 <code>8</code> 到 <code>15</code> 之间。</p>
+<p>话是这么说的没错，但 zlib 的文档中也说了，实际上这个 <code>window_bits</code> 可以是其它值。</p>
+<p>当 <code>window_bits</code> 处于 <code>-8</code> 到 <code>-15</code> 之间时，则表示使用 Raw 进行加解压，也就是所谓的 <code>DEFLATERAW</code> 和 <code>INFLATERAW</code>。这种模式下不包含 zlib 或 Gzip 的头部和尾部。</p>
+<p>当 <code>window_bits</code> 大于 <code>15</code> 时，则表示一个 Gzip 的加解压。所以当我们对原 <code>window_bits</code> 加上 <code>16</code>，就会为压缩对象加上 Gzip 的头尾，而不再包含 zlib 的头尾。</p>
+<p>当加上 <code>32</code> 后，这个 <code>window_bits</code> 就又代表可自行探测 GUNZIP 还是 INFLATE 了。</p>
+<p>所以，我们在初始化的时候通过 <code>window_bits</code> 来告诉 zlib，这个对象要处理的内容到底是哪种模式。</p>
+<pre><code>    inflateInit2(&amp;strm_, window_bits_);
+</code></pre>
+<h2 id="compressionstream-与-uncompressionstream"><code>CompressionStream</code> 与 <code>UncompressionStream</code></h2>
+<blockquote>
+<p>阅读本节前，建议你对 Service Worker API 中的 <code>ReadableStream</code>、<code>WritableStream</code> 以及 <code>TransformStream</code> 有所了解，并且知道它们是怎么用的。了解什么是 <code>controller.enqueue()</code>，什么是 <code>getReader()</code> 以及 <code>getWriter()</code> 等。</p>
+<ul>
+<li>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream" title="https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream">developer.mozilla.org/en-US/docs/…</a></p>
+</li>
+<li>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/WritableStream" title="https://developer.mozilla.org/en-US/docs/Web/API/WritableStream">developer.mozilla.org/en-US/docs/…</a></p>
+</li>
+<li>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/TransformStream" title="https://developer.mozilla.org/en-US/docs/Web/API/TransformStream">developer.mozilla.org/en-US/docs/…</a></p>
+</li>
+</ul>
+<p>如果你已了解，当我什么都没说。</p>
+</blockquote>
+<p>这俩是 Winter 中的压缩与解压流。它们都是 Service Worker API 中 <a href="https://developer.mozilla.org/en-US/docs/Web/API/TransformStream" title="https://developer.mozilla.org/en-US/docs/Web/API/TransformStream">TransformStream</a> 的一种实现。<code>TransformStream</code> 中内含一个 <code>readable</code> 和一个 <code>writable</code>。其中 <code>readable</code> 是 <a href="https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream" title="https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream">ReadableStream</a>，<code>writable</code> 是 <a href="https://developer.mozilla.org/en-US/docs/Web/API/WritableStream" title="https://developer.mozilla.org/en-US/docs/Web/API/WritableStream">WritableStream</a>，中间再有个 Transform 逻辑就好了。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0c45d74b0b6f4f44995df75c2c18876b~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=300&amp;h=200&amp;s=679102&amp;e=gif&amp;f=29&amp;b=592308" alt=""></p>
+<p>Node.js 中的 <code>CompressionStream</code> 与 <code>UncompressionStream</code> 比较偷懒。因为之前已经有现成的各式各样的加解压的变形金刚流的实现，这俩 Winter 的 API 就直接买四个萝卜切吧切吧剁了，再来四块豆腐你就咕嘟咕嘟吧。</p>
+<pre><code>    let zlib;
+    function lazyZlib() {
+      zlib ??= require('zlib');
+      return zlib;
+    }
+
+    class CompressionStream {
+      #handle;
+      #transform;
+
+      constructor(format) {
+        switch (format) {
+          case 'deflate':
+            this.#handle = lazyZlib().createDeflate();
+            break;
+          case 'gzip':
+            this.#handle = lazyZlib().createGzip();
+            break;
+          default:
+            throw new ERR_INVALID_ARG_VALUE('format', format);
+        }
+        this.#transform = newReadableWritablePairFromDuplex(this.#handle);
+      }
+
+      get readable() {
+        return this.#transform.readable;
+      }
+
+      get writable() {
+        return this.#transform.writable;
+      }
+    }
+</code></pre>
+<p><code>UncompressionStream</code> 实现也类似。核心就是通过 <code>zlib</code> 的 <code>createDeflate()</code> 或者 <code>createGzip()</code> 创建相应的变形金刚流（上一节介绍过的），把它存在 <code>this.#handle</code> 中。然后通过 <code>newReadableWritablePairFromDuplex()</code> 工具函数来将这个变形金刚流处理成 Service Worker API 中的 <code>ReadableStream</code> 与 <code>WritableStream</code> 对。往对应的 <code>readable</code> 中写内容，会被压缩或解压，并把结果导向 <code>writable</code> 中。</p>
+<blockquote>
+<p><strong>问：</strong> 明明我们前面讲的是 <code>Transform</code>，怎么到这个函数里面就是 <code>Duplex</code> 了？</p>
+<p><strong>答：</strong> 变形金刚流也是双工流的一种，只是它的输出是输入经过一系列计算后得到的结果。</p>
+</blockquote>
+<h3 id="newreadablewritablepairfromduplex"><code>newReadableWritablePairFromDuplex()</code></h3>
+<p>这个 <a href="https://github.com/nodejs/node/blob/v18.16.0/lib/internal/webstreams/adapters.js#L567-L608" title="https://github.com/nodejs/node/blob/v18.16.0/lib/internal/webstreams/adapters.js#L567-L608">newReadableWritablePairFromDuplex()</a> 长这样：</p>
+<pre><code>    function newWritableStreamFromStreamWritable(streamWritable) {
+      ...
+      return new WritableStream({
+        start(c) { controller = c; },
+
+        async write(chunk) {
+          if (streamWritable.writableNeedDrain || !streamWritable.write(chunk)) {
+            backpressurePromise = createDeferredPromise();
+            return SafePromisePrototypeFinally(
+              backpressurePromise.promise, () =&gt; {
+                backpressurePromise = undefined;
+              });
+          }
+        },
+
+        abort(reason) {
+          destroy(streamWritable, reason);
+        },
+
+        close() {
+          if (closed === undefined &amp;&amp; !isWritableEnded(streamWritable)) {
+            closed = createDeferredPromise();
+            streamWritable.end();
+            return closed.promise;
+          }
+
+          controller = undefined;
+          return PromiseResolve();
+        },
+      }, strategy);
+    }
+
+    function newReadableWritablePairFromDuplex(duplex) {
+      ...
+
+      const writable =
+        isWritable(duplex) ?
+          newWritableStreamFromStreamWritable(duplex) :
+          new WritableStream();
+
+      if (!isWritable(duplex))
+        writable.close();
+
+      const readable =
+        isReadable(duplex) ?
+          newReadableStreamFromStreamReadable(duplex) :
+          new ReadableStream();
+
+      if (!isReadable(duplex))
+        readable.cancel();
+
+      return { writable, readable };
+    }
+</code></pre>
+<p>就是通过 <code>newWritableStreamFromStreamWritable()</code> 创建一个与传进来的双工流联立的 Service Worker API 中的 <code>WritableStream</code>，以及通过 <code>newReadableStreamFromStreamReadable()</code> 创建对应的 <code>ReadableStream</code>。</p>
+<h3 id="newwritablestreamfromstreamwritable"><code>newWritableStreamFromStreamWritable()</code></h3>
+<pre><code>    function newWritableStreamFromStreamWritable(streamWritable) {
+      ...
+      return new WritableStream({
+        ...
+
+        async write(chunk) {
+          if (streamWritable.writableNeedDrain || !streamWritable.write(chunk)) {
+            backpressurePromise = createDeferredPromise();
+            return SafePromisePrototypeFinally(
+              backpressurePromise.promise, () =&gt; {
+                backpressurePromise = undefined;
+              });
+          }
+        },
+
+        ...
+      }, strategy);
+    }
+</code></pre>
+<p>就是新建一个 <code>WritableStream</code>，并且在它的 <code>write()</code> 函数中往传进来的 <code>streamWritable</code> 写入内容（<code>streamWritable.write()</code>）。</p>
+<h3 id="newreadablestreamfromstreamreadable"><code>newReadableStreamFromStreamReadable()</code></h3>
+<pre><code>    function newReadableStreamFromStreamReadable(streamReadable, options = kEmptyObject) {
+      ...
+
+      let controller;
+      function onData(chunk) {
+        // Copy the Buffer to detach it from the pool.
+        if (Buffer.isBuffer(chunk) &amp;&amp; !objectMode)
+          chunk = new Uint8Array(chunk);
+        controller.enqueue(chunk);
+        if (controller.desiredSize &lt;= 0)
+          streamReadable.pause();
+      }
+
+      ...
+
+      streamReadable.on('data', onData);
+      return new ReadableStream({
+        start(c) { controller = c; },
+
+        pull() { streamReadable.resume(); },
+
+        cancel(reason) {
+          destroy(streamReadable, reason);
+        },
+      }, strategy);
+    }
+</code></pre>
+<p>逻辑也很简单，创建一个 <code>ReadableStream</code>，并监听 <code>streamReadable</code> 的 <code>data</code> 事件。在事件监听中通过 <code>ReadableStream</code> 所创建的 <code>controller</code> 往 <code>ReadableStream</code> 推入事件里面传进来的数据（<code>controller.enqueue()</code>）。</p>
+<p>如此一来，二者就明晰了。其实 <code>CompressionStream</code> 和 <code>UncompressionStream</code> 在 Node.js 就是个造熊猫的过程。</p>
+<p><img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/15eb72f908914ef4bc59ebb120b050c1~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=930&amp;h=1332&amp;s=248969&amp;e=png&amp;b=fefefe" alt="22流程图6.png"></p>
+<p><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e243274dc8b84abdb6ef341d8f1acca9~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=225&amp;h=225&amp;s=91015&amp;e=png&amp;b=35342e" alt="image.png"></p>
+<h2 id="本章小结">本章小结</h2>
+<p>Node.js 原来有 <code>zlib</code> 内置模块，支持 <code>DEFLATE</code>、<code>GZIP</code>、<code>DEFLATERAW</code> 格式。后来在 Node.js v10 之后，强势加入 Brotli 的支持。但是为它再加个 <code>brotli</code> 模块又太多余，跟 <code>zlib</code> 模块一起改个像 <code>compress</code> 类似的模块又不想下兼容，所以只能把它也归入 <code>zlib</code> 中来。</p>
+<p>本章我们介绍了 zlib 库的使用方式（但并不介绍算法具体内容），并向大家展示了 Node.js 中是如何使用 zlib 库的，以及各种类之间的关系。</p>
+<p><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a7e9fb97c4634380951b96b0c2bbc320~tplv-k3u1fbpfcp-jj-mark:1600:0:0:0:q75.image#?w=2764&amp;h=1438&amp;s=279405&amp;e=png&amp;b=fefefe" alt="22流程图7.png"></p>
+<p>最后，为大家介绍了 Winter 中所指定的 <code>CompressionStream</code> 与 <code>UncompressionStream</code>，并讲述了其造🐼的过程——如何将原来 Node.js 的变形金刚流拆成有联立关系的 Service Worker 下的 <code>ReadableStream</code> 和 <code>WritableStream</code>，并将其组合成 <code>CompressionStream</code>。</p>
+</div>
+        </div>
+            
+            
+        </body>
+        </html>
