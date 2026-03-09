@@ -1,0 +1,221 @@
+<h1 class="heading">群聊的发起与通知</h1>
+<blockquote>
+<p>这小节，我们来学习一下如何创建一个群聊，并通知到群聊中的各位成员</p>
+</blockquote>
+<p>我们依然是先来看一下最终的效果是什么样的。</p>
+<h2 class="heading">1. 最终效果</h2>
+<blockquote>
+<p>服务端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/16641505a75cded7?w=1240&amp;h=278&amp;f=png&amp;s=114205"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>创建群聊的客户端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/16641505aa8e0757?w=1240&amp;h=337&amp;f=png&amp;s=155352"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>其他客户端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/1664150595b149c0?w=1240&amp;h=268&amp;f=png&amp;s=117376"><figcaption></figcaption></figure>
+<figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/166415059748e399?w=1240&amp;h=216&amp;f=png&amp;s=116068"><figcaption></figcaption></figure><p></p>
+<ol>
+<li>首先，依然是三位用户依次登录到服务器，分别是闪电侠、极速、萨维塔。</li>
+<li>然后，我们在闪电侠的控制台输入 <code>createGroup</code> 指令，提示创建群聊需要输入 userId 列表，然后我们输入以英文逗号分隔的 userId。</li>
+<li>群聊创建成功之后，分别在服务端和三个客户端弹出提示消息，包括群的 ID 以及群里各位用户的昵称。</li>
+</ol>
+<h2 class="heading">2. 群聊原理</h2>
+<p>群聊的原理我们在 <a target="_blank" href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b6a1a9cf265da0f87595521">仿微信 IM 系统简介</a> 已经学习过，我们再来重温一下</p>
+<p>群聊指的是一个组内多个用户之间的聊天，一个用户发到群组的消息会被组内任何一个成员接收，下面我们来看一下群聊的基本流程。</p>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/9/1651c08e91bfb935?w=1240&amp;h=872&amp;f=png&amp;s=183265"><figcaption></figcaption></figure><p></p>
+<p>如上图，要实现群聊，其实和单聊类似</p>
+<ol>
+<li>A，B，C 依然会经历登录流程，服务端保存用户标识对应的 TCP 连接</li>
+<li>A 发起群聊的时候，将 A，B，C 的标识发送至服务端，服务端拿到之后建立一个群聊 ID，然后把这个 ID 与 A，B，C 的标识绑定</li>
+<li>群聊里面任意一方在群里聊天的时候，将群聊 ID 发送至服务端，服务端拿到群聊 ID 之后，取出对应的用户标识，遍历用户标识对应的 TCP 连接，就可以将消息发送至每一个群聊成员</li>
+</ol>
+<p>这一小节，我们把重点放在创建一个群聊上，由于控制台输入的指令越来越多，因此在正式开始之前，我们先对我们的控制台程序稍作重构。</p>
+<h2 class="heading">2. 控制台程序重构</h2>
+<h3 class="heading">2.1 创建控制台命令执行器</h3>
+<p>首先，我们把在控制台要执行的操作抽象出来，抽象出一个接口</p>
+<blockquote>
+<p>ConsoleCommand.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">exec</span><span class="hljs-params">(Scanner scanner, Channel channel)</span></span>;
+}
+</code></pre><h3 class="heading">2.2 管理控制台命令执行器</h3>
+<p>接着，我们创建一个管理类来对这些操作进行管理。</p>
+<blockquote>
+<p>ConsoleCommandManager.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsoleCommandManager</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+    <span class="hljs-keyword">private</span> Map&lt;String, ConsoleCommand&gt; consoleCommandMap;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ConsoleCommandManager</span><span class="hljs-params">()</span> </span>{
+        consoleCommandMap = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+        consoleCommandMap.put(<span class="hljs-string">"sendToUser"</span>, <span class="hljs-keyword">new</span> SendToUserConsoleCommand());
+        consoleCommandMap.put(<span class="hljs-string">"logout"</span>, <span class="hljs-keyword">new</span> LogoutConsoleCommand());
+        consoleCommandMap.put(<span class="hljs-string">"createGroup"</span>, <span class="hljs-keyword">new</span> CreateGroupConsoleCommand());
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">exec</span><span class="hljs-params">(Scanner scanner, Channel channel)</span> </span>{
+        <span class="hljs-comment">//  获取第一个指令</span>
+        String command = scanner.next();
+
+        ConsoleCommand consoleCommand = consoleCommandMap.get(command);
+
+        <span class="hljs-keyword">if</span> (consoleCommand != <span class="hljs-keyword">null</span>) {
+            consoleCommand.exec(scanner, channel);
+        } <span class="hljs-keyword">else</span> {
+            System.err.println(<span class="hljs-string">"无法识别["</span> + command + <span class="hljs-string">"]指令，请重新输入!"</span>);
+        }
+    }
+}
+</code></pre><ol>
+<li>我们在这个管理类中，把所有要管理的控制台指令都塞到一个 map 中。</li>
+<li>执行具体操作的时候，我们先获取控制台第一个输入的指令，这里以字符串代替，比较清晰（这里我们已经实现了上小节课后思考题中的登出操作），然后通过这个指令拿到对应的控制台命令执行器执行。</li>
+</ol>
+<p>这里我们就拿创建群聊举个栗子：首先，我们在控制台输入 <code>createGroup</code>，然后我们按下回车，就会进入 <code>CreateGroupConsoleCommand</code> 这个类进行处理</p>
+<blockquote>
+<p>CreateGroupConsoleCommand.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateGroupConsoleCommand</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String USER_ID_SPLITER = <span class="hljs-string">","</span>;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">exec</span><span class="hljs-params">(Scanner scanner, Channel channel)</span> </span>{
+        CreateGroupRequestPacket createGroupRequestPacket = <span class="hljs-keyword">new</span> CreateGroupRequestPacket();
+
+        System.out.print(<span class="hljs-string">"【拉人群聊】输入 userId 列表，userId 之间英文逗号隔开："</span>);
+        String userIds = scanner.next();
+        createGroupRequestPacket.setUserIdList(Arrays.asList(userIds.split(USER_ID_SPLITER)));
+        channel.writeAndFlush(createGroupRequestPacket);
+    }
+
+}
+</code></pre><p>进入到 <code>CreateGroupConsoleCommand</code> 的逻辑之后，我们创建了一个群聊创建请求的数据包，然后提示输入以英文逗号分隔的 userId 的列表，填充完这个数据包之后，调用 <code>writeAndFlush()</code> 我们就可以发送一个创建群聊的指令到服务端。</p>
+<p>最后，我们再来看一下经过我们的改造，客户端的控制台线程相关的代码。</p>
+<blockquote>
+<p>NettyClient.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">startConsoleThread</span><span class="hljs-params">(Channel channel)</span> </span>{
+    ConsoleCommandManager consoleCommandManager = <span class="hljs-keyword">new</span> ConsoleCommandManager();
+    LoginConsoleCommand loginConsoleCommand = <span class="hljs-keyword">new</span> LoginConsoleCommand();
+    Scanner scanner = <span class="hljs-keyword">new</span> Scanner(System.in);
+
+    <span class="hljs-keyword">new</span> Thread(() -&gt; {
+        <span class="hljs-keyword">while</span> (!Thread.interrupted()) {
+            <span class="hljs-keyword">if</span> (!SessionUtil.hasLogin(channel)) {
+                loginConsoleCommand.exec(scanner, channel);
+            } <span class="hljs-keyword">else</span> {
+                consoleCommandManager.exec(scanner, channel);
+            }
+        }
+    }).start();
+}
+</code></pre><p>抽取出控制台指令执行器之后，客户端控制台逻辑已经相对之前清晰很多了，可以非常方便地在控制台模拟各种在 IM 聊天窗口的操作，接下来，我们就来看一下如何创建群聊。</p>
+<h2 class="heading">3. 创建群聊的实现</h2>
+<h3 class="heading">3.1 客户端发送创建群聊请求</h3>
+<p>通过我们前面讲述控制台逻辑的重构，我们已经了解到我们是发送一个 <code>CreateGroupRequestPacket</code> 数据包到服务端，这个数据包的格式为：</p>
+<blockquote>
+<p>CreateGroupRequestPacket.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateGroupRequestPacket</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Packet</span> </span>{
+    <span class="hljs-keyword">private</span> List&lt;String&gt; userIdList;
+}
+</code></pre><p>它只包含了一个列表，这个列表就是需要拉取群聊的用户列表，接下来我们看下服务端如何处理的。</p>
+<h3 class="heading">3.2 服务端处理创建群聊请求</h3>
+<p>我们依然是创建一个 handler 来处理新的指令。</p>
+<blockquote>
+<p>NettyServer.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">.childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-comment">// 添加一个 handler </span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> CreateGroupRequestHandler());
+        <span class="hljs-comment">// ...</span>
+    }
+});
+</code></pre><p>接下来，我们来看一下这个 handler 具体做哪些事情</p>
+<blockquote>
+<p>CreateGroupRequestHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateGroupRequestHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">CreateGroupRequestPacket</span>&gt; </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, CreateGroupRequestPacket createGroupRequestPacket)</span> </span>{
+        List&lt;String&gt; userIdList = createGroupRequestPacket.getUserIdList();
+
+        List&lt;String&gt; userNameList = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
+        <span class="hljs-comment">// 1. 创建一个 channel 分组</span>
+        ChannelGroup channelGroup = <span class="hljs-keyword">new</span> DefaultChannelGroup(ctx.executor());
+
+        <span class="hljs-comment">// 2. 筛选出待加入群聊的用户的 channel 和 userName</span>
+        <span class="hljs-keyword">for</span> (String userId : userIdList) {
+            Channel channel = SessionUtil.getChannel(userId);
+            <span class="hljs-keyword">if</span> (channel != <span class="hljs-keyword">null</span>) {
+                channelGroup.add(channel);
+                userNameList.add(SessionUtil.getSession(channel).getUserName());
+            }
+        }
+
+        <span class="hljs-comment">// 3. 创建群聊创建结果的响应</span>
+        CreateGroupResponsePacket createGroupResponsePacket = <span class="hljs-keyword">new</span> CreateGroupResponsePacket();
+        createGroupResponsePacket.setSuccess(<span class="hljs-keyword">true</span>);
+        createGroupResponsePacket.setGroupId(IDUtil.randomId());
+        createGroupResponsePacket.setUserNameList(userNameList);
+
+        <span class="hljs-comment">// 4. 给每个客户端发送拉群通知</span>
+        channelGroup.writeAndFlush(createGroupResponsePacket);
+
+        System.out.print(<span class="hljs-string">"群创建成功，id 为["</span> + createGroupResponsePacket.getGroupId() + <span class="hljs-string">"], "</span>);
+        System.out.println(<span class="hljs-string">"群里面有："</span> + createGroupResponsePacket.getUserNameList());
+
+    }
+}
+</code></pre><p>整个过程可以分为以下几个过程</p>
+<ol>
+<li>首先，我们这里创建一个 <code>ChannelGroup</code>。这里简单介绍一下 <code>ChannelGroup</code>：它可以把多个 chanel 的操作聚合在一起，可以往它里面添加删除 channel，可以进行 channel 的批量读写，关闭等操作，详细的功能读者可以自行翻看这个接口的方法。这里我们一个群组其实就是一个 channel 的分组集合，使用 <code>ChannelGroup</code> 非常方便。</li>
+<li>接下来，我们遍历待加入群聊的 userId，如果存在该用户，就把对应的 channel 添加到  <code>ChannelGroup</code> 中，用户昵称也添加到昵称列表中。</li>
+<li>然后，我们创建一个创建群聊响应的对象，其中 <code>groupId</code> 是随机生成的，群聊创建结果一共三个字段，这里就不展开对这个类进行说明了。</li>
+<li>最后，我们调用 <code>ChannelGroup</code> 的聚合发送功能，将拉群的通知批量地发送到客户端，接着在服务端控制台打印创建群聊成功的信息，至此，服务端处理创建群聊请求的逻辑结束。</li>
+</ol>
+<p>我们接下来再来看一下客户端处理创建群聊响应。</p>
+<h3 class="heading">3.3 客户端处理创建群聊响应</h3>
+<p>客户端依然也是创建一个 handler 来处理新的指令。</p>
+<blockquote>
+<p>NettyClient.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">.handler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() {
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(SocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-comment">// 添加一个新的 handler 来处理创建群聊成功响应的指令</span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> CreateGroupResponseHandler());
+        <span class="hljs-comment">// ...</span>
+    }
+});
+</code></pre><p>然后，在我们的应用程序里面，我们仅仅是把创建群聊成功之后的具体信息打印出来。</p>
+<blockquote>
+<p>CreateGroupResponseHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateGroupResponseHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">CreateGroupResponsePacket</span>&gt; </span>{
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, CreateGroupResponsePacket createGroupResponsePacket)</span> </span>{
+        System.out.print(<span class="hljs-string">"群创建成功，id 为["</span> + createGroupResponsePacket.getGroupId() + <span class="hljs-string">"], "</span>);
+        System.out.println(<span class="hljs-string">"群里面有："</span> + createGroupResponsePacket.getUserNameList());
+    }
+}
+</code></pre><p>在实际生产环境中，<code>CreateGroupResponsePacket</code> 对象里面可能有更多的信息，然后以上逻辑的处理也会更加复杂，不过我们这里已经能说明问题了。</p>
+<p>到了这里，这小节的内容到这里就告一段落了，下小节，我们来学习群聊成员管理，包括添加删除成员，获取成员列表等等，最后，我们再对本小节内容做一下总结。</p>
+<h2 class="heading">4. 总结</h2>
+<ol>
+<li>群聊的原理和单聊类似，无非都是通过标识拿到 channel。</li>
+<li>本小节，我们重构了一下控制台的程序结构，在实际带有 UI 的 IM 应用中，我们输入的第一个指令其实就是对应我们点击 UI 的某些按钮或菜单的操作。</li>
+<li>通过 <code>ChannelGroup</code>，我们可以很方便地对一组 channel 进行批量操作。</li>
+</ol>
+<h2 class="heading">5. 思考</h2>
+<p>如何实现在某个客户端拉取群聊成员的时候，不需要输入自己的用户 ID，并且展示创建群聊消息的时候，不显示自己的昵称？欢迎留言讨论。</p>
+<div><script language="javascript">self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',25000);</script></div>
