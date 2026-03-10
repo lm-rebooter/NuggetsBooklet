@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 坐标系变换：基本变换原理与算法实现</h1>
+<p>上一节我们讲了 WebGL 坐标系的分类以及它们之间的转换方式，本节开始详细介绍坐标系基本变换的算法实现，图形学中实现变换的主要数学工具是<code>矩阵</code>，所以在讲解坐标系变换之前，我们先温习一下矩阵。</p>
+<p><strong>温馨提示：</strong></p>
+<p>在学习矩阵变换时，一定要搞清楚以下三点：</p>
+<ul>
+<li>所使用的向量是<code>行向量</code>还是<code>列向量</code>。
+<ul>
+<li>如果是<code>行向量</code>，按照<code>数学领域</code>中矩阵相乘的规则，向量要放在<code>左侧</code>相乘。</li>
+<li>如果是<code>列向量</code>，向量要放在<code>右侧</code>相乘。</li>
+</ul>
+</li>
+<li>矩阵是<code>行主序</code>还是<code>列主序</code>。
+<ul>
+<li>如果是行主序，内存存储矩阵的数组的前四个元素表示的是对应数学矩阵的<code>第一行</code></li>
+<li>如果是列主序，内存存储矩阵的数组的前四个元素表示的是对应数学矩阵的<code>第一列</code></li>
+</ul>
+</li>
+<li>多个矩阵变换时的相乘顺序。
+<ul>
+<li>
+<p>在多个矩阵变换时，不同的相乘顺序会导致不同的结果，所以我们要保证矩阵相乘的顺序是我们期望的。假设有三个变换矩阵：旋转矩阵 R，平移矩阵 T，缩放矩阵 S，以及顶点向量 P，那么 P 变换到 P1 的顺序一般是这样的：</p>
+<p><img alt="P1 = T \times R \times S \times P" src="https://juejin.cn/equation?tex=P1%20%3D%20T%20%5Ctimes%20R%20%5Ctimes%20S%20%5Ctimes%20P" loading="lazy" class="medium-zoom-image"></p>
+<p>即先<code>缩放</code>，再<code>旋转</code>，最后<code>平移</code>。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 data-id="heading-1">矩阵到底代表什么？</h2>
+<p>3D 学习过程中的一大难点就是矩阵变换，我们经常看到矩阵左乘一个列向量就能够实现平移、旋转、缩放等效果。</p>
+<p>那么，矩阵背后的神秘力量是什么呢？</p>
+<p>其实矩阵并不神秘，只是矩阵可以对一些数字按照矩阵的规则执行一系列运算操作，简化了我们使用<code>+</code>、 <code>-</code>、 <code>*</code>、 <code>/</code>进行变换运算的步骤而已。</p>
+<p>一个矩阵可以理解为一种变换，多个矩阵相乘代表多个变换。</p>
+<h3 data-id="heading-2">矩阵变换</h3>
+<p>常见的矩阵变换有如下几种：</p>
+<ul>
+<li>平移</li>
+<li>缩放</li>
+<li>旋转</li>
+<li>切变</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181023166a0297d6ae7194~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>但是在坐标系转换中，最常应用的是前三种。我们看一下如何用矩阵表示这些变换。在讲解矩阵变换之前，我们先从头捋一下<code>点</code>和<code>向量</code>的表示。</p>
+<h3 data-id="heading-3">点和向量</h3>
+<p>前面章节我们讲了<code>齐次坐标</code>，它用来区分<code>点</code>和<code>向量</code>，齐次坐标使用 <code>N+1</code> 维向量表示 N 维空间，第 N+1 维数字如果是 0 的话，则代表 N 维空间中的<code>向量</code>，如下用 4 维向量表示 3 维空间中的一个向量：</p>
+<p><img alt="\vec{P} = (3, 2, 1, 0)" src="https://juejin.cn/equation?tex=%5Cvec%7BP%7D%20%3D%20(3%2C%202%2C%201%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>第 <code>N+1</code> 维数字如果是<code>非0数字</code>的话，则代表 N 维空间下的<code>点</code>：</p>
+<p><img alt="\vec{P} = (3, 2, 1, 1)" src="https://juejin.cn/equation?tex=%5Cvec%7BP%7D%20%3D%20(3%2C%202%2C%201%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p>使用 N+1 维数字表示 N 维空间中的点或向量的方式就是齐次坐标。</p>
+<p>齐次坐标除了能够区分<code>点</code>和<code>向量</code>，还有两大用处：</p>
+<h4 data-id="heading-4">1、模拟透视投影效果。</h4>
+<p>模拟透视效果我们上一节已经介绍了，在裁剪坐标系中，w 值越大，经过透视除法后的坐标越小，于是也就有了近大远小的投影效果。</p>
+<h4 data-id="heading-5">2、用矩阵来表示平移变换。</h4>
+<p>前面章节已经讲过，n 阶矩阵只能和 n 维列向量相乘，得到一个新的 n 维列向量。</p>
+<p><img alt="M_{ij} \times P_{j1}" src="https://juejin.cn/equation?tex=M_%7Bij%7D%20%5Ctimes%20P_%7Bj1%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>乘得的结果只能表示缩放和旋转变换，没有办法表示平移变换，因为平移是在原向量的基础上加上一个常量位移，属于加法操作，但是 n 阶矩阵和 n 维列向量相乘的话，每一步都是相乘操作，没有加法运算，所以无法用 n 阶矩阵和 n 维列向量表示 n 维列向量的平移。</p>
+<blockquote>
+<p>要注意：上面所说的列向量指的是坐标，不是数学意义上的向量。</p>
+</blockquote>
+<p><img alt="\begin{pmatrix}
+a & b & c \\
+d & e & f \\
+g & h & i
+\end{pmatrix} \times \begin{pmatrix}x \\
+y \\
+z
+\end{pmatrix} = \begin{pmatrix}
+ax + by + cz \\
+dx + ey + fz \\
+gx + hy + iz
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0Aa%20%26%20b%20%26%20c%20%5C%5C%0Ad%20%26%20e%20%26%20f%20%20%5C%5C%0Ag%20%26%20h%20%26%20i%0A%5Cend%7Bpmatrix%7D%20%5Ctimes%20%5Cbegin%7Bpmatrix%7Dx%20%5C%5C%0Ay%20%5C%5C%0Az%0A%5Cend%7Bpmatrix%7D%20%3D%20%5Cbegin%7Bpmatrix%7D%0Aax%20%2B%20by%20%2B%20cz%20%5C%5C%0Adx%20%2B%20ey%20%2B%20fz%20%20%5C%5C%0Agx%20%2B%20hy%20%2B%20iz%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>可以看到 n 维矩阵和 n 维向量相乘，不能实现 n 维向量和一个常量进行加减的操作。</p>
+<p>我们期待的是得到这样一个向量：</p>
+<p><img alt="(ax + by +cz + p)" src="https://juejin.cn/equation?tex=(ax%20%2B%20by%20%2Bcz%20%2B%20p)" loading="lazy" class="medium-zoom-image"></p>
+<p>其中 p 是常数，代表平移的大小。</p>
+<p>我们看一下齐次坐标是如何帮助我们解决这个问题的。</p>
+<p>顶点 P 用齐次坐标表示如下：</p>
+<p><img alt="P = (x, y, z, 1)" src="https://juejin.cn/equation?tex=P%20%3D%20(x%2C%20y%2C%20z%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p>因为 3 维坐标用齐次坐标的话需要增加到 4 维，所以表示平移变换的矩阵也要相应地变成 4 阶矩阵，我们看下这个 4 阶矩阵如何构成：</p>
+<p><img alt="\begin{pmatrix}
+a & b & c & tx \\
+c & d & e & ty \\
+f & g & h & tz \\
+0 & 0 & 0 & 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0Aa%20%26%20b%20%26%20c%20%26%20tx%20%5C%5C%0Ac%20%26%20d%20%26%20e%20%26%20ty%20%5C%5C%0Af%20%26%20g%20%26%20h%20%26%20tz%20%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>在原来基础上增加一行和一列，其中第四行前三个分量为 0，第四个分量为 1，这样矩阵和向量的乘积得到的新的向量的第四个分量也是 1，所以也是代表点。</p>
+<p>第四列tx、ty、tz分别代表沿 x 轴、y 轴、 z 轴方向上的平移量。</p>
+<p>我们推算验证一下：</p>
+<p><img alt="\begin{pmatrix}
+a & b & c & tx \\
+d & e & f & ty \\
+g & h & i & tz \\
+0 & 0 & 0 & 1
+\end{pmatrix} \times \begin{pmatrix}x \\
+y \\
+z \\ 1
+\end{pmatrix} = \begin{pmatrix}
+ax + by + cz +tx \\
+dx + ey + fz + ty \\
+gx + hy + iz + tz \\
+0 + 0 + 0 + 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0Aa%20%26%20b%20%26%20c%20%26%20tx%20%5C%5C%0Ad%20%26%20e%20%26%20f%20%26%20ty%20%5C%5C%0Ag%20%26%20h%20%26%20i%20%26%20tz%20%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%20%5Ctimes%20%5Cbegin%7Bpmatrix%7Dx%20%5C%5C%0Ay%20%5C%5C%0Az%20%5C%5C%201%0A%5Cend%7Bpmatrix%7D%20%3D%20%5Cbegin%7Bpmatrix%7D%0Aax%20%2B%20by%20%2B%20cz%20%2Btx%20%5C%5C%0Adx%20%2B%20ey%20%2B%20fz%20%2B%20ty%20%5C%5C%0Agx%20%2B%20hy%20%2B%20iz%20%2B%20tz%20%5C%5C%0A0%20%2B%200%20%2B%200%20%2B%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>转换后的向量的每一个分量都实现了<code>ax + by + cz + 常数</code>的格式，也就是说，向量可以通过乘以一个矩阵实现平移操作。</p>
+<h2 data-id="heading-6">变换矩阵的推导</h2>
+<h3 data-id="heading-7">变换矩阵的求解思路</h3>
+<p>首先我们要知道，对物体（顶点）做平移、旋转、缩放的变换操作相当于对原来的坐标系做平移、旋转、缩放变换，得到一个新坐标系。了解了这一点，我们就可以学习一种求解变换矩阵的简单方式：</p>
+<ul>
+<li>首先求出新坐标系的基向量 U 在原坐标系下的表示 U’，其中U =(Ux, Uy, Uz)， U' = (Ux', Uy', Uz')。
+<ul>
+<li>Ux：X轴基向量，由三个分量构成，
+<ul>
+<li>Uxx, X轴分量。</li>
+<li>Uxy, Y轴分量。</li>
+<li>Uxz，Z轴分量。</li>
+</ul>
+</li>
+<li>Uy：Y轴基向量，由三个坐标轴分量组成
+<ul>
+<li>Uyx：X轴分量。</li>
+<li>Uyy：Y轴分量。</li>
+<li>Uyz：Z轴分量。</li>
+</ul>
+</li>
+<li>Uz：Z轴基向量，由三个坐标轴分量组成
+<ul>
+<li>Uzx：X轴分量。</li>
+<li>Uzy：Y轴分量。</li>
+<li>Uzz：Z轴分量。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>基向量是指坐标系中各个坐标轴正方向的单位向量，假设 Ux 代表 X 轴的单位向量，那么 Ux = (1, 0, 0)，同理， Uy = (0, 1, 0)，Uz = (0, 0, 1)。</p>
+</blockquote>
+<ul>
+<li>其次求出新坐标系的坐标原点O(Ox, Oy, Oz)在原坐标系下的坐标O1（Ox1, Oy1, Oz1）</li>
+</ul>
+<blockquote>
+<p>基向量是坐标系变换的基础，我们求解坐标变换矩阵关键就是要找到原坐标系的基向量在新坐标系中的表示。</p>
+</blockquote>
+<ul>
+<li>最后，将上面求出的各个值代入下面的矩阵框架：</li>
+</ul>
+<p><img alt="\begin{pmatrix}
+U_{xx} & U_{yx} & U_{zx} & O_{x1}\\
+U_{xy} & U_{yy} & U_{zy} & O_{y1}\\
+U_{xz} & U_{yz} & U_{zz} & O_{z1}\\
+0 & 0 & 0 & 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0AU_%7Bxx%7D%20%26%20U_%7Byx%7D%20%26%20U_%7Bzx%7D%20%26%20O_%7Bx1%7D%5C%5C%0AU_%7Bxy%7D%20%26%20U_%7Byy%7D%20%26%20U_%7Bzy%7D%20%26%20O_%7By1%7D%5C%5C%0AU_%7Bxz%7D%20%26%20U_%7Byz%7D%20%26%20U_%7Bzz%7D%20%26%20O_%7Bz1%7D%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>这是一个简单易于理解的求解思路，掌握了这个思路，不管进行什么样的变换，我们都能很快地求出来变换矩阵，只需要找到这些值，然后将其代入<code>矩阵框架</code>就行啦。</p>
+<p>下面是一个坐标系变换的例子，坐标系 oxyz 绕 Z 轴旋转 β 角度后形成了新坐标系 ox'y'z'：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a6a27af075ce0~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>大家一定要分清，新坐标系是 <code>ox'y'z'</code>，原坐标系是 <code>oxyz</code>，新坐标系的<code>基向量</code>在原坐标系下的表示我们利用三角函数运算即可求出，如上图所示，所以按照求解思路的第一步，新坐标系的基向量在原坐标系表示为：</p>
+<p><img alt="U' = (Ux', Uy', Uz')" src="https://juejin.cn/equation?tex=U'%20%3D%20%20(Ux'%2C%20Uy'%2C%20Uz')" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Ux' = (cos\beta, sin\beta, 0)" src="https://juejin.cn/equation?tex=Ux'%20%3D%20(cos%5Cbeta%2C%20sin%5Cbeta%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uy' = (-sin\beta, cos\beta, 0)" src="https://juejin.cn/equation?tex=Uy'%20%3D%20(-sin%5Cbeta%2C%20cos%5Cbeta%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uz' = (0, 0, 1)" src="https://juejin.cn/equation?tex=Uz'%20%3D%20(0%2C%200%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p>原坐标系的坐标原点和新坐标系重合，所以新坐标系原点在原坐标系下的表示：</p>
+<p><img alt="O1 = (Ox1 ,Oy1, Oz1) = (0, 0, 0)" src="https://juejin.cn/equation?tex=O1%20%3D%20(Ox1%20%2COy1%2C%20Oz1)%20%3D%20(0%2C%200%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>代入通用矩阵框架后得出变换矩阵为：</p>
+<p><img alt="\begin{pmatrix}
+cos\beta & -sin\beta & 0 & O_{x1}\\
+sin\beta & cos\beta & 0 & O_{y1}\\
+0 & 0 & 1 & O_{z1}\\
+0 & 0 & 0 & 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0Acos%5Cbeta%20%26%20-sin%5Cbeta%20%26%200%20%26%20O_%7Bx1%7D%5C%5C%0Asin%5Cbeta%20%26%20cos%5Cbeta%20%26%200%20%26%20O_%7By1%7D%5C%5C%0A0%20%26%200%20%26%201%20%26%20O_%7Bz1%7D%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-8">平移变换</h3>
+<p>按照上面的矩阵变换求解思路来寻找平移矩阵：</p>
+<ul>
+<li>tx 代表沿着 X 轴方向的位移量。</li>
+<li>ty 代表沿着 Y 轴方向的位移量。</li>
+<li>tz 代表沿着 Z 轴方向的位移量。</li>
+</ul>
+<p><strong>1、求出原坐标系的基向量在新坐标系的表示。</strong></p>
+<p>由于没有进行旋转和缩放操作，所以新坐标系的基向量和原坐标系一样：</p>
+<p><img alt="Ux = (1, 0, 0)" src="https://juejin.cn/equation?tex=Ux%20%3D%20(1%2C%200%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uy = (0, 1, 0)" src="https://juejin.cn/equation?tex=Uy%20%3D%20(0%2C%201%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uz = (0, 0, 1)" src="https://juejin.cn/equation?tex=Uz%20%3D%20(0%2C%200%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>2、新坐标系坐标原点的坐标：</strong></p>
+<p><img alt="Ox1 = Ox + t_x = t_x" src="https://juejin.cn/equation?tex=Ox1%20%3D%20Ox%20%2B%20t_x%20%3D%20t_x" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Oy1 = Oy + t_y= t_y" src="https://juejin.cn/equation?tex=Oy1%20%3D%20Oy%20%2B%20t_y%3D%20t_y" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Oz1 = Oz + t_z = t_z" src="https://juejin.cn/equation?tex=Oz1%20%3D%20Oz%20%2B%20t_z%20%3D%20t_z" loading="lazy" class="medium-zoom-image"></p>
+<p>将这些值代入变换矩阵框架</p>
+<p><img alt="\begin{pmatrix}
+1 & 0 & 0 & tx \\
+0 & 1 & 0 & ty \\
+0 & 0 & 1 & tz \\
+0 & 0 & 0 & 1
+\end {pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0A1%20%26%200%20%26%200%20%26%20tx%20%5C%5C%0A0%20%26%201%20%26%200%20%26%20ty%20%5C%5C%0A0%20%26%200%20%26%201%20%26%20tz%20%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%20%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<h5 data-id="heading-9">算法实现</h5>
+<p>我们用 JavaScript 实现上述平移矩阵。</p>
+<ul>
+<li>输入参数
+<ul>
+<li>tx：沿 X 轴方向平移量。</li>
+<li>ty：沿 Y 轴方向平移量。</li>
+<li>tz：沿 Z 轴方向平移量。</li>
+</ul>
+</li>
+<li>输出结果
+<ul>
+<li>返回一个平移矩阵。</li>
+</ul>
+</li>
+</ul>
+<p>还记得吗？WebGL 矩阵是列主序的，每隔 4 个数代表一列。</p>
+<pre><code lang="ini" class="hljs language-ini">function translation(tx, ty, tz, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ // 第一列
+ target<span class="hljs-section">[0]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ // 第二列
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ // 第三列
+ target<span class="hljs-section">[8]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ // 第四列
+ target<span class="hljs-section">[12]</span> = tx<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = ty<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = tz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 0<span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>平移矩阵的生成算法很简单，按照数学关于矩阵的定义，在指定位置设置正确的值即可。</p>
+<p>之后我们就可以用该算法生成一个平移矩阵实现顶点的平移变换了。</p>
+<p><strong>平移矩阵的演示</strong></p>
+<p>我们绘制两个半径为 5 的球体，第一个球体在世界坐标系中心，第二个球体沿着 X 轴偏移 10 个单位，为了演示方便，我们先设置一个正射投影矩阵，左平面位于 -15 处，右平面位于 15 处，上平面位于 15 处，下平面位于 -15 处，远平面位于 1000，近平面位于 -1000。</p>
+<pre><code lang="ini" class="hljs language-ini">//获取视口宽高比
+var <span class="hljs-attr">aspect</span> = canvas.width / canvas.height<span class="hljs-comment">;</span>
+//获取正射投影观察箱
+var <span class="hljs-attr">perMatrix</span> = matrix.ortho(-aspect * <span class="hljs-number">15</span>, aspect * <span class="hljs-number">15</span>, -<span class="hljs-number">15</span>, <span class="hljs-number">15</span>, <span class="hljs-number">1000</span>, -<span class="hljs-number">1000</span>)<span class="hljs-comment">;</span>
+// 获取平移矩阵
+var <span class="hljs-attr">translationMatrix</span> = matrix.translation(<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+// 将矩阵传往 GPU。
+gl.uniformMatrix4fv(u_Matrix, translationMatrix)<span class="hljs-comment">;</span>
+</code></pre><pre><code class="hljs language-go" lang="go"><span class="hljs-number">1</span>、gl.uniformMatrix4fv该方法的作用是 JavaScript 向着色器程序中的<span class="hljs-string">`u_Matrix`</span>属性传递一个 <span class="hljs-number">4</span> 阶<span class="hljs-string">`列主序`</span>矩阵。 
+<span class="hljs-number">2</span>、ortho 方法是生成正射投影矩阵的方法，讲到投影变换时我们再对它的实现做讲解。
+</code></pre>
+<p>右侧球体是平移后的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a1c143421a4f3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，平移矩阵能够正常工作。</p>
+<h3 data-id="heading-10">缩放</h3>
+<p>缩放是将组成物体的各个顶点沿着对应坐标轴缩小或者放大，一种方法是：使用顶点向量乘以缩放向量即可实现。请注意数学领域向量和向量只有点乘和叉乘，并没有一种运算可以实现向量与向量各个分量相乘得到一个新的向量。
+不过在上一节我们使用 JavaScript 实现了这样一个算法，在这里就可以用到了：</p>
+<pre><code lang="ini" class="hljs language-ini">Vector3 <span class="hljs-attr">vec</span> = new Vector3(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+Vector3 <span class="hljs-attr">scale</span> = new Vector3(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+<span class="hljs-attr">vec</span> = vec.multiply(scale)<span class="hljs-comment">;</span>
+</code></pre><p><img alt="P \times S = (x, y, z) \times (2, 2, 1) = (2x, 2y, z, 1)" src="https://juejin.cn/equation?tex=P%20%5Ctimes%20S%20%3D%20(x%2C%20y%2C%20z)%20%5Ctimes%20(2%2C%202%2C%201)%20%3D%20(2x%2C%202y%2C%20z%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p>但是这里我们要实现的是通过向量和矩阵相乘的方式来实现。</p>
+<p>我们要构建一个缩放矩阵，缩放矩阵也比较简单，按照上面的求解思路：</p>
+<p><strong>1、新坐标系基向量在原坐标系下的表示：</strong></p>
+<p>沿着 X 轴缩放 sx 倍，相当于将原来的基向量放大了 sx 倍，所以新坐标系下一个单位的长度相当于原来坐标系下的 sx 个长度，以此类推，我们很容易地推导出 Y 轴和 Z 轴的基向量</p>
+<p><img alt="Ux = (sx, 0, 0)" src="https://juejin.cn/equation?tex=Ux%20%3D%20(sx%2C%200%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uy = (0, sy, 0)" src="https://juejin.cn/equation?tex=Uy%20%3D%20(0%2C%20sy%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="Uz = (0, 0, sz)" src="https://juejin.cn/equation?tex=Uz%20%3D%20(0%2C%200%2C%20sz)" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>2、原坐标系原点在新坐标系下的坐标：</strong></p>
+<p>由于缩放操作没有改变原点位置，所以，原点坐标在新坐标系下仍然是（0，0，0）。</p>
+<p><img alt="O1 = (0, 0, 0)" src="https://juejin.cn/equation?tex=O1%20%3D%20(0%2C%200%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>将这些值代入变换矩阵框架，可以得出：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a3da75f85ba1b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>上面这个图就是一个典型的缩放矩阵：</p>
+<ul>
+<li>sx：沿着 X 轴方向的缩放比例</li>
+<li>sy：沿着 Y 轴方向的缩放比例</li>
+<li>sz：沿着 Z 轴方向的缩放比例</li>
+</ul>
+<h4 data-id="heading-11">缩放矩阵算法实现：</h4>
+<pre><code lang="ini" class="hljs language-ini">function scale(sx, sy, sz, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ 
+ // 第一列
+ target<span class="hljs-section">[0]</span> = sx<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ 
+ // 第二列
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = sy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ 
+ // 第三列
+ target<span class="hljs-section">[8]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = sz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ 
+ // 第四列
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>调用该方法需要指定三个方向的缩放比例，但是有时我们可能只缩放某个方向，所以需要再衍生三个缩放函数</p>
+<ul>
+<li>沿 X 轴缩放矩阵</li>
+<li>沿 Y 轴缩放矩阵</li>
+<li>沿 Z 轴缩放矩阵</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss">function <span class="hljs-built_in">scaleX</span>(sx){
+ return <span class="hljs-built_in">scale</span>(sx, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+}
+function <span class="hljs-built_in">scaleY</span>(sy){
+ return <span class="hljs-built_in">scale</span>(<span class="hljs-number">1</span>, sy, <span class="hljs-number">1</span>);
+}
+function <span class="hljs-built_in">scaleZ</span>(sz){
+ return <span class="hljs-built_in">scale</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, sz);
+}
+</code></pre><h3 data-id="heading-12">旋转</h3>
+<p>相比平移和缩放，旋转矩阵相对复杂一些，我们从 2D 平面上一个顶点的旋转说起。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a3f4f493efad8~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>点 P(x, y) 旋转 β 角度后，得到一个新的顶点 P1(x1, y1) ， P1 和 P 之间的坐标关系：</p>
+<p><strong>P 点坐标：</strong></p>
+<p><img alt="x = r \times cos\alpha" src="https://juejin.cn/equation?tex=x%20%3D%20r%20%5Ctimes%20cos%5Calpha" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="y = r \times sin\alpha" src="https://juejin.cn/equation?tex=y%20%3D%20r%20%5Ctimes%20sin%5Calpha" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>旋转后的 P1 点坐标：</strong></p>
+<p><img alt="x1 = r \times cos(\alpha + \beta) = r \times cos\alpha cos\beta - r \times sin\alpha sin\beta" src="https://juejin.cn/equation?tex=x1%20%3D%20r%20%5Ctimes%20cos(%5Calpha%20%2B%20%5Cbeta)%20%3D%20r%20%5Ctimes%20cos%5Calpha%20%20cos%5Cbeta%20-%20r%20%5Ctimes%20sin%5Calpha%20sin%5Cbeta" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="y1 = r \times sin(\alpha + \beta) = r \times cos\alpha sin\beta + r \times sin\alpha cos\beta" src="https://juejin.cn/equation?tex=y1%20%3D%20r%20%5Ctimes%20sin(%5Calpha%20%2B%20%5Cbeta)%20%3D%20r%20%5Ctimes%20cos%5Calpha%20sin%5Cbeta%20%2B%20r%20%5Ctimes%20sin%5Calpha%20cos%5Cbeta" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>将 P 点坐标带入 P1点可以得到：</strong></p>
+<p><img alt="x1 = xcos\beta - ysin\beta" src="https://juejin.cn/equation?tex=x1%20%3D%20xcos%5Cbeta%20-%20ysin%5Cbeta" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="y1 = xsin\beta + ycos\beta" src="https://juejin.cn/equation?tex=y1%20%3D%20xsin%5Cbeta%20%2B%20ycos%5Cbeta" loading="lazy" class="medium-zoom-image"></p>
+<p>我们使用齐次坐标和矩阵表示：</p>
+<figure><img alt="P1 = 
+\begin{pmatrix}
+cos\beta & -sin\beta & 0 \\\
+sin\beta & cos\beta & 0 \\\
+0 & 0 & 1
+\end{pmatrix}
+ \times \begin{pmatrix}
+x \\ y \\ 1
+\end{pmatrix}
+=\begin{pmatrix}
+xcos\beta - ysin\beta \\ xsin\beta + ycos\beta \\ 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=P1%20%3D%20%0A%5Cbegin%7Bpmatrix%7D%0Acos%5Cbeta%20%26%20-sin%5Cbeta%20%26%200%20%5C%5C%5C%0Asin%5Cbeta%20%26%20cos%5Cbeta%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%20%5Ctimes%20%5Cbegin%7Bpmatrix%7D%0Ax%20%5C%5C%20y%20%5C%5C%201%0A%5Cend%7Bpmatrix%7D%0A%3D%5Cbegin%7Bpmatrix%7D%0Axcos%5Cbeta%20-%20ysin%5Cbeta%20%5C%5C%20xsin%5Cbeta%20%2B%20ycos%5Cbeta%20%5C%5C%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>扩展到 3D 空间，我们同样能推导出下面三种旋转矩阵。</p>
+<h4 data-id="heading-13">绕 X 轴旋转</h4>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a6abab10b4063~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>JavaScript 的实现，相信大家已经熟记于心了，我们只需要在矩阵的各个位置指定对应数字即可。</p>
+<pre><code lang="ini" class="hljs language-ini">function rotationX(angle, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">sin</span> = Math.sin(angle)<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">cos</span> = Math.cos(angle)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[0]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = cos<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[8]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = -sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = cos<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+
+ return target<span class="hljs-comment">;</span>
+ 
+}
+</code></pre><blockquote>
+<p>只要你理解了矩阵的运算规则，并推导出变换矩阵，之后只需将各个位置的元素赋值到一个类型化数组中即可。</p>
+</blockquote>
+<h4 data-id="heading-14">绕 Y 轴旋转</h4>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20191141684bb58b07334c9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>算法和 X 轴旋转极其相似，就不在这里写了，具体实现请看<a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Futils%2Fwebgl-matrix.js" title="https://github.com/lucefer/webgl/blob/master/utils/webgl-matrix.js" ref="nofollow noopener noreferrer">这里</a>。</p>
+<h4 data-id="heading-15">绕 Z 轴旋转</h4>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181024166a6ac18384889f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>具体实现请看<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">这里</a>。</p>
+<p>请注意：以上每一种旋转都是单一旋转，但往往我们需要既沿 X 轴旋转，又要沿 Y 轴旋转，这种情况，我们只需要将旋转矩阵相乘，得到的新的矩阵就是包含了这两种旋转的变换矩阵。</p>
+<h4 data-id="heading-16">绕任意轴旋转</h4>
+<p>上面三种是绕坐标轴进行旋转，但实际上我们往往需要绕空间中某一根轴旋转，绕任意轴旋转的矩阵求解比较复杂。</p>
+<blockquote>
+<p>这里我们采用过原点的任意轴旋转，不考虑平移情况，如果是绕一个不过原点的任意轴旋转的话，我们可以利用一个旋转矩阵和一个平移矩阵来完成。</p>
+</blockquote>
+<p>我们看下如何推导，如下图所示：</p>
+<ul>
+<li>C：空间中一点。</li>
+<li>A：坐标原点。</li>
+<li>向量<img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image">：旋转轴单位向量 。</li>
+</ul>
+<p>点 C 旋转 β 角之后，来到 C' 点。</p>
+<p>假设这个变换矩阵为 M，那么 M 和 角度 β以及旋转轴 <img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image"> 有关，</p>
+<p><img alt="\vec{M} = (β, \vec{AF})" src="https://juejin.cn/equation?tex=%5Cvec%7BM%7D%20%3D%20(%CE%B2%2C%20%5Cvec%7BAF%7D)" loading="lazy" class="medium-zoom-image"></p>
+<p>如下图所示：
+</p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181025166a969395da019a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们现在需要求得如何用点C、 旋转角β以及旋转轴 <img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image"> 表示 C'。</p>
+<h5 data-id="heading-17">求解步骤</h5>
+<ul>
+<li>首先，求出<img alt="\vec{AC}" src="https://juejin.cn/equation?tex=%5Cvec%7BAC%7D" loading="lazy" class="medium-zoom-image">在旋转轴<img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image">上的分量<img alt="\vec{AB}" src="https://juejin.cn/equation?tex=%5Cvec%7BAB%7D" loading="lazy" class="medium-zoom-image">，同时向量<img alt="\vec{BC}" src="https://juejin.cn/equation?tex=%5Cvec%7BBC%7D" loading="lazy" class="medium-zoom-image">垂直于 <img alt="\vec{AB}" src="https://juejin.cn/equation?tex=%5Cvec%7BAB%7D" loading="lazy" class="medium-zoom-image">，</li>
+<li>接着根据<img alt="\vec{BZ'}" src="https://juejin.cn/equation?tex=%5Cvec%7BBZ'%7D" loading="lazy" class="medium-zoom-image"> 和旋转角度 β，求出 <img alt="\vec{B}C'" src="https://juejin.cn/equation?tex=%5Cvec%7BB%7DC'" loading="lazy" class="medium-zoom-image">，然后根据向量加法公式，求出 <img alt="\vec{AC'}" src="https://juejin.cn/equation?tex=%5Cvec%7BAC'%7D" loading="lazy" class="medium-zoom-image">，即 C' 转换后的坐标。</li>
+</ul>
+<p>用数学公式表示：</p>
+<p>1、向量<img alt="\vec{AC}" src="https://juejin.cn/equation?tex=%5Cvec%7BAC%7D" loading="lazy" class="medium-zoom-image">点乘<img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image">,求出向量<img alt="\vec{AB}" src="https://juejin.cn/equation?tex=%5Cvec%7BAB%7D" loading="lazy" class="medium-zoom-image"> 。</p>
+<p><img alt="\vec{AB} = (\vec{AC} \cdot \vec{AF}) \times \vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAB%7D%20%3D%20(%5Cvec%7BAC%7D%20%5Ccdot%20%5Cvec%7BAF%7D)%20%5Ctimes%20%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>2、求出<img alt="\vec{BC}" src="https://juejin.cn/equation?tex=%5Cvec%7BBC%7D" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="\vec{BC} = \vec{AC} - \vec{AB}" src="https://juejin.cn/equation?tex=%5Cvec%7BBC%7D%20%3D%20%5Cvec%7BAC%7D%20-%20%5Cvec%7BAB%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>3、通过向量<img alt="\vec{AF}" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D" loading="lazy" class="medium-zoom-image">叉乘<img alt="\vec{BC}" src="https://juejin.cn/equation?tex=%5Cvec%7BBC%7D" loading="lazy" class="medium-zoom-image"> 求得<img alt="\vec{BZ'}" src="https://juejin.cn/equation?tex=%5Cvec%7BBZ'%7D" loading="lazy" class="medium-zoom-image"></p>
+<figure><img alt="\begin{aligned}
+\vec{BZ'} &= \vec{AF} \times \vec{BC} \\\
+&=\vec{AF} \times \vec{AC} - \vec{AF} \times \vec{AB} \\\
+& = \vec{AF} \times \vec{AC} - 0 \\\
+& = \vec{AF} \times \vec{AC}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cvec%7BBZ'%7D%20%26%3D%20%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BBC%7D%20%5C%5C%5C%0A%26%3D%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BAC%7D%20-%20%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BAB%7D%20%5C%5C%5C%0A%26%20%3D%20%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BAC%7D%20-%200%20%5C%5C%5C%0A%26%20%3D%20%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BAC%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>4、利用三角函数求出 <img alt="\vec{BC'}" src="https://juejin.cn/equation?tex=%5Cvec%7BBC'%7D" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="\vec{BC'} = \vec{BZ'} sin\beta + \vec{BC} cos\beta" src="https://juejin.cn/equation?tex=%5Cvec%7BBC'%7D%20%3D%20%5Cvec%7BBZ'%7D%20sin%5Cbeta%20%2B%20%5Cvec%7BBC%7D%20cos%5Cbeta" loading="lazy" class="medium-zoom-image"></p>
+<p>5、利用向量加法求出 <img alt="\vec{AC'}" src="https://juejin.cn/equation?tex=%5Cvec%7BAC'%7D" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="\vec{AC'} = \vec{AB} + \vec{BC'}" src="https://juejin.cn/equation?tex=%5Cvec%7BAC'%7D%20%3D%20%5Cvec%7BAB%7D%20%2B%20%5Cvec%7BBC'%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>6、将1-4步代入第5步，得出：</p>
+<figure><img alt="\vec{AC'} = (\vec{AC} \cdot \vec{AF}) \times \vec{AF} + (\vec{AF} \times \vec{AC}) sin\beta + (\vec{AC} - (\vec{AC} \cdot \vec{AF}) \times \vec{AF}) cos\beta" src="https://juejin.cn/equation?tex=%5Cvec%7BAC'%7D%20%3D%20(%5Cvec%7BAC%7D%20%5Ccdot%20%5Cvec%7BAF%7D)%20%5Ctimes%20%5Cvec%7BAF%7D%20%2B%20(%5Cvec%7BAF%7D%20%5Ctimes%20%5Cvec%7BAC%7D)%20sin%5Cbeta%20%2B%20(%5Cvec%7BAC%7D%20-%20(%5Cvec%7BAC%7D%20%5Ccdot%20%5Cvec%7BAF%7D)%20%5Ctimes%20%5Cvec%7BAF%7D)%20cos%5Cbeta" loading="lazy" class="medium-zoom-image"></figure>
+<p>假设旋转轴向量表示为：</p>
+<p><img alt="\vec{AF} = (t_x, t_y, t_z)" src="https://juejin.cn/equation?tex=%5Cvec%7BAF%7D%20%3D%20(t_x%2C%20t_y%2C%20t_z)" loading="lazy" class="medium-zoom-image"></p>
+<p>新坐标系基向量U(Ux,Uy,Uz)在原坐标系中的坐标位置求解如下：</p>
+<figure><img alt="\begin{aligned}
+Ux = (\begin{pmatrix}
+1 \\ 0 \\ 0 
+\end{pmatrix} -
+（\begin{pmatrix}
+1 \\ 0 \\ 0 
+\end{pmatrix} \cdot \begin{pmatrix}
+t_x \\t_y \\t_z
+\end{pmatrix}) \times \begin{pmatrix}t_x \\t_y \\t_z\end{pmatrix})cos\beta + （
+\begin{pmatrix} t_x \\ t_y \\ t_z \end{pmatrix}\times \begin{pmatrix}
+1 \\ 0 \\0
+\end{pmatrix} ）\times sin\beta + 
+(\begin{pmatrix}
+1 \\ 0 \\ 0
+\end{pmatrix}
+\cdot 
+\begin{pmatrix}
+t_x \\ t_y \\t_z
+\end{pmatrix}) \times 
+\begin{pmatrix}
+t_x \\ t_y \\ t_z
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AUx%20%3D%20%20(%5Cbegin%7Bpmatrix%7D%0A1%20%5C%5C%200%20%5C%5C%200%20%0A%5Cend%7Bpmatrix%7D%20-%0A%EF%BC%88%5Cbegin%7Bpmatrix%7D%0A1%20%5C%5C%200%20%5C%5C%200%20%0A%5Cend%7Bpmatrix%7D%20%5Ccdot%20%5Cbegin%7Bpmatrix%7D%0At_x%20%5C%5Ct_y%20%5C%5Ct_z%0A%5Cend%7Bpmatrix%7D)%20%5Ctimes%20%5Cbegin%7Bpmatrix%7Dt_x%20%5C%5Ct_y%20%5C%5Ct_z%5Cend%7Bpmatrix%7D)cos%5Cbeta%20%20%2B%20%EF%BC%88%0A%5Cbegin%7Bpmatrix%7D%20t_x%20%5C%5C%20t_y%20%5C%5C%20t_z%20%5Cend%7Bpmatrix%7D%5Ctimes%20%5Cbegin%7Bpmatrix%7D%0A1%20%5C%5C%200%20%5C%5C0%0A%5Cend%7Bpmatrix%7D%20%EF%BC%89%5Ctimes%20sin%5Cbeta%20%2B%20%0A(%5Cbegin%7Bpmatrix%7D%0A1%20%5C%5C%200%20%5C%5C%200%0A%5Cend%7Bpmatrix%7D%0A%5Ccdot%20%0A%5Cbegin%7Bpmatrix%7D%0At_x%20%5C%5C%20t_y%20%5C%5Ct_z%0A%5Cend%7Bpmatrix%7D)%20%5Ctimes%20%0A%5Cbegin%7Bpmatrix%7D%0At_x%20%5C%5C%20t_y%20%5C%5C%20t_z%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>利用向量点乘、叉乘规则最终推导出：</p>
+<figure><img alt="Ux = \begin{pmatrix}
+t_x^2 (1-cos\beta) + cos\beta \\\
+t_xt_y(1-cos\beta) + t_zsin\beta \\\
+t_xt_z(1-cos\beta) - t_ysin\beta
+\end{pmatrix}" src="https://juejin.cn/equation?tex=Ux%20%3D%20%5Cbegin%7Bpmatrix%7D%0At_x%5E2%20%20(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%20%5C%5C%5C%0At_xt_y(1-cos%5Cbeta)%20%2B%20t_zsin%5Cbeta%20%5C%5C%5C%0At_xt_z(1-cos%5Cbeta)%20-%20t_ysin%5Cbeta%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>同理，将Y 轴基向量 (0, 1, 0) 代入上面公式，推导可得：</p>
+<figure><img alt="Uy = \begin{pmatrix}
+t_xt_y (1-cos\beta) - t_zsin\beta \\\
+t_y^2(1-cos\beta) + cos\beta \\\
+t_yt_z(1-cos\beta) + t_xsin\beta
+\end{pmatrix}" src="https://juejin.cn/equation?tex=Uy%20%3D%20%5Cbegin%7Bpmatrix%7D%0At_xt_y%20%20(1-cos%5Cbeta)%20-%20t_zsin%5Cbeta%20%5C%5C%5C%0At_y%5E2(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%20%5C%5C%5C%0At_yt_z(1-cos%5Cbeta)%20%2B%20t_xsin%5Cbeta%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Uz = \begin{pmatrix}
+t_xt_z (1-cos\beta) + t_ysin\beta \\\
+t_yt_z(1-cos\beta) - t_xsin\beta \\\
+t_z^2(1-cos\beta) + cos\beta
+\end{pmatrix}" src="https://juejin.cn/equation?tex=Uz%20%3D%20%5Cbegin%7Bpmatrix%7D%0At_xt_z%20%20(1-cos%5Cbeta)%20%2B%20t_ysin%5Cbeta%20%5C%5C%5C%0At_yt_z(1-cos%5Cbeta)%20-%20t_xsin%5Cbeta%20%5C%5C%5C%0At_z%5E2(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>这样我们就求出了新坐标系的基向量在原坐标系的表示。</p>
+<p>接下来，我们找出新坐标系的原点在原坐标系下的坐标，因为是绕原点旋转，所以坐标不变，仍然是（0，0，0）。将这些值代入矩阵框架，得出绕任意旋转轴的变换矩阵：</p>
+<figure><img alt="\begin{pmatrix}
+t_x^2 (1-cos\beta) + cos\beta &
+t_xt_y(1-cos\beta) - t_zsin\beta &
+t_xt_z(1-cos\beta) + t_ysin\beta & 0 \\\
+t_xt_y (1-cos\beta) + t_zsin\beta &
+t_y^2(1-cos\beta) + cos\beta &
+t_yt_z(1-cos\beta) - t_xsin\beta & 0 \\\
+t_xt_z (1-cos\beta) - t_ysin\beta &
+t_yt_z(1-cos\beta) + t_xsin\beta &
+t_z^2(1-cos\beta) + cos\beta & 0 \\\
+0 & 0 & 0 & 1
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0At_x%5E2%20%20(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%20%26%0At_xt_y(1-cos%5Cbeta)%20-%20t_zsin%5Cbeta%20%26%0At_xt_z(1-cos%5Cbeta)%20%2B%20t_ysin%5Cbeta%20%26%200%20%5C%5C%5C%0At_xt_y%20%20(1-cos%5Cbeta)%20%2B%20t_zsin%5Cbeta%20%26%0At_y%5E2(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%20%26%0At_yt_z(1-cos%5Cbeta)%20-%20t_xsin%5Cbeta%20%26%200%20%5C%5C%5C%0At_xt_z%20%20(1-cos%5Cbeta)%20-%20t_ysin%5Cbeta%20%26%0At_yt_z(1-cos%5Cbeta)%20%2B%20t_xsin%5Cbeta%20%26%0At_z%5E2(1-cos%5Cbeta)%20%2B%20cos%5Cbeta%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>有了变换矩阵，那么我们就可以实现JavaScript的任意轴旋转矩阵了：</p>
+<pre><code lang="ini" class="hljs language-ini">function axisRotation(axis, angle, target){
+ var <span class="hljs-attr">x</span> = axis.x<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = axis.y<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">z</span> = axis.z<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">l</span> = Math.sqrt(x * x + y * y + z * z)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">x</span> = x / l<span class="hljs-comment">;</span>
+ <span class="hljs-attr">y</span> = y/ l<span class="hljs-comment">;</span>
+ <span class="hljs-attr">z</span> = z /l<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">xx</span> = x * x<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">yy</span> = y * y<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">zz</span> = z * z<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cos</span> = Math.cos(angle)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">sin</span> = Math.sin(angle)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">oneMCos</span> = <span class="hljs-number">1</span> - cos<span class="hljs-comment">;</span>
+ 
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[0]</span> = xx + (1 - xx) * cos<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = x * y * oneMCos + z * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = x * z * oneMcos - y * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[4]</span> = x * y * oneMCos - z * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = yy + (1 - yy) * cos<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = y * z * oneMCos + x * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[8]</span> = x * z * oneMCos + y * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = y * z * oneMCos - x * sin<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = zz + (1 - zz) * cos<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>以上就是绕任意轴进行旋转的矩阵。</p>
+<h5 data-id="heading-18">任意轴旋转演示</h5>
+<p>我们利用上面的算法演示一下，使用四根旋转轴：</p>
+<pre><code lang="yaml" class="hljs language-yaml"><span class="hljs-string">//</span> <span class="hljs-string">中间立方体绕</span> <span class="hljs-string">X</span> <span class="hljs-string">轴旋转。</span>
+<span class="hljs-string">var</span> <span class="hljs-string">axisX</span> <span class="hljs-string">=</span> {<span class="hljs-attr">x:</span> <span class="hljs-number">1</span>, <span class="hljs-attr">y:</span> <span class="hljs-number">0</span>, <span class="hljs-attr">z:</span> <span class="hljs-number">0</span>}
+<span class="hljs-string">//右边立方体绕</span> <span class="hljs-string">Y</span> <span class="hljs-string">轴旋转</span>
+<span class="hljs-string">var</span> <span class="hljs-string">axisY</span> <span class="hljs-string">=</span> {<span class="hljs-attr">x:</span> <span class="hljs-number">0</span>, <span class="hljs-attr">y:</span> <span class="hljs-number">1</span>, <span class="hljs-attr">z:</span> <span class="hljs-number">0</span>}
+<span class="hljs-string">//</span> <span class="hljs-string">左边立方体绕</span> <span class="hljs-string">Z</span> <span class="hljs-string">轴旋转</span>
+<span class="hljs-string">var</span> <span class="hljs-string">axisZ</span> <span class="hljs-string">=</span> {<span class="hljs-attr">x:</span> <span class="hljs-number">0</span>, <span class="hljs-attr">y:</span> <span class="hljs-number">0</span>, <span class="hljs-attr">z:</span> <span class="hljs-number">1</span>}
+<span class="hljs-string">//</span> <span class="hljs-string">上边立方体绕对角线轴旋转。</span>
+<span class="hljs-string">var</span> <span class="hljs-string">axisXYZ</span> <span class="hljs-string">=</span> {<span class="hljs-attr">x:</span> <span class="hljs-number">1</span>, <span class="hljs-attr">y:</span> <span class="hljs-number">1</span>, <span class="hljs-attr">z:</span> <span class="hljs-number">1</span>}
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181025166aaf1eaec1aec8~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>绕任意轴旋转的推导比较复杂，涉及到立体几何以向量点乘叉乘等运算，不过它的使用方法还是很简单的。</p>
+<h2 data-id="heading-19">回顾</h2>
+<p>本节主要讲解坐标系变换过程中涉及到的基本变换的原理与实现，涉及几何和三角函数的运算比较多，大家看一遍可能不能明白，不妨多看几遍，拿纸笔写写画画，很快就会豁然开朗。</p>
+<p>虽然说这些 API 只要能看懂、会用就足够了，没有必要去掌握推导过程，但我仍然建议大家尝试推导一遍，掌握推导过程对巩固学过的数学知识很有帮助，也可以培养自己利用数学知识解决疑难问题的能力。</p>
+<p>下一节我们学习如何利用这些基本变换实现各个坐标系之间的变换。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

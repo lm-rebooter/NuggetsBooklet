@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h2 data-id="heading-0">高级应用 --- 魔法 Shader：火焰效果的原理与实现。</h2>
+<p>前面的一系列学习中，我们用到的着色器（Shader） 程序，仅仅是一些简单的着色器使用。但其实，着色器程序是实现各种特效的秘密武器，那么本节我 将带领大家学习一下 Shader 的深入使用。</p>
+<h3 data-id="heading-1">片元着色器</h3>
+<p>很多特效事实上都是基于片元着色器来实现，所以我们着重讲解一下片元着色器。</p>
+<p>接下来我们先了解一下片元着色器中的常用内置变量以及内置函数。</p>
+<h4 data-id="heading-2">内置变量</h4>
+<ul>
+<li>gl_FragColor</li>
+<li>gl_FragCoord</li>
+</ul>
+<h4 data-id="heading-3">内置函数</h4>
+<p>着色器中有很多内置数学和几何函数，有一些是很常见且易于理解的，譬如如下几种：</p>
+<ul>
+<li>abs(x)
+<ul>
+<li>返回绝对值。</li>
+</ul>
+</li>
+<li>sin(x)
+<ul>
+<li>返回对应弧度值的正弦值。</li>
+</ul>
+</li>
+<li>cos(x)
+<ul>
+<li>返回对应弧度值的余弦值。</li>
+</ul>
+</li>
+<li>mod(x, y)
+<ul>
+<li>求模计算，返回 x - y * floor(x / y)，其实就是我们小学学的取余数。</li>
+<li>比如：mod(5, 10)，返回的模是 5。</li>
+</ul>
+</li>
+<li>min
+<ul>
+<li>返回两个数之间的最小值。</li>
+</ul>
+</li>
+<li>max
+<ul>
+<li>返回两个数之前的最大值</li>
+</ul>
+</li>
+</ul>
+<p>但是还有一些很常用但是我们不太熟悉的函数，比如下面的这些函数：</p>
+<ul>
+<li>fract
+<ul>
+<li>返回一个数的小数部分。</li>
+</ul>
+</li>
+<li>mix
+<ul>
+<li>接收三个参数：x，y，a</li>
+<li>返回（</li>
+</ul>
+</li>
+<li>smoothstep(edge0, edge1, x)
+<ul>
+<li>这个函数也很常用，主要用于平滑取值，当 x 小于edge0 时，返回 edge0，当 x 大于edge1 时，返回 edge1。当 x 介于 edge0 和 edge1 时，返回该区间内的平滑过渡值，并非线性值哦。</li>
+</ul>
+</li>
+</ul>
+<h3 data-id="heading-4">着色器的优势</h3>
+<p>有些同学见到这些函数可能会有想法了：</p>
+<blockquote><p> 这些类型的函数计算我们完全可以在应用层面完成，为什么着色器语言还要再设计这么一套函数呢？
+</p></blockquote><p>这个问题其实比较关键，是图形学编程中性能优化的一个参考基点。</p>
+<p>这里给大家普及下 GPU 与 CPU 的区别。</p>
+<p>首先，着色器程序运行在 GPU 上。</p>
+<p>我想大家都知道 GPU 擅长图形运算，但不知大家有没有想过，为什么是 GPU 擅长而不是 CPU 呢？</p>
+<p>原理就在于 GPU 的硬件设计，GPU 内部存在数以千计的微处理器，这些微处理器可以并行地同时执行一类相似的任务。也就是说，如果我们要对屏幕图像进行像素处理，让图像的每一个像素都变成红色，每一个像素的处理可以看成一个微任务，微处理器会并行执行这些任务，如果是 CPU 的话，恐怕要针对每一个像素的任务进行串行处理，显而易见，在重复简单任务的执行效率上，GPU 更胜一筹。</p>
+<p>常用的一些数学函数我们就先介绍到这里，接下来，我们使用这些函数做一些效果，在实践中加深对这些函数的理解。</p>
+<h3 data-id="heading-5">对角线的画法</h3>
+<p>先来实现一个特别简单的效果，我们使用着色器程序在屏幕上绘制一个对角线。</p>
+<h4 data-id="heading-6">原理</h4>
+<p>实现这个效果有很多种方式，本节主要使用着色器程序实现。
+原理很简单。</p>
+<ul>
+<li>首先，在片元着色器中，获取每一个像素在屏幕上的坐标。利用 gl_FragCoord 内置变量来获取。</li>
+<li>判断 X 轴坐标。</li>
+<li>使用 mix 线性函数，求得 Y 轴坐标。</li>
+<li>将符合 X、Y 轴坐标的像素，涂抹成待绘制的线条颜色。</li>
+</ul>
+<h4 data-id="heading-7">实现</h4>
+<ul>
+<li>顶点着色器代码</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+attribute vec3 a_Position<span class="hljs-comment">;</span>
+
+void main () {
+ <span class="hljs-attr">gl_Position</span> = vec4(a_Position, <span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+}
+</code></pre><ul>
+<li>片元着色器代码</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+uniform vec2 u_Screen<span class="hljs-comment">;</span>
+
+void main() {
+ float <span class="hljs-attr">y</span> = mix(<span class="hljs-number">0</span>., u_Screen.y, gl_FragCoord.x/u_Screen.x)<span class="hljs-comment">;</span>
+ if(abs(y - gl_FragCoord.y) <= 1.){
+ <span class="hljs-attr">gl_FragColor</span> = vec4(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ } else {
+ <span class="hljs-attr">gl_FragColor</span> = vec4(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ }
+ return<span class="hljs-comment">;</span>
+}
+</code></pre><p>实现效果如下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019111016e54c9a1a80e414~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，画一个对角线，我们主要使用了 gl_FragCoord 内置变量，该变量可以让我们在片元着色器中拿到当前像素在绘制屏幕的坐标值。</p>
+<p>然后我们通过线性计算 mix，计算出对角线上的 Y 轴坐标，并将处于对角线上点的颜色设置成我们需要的颜色。</p>
+<h3 data-id="heading-8">抛物线的画法</h3>
+<p>接下来，我们提升下难度，看一下抛物线的绘制方法。</p>
+<h4 data-id="heading-9">原理</h4>
+<p>利用抛物线公式:</p>
+<p><img alt="y = ax^2 + bx + c" src="https://juejin.cn/equation?tex=y%20%3D%20ax%5E2%20%2B%20bx%20%2B%20c" loading="lazy" class="medium-zoom-image"></p>
+<p>将坐标符合以上抛物线公式求得的点，渲染成我们需要的颜色，即可绘制出一条抛物线来。</p>
+<h4 data-id="heading-10">实现</h4>
+<ul>
+<li>顶点着色器代码</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+attribute vec3 a_Position<span class="hljs-comment">;</span>
+
+void main () {
+ <span class="hljs-attr">gl_Position</span> = vec4(a_Position, <span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+}
+
+</code></pre><ul>
+<li>片元着色器代码</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss">precision highp <span class="hljs-attribute">float</span>;
+<span class="hljs-comment">// canvas 尺寸</span>
+uniform vec2 u_Screen;
+
+void <span class="hljs-selector-tag">main</span> () {
+ <span class="hljs-comment">// 求得符合抛物线公式的 Y 轴坐标。</span>
+ <span class="hljs-attribute">float</span> y = -<span class="hljs-number">6.0</span> * <span class="hljs-built_in">pow</span>((gl_FragCoord.x-u_Screen.x/<span class="hljs-number">2</span>.)/u_Screen<span class="hljs-selector-class">.x</span> ,<span class="hljs-number">2</span>.) + <span class="hljs-number">0.5</span>;
+ <span class="hljs-comment">// 将距离求得的 Y 轴坐标不超过 0.005 的点涂抹成我们需要的颜色，0.28 是抛物线和 X 轴的焦点，也就是说我们将 X 轴以上的抛物线部分绘制出来。</span>
+ <span class="hljs-built_in">if</span>(abs(gl_FragCoord.y / u_Screen.y - y) <=<span class="hljs-number">0.005</span> && <span class="hljs-built_in">abs</span>((gl_FragCoord.x-u_Screen.x/<span class="hljs-number">2</span>.)/u_Screen<span class="hljs-selector-class">.x</span>)<=<span class="hljs-number">0.28</span>){
+ gl_FragColor = <span class="hljs-built_in">vec4</span>(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>);
+ } else {
+ gl_FragColor = <span class="hljs-built_in">vec4</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>);
+ }
+ return;
+}
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019111116e593b76337eac8~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h3 data-id="heading-11">正弦波的画法</h3>
+<p>从上面大家可以看出，当我们想绘制一些曲线的时候，我们只需要找到对应的公式就可以了。</p>
+<p>接下来，我们再学习绘制一个动态曲线，正弦波。</p>
+<h4 data-id="heading-12">原理</h4>
+<ul>
+<li>首先，根据当前点的 X 轴坐标，算出对应 X 轴坐标的正弦值，以该正弦值作为 Y 轴坐标的参照。</li>
+<li>然后将当前点的 Y 轴坐标和第一步计算出来的正弦值作比较，相差不超过0.005 时，将该点渲染成期望的颜色。</li>
+<li>我们每次都往着色器中传递一个时间参数 u_Time，通过它让正弦波动起来。</li>
+</ul>
+<h4 data-id="heading-13">实现</h4>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+attribute vec3 a_Position<span class="hljs-comment">;</span>
+
+void main () {
+ <span class="hljs-attr">gl_Position</span> = vec4(a_Position, <span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+}
+</code></pre><ul>
+<li>片元着色器</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+uniform vec2 u_Screen<span class="hljs-comment">;</span>
+uniform float u_Time<span class="hljs-comment">;</span>
+const float <span class="hljs-attr">PI</span> = <span class="hljs-number">3.1415926</span><span class="hljs-comment">;</span>
+
+void main () {
+ float <span class="hljs-attr">x</span> = gl_FragCoord.x +(u_Screen.x / <span class="hljs-number">8</span>.) * u_Time<span class="hljs-comment">;</span>
+ float <span class="hljs-attr">y</span> = sin(<span class="hljs-number">8</span>.* PI * (x-u_Screen.x)/u_Screen.x)+ <span class="hljs-number">2</span>.<span class="hljs-comment">;</span>
+ 
+ if(abs(4. * gl_FragCoord.y / u_Screen.y - y) <=0.01 ){
+ <span class="hljs-attr">gl_FragColor</span> = vec4(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ } else {
+ <span class="hljs-attr">gl_FragColor</span> = vec4(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ }
+}
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019111116e599972435ed5b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>很简单有木有。</p>
+<h3 data-id="heading-14">火焰效果实现</h3>
+<p>最后我们综合运用以上的函数和内置变量，讲解一下火焰效果的实现。</p>
+<h4 data-id="heading-15">原理</h4>
+<ul>
+<li>首先根据当前点的 X 轴坐标，计算出符合火焰抛物线性质的 Y 轴坐标。</li>
+<li>将当前点的 Y 轴坐标和第一步计算出的 Y 轴坐标点作比较，如果这两个点的距离小于某个阈值，则将该点的颜色置为火焰颜色，为了做出一种平滑渐变的感觉，使用 smooth_step 计算火焰颜色。</li>
+<li>弱化绿色通道的颜色，使火焰颜色偏红。</li>
+</ul>
+<h4 data-id="heading-16">实现</h4>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">precision highp float<span class="hljs-comment">;</span>
+attribute vec3 a_Position<span class="hljs-comment">;</span>
+
+void main () {
+ <span class="hljs-attr">gl_Position</span> = vec4(a_Position, <span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+}
+</code></pre><ul>
+<li>片元着色器</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss">precision highp <span class="hljs-attribute">float</span>;
+uniform vec2 u_Screen;
+varying vec3 v_Position;
+uniform <span class="hljs-attribute">float</span> u_Time;
+const <span class="hljs-attribute">float</span> PI = <span class="hljs-number">3.1415926</span>;
+
+void <span class="hljs-selector-tag">main</span> () {
+ <span class="hljs-comment">// 将坐标系坐标范围约束在【-4，4】和【-5，3】之间。</span>
+ vec2 pos = ( gl_FragCoord.xy / u_Screen.xy )*<span class="hljs-number">8</span><span class="hljs-selector-class">.-vec2</span>(<span class="hljs-number">4</span>., <span class="hljs-number">5</span>.);
+ <span class="hljs-built_in">if</span>(pos.y>-<span class="hljs-number">5</span>.){
+ pos<span class="hljs-selector-class">.y</span> += <span class="hljs-number">0.1</span> * <span class="hljs-built_in">sin</span>(u_Time * <span class="hljs-number">3</span>.) + <span class="hljs-number">0.13</span> * <span class="hljs-built_in">cos</span>(u_Time * <span class="hljs-number">2</span>. + <span class="hljs-number">0.6</span>) + <span class="hljs-selector-class">.1</span> * <span class="hljs-built_in">sin</span>(u_Time * <span class="hljs-number">3</span>. + <span class="hljs-number">0.4</span>) + <span class="hljs-number">0.2</span> * <span class="hljs-built_in">fract</span>(sin(u_Time * <span class="hljs-number">400</span>.));
+ }
+ vec3 <span class="hljs-attribute">color</span> = <span class="hljs-built_in">vec3</span>(<span class="hljs-number">0</span>., <span class="hljs-number">0</span>., <span class="hljs-number">0.0</span>);
+ <span class="hljs-attribute">float</span> y = <span class="hljs-built_in">-pow</span>(pos.x, <span class="hljs-number">3.2</span>)/(<span class="hljs-number">0.008</span>) * <span class="hljs-number">3.3</span>;
+ <span class="hljs-comment">//计算当前点与抛物线点的距离，并缩小距离范围。</span>
+ <span class="hljs-attribute">float</span> dir = <span class="hljs-built_in">length</span>(pos-vec2(pos.x, y)) * <span class="hljs-built_in">sin</span>(<span class="hljs-number">0.3</span>);
+ <span class="hljs-built_in">if</span>(dir < <span class="hljs-number">0.7</span>){
+ <span class="hljs-attribute">color</span><span class="hljs-selector-class">.rg</span> += <span class="hljs-built_in">smoothstep</span>(<span class="hljs-number">0.0</span>,<span class="hljs-number">1</span>.,.<span class="hljs-number">75</span>-dir);
+ <span class="hljs-comment">//弱化绿色通道颜色</span>
+ <span class="hljs-attribute">color</span><span class="hljs-selector-class">.g</span> /=<span class="hljs-number">2.4</span>;
+ }
+ <span class="hljs-comment">//强化红色通道颜色。</span>
+ <span class="hljs-attribute">color</span> += <span class="hljs-built_in">pow</span>(color.r,<span class="hljs-number">1.1</span>);
+ gl_FragColor = <span class="hljs-built_in">vec4</span>(vec3(color) , <span class="hljs-number">1.0</span> );
+}
+</code></pre><p>最终效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019111116e59ba223e08828~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>注意：在用 GLSL 实现一些复杂效果的时候，需要有一定的耐心，去调配各种参数。</p>
+</blockquote>
+<h3 data-id="heading-17">总结</h3>
+<p>以上就是 GLSL 一些基本函数的使用，通过这些函数，我们可以实现很多特效。当然，这其中离不开数学公式，大家还是要多温习一下初中高中学过的数学函数，这样才更容易发挥想象力，实现各种各样的特效。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

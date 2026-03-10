@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 通用数学库的 JavaScript 实现。</h1>
+<p>上一节我们介绍了图形学涉及到的数学知识，并介绍了了它们的各种运算规则，掌握这些规则对我们开发 3D 应用有着至关重要的作用。本节我们看一下如何将这些运算规则表示出来。</p>
+<p>业界已经有一些有名的数学库，比如基于 JavaScript 的<code>Threejs</code>框架中就内置了 <code>matrix</code> 和 <code>vector</code> 的操作类，还有基于 C++ 语言进行实现的 <code>GLM</code>。</p>
+<p>由于我们是 WebGL 开发，所以我将带大家使用 JavaScript 实现这些数学算法。</p>
+<h2 data-id="heading-1">需要实现哪些功能？</h2>
+<p>那么，我们即将编写的数学库要能够实现哪些功能呢？</p>
+<p>上一节已经讲了，主要是<code>向量</code>和<code>矩阵</code>的表示、运算。</p>
+<p>在此罗列一下：</p>
+<ul>
+<li>向量
+<ul>
+<li>初始化向量</li>
+<li>归一化向量</li>
+<li>向量相加</li>
+<li>向量相减</li>
+<li>向量与标量相乘</li>
+<li>向量与标量相除</li>
+<li>向量与向量相乘</li>
+<li>点积</li>
+<li>叉积</li>
+</ul>
+</li>
+<li>矩阵
+<ul>
+<li>初始化矩阵</li>
+<li>创建单位矩阵</li>
+<li>矩阵与矩阵相乘</li>
+<li>矩阵相加</li>
+<li>矩阵相减</li>
+<li>求转置矩阵</li>
+<li>求逆矩阵</li>
+</ul>
+</li>
+</ul>
+<h2 data-id="heading-2">矩阵在 GLSL 中的存储特点。</h2>
+<p>在用 JavaScript 实现数学库之前，我们必须先想清楚如何使用开发出来的库。大家应该都知道，WebGL 应用中的数据一般是从 CPU 传入 GPU 的，语言层面从 JavaScript 传入 GLSL。假如我们要把在 JavaScript 中生成的矩阵传入到 GLSL 中，那么就得保证生成的矩阵能够被 GLSL 所理解，换句话说，JavaScript 矩阵和 GPU 中的矩阵要有相同的表示形式，避免不必要的转换过程。
+那么 GPU 中向量和矩阵是如何存储的呢？</p>
+<p>在前面章节的初级练习中，我们已经频繁接触了 GLSL 中的向量<code>vec</code>和矩阵<code>mat</code>，GLSL遵循的是线性代数的标准，也就是上一节我们所讲的内容，只是在存储方式上有所不同。</p>
+<h3 data-id="heading-3">行主序和列主序</h3>
+<p>存储顺序说明了线性代数中的矩阵如何在线性的内存数组中存储，按照存储方式分为行主序和列主序。</p>
+<p>行主序是按照行向量的方式组织矩阵。列主序是按照列向量的方式组织矩阵，为了便于理解，我们看下图示。</p>
+<p>假设有一个 3 阶方阵 M：</p>
+<p><img alt="\begin{aligned}
+M = \begin{pmatrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AM%20%3D%20%5Cbegin%7Bpmatrix%7D%0A1%20%26%202%20%26%203%20%5C%5C%0A4%20%26%205%20%26%206%20%5C%5C%0A7%20%26%208%20%26%209%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>那么它在内存中的排布方式如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810201669106cb868043c~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>观察上面的图，就能够一目了然地看出行主序和列主序的区别了。</p>
+<p>请务必谨记，D3D 中矩阵采用的是行主序的存储方式，GLSL 中采用的是列主序。</p>
+<h2 data-id="heading-4">实现JavaScript数学库</h2>
+<p>那么，既然 GLSL 采用的是列主序存储，为了保持一致，我们在JavaScript中最好也采用列主序的方式存储，和 GLSL 保持一致。</p>
+<h3 data-id="heading-5">JavaScript中 用什么数据结构来表示矩阵</h3>
+<p>我们用<code>数组</code>来表示矩阵，但由于 JavaScript 数组是弱类型的，并没有严格按照内存位置进行排布，而 GLSL 中的矩阵元素是严格按照内存地址顺序排列的，所以我们需要将弱类型数组转化成二进制形式，通常我们使用 Float32Array 把弱类型数组转化成强类型数组。</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">M</span> = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>]<span class="hljs-comment">;</span>
+<span class="hljs-attr">M</span> = new Float32Array(M)<span class="hljs-comment">;</span>
+</code></pre><h3 data-id="heading-6">实现数学库中的方法</h3>
+<p>图形学中多用方阵来表示变换，因为我们要在 3D 坐标系中变换，所以我们要用 4 阶方阵，所以关于矩阵的运算，我们主要以 4 阶矩阵为基础。</p>
+<h4 data-id="heading-7">3维向量初始化</h4>
+<p>图形学编程中用的比较多的是 3 维、4 维向量，3 维向量多用来表示笛卡尔坐标系中的顶点坐标(X, Y, Z)，4维向量通常表示齐次坐标，如(X, Y, Z, W)，以及颜色信息(R, G, B, A)。
+我们需要初始化向量的方法，默认值为 0。</p>
+<p>下面以 3 维向量为例进行实现， 4 维向量和 3维类似。</p>
+<h5 data-id="heading-8">3 维向量初始化</h5>
+<ul>
+<li>输入参数 source 是 JavaScript 弱类型数组（Array），包含3个元素，比如[0, 0, 1]。</li>
+<li>返回结果是强类型数组，包含 3 个元素[0, 0, 1]。</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">function Vector3(x, y, z){
+ <span class="hljs-attr">this.x</span> = x || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.y</span> = y || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.z</span> = z || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+}
+</code></pre><h5 data-id="heading-9">设置各个分量</h5>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">Vector3.prototype.setX</span> = function(x) {
+ <span class="hljs-attr">this.x</span> = x || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ return this<span class="hljs-comment">;</span>
+}
+<span class="hljs-attr">Vector3.prototype.setY</span> = function(y) {
+ <span class="hljs-attr">this.y</span> = y || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ return this<span class="hljs-comment">;</span>
+}
+<span class="hljs-attr">Vector3.prototype.setZ</span> = function(z) {
+ <span class="hljs-attr">this.z</span> = z || <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ return this<span class="hljs-comment">;</span>
+}
+
+</code></pre><h4 data-id="heading-10">归一化向量</h4>
+<p>归一化向量比较简单，首先求出向量的长度（模），然后将各个分量除以模即可。</p>
+<pre><code lang="kotlin" class="hljs language-kotlin">Vector3.prototype.normalize = function() {
+ <span class="hljs-keyword">var</span> length = Math.sqrt(<span class="hljs-keyword">this</span>.x * <span class="hljs-keyword">this</span>.x + <span class="hljs-keyword">this</span>.y * <span class="hljs-keyword">this</span>.y + <span class="hljs-keyword">this</span>.z * <span class="hljs-keyword">this</span>.z);
+ <span class="hljs-keyword">if</span>(length > <span class="hljs-number">0.00001</span>){
+ <span class="hljs-keyword">return</span> new Vector3(<span class="hljs-keyword">this</span>.x / length, <span class="hljs-keyword">this</span>.y / length, <span class="hljs-keyword">this</span>.z / length);
+ }
+ <span class="hljs-keyword">return</span> new Vector3();
+}
+</code></pre><h4 data-id="heading-11">向量与向量相加</h4>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">Vector3.prototype.addVectors</span> = function(vec1, vec2){
+ <span class="hljs-attr">this.x</span> = vec1.x + vec2.x<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.y</span> = vec1.y + vec2.y<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.z</span> = vec1.z + vec2.z<span class="hljs-comment">;</span>
+ return this<span class="hljs-comment">;</span>
+}
+</code></pre><pre><code lang="kotlin" class="hljs language-kotlin">Vector3.prototype.add = function(vec1, vec2){
+ <span class="hljs-keyword">if</span>(vec2){
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.addVector(vec1, vec2);
+ }
+ <span class="hljs-keyword">this</span>.x += vec1.x;
+ <span class="hljs-keyword">this</span>.y += vec1.y;
+ <span class="hljs-keyword">this</span>.z += vec1.z;
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+</code></pre><h4 data-id="heading-12">向量与向量相减</h4>
+<pre><code lang="kotlin" class="hljs language-kotlin">Vector3.prototype.sub = function(vec1, vec2){
+ <span class="hljs-keyword">if</span>(vec2){
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.addVector(vec1, -vec2);
+ }
+ <span class="hljs-keyword">this</span>.x -= vec1.x;
+ <span class="hljs-keyword">this</span>.y -= vec1.y;
+ <span class="hljs-keyword">this</span>.z -= vec1.z;
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+</code></pre><h4 data-id="heading-13">向量与标量相乘</h4>
+<pre><code lang="kotlin" class="hljs language-kotlin">Vector3.prototype.multiplyScalar = function(scalar){
+ <span class="hljs-keyword">this</span>.x *= scalar;
+ <span class="hljs-keyword">this</span>.y *= scalar;
+ <span class="hljs-keyword">this</span>.z *= scalar;
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+</code></pre><h4 data-id="heading-14">向量与向量相乘</h4>
+<p>其实数学中是没有向量和向量相乘这一说法的，只是为了更方便的计算两个向量各个分量的乘积，所以增加这个计算，在GLSL 中 vec4 和 vec4 相乘返回的新向量就是将各个分量相乘，在计算光照时经常用到。</p>
+<pre><code lang="kotlin" class="hljs language-kotlin">Vector3.prototype.multiplyVector = function(vec1, vec2){
+ <span class="hljs-keyword">this</span>.x = vec1.x * vec2.x;
+ <span class="hljs-keyword">this</span>.y = vec1.y * vec2.y;
+ <span class="hljs-keyword">this</span>.z = vec1.z * vec2.z;
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+Vector3.prototype.multiply = function(vec1, vec2){
+ <span class="hljs-keyword">if</span>(vec2){
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.multiplyVector(vec1, vec2);
+ }
+ <span class="hljs-keyword">this</span>.x *= vec1.x;
+ <span class="hljs-keyword">this</span>.y *= vec1.y;
+ <span class="hljs-keyword">this</span>.z *= vec1.z;
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+</code></pre><h4 data-id="heading-15">点乘</h4>
+<p>上一节讲过了，点乘就是将向量的各个分量相乘然后再相加，返回的结果是一个标量。</p>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dot</span>(<span class="hljs-params">vec1, vec2</span>){
+ <span class="hljs-keyword">return</span> vec1.<span class="hljs-property">x</span> * vec2.<span class="hljs-property">x</span> + vec1.<span class="hljs-property">y</span> *vec2.<span class="hljs-property">y</span> + vec1.<span class="hljs-property">z</span> * vec2.<span class="hljs-property">z</span>;
+}
+</code></pre><h4 data-id="heading-16">叉乘</h4>
+<p>叉乘的计算方法也比较简单，上一节我们讲了计算公式：</p>
+<pre><code lang="ini" class="hljs language-ini">function cross(vec1, vec2){
+ var <span class="hljs-attr">x</span> = vec1.y * vec2.z - vec2.y * vec1.z<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = vec2.x * vec1.z - vec1.x * vec2.z<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">z</span> = vec1.x * vec2.y - vec1.y * vec2.x<span class="hljs-comment">;</span>
+ return new Vector3(x, y, z)<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-17">初始化 4 阶单位矩阵</h4>
+<p>我们需要一个方法能够自动生成一个单位矩阵：</p>
+<p><img alt="\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0A1%20%26%20%200%20%26%20%200%20%26%200%20%5C%5C%0A0%20%26%201%20%26%200%20%26%200%20%5C%5C%0A0%20%26%200%20%26%201%20%26%200%20%5C%5C%0A0%20%26%200%20%26%200%20%26%201%20%5C%5C%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>4 阶矩阵包含 16 个元素，所以我们要初始化 16 个元素的类型化数组，处于性能考虑，我们需要支持对一个矩阵进行单位化。</p>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">identity</span>(<span class="hljs-params">target</span>) {
+ target = target || <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>(<span class="hljs-number">16</span>);
+}
+</code></pre><p>默认各个元素值都是 0 ，我们要将该数组中各个元素的值与数学中的单位矩阵对应上，又由于矩阵以列主序存储，所以每四个数字代表一列：</p>
+<pre><code lang="ini" class="hljs language-ini">function identity(target) {
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ // 第一列
+ target<span class="hljs-section">[0]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ // 第二列
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ // 第三列
+ target<span class="hljs-section">[8]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = 1<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ // 第四列
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>初始化单位矩阵的方法就算完成了，我们还可以用另一种方式来生成，先用 JavaScrpt 数组存储矩阵各个元素，然后用 Float32Array 转化成强类型数组。</p>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">identity</span>(<span class="hljs-params"></span>){
+ <span class="hljs-keyword">var</span> m = 
+ [
+ <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-comment">// 第一列</span>
+ <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-comment">// 第二列</span>
+ <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-comment">// 第三列</span>
+ <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span> <span class="hljs-comment">// 第四列</span>
+ ]
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>(m);
+}
+</code></pre><p>这两种方法用哪种方法都可以，我们使用第一种方法。</p>
+<h4 data-id="heading-18">初始化 4 阶方阵</h4>
+<p>有时我们需要根据一个列主序的弱类型数组初始化成矩阵。</p>
+<ul>
+<li>输入参数
+<ul>
+<li>source：源数组，包含16个元素。</li>
+<li>target：目标数组，将目标数组初始化成source对应的元素。</li>
+</ul>
+</li>
+<li>返回结果
+<ul>
+<li>如果source 不为空，返回该数组对应的强类型数组矩阵。</li>
+<li>如果 source 为空，返回单位矩阵</li>
+</ul>
+</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss">function <span class="hljs-built_in">initialize</span>(source, target) {
+ <span class="hljs-built_in">if</span>(source){
+ <span class="hljs-built_in">if</span>(target){
+ <span class="hljs-built_in">for</span>(var i = <span class="hljs-number">0</span>;i < source.length; i++){
+ target<span class="hljs-selector-attr">[i]</span> = source<span class="hljs-selector-attr">[i]</span>;
+ }
+ return target;
+ }
+ return new <span class="hljs-built_in">Float32Array</span>(source);
+ }
+ return <span class="hljs-built_in">identity</span>(target);
+}
+
+<span class="hljs-comment">//使用方法</span>
+<span class="hljs-built_in">initialize</span>([<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>, <span class="hljs-number">14</span>, <span class="hljs-number">15</span>]);
+</code></pre><h4 data-id="heading-19">矩阵和矩阵相加减</h4>
+<p>虽然矩阵和矩阵相加减的场景很少，但我们仍然要支持它们。实现比较简单，但有一个前提：相加减的两个矩阵的行列必须相同。</p>
+<ul>
+<li>输入参数
+<ul>
+<li>m1，操作符左边矩阵。</li>
+<li>m2，操作符右边矩阵。</li>
+<li>target，将结果存入 target 数组。</li>
+</ul>
+</li>
+<li>返回结果
+<ul>
+<li>返回相加、减后的新矩阵。</li>
+</ul>
+</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">// m1 + m2
+function addMatrix(m1, m2, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ for(var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i < m1.length; i++){</span>
+ target<span class="hljs-section">[i]</span> = m1<span class="hljs-section">[i]</span> + m2<span class="hljs-section">[i]</span>
+ }
+ return target<span class="hljs-comment">;</span>
+}
+
+// m1 - m2
+function subtractMatrix(m1, m2, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ for(var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i < m1.length; i++){</span>
+ target<span class="hljs-section">[i]</span> = m1<span class="hljs-section">[i]</span> - m2<span class="hljs-section">[i]</span>
+ }
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-20">矩阵和矩阵相乘</h4>
+<p>矩阵相乘是最经常用到的运算，我们看下如何用 JavaScript 实现。</p>
+<p>假设有两个 4 阶方阵 M 和 N，其中：</p>
+<pre><code lang="arduino" class="hljs language-arduino">M = 
+ [
+ a00, a01, a02, a03, <span class="hljs-comment">//第一列</span>
+ a10, a11, a12, a13, <span class="hljs-comment">//第二列</span>
+ a20, a21, a22, a23, <span class="hljs-comment">//第三列</span>
+ a30, a31, a32, a33, <span class="hljs-comment">//第四列</span>
+ ] 
+N = 
+ [
+ b00, b01, b02, b03, <span class="hljs-comment">//第一列</span>
+ b10, b11, b12, b13, <span class="hljs-comment">//第二列</span>
+ b20, b21, b22, b23, <span class="hljs-comment">//第三列</span>
+ b30, b31, b32, b33, <span class="hljs-comment">//第四列</span>
+ ]
+</code></pre><p>参考上一节的矩阵乘法， <img alt="N \times M" src="https://juejin.cn/equation?tex=N%20%5Ctimes%20M" loading="lazy" class="medium-zoom-image">的算法表示如下：</p>
+<pre><code lang="ini" class="hljs language-ini">// 此处的 prev 代表 M，next 代表 N
+function multiply(next, prev, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ // 第一列
+ var <span class="hljs-attr">p00</span> = prev[<span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p10</span> = prev[<span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p20</span> = prev[<span class="hljs-number">2</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p30</span> = prev[<span class="hljs-number">3</span>]<span class="hljs-comment">;</span>
+ // 第二列
+ var <span class="hljs-attr">p01</span> = prev[<span class="hljs-number">4</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p11</span> = prev[<span class="hljs-number">5</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p21</span> = prev[<span class="hljs-number">6</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p31</span> = prev[<span class="hljs-number">7</span>]<span class="hljs-comment">;</span>
+ // 第三列
+ var <span class="hljs-attr">p02</span> = prev[<span class="hljs-number">8</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p12</span> = prev[<span class="hljs-number">9</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p22</span> = prev[<span class="hljs-number">10</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p32</span> = prev[<span class="hljs-number">11</span>]<span class="hljs-comment">;</span>
+
+ // 第四列
+ var <span class="hljs-attr">p03</span> = prev[<span class="hljs-number">12</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p13</span> = prev[<span class="hljs-number">13</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p23</span> = prev[<span class="hljs-number">14</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p33</span> = prev[<span class="hljs-number">15</span>]<span class="hljs-comment">;</span>
+
+ // 第一行
+ var <span class="hljs-attr">n00</span> = next[<span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n01</span> = next[<span class="hljs-number">4</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n02</span> = next[<span class="hljs-number">8</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n03</span> = next[<span class="hljs-number">12</span>]<span class="hljs-comment">;</span>
+ // 第二行
+ var <span class="hljs-attr">n10</span> = next[<span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n11</span> = next[<span class="hljs-number">5</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n12</span> = next[<span class="hljs-number">9</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n13</span> = next[<span class="hljs-number">13</span>]<span class="hljs-comment">;</span>
+ // 第三行
+ var <span class="hljs-attr">n20</span> = next[<span class="hljs-number">2</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n21</span> = next[<span class="hljs-number">6</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n22</span> = next[<span class="hljs-number">10</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n23</span> = next[<span class="hljs-number">14</span>]<span class="hljs-comment">;</span>
+
+ // 第四行
+ var <span class="hljs-attr">n30</span> = next[<span class="hljs-number">3</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n31</span> = next[<span class="hljs-number">7</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n32</span> = next[<span class="hljs-number">11</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n33</span> = next[<span class="hljs-number">15</span>]<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[0]</span> = p00 * n00 + p10 * n01 + p20 * n02 + p30 * n03<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = p00 * n10 + p10 * n11 + p20 * n12 + p30 * n13<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = p00 * n20 + p10 * n21 + p20 * n22 + p30 * n23<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = p00 * n30 + p10 * n31 + p20 * n32 + p30 * n33<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[4]</span> = p01 * n00 + p11 * n01 + p21 * n02 + p31 * n03<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = p01 * n10 + p11 * n11 + p21 * n12 + p31 * n13<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = p01 * n20 + p11 * n21 + p21 * n22 + p31 * n23<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = p01 * n30 + p11 * n31 + p21 * n32 + p31 * n33<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[8]</span> = p02 * n00 + p12 * n01 + p22 * n02 + p32 * n03<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = p02 * n10 + p12 * n11 + p22 * n12 + p32 * n13<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = p02 * n20 + p12 * n21 + p22 * n22 + p32 * n23<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = p02 * n30 + p12 * n31 + p22 * n32 + p32 * n33<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[12]</span> = p03 * n00 + p13 * n01 + p23 * n02 + p33 * n03<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = p03 * n10 + p13 * n11 + p23 * n12 + p33 * n13<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = p03 * n20 + p13 * n21 + p23 * n22 + p33 * n23<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = p03 * n30 + p13 * n31 + p23 * n32 + p33 * n33<span class="hljs-comment">;</span>
+
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>我们一共要计算 16 个元素，可以看出计算步骤很繁琐，但都没有难度，都是简单的基本运算，我们只要保证好顺序正确就可以。</p>
+<h4 data-id="heading-21">矩阵和标量相乘</h4>
+<p>矩阵和标量相乘比较简单，各个位置的元素分别乘以标量就可以了。</p>
+<pre><code lang="ini" class="hljs language-ini">function multiplyScalar(m, scalar){
+ if(<span class="hljs-attr">scalar</span> === undefined || scalar === null){
+ return m<span class="hljs-comment">;</span>
+ }
+ for(var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i < m.length; i++){</span>
+ m<span class="hljs-section">[i]</span> *= scalar<span class="hljs-comment">;</span>
+ }
+ return m<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-22">转置矩阵</h4>
+<p>转置矩阵其实就是将原矩阵的行变成列。
+有一个矩阵 M ：</p>
+<figure><img alt="\begin{pmatrix}
+1 & 2 & 3 & 4 \\\
+5 & 6 & 7 & 8 \\\
+9 & 10 & 11 & 12 \\\
+13 & 14 & 15 & 16
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0A1%20%26%202%20%26%203%20%26%204%20%5C%5C%5C%0A5%20%26%206%20%26%207%20%26%208%20%5C%5C%5C%0A9%20%26%2010%20%26%2011%20%26%2012%20%5C%5C%5C%0A13%20%26%2014%20%26%2015%20%26%2016%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>M 的转置矩阵：</p>
+<figure><img alt="\begin{pmatrix}
+1 & 5 & 9 & 13 \\\
+2 & 6 & 10 & 14 \\\
+3 & 7 & 11 & 15 \\\
+4 & 8 & 12 & 16
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0A1%20%26%205%20%26%209%20%26%2013%20%5C%5C%5C%0A2%20%26%206%20%26%2010%20%26%2014%20%5C%5C%5C%0A3%20%26%207%20%26%2011%20%26%2015%20%5C%5C%5C%0A4%20%26%208%20%26%2012%20%26%2016%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>我们转置函数接收一个输入参数，表示待转置的矩阵，用m 表示：</p>
+<ul>
+<li>输入参数：
+<ul>
+<li>m，原矩阵</li>
+</ul>
+</li>
+<li>输出结果
+<ul>
+<li>target，转置矩阵。</li>
+</ul>
+</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">function transpose(m, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ //转置矩阵的第一列
+ target<span class="hljs-section">[0]</span> = m<span class="hljs-section">[0]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = m<span class="hljs-section">[4]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = m<span class="hljs-section">[8]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = m<span class="hljs-section">[12]</span><span class="hljs-comment">;</span>
+ //转置矩阵的第二列
+ target<span class="hljs-section">[4]</span> = m<span class="hljs-section">[1]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = m<span class="hljs-section">[5]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = m<span class="hljs-section">[9]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = m<span class="hljs-section">[13]</span><span class="hljs-comment">;</span>
+ //转置矩阵的第三列
+ target<span class="hljs-section">[8]</span> = m<span class="hljs-section">[2]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = m<span class="hljs-section">[6]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = m<span class="hljs-section">[10]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = m<span class="hljs-section">[14]</span><span class="hljs-comment">;</span>
+ //转置矩阵的第四列
+ target<span class="hljs-section">[12]</span> = m<span class="hljs-section">[3]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = m<span class="hljs-section">[7]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = m<span class="hljs-section">[11]</span><span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = m<span class="hljs-section">[15]</span><span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-23">计算逆矩阵</h4>
+<p>逆矩阵的计算是最复杂的计算，很容易把人绕晕，如果大家感兴趣，按照上一节讲的逆矩阵求解步骤，可以自己写一下这个算法。</p>
+<p>回忆一下，逆矩阵的计算分为 4 步：</p>
+<ul>
+<li>求出余子式矩阵。</li>
+<li>为余子式矩阵增加符号。</li>
+<li>转置第二步的矩阵。</li>
+<li>将第三步得出的矩阵乘以 1/行列式。</li>
+</ul>
+<p>完成以上四步，最后得出的矩阵就是逆矩阵了。
+我们实现一下该算法：</p>
+<h5 data-id="heading-24">1、求出余子式矩阵</h5>
+<p>假设矩阵M，<img alt="m_{ij}" src="https://juejin.cn/equation?tex=m_%7Bij%7D" loading="lazy" class="medium-zoom-image">来表示各个位置的元素，i 表示第几行，j 表示第几列。</p>
+<p>例如m00，就代表处于第一行第一列的元素。</p>
+<p><img alt="\begin{pmatrix}
+m00 & m01 & m02 & m03 \\\
+m10 & m11 & m12 & m13 \\\
+m20 & m21 & m22 & m23 \\\
+m30 & m31 & m32 & m33 
+\end{pmatrix}" src="https://juejin.cn/equation?tex=%5Cbegin%7Bpmatrix%7D%0Am00%20%26%20m01%20%26%20m02%20%26%20m03%20%5C%5C%5C%0Am10%20%26%20m11%20%26%20m12%20%26%20m13%20%5C%5C%5C%0Am20%20%26%20m21%20%26%20m22%20%26%20m23%20%5C%5C%5C%0Am30%20%26%20m31%20%26%20m32%20%26%20m33%20%0A%5Cend%7Bpmatrix%7D" loading="lazy" class="medium-zoom-image"></p>
+<pre><code lang="ini" class="hljs language-ini">function inverse(m){
+ //第一列
+ var <span class="hljs-attr">m00</span> = m[<span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m10</span> = m[<span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m20</span> = m[<span class="hljs-number">2</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m30</span> = m[<span class="hljs-number">3</span>]<span class="hljs-comment">;</span>
+ // 第二列
+ var <span class="hljs-attr">m01</span> = m[<span class="hljs-number">4</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m11</span> = m[<span class="hljs-number">5</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m21</span> = m[<span class="hljs-number">6</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m31</span> = m[<span class="hljs-number">7</span>]<span class="hljs-comment">;</span>
+ // 第三列
+ var <span class="hljs-attr">m02</span> = m[<span class="hljs-number">8</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m12</span> = m[<span class="hljs-number">9</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m22</span> = m[<span class="hljs-number">10</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m32</span> = m[<span class="hljs-number">11</span>]<span class="hljs-comment">;</span>
+ // 第四列
+ var <span class="hljs-attr">m03</span> = m[<span class="hljs-number">12</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m13</span> = m[<span class="hljs-number">13</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m23</span> = m[<span class="hljs-number">14</span>]<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">m33</span> = m[<span class="hljs-number">15</span>]<span class="hljs-comment">;</span>
+}
+
+</code></pre><p>矩阵的行列式：</p>
+<pre><code lang="ini" class="hljs language-ini"> var <span class="hljs-attr">tmp_22_33</span> = m22 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_32_23</span> = m32 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_21_33</span> = m21 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_31_23</span> = m31 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_12_23</span> = m12 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_22_13</span> = m22 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_23</span> = m10 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_13</span> = m20 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_11_23</span> = m11 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_21_13</span> = m21 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_32</span> = m20 * m32<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_22</span> = m10 * m22<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_12</span> = m20 * m12<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_21</span> = m10 * m21<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_11</span> = m20 * m11<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_31_22</span> = m31 * m22<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_23</span> = m30 * m23<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_22</span> = m30 * m22<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_33</span> = m20 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_20_31</span> = m20 * m31<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_21</span> = m30 * m21<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_21_32</span> = m21 * m32<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_12_33</span> = m12 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_32_13</span> = m32 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_11_32</span> = m11 * m32<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_31_12</span> = m31 * m12<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_11_33</span> = m11 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_31_13</span> = m31 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_33</span> = m10 * m33<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_13</span> = m30 * m13<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_32</span> = m10 * m32<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_12</span> = m30 * m12<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_10_31</span> = m10 * m31<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_30_11</span> = m30 * m11<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_11_22</span> = m11 * m22<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">tmp_21_12</span> = m21 * m12<span class="hljs-comment">;</span>
+
+ var <span class="hljs-attr">t00</span> =
+ m11 * (tmp_22_33 - tmp_32_23) -
+ m12 * (tmp_21_33 - tmp_31_23) +
+ m13 * (tmp_21_32 - tmp_31_22)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">t01</span> =
+ m10 * (tmp_22_33 - tmp_32_23) -
+ m12 * (tmp_20_33 - tmp_30_23) +
+ m13 * (tmp_20_32 - tmp_30_22)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">t02</span> =
+ m10 * (tmp_21_33 - tmp_31_23) -
+ m11 * (tmp_20_33 - tmp_30_23) +
+ m13 * (tmp_20_31 - tmp_30_21)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">t03</span> =
+ m10 * (tmp_21_32 - tmp_31_22) -
+ m11 * (tmp_20_32 - tmp_30_22) +
+ m12 * (tmp_20_31 - tmp_30_21)<span class="hljs-comment">;</span>
+
+ // 矩阵的行列式
+ var <span class="hljs-attr">determinant</span> = m00 * t00 - m01 * t01 + m02 * t02 - m03 * t03<span class="hljs-comment">;</span>
+</code></pre><h5 data-id="heading-25">余子式矩阵</h5>
+<p>余子式矩阵是将原矩阵各个位置的行列式求解出来放在对应位置，生成的一个新矩阵。</p>
+<p>求解行列式是一个很繁琐但是很简单的过程，因为它涉及到的只是简单的算术运算。</p>
+<pre><code lang="ini" class="hljs language-ini">// 第一行
+ var <span class="hljs-attr">n00</span> = t00<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n01</span> = t01<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n02</span> = t02<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n03</span> = t03<span class="hljs-comment">;</span>
+
+ // 第二行
+ var <span class="hljs-attr">n10</span> =
+ m01 * (tmp_22_33 - tmp_32_23) -
+ m02 * (tmp_21_33 - tmp_31_23) +
+ m03 * (tmp_21_32 - tmp_31_22)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n11</span> =
+ m00 * (tmp_22_33 - tmp_32_23) -
+ m02 * (tmp_20_33 - tmp_30_23) +
+ m03 * (tmp_20_32 - tmp_30_22)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n12</span> =
+ m00 * (tmp_21_33 - tmp_31_23) -
+ m01 * (tmp_20_33 - tmp_30_23) +
+ m03 * (tmp_20_31 - tmp_30_21)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n13</span> =
+ m00 * (tmp_21_32 - tmp_31_22) -
+ m01 * (tmp_20_32 - tmp_30_22) +
+ m02 * (tmp_20_31 - tmp_30_21)<span class="hljs-comment">;</span>
+
+ // 第三行
+ var <span class="hljs-attr">n20</span> =
+ m01 * (tmp_12_33 - tmp_32_13) -
+ m02 * (tmp_11_33 - tmp_31_13) +
+ m03 * (tmp_11_32 - tmp_31_12)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n21</span> =
+ m00 * (tmp_12_33 - tmp_32_13) -
+ m02 * (tmp_10_33 - tmp_30_13) +
+ m03 * (tmp_10_32 - tmp_30_12)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n22</span> =
+ m00 * (tmp_11_33 - tmp_31_13) -
+ m01 * (tmp_10_33 - tmp_30_13) +
+ m03 * (tmp_10_31 - tmp_30_11)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n23</span> =
+ m00 * (tmp_11_32 - tmp_31_12) -
+ m01 * (tmp_10_32 - tmp_30_12) +
+ m02 * (tmp_10_31 - tmp_30_11)<span class="hljs-comment">;</span>
+
+ // 第四行
+ var <span class="hljs-attr">n30</span> =
+ m01 * (tmp_12_23 - tmp_22_13) -
+ m02 * (tmp_21_33 - tmp_31_23) +
+ m03 * (tmp_11_22 - tmp_21_12)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n31</span> =
+ m00 * (tmp_12_23 - tmp_22_13) -
+ m02 * (tmp_10_23 - tmp_20_13) +
+ m03 * (tmp_10_22 - tmp_20_12)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n32</span> =
+ m00 * (tmp_11_23 - tmp_21_13) -
+ m01 * (tmp_10_23 - tmp_20_13) +
+ m03 * (tmp_10_21 - tmp_20_11)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">n33</span> =
+ m00 * (tmp_11_22 - tmp_21_12) -
+ m01 * (tmp_10_22 - tmp_20_12) +
+ m02 * (tmp_10_21 - tmp_20_11)<span class="hljs-comment">;</span>
+
+</code></pre><h5 data-id="heading-26">代数余子式矩阵</h5>
+<p>把"纵横交错"排列的正负号放在"余子式矩阵"上。换句话说，我们需要每隔一个格改变正负号，像这样：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018102116696adefc66dacf~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">n01</span> = -n01<span class="hljs-comment">;</span>
+<span class="hljs-attr">n03</span> = -n03<span class="hljs-comment">;</span>
+<span class="hljs-attr">n10</span> = -n10<span class="hljs-comment">;</span>
+<span class="hljs-attr">n12</span> = -n12<span class="hljs-comment">;</span>
+<span class="hljs-attr">n21</span> = -n21<span class="hljs-comment">;</span>
+<span class="hljs-attr">n23</span> = -n23<span class="hljs-comment">;</span>
+<span class="hljs-attr">n30</span> = -n30<span class="hljs-comment">;</span>
+<span class="hljs-attr">n32</span> = -n32<span class="hljs-comment">;</span>
+</code></pre><h5 data-id="heading-27">转置代数余子式矩阵</h5>
+<p>将上面经过转换符号的余子式矩阵转置。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+target<span class="hljs-section">[0]</span> = n00<span class="hljs-comment">;</span>
+target<span class="hljs-section">[1]</span> = n01<span class="hljs-comment">;</span>
+target<span class="hljs-section">[2]</span> = n02<span class="hljs-comment">;</span>
+target<span class="hljs-section">[3]</span> = n03<span class="hljs-comment">;</span>
+target<span class="hljs-section">[4]</span> = n10<span class="hljs-comment">;</span>
+target<span class="hljs-section">[5]</span> = n11<span class="hljs-comment">;</span>
+target<span class="hljs-section">[6]</span> = n12<span class="hljs-comment">;</span>
+target<span class="hljs-section">[7]</span> = n13<span class="hljs-comment">;</span>
+target<span class="hljs-section">[8]</span> = n20<span class="hljs-comment">;</span>
+target<span class="hljs-section">[9]</span> = n21<span class="hljs-comment">;</span>
+target<span class="hljs-section">[10]</span> = n22<span class="hljs-comment">;</span>
+target<span class="hljs-section">[11]</span> = n23<span class="hljs-comment">;</span>
+target<span class="hljs-section">[12]</span> = n30<span class="hljs-comment">;</span>
+target<span class="hljs-section">[13]</span> = n31<span class="hljs-comment">;</span>
+target<span class="hljs-section">[14]</span> = n32<span class="hljs-comment">;</span>
+target<span class="hljs-section">[15]</span> = n33<span class="hljs-comment">;</span>
+</code></pre><h5 data-id="heading-28">乘以 1/原矩阵的行列式</h5>
+<p>最后一步，我们将上面得到的转置矩阵乘以 1/原矩阵的行列式，得出的新矩阵就是所求逆矩阵。</p>
+<pre><code lang="ini" class="hljs language-ini">for(var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i< result.length; i++){</span>
+ target<span class="hljs-section">[i]</span> = target<span class="hljs-section">[i]</span> * 1 / determinant<span class="hljs-comment">;</span>
+}
+
+return target<span class="hljs-comment">;</span>
+</code></pre><p>哇哦，历尽九九八十一难，我们终于求出了逆矩阵。</p>
+<p>大家可以看到，数学库所做的就是将数学中的矩阵、向量以及它们之间的运算表示出来，步骤很繁琐，但是都不难。这些函数我们只要会用，知道它们所适用的场景就可以了。</p>
+<h2 data-id="heading-29">回顾</h2>
+<p>本节主要实现了图形学涉及到数学中的向量和矩阵的基本运算，除此以外，我们还有一些3D 开发中经常用到的方法没有实现，比如顶点旋转、平移、缩放等变换矩阵。</p>
+<p>但在这之前，我们要先学习为什么需要这些变换，具体需要哪些变换。</p>
+<p>这些东西在下一节揭晓，下一节主要涉及到 WebGL 中的常见坐标系以及坐标系之间的变换，让我们拭目以待吧~</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

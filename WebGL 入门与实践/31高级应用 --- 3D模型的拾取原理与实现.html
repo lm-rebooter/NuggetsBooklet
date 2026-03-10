@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>实际应用中，场景里的模型会越来越多，这时我们不可避免地需要一些交互效果，比如当点击某一个模型的时候，做出一些反馈，这需要我们能够通过鼠标的点击位置推导出点击到的模型，即距离我们最近的模型，这种技术称为 <code>3D 拾取</code>。</p>
+<h2 data-id="heading-0">3D 拾取原理</h2>
+<p>先透露一下 3D 拾取原理的关键点，其实是一个几何知识：
+<code>求射线与三角形的交点。</code></p>
+<p>为什么这么说呢？要理解这一点，大家还需要理解<code>坐标变换流水线</code>。</p>
+<p>让我们回顾下<code>坐标变换流水线</code>，看它是如何将一个点一步步地呈现在屏幕上的。</p>
+<h2 data-id="heading-1">坐标变换流水线</h2>
+<p>让我们回顾一下坐标变换流水线，看一下模型空间中一点 P0 到屏幕空间的转换步骤。</p>
+<h3 data-id="heading-2">从模型空间到屏幕空间</h3>
+<p>在第十七节，我为大家讲述了点从模型空间到屏幕空间的变换步骤，文章里有如下一张图：
+</p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669b4e4af96327b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h4 data-id="heading-3">1、模型空间坐标转换成世界空间坐标</h4>
+<p>模型空间经过平移、缩放、旋转后，来到世界空间，该点在世界空间中的坐标为P1。
+假设模型空间到世界空间的变换矩阵为 M，则有：</p>
+<figure><img alt="P1 = M \times P0" src="https://juejin.cn/equation?tex=P1%20%3D%20M%20%5Ctimes%20P0" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-4">2、世界空间坐标转换成观察空间坐标</h4>
+<p>将摄像机放在世界空间中的某个位置，以摄像机为原点建立观察坐标系，P0 在该空间下的坐标为 P2。</p>
+<p>假设世界空间到观察空间的变换矩阵为 V，则有：</p>
+<figure><img alt="P2 = V \times P1" src="https://juejin.cn/equation?tex=P2%20%3D%20V%20%5Ctimes%20P1" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-5">3、观察空间坐标转换到裁剪空间坐标</h4>
+<p>该阶段以透视投影为例，P0 在该空间下的坐标为 P3。
+假设观察空间到裁剪空间的变换矩阵为 P，则有：</p>
+<figure><img alt="P3 = P \times P2" src="https://juejin.cn/equation?tex=P3%20%3D%20P%20%5Ctimes%20%20P2" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-6">MVP 的由来</h4>
+<p>以上三个空间变换矩阵一般情况都是在 CPU 中进行运算，通常我们将其按照顺序相乘得到一个混合变换矩阵 MVP。</p>
+<figure><img alt="MVP = P \times M \times V" src="https://juejin.cn/equation?tex=MVP%20%3D%20P%20%5Ctimes%20M%20%5Ctimes%20V" loading="lazy" class="medium-zoom-image"></figure>
+<p>然后将该矩阵传递到GPU 中的顶点着色器程序中，将其与模型空间坐标相乘，得到裁剪空间坐标 P3。</p>
+<h4 data-id="heading-7">4、裁剪空间坐标转换成 NDC 空间坐标</h4>
+<p>裁剪空间坐标 P3 是一个 4 维齐次坐标，GPU 会自动将各个分量同时除以齐次坐标 w，得到 NDC 空间下的坐标 P4，P4 此时处于边长为 2 的立方中。</p>
+<h4 data-id="heading-8">5、NDC 空间坐标转换成屏幕坐标</h4>
+<p>NDC 空间坐标处于边长为 2 的立方体中，它的坐标原点在屏幕正中央，Y 轴正向朝上，X 轴向右为正。这和屏幕坐标有所区别，屏幕坐标以屏幕左上角为原点，X 轴向右为正，Y 轴向下为正，所以此处仍然需要转换。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019327169bcf47c921c68f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>需要特别记住的是，坐标流水线的第一步到第三步，通常由开发者去运算得出。第四步到第五步，通常是由 GPU 自行运算，运算规则也比较简单。</p>
+<p>接下来我们反向执行该流水线操作，将屏幕上一点，反推到模型空间。</p>
+<h3 data-id="heading-9">屏幕空间到模型空间</h3>
+<p>当我们在屏幕上点击时，得到一个屏幕坐标系（视口）上的二维坐标 <img alt="P_5" src="https://juejin.cn/equation?tex=P_5" loading="lazy" class="medium-zoom-image">，接下来，我们需要沿坐标变换流水线的逆序进行操作。</p>
+<h4 data-id="heading-10">1、屏幕空间到 NDC 空间。</h4>
+<p>屏幕坐标 P5 经过变换到达 NDC 空间 P4。假设 P5 坐标为 【Xp5，Yp5】，屏幕宽度为sWidth，高度为 sHeight，那么有如下等式：</p>
+<figure><img alt="\frac{Xp5 }{ sWidth} =
+ \frac{Xp4 + 1}{ 2}" src="https://juejin.cn/equation?tex=%5Cfrac%7BXp5%20%20%7D%7B%20sWidth%7D%20%20%3D%0A%20%5Cfrac%7BXp4%20%2B%201%7D%7B%202%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="\frac{Yp5}{sHeight} = \frac{- (Yp4 - 1)} {2}" src="https://juejin.cn/equation?tex=%5Cfrac%7BYp5%7D%7BsHeight%7D%20%3D%20%20%5Cfrac%7B-%20(Yp4%20-%201)%7D%20%7B2%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>所以，可以推出 P4 坐标：</p>
+<figure><img alt="Xp4 = \frac{2 \times Xp5}{sWdith - 1}" src="https://juejin.cn/equation?tex=Xp4%20%3D%20%5Cfrac%7B2%20%5Ctimes%20Xp5%7D%7BsWdith%20-%201%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Yp4 = \frac{1- (2 \times Yp5) }{ sHeight}" src="https://juejin.cn/equation?tex=Yp4%20%3D%20%5Cfrac%7B1-%20(2%20%5Ctimes%20Yp5)%20%7D%7B%20sHeight%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-11">2、NDC 空间坐标转换到投影空间坐标</h4>
+<p>我们在屏幕上点击的坐标位置，可以理解为在投影空间的近裁剪平面上的点 P3。假设近裁剪平面 X 轴最小坐标为 Pl，最大坐标为 Pr，Y 轴最大坐标为 Yt，最小坐标为 Yb，则有如下等式：</p>
+<figure><img alt="\frac{Xp4 - (-1)} { 1 - (-1)} = \frac{Xp3 - Pl} { (Pr - Pl)}" src="https://juejin.cn/equation?tex=%5Cfrac%7BXp4%20%20-%20(-1)%7D%20%7B%201%20-%20(-1)%7D%20%3D%20%5Cfrac%7BXp3%20-%20Pl%7D%20%7B%20(Pr%20-%20Pl)%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="\frac{Yp4 - (-1)} { (1 - (-1)} = \frac{Yp3 - Pb} { (Pt - Pb)}" src="https://juejin.cn/equation?tex=%5Cfrac%7BYp4%20-%20(-1)%7D%20%7B%20(1%20-%20(-1)%7D%20%3D%20%5Cfrac%7BYp3%20-%20Pb%7D%20%7B%20(Pt%20-%20Pb)%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>所以，可以推断NDC 空间坐标在投影面上的坐标为：</p>
+<figure><img alt="Xp3 = \frac{Xp4 + 1} { 2 \times (Pr - Pl)} + Pl" src="https://juejin.cn/equation?tex=Xp3%20%3D%20%5Cfrac%7BXp4%20%2B%201%7D%20%7B%202%20%5Ctimes%20(Pr%20-%20Pl)%7D%20%2B%20Pl" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Yp3 = \frac{Yp4 + 1} { 2} \times (Pt - Pb) + Pb" src="https://juejin.cn/equation?tex=Yp3%20%3D%20%5Cfrac%7BYp4%20%2B%201%7D%20%7B%202%7D%20%5Ctimes%20(Pt%20-%20Pb)%20%2B%20Pb" loading="lazy" class="medium-zoom-image"></figure>
+<p>推断出 NDC 空间坐标在投影面上的 X、Y 轴坐标之后，我们就开始考虑为其扩展 3D 坐标 Z 值了。</p>
+<p>因为近裁剪平面，Z 值是我们做投影变换矩阵的运算时选取的，所以，我们可以采用近裁剪平面的 Z 值作为 P3 的 Z 轴坐标。</p>
+<p>至此，我们得到了投影空间坐标，投影空间坐标转换到观察空间坐标，只需一步，将 Z 轴坐标反向即可。</p>
+<h4 data-id="heading-12">投影空间坐标到观察空间坐标</h4>
+<p>转换到投影空间坐标为 P2，那么P2与 P3 的关系如下：</p>
+<figure><img alt="Xp2 = Xp3" src="https://juejin.cn/equation?tex=Xp2%20%3D%20Xp3" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Yp2 = Yp3" src="https://juejin.cn/equation?tex=Yp2%20%3D%20Yp3" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Zp2 = - Zp3" src="https://juejin.cn/equation?tex=Zp2%20%3D%20-%20Zp3" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="Wp2 = 1;" src="https://juejin.cn/equation?tex=Wp2%20%3D%201%3B" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-13">3、观察空间转换到模型空间</h4>
+<p>观察空间转到到模型空间只需要乘以观察矩阵的逆矩阵，以及世界矩阵的逆矩阵即可。</p>
+<h3 data-id="heading-14">3D 拾取步骤</h3>
+<p>以上就是流水线的正向与逆向转换过程，那么，我们只能对屏幕上一点进行逆向变换，无法对拿到物体的 Z 轴信息，那么如何进行检测呢？</p>
+<p>你或许会发现，我们将摄像机原点与近裁剪平面的一点连起来，形成一条射线，指向视椎体，射线如果穿过视椎体中的距离近裁剪屏幕最近的模型，那么代表鼠标点选了该模型。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201952316ae55ed7c8154a6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>所以，我们需要构造这么一条射线，射线和模型检测时，需要在同一个坐标系，为了计算方便，我们将射线选取在观察坐标系中。</p>
+<h4 data-id="heading-15">一、将选取射线与物体转换到同一个坐标系中</h4>
+<p>首先射线的起点 E 在观察坐标系中代表原点，即 E = （0，0，0）。所以，我们只需要求出点击位置在观察坐标系的坐标即可求出射线。</p>
+<h5 data-id="heading-16">首先我们算出点在canvas 画布上的坐标位置，这里以一个铺满屏幕的画布举例：</h5>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">x</span> = e.clientX<span class="hljs-comment">;</span>
+var <span class="hljs-attr">y</span> = e.clientY<span class="hljs-comment">;</span>
+</code></pre><h5 data-id="heading-17">将屏幕坐标转化为NDC 坐标</h5>
+<pre><code lang="ini" class="hljs language-ini">//屏幕坐标转换为 CVV 坐标
+function getCVVFromScreen(mouse) {
+ var <span class="hljs-attr">viewWidth</span> = canvas.width<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">viewHeight</span> = canvas.height<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">x</span> = mouse.x<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = mouse.y<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cvv</span> = {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>}<span class="hljs-comment">;</span>
+ <span class="hljs-attr">cvv.x</span> = x / (viewWidth / <span class="hljs-number">2</span>) - <span class="hljs-number">1</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">cvv.y</span> = <span class="hljs-number">1</span> - y / (viewHeight / <span class="hljs-number">2</span>)<span class="hljs-comment">;</span>
+ return cvv<span class="hljs-comment">;</span>
+}
+// 屏幕坐标转化为NDC坐标
+var <span class="hljs-attr">cvv</span> = getCVVFromScreen({x: x, y: y})<span class="hljs-comment">;</span>
+</code></pre><h5 data-id="heading-18">根据 NDC 坐标求出该点在投影平面上的坐标</h5>
+<pre><code lang="ini" class="hljs language-ini">function getProFromCVV(cvv, near, viewRadians) {
+ //投影盒上边坐标
+ var <span class="hljs-attr">top</span> = near * Math.tan(Math.PI / <span class="hljs-number">180</span>) * <span class="hljs-number">0.5</span> * viewRadians<span class="hljs-comment">;</span>
+ //投影盒高度
+ var <span class="hljs-attr">height</span> = <span class="hljs-number">2</span> * top<span class="hljs-comment">;</span>
+ //投影盒宽度
+ var <span class="hljs-attr">width</span> = aspect * height<span class="hljs-comment">;</span>
+ //投影盒左边界坐标
+ var <span class="hljs-attr">left</span> = -<span class="hljs-number">0.5</span> * width<span class="hljs-comment">;</span>
+
+ var <span class="hljs-attr">pro</span> = {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>}<span class="hljs-comment">;</span>
+ <span class="hljs-attr">pro.x</span> = ((cvv.x + <span class="hljs-number">1</span>) / <span class="hljs-number">2</span>) * width + left<span class="hljs-comment">;</span>
+ <span class="hljs-attr">pro.y</span> = ((cvv.y + <span class="hljs-number">1</span>) / <span class="hljs-number">2</span>) * height + top - height<span class="hljs-comment">;</span>
+ return pro<span class="hljs-comment">;</span>
+}
+</code></pre><h5 data-id="heading-19">求出该点在相机坐标系的坐标</h5>
+<p>投影面上的坐标仅仅是 2 维坐标，我们需要经 2 维转化为 3 维，还记得我们从相机坐标到投影坐标的转换步骤吗？首先是设定了一个近裁剪平面：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">near</span> = <span class="hljs-number">0.5</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">projectionMatrix</span> = matrix.perspective(
+ fieldOfViewRadians,
+ aspect,
+ near,
+ 2000
+)<span class="hljs-comment">;</span>
+</code></pre><p>perspective 方法中的第三个参数 <code>0.5</code> 就是近裁剪平面，在上一步中求得的投影平面坐标所在的投影面在相机坐标系中的 Z 轴坐标即为 <code>0.5</code>。所以，我们把 2维投影平面坐标转化为 3 维相机坐标，仅需要增加一个 Z 轴坐标即可，Z 轴坐标为近裁剪平面坐标 <code>0.5</code>。</p>
+<p>大家不要忘记了，投影空间是左手坐标系，相机空间是右手坐标系，所以，近裁剪平面的 Z 轴坐标在相机空间下要取相反数，即为 <code>-0.5</code>。</p>
+<p>因此，顶点在相机坐标系下的坐标可以通过如上方法求得：</p>
+<pre><code lang="arduino" class="hljs language-arduino"><span class="hljs-comment">// 投影坐标转化为相机坐标</span>
+<span class="hljs-function">function <span class="hljs-title">getViewFromPro</span><span class="hljs-params">(pro,near)</span> </span>{
+ var point = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Vector3</span>(pro.x, pro.y, -near);
+ <span class="hljs-keyword">return</span> point;
+}
+</code></pre><p>以上就是将鼠标点击屏幕坐标转变到相机空间坐标的推导过程，代码如下：</p>
+<pre><code lang="ini" class="hljs language-ini"> canvas.addEventListener('click', function(e) {
+ var <span class="hljs-attr">x</span> = e.clientX<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = e.clientY<span class="hljs-comment">;</span>
+ // 屏幕坐标转化为NDC坐标
+ var <span class="hljs-attr">cvv</span> = getCVVFromScreen({x: x, y: y})<span class="hljs-comment">;</span>
+ // NDC 坐标转化为投影坐标
+ <span class="hljs-attr">cvv</span> = getProFromCVV(cvv, <span class="hljs-number">0.5</span>, <span class="hljs-number">60</span>)<span class="hljs-comment">;</span>
+ // 投影坐标转化为观察坐标
+ <span class="hljs-attr">cvv</span> = getViewFromPro(cvv)<span class="hljs-comment">;</span>
+ // 构造观察坐标系下的射线
+ var <span class="hljs-attr">newRay</span> = new Ray(
+ new Vector3(0, 0, 0),
+ new Vector3(cvv.x, cvv.y, cvv.z)
+ )<span class="hljs-comment">;</span>
+ // 求出三角形的顶点 A 在观察坐标系中的坐标
+ var <span class="hljs-attr">a</span> = new Vector4(positions[<span class="hljs-number">0</span>], positions[<span class="hljs-number">1</span>], positions[<span class="hljs-number">2</span>])<span class="hljs-comment">;</span>
+ <span class="hljs-attr">a</span> = matrix.applyMatrix(a, viewMatrix)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">a</span> = V4toV3(a)<span class="hljs-comment">;</span>
+ // 求出三角形的顶点 B 在观察坐标系中的坐标
+ var <span class="hljs-attr">b</span> = new Vector4(positions[<span class="hljs-number">3</span>], positions[<span class="hljs-number">4</span>], positions[<span class="hljs-number">5</span>])<span class="hljs-comment">;</span>
+ <span class="hljs-attr">b</span> = matrix.applyMatrix(b, viewMatrix)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">b</span> = V4toV3(b)<span class="hljs-comment">;</span>
+ // 求出三角形的顶点 C 在观察坐标系中的坐标
+ var <span class="hljs-attr">c</span> = new Vector4(positions[<span class="hljs-number">6</span>], positions[<span class="hljs-number">7</span>], positions[<span class="hljs-number">8</span>])<span class="hljs-comment">;</span>
+ <span class="hljs-attr">c</span> = matrix.applyMatrix(c, viewMatrix)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">c</span> = V4toV3(c)<span class="hljs-comment">;</span>
+ // 求出射线与三角形相交交点
+ var <span class="hljs-attr">result</span> = newRay.intersectTriangle(a, b, c)<span class="hljs-comment">;</span>
+ 
+ positions1<span class="hljs-section">[0]</span> = result.x<span class="hljs-comment">;</span>
+ positions1<span class="hljs-section">[1]</span> = result.y<span class="hljs-comment">;</span>
+ positions1<span class="hljs-section">[2]</span> = result.z + 0.1<span class="hljs-comment">;</span>
+ render(gl)<span class="hljs-comment">;</span>
+ renderPoint(gl)<span class="hljs-comment">;</span>
+ return cvv<span class="hljs-comment">;</span>
+ })<span class="hljs-comment">;</span>
+</code></pre><p>接下来，我们还需要将模型坐标也转变到相机空间下，只有在同一个空间下坐标才能得到统一。模型坐标转变到相机空间比较简单，只需要将模型顶点乘以世界变换矩阵和相机变换矩阵即可，此处就不贴代码了。</p>
+<h4 data-id="heading-20">二、求出射线与三角形的交点</h4>
+<p>上面代码中有一段是射线与三角形相交算法，该类算法比较多，我们采用的是效率相对高一些的<code>Möller–Trumbore_intersection_algorithm</code> 算法，感兴趣的同学可以<a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FM%25C3%25B6ller%25E2%2580%2593Trumbore_intersection_algorithm" title="https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm" ref="nofollow noopener noreferrer">点此查看</a>。</p>
+<p>算法实现可以参照 <a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js%2Fblob%2Fdev%2Fsrc%2Fmath%2FRay.js" title="https://github.com/mrdoob/three.js/blob/dev/src/math/Ray.js" ref="nofollow noopener noreferrer">ThreeJS 的实现</a>，此处就不贴了。</p>
+<h3 data-id="heading-21">一些优化</h3>
+<p>以上就是最简单的拾取原理，但实际上，场景模型比较多的时候，我们需要考虑如何高效的实现选取操作，这里面涉及很多策略，比如射线与包围球/盒相交的检测，模型按深度排序，按区域划分屏幕等等，这些优化方式的本质都是避免一些不必要的检测，本文不再一一介绍这些内容，感兴趣的同学可以翻看 ThreeJS 的源码，其中有这些算法的实现。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

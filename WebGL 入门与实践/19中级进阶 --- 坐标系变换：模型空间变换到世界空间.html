@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 坐标系变换：模型空间变换到世界空间</h1>
+<p>上一节我们学习了基本变换的原理与实现，本节我们学习如何把这些变换应用到坐标系变换中。</p>
+<h2 data-id="heading-1">坐标系变换的分类</h2>
+<p>前面我们讲过，在 3D 编程中，可控制的坐标系变换分为3类，分别是：</p>
+<ul>
+<li>模型变换
+<ul>
+<li>模型变换负责将模型坐标转换成世界坐标。</li>
+</ul>
+</li>
+<li>视图变换
+<ul>
+<li>视图变换负责将世界坐标转换成相机坐标。</li>
+</ul>
+</li>
+<li>投影变换
+<ul>
+<li>投影变换负责将相机坐标转换成裁剪坐标，也就是将 3D 坐标投影到 2D 平面上。</li>
+</ul>
+</li>
+</ul>
+<p>需要强调一点变换矩阵相乘的顺序，假设最终变换矩阵为 F，模型矩阵为 M， 视图矩阵为 V，投影矩阵为 P，那么有：</p>
+<p><img alt="F = P \times V \times M" src="https://juejin.cn/equation?tex=F%20%3D%20P%20%5Ctimes%20V%20%5Ctimes%20M" loading="lazy" class="medium-zoom-image"></p>
+<p>这个顺序不能有错，否则效果与预想的会不一致。</p>
+<p>接下来，我们从第一个变换<code>模型变换</code>讲起。</p>
+<h2 data-id="heading-2">坐标系变换的起点</h2>
+<p>编程之初，我们首先能拿到的是模型数据，模型中各个点的位置是相对于模型的某个位置确定的，一般这个位置是模型的中心点，下面这个坐标系就是模型坐标系，立方体的所有顶点坐标都是相对于中心位置。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166cd2eb7d531b0b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>默认情况下，模型坐标系和世界坐标系重合，所有创建好的模型首先会放置在世界坐标系中心位置，我们创建一个立方体和一个球体：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166cd5693a608e92~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，我们创建的模型叠加在了一起。</p>
+<p>那么，我们需要将我们的模型摆放在 3D 世界中的特定位置，3D 世界所遵循的参照就是世界坐标系。</p>
+<p>这就涉及到模型变换了，模型变换的作用是将模型顶点从<code>模型坐标系</code>转换到<code>世界坐标系</code>。</p>
+<h2 data-id="heading-3">模型变换</h2>
+<p>模型变换是由多个基本变换组合而成，那么对矩阵而言，就是由多个基本变换矩阵相乘而得到，既然提到相乘，那么<code>相乘的顺序</code>就至关重要，因为矩阵不满足交换律，两个矩阵相乘顺序不同，结果也不同。体现到坐标系变换上，就会发现模型经过变换后的坐标也不同，这一点很重要，请大家一定要牢记。</p>
+<h3 data-id="heading-4">变换顺序</h3>
+<p>接下来我们演示下，对一个立方体进行平移旋转变换。</p>
+<h4 data-id="heading-5">平移与旋转</h4>
+<p>我们先将立方体平移5 个单位，然后逆时针旋转 45 度，看一下立方体是什么状态。</p>
+<p>平移矩阵：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">translateMatrix</span> = matrix.translate(<span class="hljs-number">5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+</code></pre><p>旋转矩阵:</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">rotateMatrix</span> = matrix.rotateX(Math.PI / <span class="hljs-number">180</span> * <span class="hljs-number">45</span>)<span class="hljs-comment">;</span>
+</code></pre><p>创建两个立方体，红色立方体先旋转再平移，黄色立方体先平移再旋转。</p>
+<p>先旋转再平移矩阵：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">redMatrix</span> = matrix.multiply(translationMatrix, rotateMatrix)<span class="hljs-comment">;</span>
+</code></pre><p>先平移再旋转矩阵：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">yellowMatrix</span> = matrix.multiply(rotateMatrix, translationMatrix)<span class="hljs-comment">;</span>
+</code></pre><p>将两个矩阵应用到立方体上，我们可以看到下面的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166ce31a5fe2ff25~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>很容易发现，当我们需要模型自身绕着模型中心旋转时，要先执行旋转再平移，党需要模型绕世界中心旋转时，需要先平移再旋转。但通常情况，我们都是先执行旋转再执行平移，也就是红色立方体的旋转效果。</p>
+<h4 data-id="heading-6">考虑缩放</h4>
+<p>当然，除了平移与旋转，有时也会涉及到模型缩放，很显然，对模型进行缩放也是要放在平移之前，但是缩放和旋转哪个在先，哪个在后呢？</p>
+<p><strong>先缩放再旋转，还是先旋转再缩放？</strong></p>
+<p>依然通过两个立方体来比较，红色立方体先执行缩放，再进行旋转，黄色立方体则先旋转再缩放，在这里缩放比例采用 X 轴放大 2 倍， Y 轴放大 1.5 倍来处理。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166ce9597ae0d78e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，先旋转再缩放的黄色立方体不是我们所期望的结果，它会改变模型的形状。而<code>先缩放再旋转</code>的红色立方体则是我们所期望的。</p>
+<p>上例我们采用的是不一样的缩放比例，大家能很容易地看出差别，这次我们采用一样的缩放比例，看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166cea140d8adf1c~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，当缩放矩阵的缩放比例一致时，旋转与缩放的顺序就不那么重要了，表现都是一样的。</p>
+<h4 data-id="heading-7">模型变换公式</h4>
+<p>假设模型变换矩阵为 M，其中缩放矩阵为 S，旋转矩阵为 R，平移矩阵为 T，考虑到我们是列主序，所以有如下公式：</p>
+<p><img alt="M = T（平移矩阵） \times R（旋转矩阵） \times S（缩放矩阵）" src="https://juejin.cn/equation?tex=M%20%3D%20T%EF%BC%88%E5%B9%B3%E7%A7%BB%E7%9F%A9%E9%98%B5%EF%BC%89%20%5Ctimes%20R%EF%BC%88%E6%97%8B%E8%BD%AC%E7%9F%A9%E9%98%B5%EF%BC%89%20%5Ctimes%20S%EF%BC%88%E7%BC%A9%E6%94%BE%E7%9F%A9%E9%98%B5%EF%BC%89" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-8">模型变换的意义</h2>
+<p>前面我们讲了，3D 世界中会有很多模型，每个模型所处的位置和朝向都不一样，这就需要我们对它们进行安放，模型变换就是我们安放模型的手段。</p>
+<h2 data-id="heading-9">回顾</h2>
+<p>本节主要讲解坐标系变换的分类，以及<code>模型变换</code>的作用以及使用时需要注意的地方，主要是矩阵相乘顺序。</p>
+<p>下一节，我们讲解视图变换的推导与应用。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

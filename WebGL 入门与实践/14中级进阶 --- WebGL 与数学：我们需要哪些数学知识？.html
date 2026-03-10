@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- WebGL 与数学：我们需要哪些数学知识？</h1>
+<p>在前面章节的学习中，大家已经接触过<code>矩阵</code>、<code>向量</code>等数学概念了。那么除了<code>矩阵</code>和<code>向量</code>， 关于 3D 开发我们还需要哪些数学知识？这些数学知识又能够帮助我们解决什么问题呢?</p>
+<p>本节为大家做一个概括，接下来的章节我们就深入学习这些数学知识。</p>
+<h2 data-id="heading-1">你能学到什么？</h2>
+<ul>
+<li>明确图形学开发与数学基础的密切关系。</li>
+<li>学好图形学开发需要掌握哪些数学知识。</li>
+<li>这些数学知识能够帮助我们解决什么问题。</li>
+</ul>
+<p>那么，3D 应用涵盖哪些数学知识呢？</p>
+<h2 data-id="heading-2">一、 坐标系</h2>
+<p><code>坐标系</code>是一个重中之重的概念，我们在开发 3D 应用的过程中，经常会涉及到坐标系之间的转换，最经典的坐标转换流水线就涉及到六种坐标系，由此可见坐标系的重要性。</p>
+<h2 data-id="heading-3">二、 点</h2>
+<p><code>点</code>在 3D 领域通常指<code>顶点坐标</code>，3D 世界由很多<code>模型</code>组成，模型又由很多<code>面</code>组成，而面又由很多<code>点</code>组成。因此，<code>点</code>是组成 3D 世界的基本元素。WebGL 渲染的过程，就是将组成模型的<code>顶点</code>传递给 <code>GPU</code>，GPU 按照指定图元<code>装配</code>并<code>插值</code>这些顶点数据，然后通过片元着色器对像素进行着色，最终渲染成 <code>3D 模型</code>。由此可见<code>顶点</code>是模型的起始数据，重要性可见一斑。</p>
+<h2 data-id="heading-4">三、向量</h2>
+<p><code>向量</code>是另一个非常重要的知识点。物理和数学中的向量代表既有<code>大小</code>又有<code>方向</code>的量。</p>
+<p>通常我们使用<code>向量容器</code>来表示数学中的<code>点</code>和<code>向量</code>。</p>
+<p>比如我们经常会使用 <code>3 维向量</code>来表示<code>顶点坐标</code>，3 维向量还可以理解为一个 <code>3 x 1</code> 阶矩阵，将 <code>3 x 3</code> 阶变换矩阵左乘顶点坐标（3 * 1 阶矩阵），按照矩阵的运算法则，<code>m行n列</code> 矩阵左乘 <code>n 行 o 列</code>矩阵可以得到一个 <code>m 行 o 列</code>矩阵，所以我们矩阵和向量相乘结果是一个新的 3 * 1 阶 矩阵，也就是 3 维向量，它表示变换后的顶点坐标。</p>
+<blockquote>
+<p>这从数学角度解释了<code>变换矩阵</code>左乘<code>顶点坐标向量</code>的结果是一个新的顶点坐标的原因。</p>
+</blockquote>
+<p>通常在对模型执行坐标转换的时候，<code>变换矩阵</code>左乘<code>顶点坐标</code>代表对这个顶点执行<code>坐标转换</code>，这是顶点着色器中对顶点执行的最常用的操作。</p>
+<p>又比如在为模型表面计算光照强度的时候，我们会用到法向量和光线入射向量，利用他们之间的点积计算光照强度。</p>
+<p>向量的重要性可见一斑。</p>
+<h3 data-id="heading-5">向量计算</h3>
+<p>3D 编程中经常使用的向量运算有以下几种。</p>
+<ul>
+<li>点积</li>
+<li>叉积</li>
+<li>归一化向量</li>
+<li>向量长度</li>
+<li>两个向量之间的距离</li>
+<li>向量基本运算
+<ul>
+<li>向量相加</li>
+<li>向量相减</li>
+<li>向量相乘</li>
+<li>向量相除</li>
+</ul>
+</li>
+</ul>
+<p>后续章节我们会详细学习它们的运算规律，并提供 JavaScript 版本的分析与实现。</p>
+<h2 data-id="heading-6">四、矩阵</h2>
+<p>3D 数学中最重要的一个知识点我想就是<code>矩阵</code>了，矩阵能够帮助我们以一种非常简单的方式解决大量运算的问题。</p>
+<p>比如坐标转换。</p>
+<p>那有同学会问了，坐标转换无非就是对顶点坐标的计算，我用普通的<code>加减乘除</code>和<code>三角函数</code>运算也能做到呀。</p>
+<p>说的没错，那大家有没有想过，如果要对一个坐标执行多种变换，大家需要写多少计算逻辑？</p>
+<p>我想大家会崩溃的。</p>
+<p><code>矩阵</code>就是为了帮助我们解决这个问题，一个矩阵代表一种变换，多个矩阵相乘就代表多个变换。有了矩阵，我们就不用再使用三角函数，加减乘除等繁杂的数学公式来完成坐标转换，仅仅使用一个矩阵就可以代替多种运算步骤。</p>
+<p>前面在构建立方体的章节我们已经接触到了矩阵，仅仅让一个<code>旋转矩阵</code>左乘<code>顶点坐标</code>，就实现了立方体的旋转，由此可见矩阵在 3D 数学运算中的重要性。</p>
+<p>这就是矩阵的主要作用。但使用矩阵还有一点考虑，就是在 GPU 中执行矩阵运算性能会高很多，这得益于 GPU 并行计算的优势，在绘制大量顶点的场景下会有很大的性能提升。</p>
+<h3 data-id="heading-7">矩阵运算</h3>
+<p>3D 编程中经常用到的矩阵运算有以下几种。</p>
+<ul>
+<li>单位化矩阵</li>
+<li>矩阵基本运算
+<ul>
+<li>矩阵相加。</li>
+<li>矩阵相减。</li>
+<li>矩阵相乘。</li>
+<li>转置矩阵</li>
+<li>逆矩阵</li>
+</ul>
+</li>
+<li>旋转矩阵
+<ul>
+<li>绕 X 轴旋转。</li>
+<li>绕 Y 轴旋转。</li>
+<li>绕 Z 轴旋转。</li>
+<li>绕轴向量旋转。</li>
+<li>根据欧拉角推导旋转矩阵。</li>
+<li>根据四元数推导旋转矩阵。</li>
+<li>旋转矩阵与欧拉角、四元数之间的变换。</li>
+</ul>
+</li>
+<li>平移
+<ul>
+<li>沿 X 轴平移。</li>
+<li>沿 Y 轴平移。</li>
+<li>沿 Z 轴平移。</li>
+</ul>
+</li>
+<li>缩放
+<ul>
+<li>沿 X 轴缩放。</li>
+<li>沿 Y 轴缩放。</li>
+<li>沿 Z 轴缩放。</li>
+</ul>
+</li>
+<li>观察矩阵</li>
+<li>正射投影矩阵</li>
+<li>透视投影矩阵</li>
+</ul>
+<p>如果我们不理解矩阵和向量的运算规则，我们就写不出数学库，自然就没办法开发 3D 应用。接下来我们就要着重讲解这方面的内容，另外我还会详细推导变换矩阵的 JavaScript 算法实现，封装出一个我们自己的数学库。</p>
+<h2 data-id="heading-8">五、 常用数学函数</h2>
+<p>3D 开发时我们经常需要使用一些数学函数完成一些数值运算，常用的有如下几种：</p>
+<ul>
+<li>
+<p>sin (θ)</p>
+<ul>
+<li>指定角度 θ 的正弦值。</li>
+</ul>
+</li>
+<li>
+<p>asin (value)</p>
+<ul>
+<li>指定正弦值 value 对应的角度值。</li>
+</ul>
+</li>
+<li>
+<p>cos (θ)</p>
+<ul>
+<li>指定角度 θ 的余弦值。</li>
+</ul>
+</li>
+<li>
+<p>acos (value)</p>
+<ul>
+<li>指定余弦值 value 对应的角度值。</li>
+</ul>
+</li>
+<li>
+<p>atan (value)</p>
+<ul>
+<li>指定正切值 value 对应的角度。</li>
+</ul>
+</li>
+<li>
+<p>tan (θ)</p>
+<ul>
+<li>求 θ 的正切值。</li>
+</ul>
+</li>
+<li>
+<p>abs (value)</p>
+<ul>
+<li>取 value 的绝对值。</li>
+</ul>
+</li>
+<li>
+<p>max (value1, value2)</p>
+<ul>
+<li>取 value1 和 value2 之间的最大值。</li>
+</ul>
+</li>
+<li>
+<p>min (value1, value2)</p>
+<ul>
+<li>取 value1 和 value2 之间的最小值。</li>
+</ul>
+</li>
+<li>
+<p>clamp (value, min, max)</p>
+<ul>
+<li>如果 value 小于 min，返回 min，如果 value 大于 max ，返回 max，如果 value 介于 min 和 max 之间，返回 value。</li>
+</ul>
+</li>
+<li>
+<p>pow (x, n)</p>
+<ul>
+<li>求 x 的 n 次幂。</li>
+</ul>
+</li>
+<li>
+<p>。。。</p>
+</li>
+</ul>
+<p>还有一些函数就不一一介绍了，在需要的时候大家可以查一下。</p>
+<h2 data-id="heading-9">六、其它高等函数</h2>
+<p>上面的数学知识，足以支撑我们完成大部分 3D 效果了，但在做一些曲线相关应用的时候，我们还会用到一些曲线公式来求坐标，如<code>正弦</code>、<code>余弦</code>、<code>贝塞尔</code>公式等。本小册不对它们做过多介绍，感兴趣的话大家可以去看看 ThreeJS 对它们的实现。</p>
+<h2 data-id="heading-10">回顾</h2>
+<p>以上就是我们在 3D 编程中将会用到的数学知识，业界一般将这些数学算法抽象出来以方便调用，比如 <code>Threejs</code> 就有单独的 <code>matrix</code> 、<code>vector</code>、<code>euler</code>等数学类。JavaScript没有提供向量和矩阵的表示和运算，所以我们需要封装。但是 <code>GLSL</code> 内置了大部分数学运算。</p>
+<p>有的同学会问，既然 <code>GLSL</code> 内置了这些计算，<code>Threejs</code> 为什么还要封装呢？</p>
+<p>这是因为有些运算没有必要放在 <code>GLSL</code> 中，如果放在 <code>GLSL</code> 中反而会影响性能。比如<code>全局变换矩阵</code>，如果放在 <code>GLSL</code> 中计算，那么每个顶点变换前，都要重新计算出矩阵。模型的顶点都是很多的，这会造成大量重复运算。尽管 <code>GPU</code> 的运算能力很强，但那么多的无用运算还是会造成性能问题。</p>
+<p>下一节，我们开始详细介绍这些数学知识。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

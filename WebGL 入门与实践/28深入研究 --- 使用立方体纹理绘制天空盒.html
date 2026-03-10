@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- 使用立方体纹理绘制天空盒。</h1>
+<p>在初级进阶课程，我们学习了纹理的绘制方法，不过那节我们只学习了如何使用<code>2D纹理</code>进行贴图。事实上，WebGL 还支持将多个 2D 纹理组合成一个单一纹理，然后采用该单一纹理进行贴图，这种纹理称为立方体纹理<code>CubeMap</code>，本节我们学习如何使用立方体纹理进行贴图。</p>
+<h2 data-id="heading-1">采样原理</h2>
+<p>在讲解贴图方法之前，我们简单了解一下立方体纹理的采样原理。立方体纹理实质上由 6 个 2D 纹理组成，这 6 个2D 纹理对应立方体的每个面，立方体纹理可以理解为 6 个面都是图像的立方体。</p>
+<p>那如何对立方体纹理进行采样呢？首先，立方体纹理对应的 6 个图像资源宽度和高度要相等。其次，使用一束从立方体中心位置发出的方向向量进行采样，方向向量就是我们传递给 GPU 的纹理坐标，该向量和立方体交点处的图像像素就是我们需要的采样值。</p>
+<blockquote>
+<p>当模型是单位为 1 的立方体时，模型的顶点坐标即立方体纹理坐标。</p>
+</blockquote>
+<h2 data-id="heading-2">贴图过程</h2>
+<p>立方体纹理的贴图过程和之前的 2D 纹理贴图有所区别，接下来我们演示一下。</p>
+<h3 data-id="heading-3">着色器</h3>
+<p>因为是纹理操作，所以着色器部分需要增加纹理坐标和纹理资源。</p>
+<h4 data-id="heading-4">顶点着色器</h4>
+<p>顶点着色器需要增加纹理坐标，立方体纹理的一个优点就是纹理坐标采用原始坐标值就可以。</p>
+<pre><code lang="ini" class="hljs language-ini">precision mediump float<span class="hljs-comment">;</span>
+// 接收顶点坐标 (x, y, z)
+attribute vec3 a_Position<span class="hljs-comment">;</span>
+uniform mat4 u_Matrix<span class="hljs-comment">;</span>
+varying vec3 textCoord<span class="hljs-comment">;</span>
+void main(){
+ <span class="hljs-attr">gl_Position</span> = u_Matrix * vec4(a_Position,<span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ // 将顶点原始坐标赋值给纹理坐标。
+ <span class="hljs-attr">textCoord</span> = a_Position<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-5">片元着色器</h4>
+<p>片元着色器部分也比较简单，将立方体纹理上纹理坐标对应的颜色信息赋值给 gl_FragColor 作为像素颜色。</p>
+<pre><code lang="csharp" class="hljs language-csharp">precision mediump <span class="hljs-built_in">float</span>;
+<span class="hljs-comment">//接收纹理坐标坐标 (x, y, z)</span>
+varying vec3 textCoord;
+<span class="hljs-comment">//samplerCube变量，用来接收立方体纹理。</span>
+uniform samplerCube u_Skybox;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span>()</span>
+{
+ gl_FragColor = textureCube(u_Skybox, textCoord);
+}
+</code></pre><h3 data-id="heading-6">加载资源</h3>
+<p>和 2D 纹理一样，在使用纹理之前，我们还是要先把资源加载到内存中，由于立方体纹理需要 6 个图像，所以我们需要定义一个图像资源加载器，它包含一个资源列表和加载完成后的回调事件。</p>
+<pre><code lang="ini" class="hljs language-ini">function loadImages(imgList, callback){
+ let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ function ready (){
+ if(i >= resourceList.length){
+ callback()<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ }
+ i++<span class="hljs-comment">;</span>
+ }
+ for(let <span class="hljs-attr">i</span> =<span class="hljs-number">0</span><span class="hljs-comment">;i<resourceList.length;i++){</span>
+ let <span class="hljs-attr">img</span> = new Image()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">img.onload</span> = ready<span class="hljs-comment">;</span>
+ <span class="hljs-attr">img.src</span>= resourceList[i]<span class="hljs-comment">;</span>
+ }
+ 
+}
+</code></pre><p>有了加载器，我们将需要的六张图片加载到内存中。</p>
+<pre><code lang="css" class="hljs language-css">loadImages(<span class="hljs-selector-attr">[<span class="hljs-string">'right.png'</span>,<span class="hljs-string">'left.png'</span>,<span class="hljs-string">'top.png'</span>,<span class="hljs-string">'down.png'</span>,<span class="hljs-string">'back.png'</span>,<span class="hljs-string">'front.png'</span>]</span>, renderSkyBox);
+</code></pre><blockquote>
+<p>renderSkyBox是图片加载完成后执行的回调，也就是下面的绘制过程。</p>
+</blockquote>
+<h3 data-id="heading-7">纹理操作</h3>
+<p>图片资源加载到内存之后，我们就可以对纹理进行操作了。</p>
+<p>1、创建纹理对象，并激活 0 号纹理单元。</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//1、创建纹理对象</span>
+let texture = gl<span class="hljs-selector-class">.createTexture</span>();
+<span class="hljs-comment">//2、激活0号纹理单元</span>
+gl<span class="hljs-selector-class">.activeTexture</span>(gl.TEXTURE0);
+<span class="hljs-comment">//3、将 0 号纹理单元传入 GPU。</span>
+gl<span class="hljs-selector-class">.uniform1i</span>(u_Skybox, <span class="hljs-number">0</span>);
+<span class="hljs-comment">//4、当创建的纹理对象texture绑定到立方体纹理上</span>
+gl<span class="hljs-selector-class">.bindTexture</span>(gl.TEXTURE_CUBE_MAP, texture);
+</code></pre><p>2、将 6 个面对应的纹理图像传到 GPU</p>
+<pre><code lang="javascript" class="hljs language-javascript">gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_POSITIVE_X</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky0'</span>));
+gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_NEGATIVE_X</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky1'</span>));
+gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_POSITIVE_Y</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky2'</span>));
+gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_NEGATIVE_Y</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky3'</span>));
+gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_POSITIVE_Z</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky4'</span>));
+gl.<span class="hljs-title function_">texImage2D</span>(gl.<span class="hljs-property">TEXTURE_CUBE_MAP_NEGATIVE_Z</span>, <span class="hljs-number">0</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">RGB</span>, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'sky5'</span>)); 
+</code></pre><blockquote>
+<p>这里要注意一点，sky4是背面图像，sky 5 是正面图像，我们需要将背面图像传递给正面纹理 <code>TEXTURE_CUBE_MAP_POSITIVE_Z</code> ，将正面图像传递给背面纹理<code>TEXTURE_CUBE_MAP_NEGATIVE_Z</code>。</p>
+</blockquote>
+<p>3、设置图片放大缩小时的过滤参数，此处我们设置为就近取值。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST)<span class="hljs-comment">;</span>
+gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST)<span class="hljs-comment">;</span>
+</code></pre><p>4、设置当纹理坐标没有落在任何一个面上，而是落在两个面之间时的纹理采样，使用gl.CLAMP_TO_EDGE 表示采用边缘的纹理像素。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)<span class="hljs-comment">;</span>
+gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)<span class="hljs-comment">;</span>
+</code></pre><p>至此，纹理部分的操作就完成了，接下来我们要创建一个立方体代表天空盒，将图像贴在立方体的各个面上。</p>
+<h3 data-id="heading-8">创建天空盒</h3>
+<p>我们先从立方体外部看一下立方体纹理的渲染效果，然后将摄像机放到立方体内部，讲解天空盒的实现方式。</p>
+<h4 data-id="heading-9">在外部观察天空盒</h4>
+<p>1、创建一个边长为 500 的立方体，并将立方体转化成无索引形式。</p>
+<blockquote>
+<p>边长长度没有限制，只要保证摄像机位置在立方体内部即可。</p>
+</blockquote>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-comment">//索引立方体</span>
+<span class="hljs-keyword">let</span> cube = createCube(<span class="hljs-number">500</span>, <span class="hljs-number">500</span>, <span class="hljs-number">500</span>);
+<span class="hljs-comment">//无索引立方体</span>
+cube = transformIndicesToUnIndices(cube);
+<span class="hljs-comment">// 创建顶点缓冲对象。</span>
+<span class="hljs-keyword">let</span> bufferInfo = createBufferInfoFromObject(gl, cube);
+
+<span class="hljs-comment">// 创建渲染对象</span>
+<span class="hljs-keyword">let</span> <span class="hljs-built_in">object</span> = <span class="hljs-keyword">new</span> Model(<span class="hljs-string">'sky'</span>);
+<span class="hljs-built_in">object</span>.setBufferInfo(bufferInfo);
+objectList.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">object</span>);
+renderList.<span class="hljs-keyword">add</span>({
+ programInfo: program,
+ model: <span class="hljs-built_in">object</span>,
+ primitive: <span class="hljs-string">'TRIANGLES'</span>,
+ renderType: <span class="hljs-string">'drawArrays'</span>
+});
+
+</code></pre><p>2、创建摄像机</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">cameraPosition</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">600</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">target</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">up</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">cameraMatrix</span> = matrix.lookAt(cameraPosition, target, up)<span class="hljs-comment">;</span>
+// 从相机矩阵取逆获取视图矩阵。
+let <span class="hljs-attr">viewMatrix</span> = matrix.inverse(cameraMatrix)<span class="hljs-comment">;</span>
+</code></pre><p>3、创建视图投影矩阵，近平面20，远平面 900。</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">projectionMatrix</span> = matrix.perspective(
+ fieldOfViewRadians,
+ window.innerWidth / window.innerHeight,
+ 20,
+ 900
+)<span class="hljs-comment">;</span>
+</code></pre><p>4、设置 MVP 矩阵，执行渲染操作。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">object.uniforms.u_Matrix</span> = matrix.multiply(projectionMatrix, viewMatrix)<span class="hljs-comment">;</span>
+
+renderList.forEach(function(object){
+ ...略
+})
+</code></pre><p>以上就是主要代码，我们看下贴图效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811261674fabbc9ccfa10~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到， 6 张图像都能正确的贴到对应的面上。接下来，我们将摄像机位置逐步放到立方体内部，看看呈现给我们的是什么。</p>
+<h4 data-id="heading-10">在立方体内部观察。</h4>
+<p>在立方体内部观察时，呈现在我们面前的是天空盒的背面，但是由于背面剔除机制，我们是看不到背面的，所以这时候，我们要将背面剔除方式改成<code>正面剔除</code>：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.cullFace(gl.FRONT)<span class="hljs-comment">;</span>
+</code></pre><p>上面的摄像机坐标是在Z轴正向 600 单位距离处，接下来我们将摄像机慢慢靠近立方体，当到达立方体中心后停止，我们看下这个过程。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112616750530bccf4a98~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，在内部观察时，会发现图像渲染是左右相反的，我们要修改一下顶点着色器，将纹理坐标的X值取反。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">textCoord</span> = vec3(-a_Position.x, a_Postion.y, a_Position.z)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811261675056947d9c8fc~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这次大家会发现，在外面观察立方体时图像左右相反了，内部观察时正常了。我们这次做天空盒，就要在立方体内部观察，只要内部观察正常就可以。</p>
+<p>我们将视线水平旋转进行观察。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">target.x</span> = Math.cos(deg2radians(uniforms.xRotation)) * Math.cos(deg2radians(uniforms.yRotation))<span class="hljs-comment">;</span>
+<span class="hljs-attr">target.y</span> = Math.sin(deg2radians(uniforms.xRotation))<span class="hljs-comment">;</span>
+<span class="hljs-attr">target.z</span> = Math.cos(deg2radians(uniforms.xRotation)) * Math.sin(deg2radians(uniforms.yRotation))<span class="hljs-comment">;</span>
+target.normalize()<span class="hljs-comment">;</span>
+// 重新计算视图矩阵
+
+<span class="hljs-attr">cameraMatrix</span> = matrix.lookAt(cameraPosition, target, up)<span class="hljs-comment">;</span>
+<span class="hljs-attr">viewMatrix</span> = matrix.inverse(cameraMatrix)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112616750976f415f483~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>以上天空盒的实现方式，我们用稍微真实一些的图片演示一下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181126167509bb8868ec11~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-11">渲染时机</h2>
+<p>上面的例子中，我们只绘制了天空盒，没有绘制其他物体，实际应用中往往还有其他物体存在。当然，我们不能够让物体阻挡天空盒的渲染。</p>
+<p>在上面的例子里，我们增加一个箱子，该箱子是长宽高均为 20 的立方体，上面的天空盒是长宽高为 500 的立方体，很明显，箱子在天空盒内部。</p>
+<p>同时，我们的摄像机在坐标系原点位置，所以为了能够看到箱子，我们需要将箱子往后移至少 10 个单位长度，这里我们将它往后移动 100 个单位</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">boxCube</span> = createCube(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>, <span class="hljs-number">20</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">boxBuffer</span> = createBufferInfoFromObject(gl, boxCube)<span class="hljs-comment">;</span>
+...略
+
+let <span class="hljs-attr">box</span> = new Model(<span class="hljs-string">'box'</span>)<span class="hljs-comment">;</span>
+box.setBufferInfo(boxBuffer)<span class="hljs-comment">;</span>
+box.translateZ(-100)<span class="hljs-comment">;</span>
+</code></pre><p>此时包围盒和箱子的状态应该是这样的：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181127167548478f7d265f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811271675487b2a6f3e5e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>盒子显示在了天空盒前面，但是有一点不正常，就是我们看不到盒子的正面了。原因是什么呢？</p>
+<p>在绘制天空盒的时候，摄像机在盒子内部，所以需要看到盒子背面，而箱子在摄像机外部，正常情况要能够看到盒子正面，所以在绘制箱子时，我们要把背面剔除方式改回背面剔除：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.cullFace(gl.BACK)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181127167548cdb1688d85~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这回正常了。</p>
+<p>有时候，天空盒经过视图投影矩阵作用之后，不一定在场景的最后面（也就是 Z 值坐标不是 1.0），所以，在天空盒后面的物体我们就看不到了。针对这个问题，一般采取的做法是修改顶点着色器，将天空盒的 Z 值强制改为 1.0，即在裁剪坐标系的最后面。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">gl_Position</span> = (u_Matrix * a_Position).xyww<span class="hljs-comment">;</span>
+</code></pre><p>w/w = 1.0。所以经过裁剪变换后，gl_Position 的Z 值坐标始终会是 1.0。</p>
+<p>那么，即便如此，也会有一些物体的 Z 值也是 1.0，同样是 1.0 的物体，哪个物体显示是根据绘制顺序决定的，因为深度测试函数默认是 gl.LESS，即当前片元的深度值要小于之前的深度值，才算测试通过，也就是能被渲染。所以，深度值是 1.0 的多个物体，哪个物体最先绘制，就渲染哪个物体。当然，我们可以改变深度测试函数。</p>
+<p>针对种种规则，我们约定一个绘制顺序。</p>
+<ul>
+<li>首先绘制物体（不包括天空盒）。</li>
+<li>最后绘制天空盒，将天空盒的深度值和当前物体的深度值进行比较，如果通过深度测试就绘制天空盒。默认情况下，深度缓存为 1.0 表示深度最大，即在场景最后面。为了让天空盒能够通过深度测试，我们改变默认的深度测试函数，将<code>gl.LESS</code>改为<code>gl.LEQUAL</code>，如下：</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss">gl<span class="hljs-selector-class">.depthFunc</span>(gl.LEQUAL)
+</code></pre><h2 data-id="heading-12">天空盒的应用</h2>
+<p>在实时场景渲染中，如果我们想要绘制非常远的物体，比如远山、天空等，当观察者往前或者往后移动时，远山、天空的大小是几乎没什么变化的。假如很远的地方有一座山，即使我们往前走进十米、百米，这座山在视野中的大小也是几乎没什么变化的，这个时候我们可以采用天空盒技术来实现。</p>
+<p>又或者一些房屋装修、汽车内饰等只是为了展示环境的场景，这时也可以考虑采用天空盒技术。</p>
+<h2 data-id="heading-13">回顾</h2>
+<p>本节讲述了立方体纹理的贴图过程以及天空盒的开发方式，涉及了前面的一些知识点，诸如<code>背面剔除</code>、<code>深度测试原理</code>等，如果我们对每一个知识点都能灵活运用的话，就能够实现很多强大的效果。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

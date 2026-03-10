@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- 更高级的旋转：欧拉角与四元数</h1>
+<p>在之前的<code>坐标系基本变换</code>章节中，我们学习了 3D 基本旋转的四个方法：绕 3 个坐标轴、绕任意轴的旋转，并讲述了推导过程。本节介绍另外两个旋转的表示方法：<code>欧拉角</code>与<code>四元数</code>。</p>
+<p>任何一个概念的提出都有它自身的意义，新概念的诞生大多是为了解决一些问题，欧拉角与四元数也不例外。</p>
+<h2 data-id="heading-1">欧拉角</h2>
+<p>我们看下前四种旋转的特点，前四种旋转可以归结为旋转矩阵。</p>
+<ul>
+<li>首先，旋转矩阵是一个 3 X 3 矩阵，需要 9 个数字来表示一个旋转。</li>
+<li>其次，旋转矩阵通过 3 个绕基本坐标轴的矩阵相乘得到，计算过程相对繁琐。</li>
+<li>最后，物体旋转用矩阵来描述的话不易理解。为什么不易理解，是因为我们习惯于用角度来描述旋转状态，比如向左旋转多少度，绕着什么什么旋转多少度，这种说法很容易在脑子里想象出来。但如果我们看到一种旋转用如下方式来表示：</li>
+</ul>
+<figure><img alt="\begin{aligned}
+R = \begin{pmatrix}
+0.25 & 0.1 & 0.3 \\\
+0.1 & 0.02 & 0.2 \\\
+0.1 & 0.02 & 0.2
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AR%20%3D%20%5Cbegin%7Bpmatrix%7D%0A0.25%20%26%200.1%20%26%200.3%20%5C%5C%5C%0A0.1%20%26%200.02%20%26%200.2%20%5C%5C%5C%0A0.1%20%26%200.02%20%26%200.2%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>我想，这种反人类的<code>旋转表示方法</code>，人类是无法理解的，当然计算机是能读懂这种旋转的。</p>
+<p>那么，如何表示才能让人很容易地理解旋转呢？于是欧拉角的表示方法诞生了。关于欧拉角的详细介绍，大家可以从<a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FEuler_angles" title="https://en.wikipedia.org/wiki/Euler_angles" ref="nofollow noopener noreferrer">这里</a>了解，本节不做具体描述。</p>
+<p>欧拉角是飞控系统中用于描述飞行器姿态的方式，使用三个角度来表示，分别是yaw<code>偏航角</code>、pitch<code>俯仰角</code>、roll<code>滚转角</code>。</p>
+<ul>
+<li>yaw：偏航角，是指飞行器偏离原来航线的角度。</li>
+<li>pitch：俯仰角，是指飞行器机头抬起的角度。</li>
+<li>roll：滚转角，是指飞行器绕着自身头尾轴线翻滚的角度。</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672ab81527c0715~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>对比到笛卡尔坐标系，偏航角是绕着 Y 轴旋转的角度 α，俯仰角是绕着 X 轴旋转的角度 β，滚转角是绕着 Z 轴旋转的角度 γ。</p>
+<blockquote>
+<p>欧拉角旋转时绕的轴系，既可以参照世界坐标系，也可以参照自身坐标系。本节所讲的内容都是参照自身坐标系。</p>
+</blockquote>
+<p>可以看出，欧拉角很容易就能表示出一个旋转运动，而且用角度来描述旋转，容易被人理解。</p>
+<figure><img alt="R = (
+\alpha, \beta, \gamma)" src="https://juejin.cn/equation?tex=R%20%3D%20(%0A%5Calpha%2C%20%5Cbeta%2C%20%5Cgamma)" loading="lazy" class="medium-zoom-image"></figure>
+<h3 data-id="heading-2">欧拉角旋转顺序。</h3>
+<p>上面讲到，欧拉角是由三个角度构成，那么这三个角度的旋转顺序又是如何表示呢？</p>
+<p>我们必须清楚，欧拉角的旋转顺序必须保证统一性。如果顺序不统一，同样的三个角度，旋转结果也会不一样。就好比我们平常走路，向左转α然后向右转β，向右转α然后向左转β，两种旋转最终表示的姿态也会不同。</p>
+<p>我们常说的欧拉角严格意义上还可以细分为欧拉角<code>Euler-angles</code>和泰特布莱恩角<code>Tait-Bryan-angles</code>，这两种方法都利用了笛卡尔坐标系的三个坐标轴作为旋转轴，区别主要在于绕轴的旋转顺序。</p>
+<h4 data-id="heading-3">欧拉角</h4>
+<p>欧拉角的选取顺序有以下6种：</p>
+<ul>
+<li>XYX</li>
+<li>XZX</li>
+<li>YZY</li>
+<li>YXY</li>
+<li>ZXZ</li>
+<li>ZYZ</li>
+</ul>
+<p>以 XYX 欧拉角为例，最开始物体的坐标系和世界坐标系保持一致，首先物体绕 X 轴旋转 α角度，此时物体的坐标系发生了变化，产生了新的坐标系E1，然后绕新坐标系E1的 Y 轴旋转 β角度，这时又产生了新的坐标系 E2， 接着绕 E2 的 X 轴旋转 γ 角度，此时即物体的最终姿态。</p>
+<p>可以看到，这种顺序有一个共同点：第一个旋转轴和最后一个旋转轴在物体这个参照系下相同，可以理解为对称型欧拉角。</p>
+<h4 data-id="heading-4">泰特布莱恩角。</h4>
+<p>泰特布莱恩角的选取顺序有如下 6 种：</p>
+<ul>
+<li>XYZ</li>
+<li>XZY</li>
+<li>ZXY</li>
+<li>ZYX</li>
+<li>YXZ</li>
+<li>YZX</li>
+</ul>
+<p>可以看出，此种旋转顺序是非对称型的，我们前面所说的 yaw-pitch-roll 旋转就是采用的泰特布莱恩角。</p>
+<h3 data-id="heading-5">欧拉角的矩阵表示</h3>
+<p>欧拉角的定义有了，那么我们最终还是要将它推导成对应的旋转矩阵才能使用。</p>
+<p><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FEuler_angles" title="https://en.wikipedia.org/wiki/Euler_angles" ref="nofollow noopener noreferrer">这里</a>有这几种顺序的最终推导公式，但接下来我还是要讲解一下这个公式是如何推导出来的。</p>
+<p>前面说过了，顺序不同，所对应的旋转矩阵不同，旋转结果也不同。那么我们根据不同的顺序推导对应的旋转矩阵：</p>
+<h4 data-id="heading-6">XYZ 顺序</h4>
+<p>在坐标系基本变换章节我们讲解了矩阵的基本旋转，那么，本节的欧拉旋转其实相当于矩阵绕基本坐标轴的复合旋转。
+以 XYZ 顺序为例，XYZ 顺序的欧拉旋转可以表示如下：</p>
+<figure><img alt="R_{xyz} = R_x R_y R_z" src="https://juejin.cn/equation?tex=R_%7Bxyz%7D%20%3D%20R_x%20R_y%20R_z" loading="lazy" class="medium-zoom-image"></figure>
+<p>看到这个表达式，我们首先要思考一个问题，上面这个表达式表示的是什么样的旋转呢？</p>
+<p>请谨记，上面表示的旋转可以用以下两种方式理解：</p>
+<ul>
+<li>参照自身坐标系，先绕X轴旋转，再绕 Y 轴旋转，最后绕 Z 轴旋转。</li>
+<li>参照世界坐标系，先绕 Z 轴旋转，再绕 Y 轴旋转，最后绕 X 轴旋转。</li>
+</ul>
+<p>这两种旋转顺序相反。下面的两个方法可以验证，点击<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">这里查看源码</a>。</p>
+<p>如何验证参照世界坐标系的旋转顺序？</p>
+<ul>
+<li>首先改变 Z 轴旋转角度，直到旋转 90 度。</li>
+<li>其次改变 Y 轴旋转角度，直到旋转 90 度。</li>
+<li>最后改变 X 轴旋转角度，直到旋转 90 度。</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b7709ac748ba~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们发现，以世界坐标系为参照，旋转按照先 Z 、再 Y 、最后 X 轴的顺序依次进行。</p>
+<p>如何验证参照自身坐标系的旋转顺序？</p>
+<ul>
+<li>首先改变 X 轴旋转角度，直到旋转 90 度。</li>
+<li>其次改变 Y 轴旋转角度，直到旋转 90 度。</li>
+<li>最后改变 Z 轴旋转角度，直到旋转 90 度。</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b7b924f82e5a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们发现，以自身坐标系为参照，旋转按照先 X 、再 Y 、最后 Z 轴的顺序依次进行。</p>
+<p>所以我们得出以下结论：一个复合变换矩阵，既可以理解为世界坐标系下的依次变换，也可以理解为模型坐标系下的依次变换，变换顺序相反。</p>
+<h4 data-id="heading-7">根据欧拉角推导旋转矩阵</h4>
+<p>接下来，我们按照 XYZ 的顺序推导旋转矩阵，如下所示：</p>
+<figure><img alt="\begin{aligned}
+R &= R_x(\alpha)R_y(\beta)R_z(\gamma) \\\
+\\\
+ &= \begin{pmatrix}
+1 & 0 & 0 \\\
+0 & cos\alpha & -sin\alpha \\\
+0 & sin\alpha & cos\alpha 
+\end{pmatrix}
+ \begin{pmatrix}
+cos\beta &0 & sin\beta \\\
+0 & 1 & 0 \\\
+-sin\beta & 0 & cos\beta 
+
+\end{pmatrix} \begin{pmatrix}
+cos\gamma & -sin\gamma & 0 \\\
+sin\gamma & cos\gamma & 0 \\\
+0 & 0 & 1
+\end{pmatrix} \\\
+\\\
+&=
+\begin{pmatrix}
+cos\beta cos\gamma & -cos\beta sin\gamma & sin\beta \\\
+sin\alpha sin\beta cos\gamma + cos\alpha sin\gamma & -sin\alpha sin\beta sin\gamma + cos\alpha cos\gamma & -sin\alpha cos\beta \\\
+-cos\alpha cos\gamma sin\beta + sin\alpha sin\gamma & sin\alpha cos\gamma + cos\alpha sin\beta sin\gamma & cos\alpha cos\beta 
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AR%20%26%3D%20R_x(%5Calpha)R_y(%5Cbeta)R_z(%5Cgamma)%20%5C%5C%5C%0A%5C%5C%5C%0A%20%20%20%20%26%3D%20%5Cbegin%7Bpmatrix%7D%0A1%20%26%200%20%26%200%20%5C%5C%5C%0A0%20%26%20cos%5Calpha%20%20%26%20-sin%5Calpha%20%20%5C%5C%5C%0A0%20%26%20sin%5Calpha%20%26%20cos%5Calpha%20%0A%5Cend%7Bpmatrix%7D%0A%20%5Cbegin%7Bpmatrix%7D%0Acos%5Cbeta%20%260%20%26%20%20sin%5Cbeta%20%20%5C%5C%5C%0A0%20%26%201%20%26%200%20%5C%5C%5C%0A-sin%5Cbeta%20%26%200%20%26%20%20cos%5Cbeta%20%0A%0A%5Cend%7Bpmatrix%7D%20%20%5Cbegin%7Bpmatrix%7D%0Acos%5Cgamma%20%26%20-sin%5Cgamma%20%26%200%20%5C%5C%5C%0Asin%5Cgamma%20%26%20cos%5Cgamma%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%20%5C%5C%5C%0A%5C%5C%5C%0A%26%3D%0A%5Cbegin%7Bpmatrix%7D%0Acos%5Cbeta%20cos%5Cgamma%20%26%20-cos%5Cbeta%20sin%5Cgamma%20%26%20sin%5Cbeta%20%5C%5C%5C%0Asin%5Calpha%20%20sin%5Cbeta%20cos%5Cgamma%20%2B%20cos%5Calpha%20sin%5Cgamma%20%26%20-sin%5Calpha%20sin%5Cbeta%20sin%5Cgamma%20%2B%20%20cos%5Calpha%20cos%5Cgamma%20%26%20-sin%5Calpha%20cos%5Cbeta%20%5C%5C%5C%0A-cos%5Calpha%20cos%5Cgamma%20sin%5Cbeta%20%2B%20sin%5Calpha%20sin%5Cgamma%20%26%20sin%5Calpha%20cos%5Cgamma%20%2B%20cos%5Calpha%20%20%20sin%5Cbeta%20sin%5Cgamma%20%26%20cos%5Calpha%20cos%5Cbeta%20%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>有了推导公式，我们就可以很容易编写JavaScript 算法了：</p>
+<pre><code lang="ini" class="hljs language-ini">function makeRotationFromEuler(euler, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ 
+ var <span class="hljs-attr">x</span> = euler.x, y = euler.y, z = euler.z<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cx</span> = Math.cos(x), sx = Math.sin(x),
+ <span class="hljs-attr">cy</span> = Math.cos(y), sy = Math.sin(y),
+ <span class="hljs-attr">cz</span> = Math.cos(z), sz = Math.sin(z)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">sxsz</span> = sx * sz<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cxcz</span> = cx * cz<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cxsz</span> = cx * sz<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">sxcz</span> = sx * cz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[0]</span> = cy * cz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = sxcz * sy + cxsz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = sxsz - cxcz * sy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[4]</span> = -cy * sz<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = cxcz - sxsz * sy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = sxcz + cxsz * sy
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[8]</span> = sy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = -sx * cy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = cx * cy<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+ 
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-8">其它顺序推导</h4>
+<p>其它顺序的推导公式和 XYZ 类似，大家只需要按照矩阵相乘顺序推导即可，比如：</p>
+<ul>
+<li>XZY 顺序的推导公式：</li>
+</ul>
+<figure><img alt="R_{xzy} = R_x R_z R_y" src="https://juejin.cn/equation?tex=R_%7Bxzy%7D%20%3D%20R_x%20R_z%20R_y" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>YXZ 顺序的推导公式：</li>
+</ul>
+<figure><img alt="R_{yxz} = R_y R_x R_z" src="https://juejin.cn/equation?tex=R_%7Byxz%7D%20%3D%20R_y%20R_x%20R_z" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>YZX 顺序的推导公式：</li>
+</ul>
+<figure><img alt="R_{yzx} = R_y R_z R_x" src="https://juejin.cn/equation?tex=R_%7Byzx%7D%20%3D%20R_y%20R_z%20R_x" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>ZXY 顺序的推导公式：</li>
+</ul>
+<figure><img alt="R_{zxy} = R_z R_x R_y" src="https://juejin.cn/equation?tex=R_%7Bzxy%7D%20%3D%20R_z%20R_x%20R_y" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>ZYX 顺序的推导公式：</li>
+</ul>
+<figure><img alt="R_{zyx} = R_z R_y R_x" src="https://juejin.cn/equation?tex=R_%7Bzyx%7D%20%3D%20R_z%20R_y%20R_x" loading="lazy" class="medium-zoom-image"></figure>
+<p><a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">点击这里</a>可以查看不同顺序的欧拉角算法实现。</p>
+<p>有了欧拉角生成旋转矩阵的算法之后，我们就可以按照任意顺序进行旋转了。但请注意，在一个应用中尽量要统一旋转顺序，否则物体的旋转姿态将不是我们期望的。</p>
+<h4 data-id="heading-9">实战演练</h4>
+<p>上面推导出的算法使用起来相当简单，只需传入一个能够表示欧拉角的对象即可：</p>
+<blockquote>
+<p>一个欧拉角对象包含x、y、z 三个属性，分别表示绕 X 轴、Y 轴、Z 轴旋转的角度，以及一个表示欧拉旋转的顺序 order。</p>
+</blockquote>
+<pre><code lang="css" class="hljs language-css">
+<span class="hljs-selector-tag">var</span> rotateMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(uniforms.xRotation),
+ y: <span class="hljs-built_in">deg2radians</span>(uniforms.yRotation),
+ z: <span class="hljs-built_in">deg2radians</span>(uniforms.zRotation),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><h3 data-id="heading-10">欧拉角的缺点</h3>
+<p>尽管欧拉角易于理解，但它还是有一些缺点的：</p>
+<ul>
+<li>计算过程涉及到大量三角函数计算，运算量大，这点在推导公式的过程中显而易见。</li>
+<li>给定方位的欧拉角不唯一，有多个，这会对旋转动画的插值造成困难。同样一个姿态可以由好多个欧拉角来表示，即多对一的关系，那么在插值过程中就可能会引起姿态突变，产生抖动效果。</li>
+<li>万向节死锁，这个现象会在第二个旋转轴旋转了90 度时产生，当第二个旋转轴旋转 90 度时，会导致第三个旋转轴和第一个旋转轴重合，此时如果继续绕第三个旋转轴，相当于在第一个旋转轴上旋转。所谓死锁并不是旋转不了了，而是少了一个自由度。</li>
+</ul>
+<h4 data-id="heading-11">万向节死锁</h4>
+<p>我们看一下万向节死锁的表现：</p>
+<p>首先绕 X 轴旋转30度。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b95a50c92be1~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>接着绕 Y 轴旋转90 度。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b96751efbb08~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>绕 Y 轴旋转 90 度后，此时自身坐标系的 Z 轴和最开始的 X 轴重合，触发了万向节死锁，那么它会产生什么后果呢？</p>
+<p>我们绕 Z 轴做的旋转，等价于在最开始的 X 轴上旋转。那还要 Z 轴有什么用呢？是的，Z 轴的旋转已经没用了，此时我们无论怎么绕物体自身的 Z 轴旋转，都只能在原先 X 轴和 Y 轴上进行旋转，失去了原先 Z 轴方向上的的自由度。</p>
+<p>上面的例子最终的旋转角度是(x: 30, y: 90, z: 50)。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b9c1369c1766~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>接下来，我们把 Z 轴的旋转角度放到 X 轴上，不再绕 Z 轴旋转了，此时的欧拉角（x：80， y：90，z：0）。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672b9ba8ef07dd1~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，欧拉角（x: 80, y: 90, z: 0）和(x: 30, y: 90, z: 50) 表示的旋转一模一样。也就是说，多个欧拉角会对应一个旋转。这在做旋转动画时会导致旋转动画不准确的问题。</p>
+<h4 data-id="heading-12">欧拉角缺陷演示</h4>
+<p>有句话说得好，当你没有碰到过使用欧拉角进行旋转所产生的缺陷时，你永远无法理解它的缺点，接下来我通过两个例子来演示一下：</p>
+<h5 data-id="heading-13">大圆弧与小圆弧</h5>
+<p>我们知道 (0, 0, 330)和(0, 0, -30)所表示的方位一样，如果把物体从(0, 0, 0)旋转到（0，0，330）所代表的方位，我们期望的旋转动画应该是这样的：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181120167304a01f8b6ceb~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>但是实际上，欧拉角旋转路径却是这样的：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181120167304eb7e5ddcf4~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>欧拉角的这个特点会导致插值动画产生抖动、跳跃的副作用。</p>
+<h5 data-id="heading-14">动画路径怪异</h5>
+<p>除了上述大小圆弧产生的路径不正确以外，欧拉角的旋转路径有时很怪异，比如下面这个动画过程。</p>
+<p>准备一个球体，球体初始状态处于万向节死锁状态，如下：</p>
+<pre><code lang="yaml" class="hljs language-yaml"> <span class="hljs-attr">xRotation:</span> <span class="hljs-number">0</span><span class="hljs-string">,</span>
+ <span class="hljs-attr">yRotation:</span> <span class="hljs-number">-90</span><span class="hljs-string">,</span>
+ <span class="hljs-attr">zRotation:</span> <span class="hljs-number">0</span><span class="hljs-string">,</span>
+</code></pre><p>接下来我们让球体转动到如下状态：</p>
+<pre><code lang="yaml" class="hljs language-yaml"> <span class="hljs-attr">xRotation:</span> <span class="hljs-number">0</span><span class="hljs-string">,</span>
+ <span class="hljs-attr">yRotation:</span> <span class="hljs-number">-90</span><span class="hljs-string">,</span>
+ <span class="hljs-attr">zRotation:</span> <span class="hljs-number">0</span><span class="hljs-string">,</span>
+</code></pre><p>我们看一下球体的旋转路径是怎样的：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181215167b1ccaf1e51bf3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure>。<p></p>
+<ul>
+<li>
+<p>白色轨迹是采用欧拉角旋转时的运动路线。</p>
+</li>
+<li>
+<p>红色轨迹是我们正常的旋转路线。</p>
+</li>
+</ul>
+<p>可见，欧拉角有时会让我们的旋转绕个弯，产生比较怪异的动画效果，万向节死锁还是那么讨厌。</p>
+<h5 data-id="heading-15">连续旋转</h5>
+<p>万向节死锁除了会产生上面的问题以外，还会导致在做连续增量旋转时姿态不准确的问题，这个问题在一些跟踪系统中导致的后果是跟丢目标。</p>
+<p>举个例子，假设现在我们的飞行器先绕自身 X 轴（此时 X 轴和世界坐标系的 X 轴重合）旋转47 度，接着绕 Y 轴旋转 41 度，最后绕 Z 轴旋转 55 度。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> rotateMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">47</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">41</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><p>接着我们再绕飞行器自身坐标系的 X 轴旋转 8 度。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> rotateMoreMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">8</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">0</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">0</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><p>经过两次连续旋转之后，物体姿态如下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672ca68414f6aa2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>那么，如果我们不分为两次旋转，而是采用一次旋转，那么物体的旋转姿态有什么不同呢？看一下一次旋转的效果：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> rotateMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">41</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672ca5f659c7f1e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，虽然有一些差异，但是大体上是一致的。</p>
+<p>接下来我们逐渐改变 Y 轴的旋转角度，当 Y 轴旋转角度为 90 度时，我们再用上面的方法比较一下插值和不插值旋转的区别：</p>
+<p>插值旋转：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> rotateMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">47</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">90</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+
+<span class="hljs-selector-tag">var</span> rotateMoreMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">8</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">0</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">0</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672cada3bd27c21~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>那么我们看下一次性旋转后的方位：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> rotateMatrix = matrix<span class="hljs-selector-class">.getMatrixFromEuler</span>({
+ x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">90</span>),
+ z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">55</span>),
+ order:<span class="hljs-string">'XYZ'</span>
+});
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811191672cad6b817fc9b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这次能够很明显的感觉出插值前和插值后的区别了，结论是当第二个旋转轴越靠近 90 度，经过插值后的旋转姿态与一次旋转后的姿态产生的偏差越大。</p>
+<h4 data-id="heading-16">结论</h4>
+<p>实际上欧拉角足以应对大部分场景，虽然它有一些缺点。我们可以做出一些限制来避免它们，比如我们可以将第二个旋转轴的旋转角度限制在 -90 到 +90 之间。但尽管如此，我们仍然无法规避死锁的产生，所以我们急需一种能够避免死锁的旋转方法，也就是接下来要出场的四元数。</p>
+<h2 data-id="heading-17">四元数</h2>
+<p>还记得我们在基本变换里推导出的绕任意轴进行旋转的算法吗？但是通过轴角方式的旋转插值不是很直观，四元数的引入是对轴角旋转的升级，它能够完美地避免欧拉角的缺陷，并且能够很容易地对旋转进行插值，使物体旋转更自然，更平滑。</p>
+<h3 data-id="heading-18">四元数基础</h3>
+<p>四元数，顾名思义，是由四个数字组成，包含一个实数和三个复数，可以表示为：</p>
+<figure><img alt="q = (w, x, y, z)" src="https://juejin.cn/equation?tex=q%20%3D%20(w%2C%20x%2C%20y%2C%20z)" loading="lazy" class="medium-zoom-image"></figure>
+<p>或者</p>
+<figure><img alt="q = w + xi + yj + zk" src="https://juejin.cn/equation?tex=q%20%3D%20w%20%2B%20xi%20%2B%20yj%20%2B%20zk" loading="lazy" class="medium-zoom-image"></figure>
+<p>并且有以下特点：</p>
+<figure><img alt="i^2= j^2 = k^2 = -1" src="https://juejin.cn/equation?tex=i%5E2%3D%20j%5E2%20%3D%20k%5E2%20%3D%20-1" loading="lazy" class="medium-zoom-image"></figure>
+<p>四元数还可以理解为一个实数 w 和一个向量 <img alt="\vec u(x,y,z)" src="https://juejin.cn/equation?tex=%5Cvec%20u(x%2Cy%2Cz)" loading="lazy" class="medium-zoom-image"></p>
+<figure><img alt="q = (w, \vec u)" src="https://juejin.cn/equation?tex=q%20%3D%20(w%2C%20%5Cvec%20u)" loading="lazy" class="medium-zoom-image"></figure>
+<h3 data-id="heading-19">基本运算</h3>
+<h4 data-id="heading-20">加法/减法运算</h4>
+<p>四元数的加减是将对应位置的元素相加或者相减，得到新的四元数。</p>
+<figure><img alt="\begin{aligned}
+q0 + q1 &= (w_0, x_0i, y_0j, z_0k) + (w_1, x_1i, y_1j,z_1k) \\\
+&=(w_0 + w_1, (x_0 + x_1)i, (y_0 + y_1)j,(z_0+z_1)k)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Aq0%20%2B%20q1%20%26%3D%20(w_0%2C%20x_0i%2C%20y_0j%2C%20z_0k)%20%2B%20(w_1%2C%20x_1i%2C%20y_1j%2Cz_1k)%20%20%5C%5C%5C%0A%26%3D(w_0%20%2B%20w_1%2C%20(x_0%20%2B%20x_1)i%2C%20(y_0%20%2B%20y_1)j%2C(z_0%2Bz_1)k)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="\begin{aligned}
+q0 - q1 &= (w_0 + x_0i+ y_0j+ z_0k) - (w_1+ x_1i+ y_1j+z_1k) \\\
+&=w_0 - w_1 + (x_0 - x_1)i+(y_0 - y_1)j+(z_0-z_1)k
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Aq0%20-%20q1%20%26%3D%20(w_0%20%2B%20x_0i%2B%20y_0j%2B%20z_0k)%20-%20(w_1%2B%20x_1i%2B%20y_1j%2Bz_1k)%20%20%5C%5C%5C%0A%26%3Dw_0%20-%20w_1%20%2B%20(x_0%20-%20x_1)i%2B(y_0%20-%20y_1)j%2B(z_0-z_1)k%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-21">乘法运算</h4>
+<figure><img alt="\begin{aligned}
+q0 . q1 = (w0*w1-x0*x1-y0*y1-z0*z1) \\\
++ (w0*x1+x0*w1+y0*z1-z0*y1)i \\\
++ (y0*w1+w0*y1+z0*x1-x0*z1)j \\\
++ (w0*z1+z0*w1+x0*y1-y0*x1)k
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Aq0%20.%20q1%20%3D%20(w0*w1-x0*x1-y0*y1-z0*z1)%20%5C%5C%5C%0A%2B%20%20(w0*x1%2Bx0*w1%2By0*z1-z0*y1)i%20%5C%5C%5C%0A%2B%20%20(y0*w1%2Bw0*y1%2Bz0*x1-x0*z1)j%20%5C%5C%5C%0A%2B%20%20(w0*z1%2Bz0*w1%2Bx0*y1-y0*x1)k%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-22">四元数的模</h4>
+<figure><img alt="\begin{aligned}
+|q| = \sqrt{w^2+x^2+y^2+z^2}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%7Cq%7C%20%3D%20%5Csqrt%7Bw%5E2%2Bx%5E2%2By%5E2%2Bz%5E2%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-23">四元数的共轭</h4>
+<figure><img alt="\begin{aligned}
+q^* &= (w+xi+yj+zk)^* \\\
+&=(w-xi-yj-zk)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Aq%5E*%20%26%3D%20(w%2Bxi%2Byj%2Bzk)%5E*%20%5C%5C%5C%0A%26%3D(w-xi-yj-zk)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-24">四元数的倒数</h4>
+<figure><img alt="\begin{aligned}
+q^{-1} . q &= q . q^{-1} = 1
+
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Aq%5E%7B-1%7D%20.%20q%20%26%3D%20q%20.%20q%5E%7B-1%7D%20%3D%201%0A%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="q^{-1} = \cfrac{q^*}{w^2+x^2+y^2+z^2}" src="https://juejin.cn/equation?tex=q%5E%7B-1%7D%20%3D%20%5Ccfrac%7Bq%5E*%7D%7Bw%5E2%2Bx%5E2%2By%5E2%2Bz%5E2%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-25">四元数的性质</h4>
+<p>共轭与倒数的性质：</p>
+<p><img alt="(q_0q_1)^{-1} = q_1^{-1}q_0^{-1}" src="https://juejin.cn/equation?tex=(q_0q_1)%5E%7B-1%7D%20%3D%20q_1%5E%7B-1%7Dq_0%5E%7B-1%7D" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="(q_0q_1)^{*} = q_1^{*}q_0^{*}" src="https://juejin.cn/equation?tex=(q_0q_1)%5E%7B*%7D%20%3D%20q_1%5E%7B*%7Dq_0%5E%7B*%7D" loading="lazy" class="medium-zoom-image"></p>
+<p>加法乘法满足结合律和分配律</p>
+<p><img alt="q_0+q_1+q_2 = q_0 + (q_1 + q_2)" src="https://juejin.cn/equation?tex=q_0%2Bq_1%2Bq_2%20%3D%20q_0%20%2B%20(q_1%20%2B%20q_2)" loading="lazy" class="medium-zoom-image">
+<img alt="q_0q_1q_2 = q_0(q_1q_2)" src="https://juejin.cn/equation?tex=q_0q_1q_2%20%3D%20q_0(q_1q_2)" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="q_0(q_1+q_2) = q_0q_1+ q_0q_2" src="https://juejin.cn/equation?tex=q_0(q_1%2Bq_2)%20%3D%20q_0q_1%2B%20q_0q_2" loading="lazy" class="medium-zoom-image"></p>
+<p>以上是四元数的运算法则和运算性质，我们对它们进行基本封装。</p>
+<h3 data-id="heading-26">如何用四元数表示旋转？</h3>
+<p>四元数的旋转原理如下：
+先将原向量表示为四元数<img alt="q_0=(0,\vec{v})" src="https://juejin.cn/equation?tex=q_0%3D(0%2C%5Cvec%7Bv%7D)" loading="lazy" class="medium-zoom-image"> ，将旋转角度和旋转轴的信息用<code>单位四元数 q</code> 表示，下面是一个代表旋转的四元数：</p>
+<figure><img alt="q = cos\theta + \vec u sin\theta" src="https://juejin.cn/equation?tex=q%20%3D%20cos%5Ctheta%20%2B%20%5Cvec%20u%20sin%5Ctheta" loading="lazy" class="medium-zoom-image"></figure>
+<blockquote>
+<p>其中旋转轴 <img alt="\vec{u}" src="https://juejin.cn/equation?tex=%5Cvec%7Bu%7D" loading="lazy" class="medium-zoom-image"> 必须是单位向量。</p>
+</blockquote>
+<p>该四元数表示绕轴 <img alt="\vec u" src="https://juejin.cn/equation?tex=%5Cvec%20u" loading="lazy" class="medium-zoom-image"> 旋转 2 * θ 角度，注意是 θ 角的2倍哦。</p>
+<p>旋转后得到的向量坐标利用公式 <img alt="r = q\cdot p\cdot q^*" src="https://juejin.cn/equation?tex=r%20%3D%20q%5Ccdot%20p%5Ccdot%20q%5E*" loading="lazy" class="medium-zoom-image"> 或<img alt="r = q \cdot p\cdot q^{-1}" src="https://juejin.cn/equation?tex=r%20%3D%20q%20%5Ccdot%20p%5Ccdot%20q%5E%7B-1%7D" loading="lazy" class="medium-zoom-image"> 计算得出。</p>
+<h3 data-id="heading-27">多个四元数旋转</h3>
+<p>一个四元数代表一个旋转过程，那么多个四元数代表多个旋转过程。</p>
+<p>假设有一个旋转 M 用四元数表示为 Q1，另一个旋转 N 用四元数表示为 Q2。</p>
+<p>那么如果我们按顺序实现这两个旋转，先进行 M 旋转，再执行 N 旋转，我们有两种方式：</p>
+<ul>
+<li>将 Q2 和 Q1 相乘，然后将乘积转化为旋转矩阵。
+<ul>
+<li>注意顺序：Q2 * Q1。</li>
+</ul>
+</li>
+<li>将 Q2 和 Q1 分别转换成旋转矩阵，再将旋转矩阵相乘。
+<ul>
+<li>注意顺序：N * M</li>
+</ul>
+</li>
+</ul>
+<p>注意：在计算四元数乘积或者旋转矩阵乘积时，一定要注意顺序，先进行的旋转矩阵或者旋转四元数要放在乘号右侧。</p>
+<p>这两种方式所表达的旋转是一致的，但是显然，第一种方式计算量更小一些。</p>
+<h3 data-id="heading-28">利用四元数实现旋转。</h3>
+<p>我们至少需要以下三个方法才能对物体进行旋转：</p>
+<ul>
+<li>通过如下三种方式构造出四元数。
+<ul>
+<li>setFromEuler，将一组欧拉角转化成四元数。</li>
+<li>setFromAxis，将轴角转化成四元数。</li>
+<li>setFromRotationMatrix，将旋转矩阵转化成四元数。</li>
+</ul>
+</li>
+<li>已知初始状态四元数和结束状态四元数，构造某一阶段的四元数。
+<ul>
+<li><code>slerp</code>。</li>
+</ul>
+</li>
+<li>根据四元数计算出该四元数所代表的旋转矩阵。
+<ul>
+<li><code>makeRotationFromQuaternion</code></li>
+</ul>
+</li>
+</ul>
+<p>公式的推导比较复杂，这里就不讲述推导过程了，感兴趣的同学可以点击<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">这里</a>，自己动动手试着推导一下。同时，<code>THREEJS</code> 已经为我们封装了关于四元数的函数，在这里我们掌握它提供的一些方法就能覆盖大部分应用场景。</p>
+<p>除了上面的一些方法，THREEJS 还做了一些转换方法：</p>
+<ul>
+<li>将四元数转换成对应欧拉角。</li>
+<li>将四元数转换成对应轴向量。</li>
+<li>将四元数转换成绕轴向量旋转的角度。</li>
+<li>从当前四元数旋转到另一个四元数所经过的角度。</li>
+</ul>
+<p>利用这些方法，很容易地将易于理解的欧拉旋转或者轴角旋转，转换成易于线性插值的四元数。</p>
+<h3 data-id="heading-29">四元数的用法</h3>
+<p>看一下如何使用四元数进行插值，我们将物体从欧拉角（30，40，50）代表的方向旋转到（70，90，120）。</p>
+<p>首先，我们将起始时刻和结束时刻的欧拉角转化为对应的四元数：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> startQuaternion = matrix<span class="hljs-selector-class">.setFromEuler</span>({
+ _x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">30</span>),
+ _y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">40</span>),
+ _z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">50</span>)
+});
+
+<span class="hljs-selector-tag">var</span> endQuaternion = matrix<span class="hljs-selector-class">.setFromEuler</span>({
+ _x: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">70</span>),
+ _y: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">90</span>),
+ _z: <span class="hljs-built_in">deg2radians</span>(<span class="hljs-number">120</span>)
+});
+
+</code></pre><p>有了起始四元数和结束四元数，我们就可以利用<code>球面插值算法slerp</code>来求旋转矩阵了。假设我们本次旋转过程设置为 30 帧，那么由初始角度到当前帧所代表角度的旋转用四元数表示如下：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">currentQuaternion</span> = matrix.slerp(startQuaternion, endQuaternion, progress / <span class="hljs-number">30</span>)<span class="hljs-comment">;</span>
+</code></pre><p>那么当前方位的旋转矩阵通过以下方法求得：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">currentMatrix</span> = matrix.makeRotationFromQuaternion(unitQuaternion)<span class="hljs-comment">;</span>
+</code></pre><p>有了初始角度到每一帧角度的旋转矩阵 U ，那么左乘该旋转矩阵 U 可以实现平滑均匀的旋转动画了，如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112116735a0e43948b8b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>如果让欧拉角来做 30 次连续插值旋转，最终的动画路径和旋转方向可能会不准确。</p>
+</blockquote>
+<p>四元数在平滑插值上表现出了极大的优势，如果我们想做插值动画，那么四元数无疑是最佳选择。</p>
+<h3 data-id="heading-30">总结</h3>
+<p>四元数相比欧拉角的优势还是很大的：</p>
+<ul>
+<li>计算量相对小一些。</li>
+<li>能够更平滑地插值。</li>
+</ul>
+<p>但是四元数也有一定缺点：</p>
+<ul>
+<li>概念复杂，不易理解。</li>
+</ul>
+<h2 data-id="heading-31">回顾</h2>
+<p>本节介绍了表示旋转的两种很重要的方法：欧拉角与四元数，并分析了它们的优缺点。在实际编程中，四元数的使用场景比较多，动画中的旋转往往需要平滑线性，这种情况我们采用四元数是最佳选择。</p>
+<p>下一节，我们结合学过的算法，学习利用鼠标控制模型旋转的原理。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

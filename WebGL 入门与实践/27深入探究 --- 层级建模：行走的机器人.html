@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- 层级建模：行走的机器人</h1>
+<p>本节我们学习如何建立模型与模型之间的层级关系，层级关系通常用树形结构来表示。比如人体模型，人是由头部、躯干、胳膊、腿、脚等局部模型组成，当人在走路的时候，腿部相对于腰部做旋转运动，膝盖会相对于大腿内侧进行旋转，小腿会相对于膝盖进行旋转，这些不同部位间的相对运动通过多个矩阵变换的方式可以转化成相对世界坐标系的绝对运动，如下图，便是一个行走中的机器人：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111516716697500485d2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>同样地，可以类比到动物、汽车、太阳系、银河系、宇宙等，涉及到相对运动的多个物体之间我们都可以用层级对它们进行建模。</p>
+<h2 data-id="heading-1">为什么需要层级建模</h2>
+<p>如果没有层级建模，那么模型只能做整体的刚性运动，模型的一部分不能相对整体进行局部运动，这在某些场景下就会产生一些问题。比如在游戏中的人物在行走时，手臂、腿会随着步伐做适当摆动，如果没有层级建模，我们就需要单独为手臂、腿计算相对世界坐标系的变换矩阵，比较复杂。如果有了层级建模，我们可以只考虑手臂、腿相对于自身的变换，不需再考虑世界坐标系下的变换。</p>
+<blockquote>
+<p>不需考虑世界坐标系下的变换并不代表我们不计算世界矩阵，只不过计算世界矩阵的方法在已经被我们抽象出来，我们不用关心这块逻辑，而是交由库来实现。我们只需要设置好平移、旋转、缩放这三个属性即可。</p>
+</blockquote>
+<p>我们需要用一棵树型结构来表示层级关系，节点与节点之间存在父子关系，即每个节点都会有 parent 和 children 属性，其中，parent 表示当前节点的父节点，children 表示当前节点的子节点属性，用数组来表示。除此之外，节点还需要保存世界变换矩阵和局部变换矩阵，世界变换矩阵用来保存子节点的世界变换矩阵，局部变换矩阵用来保存子节点自身的变换矩阵。</p>
+<p>我们知道，变换分为 3 种：平移、缩放、旋转。每个节点都需要有这三个属性，但请大家一定要记住，在使用层级进行建模时，这三个属性都是相对于模型自身坐标系的。各个节点的世界变换矩阵如何得来呢？</p>
+<ul>
+<li>1、通过平移、旋转、缩放属性我们可以计算出节点的局部变换矩阵，</li>
+<li>2、将每个节点的父节点的世界变换矩阵右乘当前节点的局部变换矩阵可以计算出当前节点的世界变换矩阵。</li>
+</ul>
+<p>我们以手臂的运动加以分析，手臂由前臂和小臂组成，小臂绕着肘关节（即前臂的末端）进行旋转，不需要考虑其他因素。手臂的层级表示如下：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">arm</span> = {
+ name:'arm',
+ translation: <span class="hljs-section">[0, 0, 0]</span>,
+ rotation: <span class="hljs-section">[0, 0, 0]</span>,
+ scalation: <span class="hljs-section">[1, 1, 3]</span>,
+ parent:null,
+ children:<span class="hljs-section">[
+ {
+ name:'forearm',
+ translation: [0, 0, 0]</span>,
+ rotation: <span class="hljs-section">[0, 0, 0]</span>,
+ scalation: <span class="hljs-section">[1, 2, 1]</span>,
+ parent:null,
+ }
+ ]
+}
+</code></pre><p>接下来我们看一下如何根据这些属性实现层级建模。</p>
+<h2 data-id="heading-2">如何实现层级建模</h2>
+<p>还记得我们重构过的 Model 类吗？为了实现层级关系，我们需要为 <code>Model</code> 类增加 <code>children</code> 、<code>parent</code>、<code>localMatrix</code>、<code>worldMatrix</code> 四个属性：</p>
+<pre><code lang="ini" class="hljs language-ini">function Model(name) {
+ <span class="hljs-attr">this.uniforms</span> = {}<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.bufferInfo</span> = {}<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.u_Matrix</span> = matrix.identity()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.translation</span> = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.scalation</span> = [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.rotation</span> = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.parent</span> = null<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.children</span> = []<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.localMatrix</span> = matrix.identity()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.worldMatrix</span> = matrix.identity()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.name</span> = name || <span class="hljs-string">'未命名'</span><span class="hljs-comment">;</span>
+}
+</code></pre><p>另外，我们给模型增加设置父节点的方法：</p>
+<pre><code lang="kotlin" class="hljs language-kotlin">Model.prototype.setParent = function(parent){
+ <span class="hljs-comment">// 若当前模型有父节点，从父节点中移除</span>
+ <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.parent){
+ let index = <span class="hljs-keyword">this</span>.parent.children.indexOf(<span class="hljs-keyword">this</span>);
+ <span class="hljs-keyword">if</span>(index >= <span class="hljs-number">0</span>){
+ <span class="hljs-keyword">this</span>.parent.children.splice(index, <span class="hljs-number">1</span>);
+ }
+ }
+ <span class="hljs-comment">// 将模型添加到指定 parent 节点的子列表尾部。</span>
+ <span class="hljs-keyword">if</span>(parent){
+ parent.children.push(<span class="hljs-keyword">this</span>);
+ }
+ <span class="hljs-keyword">this</span>.parent = parent || <span class="hljs-literal">null</span>;
+}
+</code></pre><p>在预渲染阶段，我们为模型计算 MVP 矩阵的时候，计算出来的只是相对于自身的局部变换矩阵，需要转化成相对世界坐标系的矩阵，转化过程也比较简单，将当前节点的本地矩阵右乘父节点的世界矩阵即可，我们需要有这样一个算法来更新模型的世界矩阵。</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">Model.prototype.getWorldMatrix</span> = function(worldMatrix){
+ if (worldMatrix) {
+ <span class="hljs-attr">this.worldMatrix</span> = matrix.multiply(worldMatrix, this.localMatrix)<span class="hljs-comment">;</span>
+ } else {
+ <span class="hljs-attr">this.worldMatrix</span> = matrix.clone(this.localMatrix)<span class="hljs-comment">;</span>
+ }
+ let <span class="hljs-attr">currentWorldMatrix</span> = this.worldMatrix<span class="hljs-comment">;</span>
+ this.children.forEach(function(model) {
+ model.getWorldMatrix(currentWorldMatrix)<span class="hljs-comment">;</span>
+ })<span class="hljs-comment">;</span>
+}
+</code></pre><p>有了更新世界矩阵的方法，那么接下来要考虑的是在何时执行更新方法呢？还记得 Model 的preRender 方法吗，我们把 getWorldMatrix 方法的执行时机放在 preRender 中。</p>
+<pre><code lang="kotlin" class="hljs language-kotlin">let modelMatrix = matrix.identity();
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.translation) {
+ modelMatrix = matrix.translate(
+ modelMatrix,
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">0</span>],
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">1</span>],
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">2</span>]
+ );
+ }
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation) {
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">0</span>] !== undefined)
+ modelMatrix = matrix.rotateX(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">0</span>]));
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">1</span>] !== undefined)
+ modelMatrix = matrix.rotateY(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">1</span>]));
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">2</span>] !== undefined)
+ modelMatrix = matrix.rotateZ(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">2</span>]));
+ }
+ modelMatrix = matrix.translate(
+ modelMatrix,
+ -<span class="hljs-keyword">this</span>.origination[<span class="hljs-number">0</span>] * <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">0</span>],
+ -<span class="hljs-keyword">this</span>.origination[<span class="hljs-number">1</span>] * <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">1</span>],
+ -<span class="hljs-keyword">this</span>.origination[<span class="hljs-number">2</span>] * <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">2</span>]
+ );
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.scalation) {
+ modelMatrix = matrix.scale(
+ modelMatrix,
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">0</span>],
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">1</span>],
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">2</span>]
+ );
+ }
+
+ <span class="hljs-keyword">this</span>.localMatrix = modelMatrix;
+ <span class="hljs-keyword">this</span>.children.forEach(function(child) {
+ child.preRender(viewMatrix, projectionMatrix);
+ });
+ 
+ <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.parent) {
+ <span class="hljs-keyword">this</span>.getWorldMatrix();
+ }
+ 
+ <span class="hljs-comment">//重新计算 MVP 矩阵</span>
+ <span class="hljs-keyword">this</span>.u_Matrix = matrix.multiply(viewMatrix, <span class="hljs-keyword">this</span>.worldMatrix);
+ <span class="hljs-keyword">this</span>.u_Matrix = matrix.multiply(projectionMatrix, <span class="hljs-keyword">this</span>.u_Matrix);
+
+ <span class="hljs-keyword">this</span>.uniforms.u_Matrix = <span class="hljs-keyword">this</span>.u_Matrix;
+ <span class="hljs-keyword">this</span>.uniforms.u_ModelMatrix = <span class="hljs-keyword">this</span>.worldMatrix;
+ 
+</code></pre><p>你会发现，我在preRender方法中执行getWorldMatrix 时增加了一个判断条件，当前节点没有父节点时才开始执行世界矩阵的更新。</p>
+<h3 data-id="heading-3">层级建模实战</h3>
+<p>好了，经过改造后的 Model 满足层级建模的需求了，我们实现一个手臂模型演示 Model 使用方法。</p>
+<p>我们创建一个手臂 arm 和 前臂 forearm，简单起见，将他们的形状设置为顶点边长为 1 的立方体：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">cube</span> = createCube(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">bufferInfo</span> = createBufferInfoFromObject(gl, cube)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">arm</span> = new Model(<span class="hljs-string">'arm'</span>)<span class="hljs-comment">;</span>
+arm.setBufferInfo(bufferInfo)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">forearm</span> = new Model(<span class="hljs-string">'forearm'</span>)<span class="hljs-comment">;</span>
+smallArm.setBufferInfo(bufferInfo)<span class="hljs-comment">;</span>
+</code></pre><p>接下来要将 forearm 的父节点设置为arm，建立层级关系，并将 arm 添加到模型列表中，这里由于forearm 和 arm 建立了父子关系，所以此处我们只把arm 添加到模型列表和渲染列表即可。</p>
+<pre><code lang="ini" class="hljs language-ini">forearm.setParent(arm)<span class="hljs-comment">;</span>
+objectList.add(arm)<span class="hljs-comment">;</span>
+renderList.add({
+ model: arm,
+ programInfo: program
+})<span class="hljs-comment">;</span>
+</code></pre><p>接下来开始渲染，渲染仍然是遍历渲染列表，传递 渲染对象对应的模型对象的 uniforms 属性和 attribute 属性：</p>
+<pre><code lang="ini" class="hljs language-ini">renderList.forEach(function(object) {
+ let <span class="hljs-attr">programInfo</span> = object.programInfo<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">programChanged</span> = <span class="hljs-literal">false</span><span class="hljs-comment">;</span>
+ object.model.preRender(viewMatrix, projectionMatrix)<span class="hljs-comment">;</span>
+ if (programInfo != lastProgramInfo) {
+ <span class="hljs-attr">lastProgramInfo</span> = programInfo<span class="hljs-comment">;</span>
+ <span class="hljs-attr">programChanged</span> = <span class="hljs-literal">true</span><span class="hljs-comment">;</span>
+ }
+
+ renderObject(
+ object.model,
+ programChanged,
+ object.renderType,
+ object.primitive
+ )<span class="hljs-comment">;</span>
+})<span class="hljs-comment">;</span>
+</code></pre><p>我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416711dfcf8990c2d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们只看到了一个立方体，原因是我们没有给 forearm 设置平移，forearm和arm重叠了。</p>
+<h4 data-id="heading-4">增加平移</h4>
+<p>为 forearm 设置一个平移属性：</p>
+<pre><code lang="ini" class="hljs language-ini">forearm.translateX(1)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416711e19ce7ea9fc~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>嗯，这次我们可以看到两个挨着的立方体了，靠右的是 forearm。</p>
+<p>层级建模的一个优势是，我们只需要考虑局部的变换，不需要考虑世界坐标系变换，库会为我们自动计算。接下来我们演示一下，这次我们只让 arm 进行平移：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416712ade469a330d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，不管 arm 移动到什么位置，forearm 始终在 arm 的 X 轴右侧 1 个单位处。</p>
+<h4 data-id="heading-5">增加缩放</h4>
+<p>手臂过于方正了，我们将 arm 和 forearm 沿着X轴放大一倍：</p>
+<pre><code lang="ini" class="hljs language-ini">arm.scaleX(2)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416711e29ab3b8039~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>啊哦，我们只给 arm 设置了放大倍数，但是同时影响了 forearm，这在某些时候可不是我们想要的结果，在一些特定的场景下，我们能只对父节点执行缩放，而不缩放子节点。</p>
+<p>如何解决这个问题呢？</p>
+<p>事实上，我们可以将需要放大的节点拆出来，只对它执行缩放变换。像下面这样：</p>
+<pre><code lang="css" class="hljs language-css">let arm = {
+ name: <span class="hljs-string">'arm'</span>,
+ children:[{
+ name: <span class="hljs-string">'bigArm'</span>,
+ rotation:[<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]
+ },{
+ name: <span class="hljs-string">'forearm'</span>,
+ translation: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+ }]
+}
+</code></pre><p>额外增加一个需要缩放的节点 bigArm 作为 arm 的子节点，此时bigArm 和 forearm 同级，并且都以 arm 作为父节点。有一点需要注意，arm 此时不再需要渲染了，作为父节点的它，只是为了给子节点提供旋转和平移的变换矩阵，所以，我们修改Model ，为 Model 增加一个参数 isDraw，设置为 false即可不必对它执行渲染操作。</p>
+<pre><code lang="ini" class="hljs language-ini">function Model(name, isDraw){
+ ...略
+ if(<span class="hljs-attr">isDraw</span> === <span class="hljs-literal">false</span>){
+ <span class="hljs-attr">this.isDraw</span> = <span class="hljs-literal">false</span><span class="hljs-comment">;</span>
+ }
+ else {
+ <span class="hljs-attr">this.isDraw</span> = <span class="hljs-literal">true</span><span class="hljs-comment">;</span>
+ }
+ ...略
+}
+</code></pre><pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">arm</span> = new Model(<span class="hljs-string">'arm'</span>, <span class="hljs-literal">false</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">bigArm</span> = new Model(<span class="hljs-string">'bigArm'</span>)<span class="hljs-comment">;</span>
+bigArm.scaleX(2)<span class="hljs-comment">;</span>
+bigArm.setParent(arm)<span class="hljs-comment">;</span>
+forearm.translateY(1)<span class="hljs-comment">;</span>
+...略
+
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416711e93eccba498~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，通过额外增加一个节点的方式，我们可以解决父节点的缩放效果影响到子节点问题。</p>
+<h3 data-id="heading-6">增加旋转</h3>
+<p>解决了缩放问题，接下来我们增加旋转效果，这里我们让 forearm 绕自身原点旋转，默认情况下节点的坐标系原点位于中心位置。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111416712d1a70f0f6e7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，forearm 围绕自身中心在旋转了，但是这不是我们期待的效果，我们期待的是 forearm 绕 forearm 和 arm 先接触进行旋转。</p>
+<p>如何解决这个问题，我们可以给 Model 增加一个新的属性，改变模型自身原点：</p>
+<pre><code lang="ini" class="hljs language-ini">function <span class="hljs-attr">Model</span> = (name, isDraw){
+ ...略
+ <span class="hljs-attr">this.origination</span> = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ ...略
+}
+
+<span class="hljs-attr">Model.prototype.setOrigin</span> = funcition(ox, oy, oz){
+ this.origination<span class="hljs-section">[0]</span> = ox || 0<span class="hljs-comment">;</span>
+ this.origination<span class="hljs-section">[1]</span> = oy || 0<span class="hljs-comment">;</span>
+ this.origination<span class="hljs-section">[2]</span> = oz || 0<span class="hljs-comment">;</span>
+}
+</code></pre><p>我们改变 forearm 原点到左侧：</p>
+<pre><code lang="ini" class="hljs language-ini">forearm.setOrigin(-0.5, 0, 0)<span class="hljs-comment">;</span>
+</code></pre><p>试试看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181115167155e9f123c86a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>嗯，这次 forearm 可以绕着自身左侧旋转了，但是还有一些问题，forearm 有一部分和 arm 重叠了，我们需要将 forearm 向右平移 bigArm 的长度，即 2 个单位。</p>
+<pre><code lang="ini" class="hljs language-ini">forearm.translateX(2)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111516715669ce1f8a79~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这回像个手臂了，但还有个问题， forearm 有些过于短小了，我们把它拉长一些：</p>
+<pre><code lang="ini" class="hljs language-ini">forearm.scaleX(2)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181115167156a1b273a716~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>嗯，这个动作看起来像是在秀肌肉了。</p>
+<h2 data-id="heading-7">行走的机器人</h2>
+<p>我们利用上面的层级代码实现本节开头的机器人行走动画，首先画一下机器人的层级结构：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181115167167a6e64c57a0~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们设计的机器人由上图中的节点组成，所有节点都是由边长为 1 的立方体通过缩放平移组合而成。</p>
+<p>如果按照前面的开发方式，每个节点的生成、平移、缩放、旋转等都需要用代码来控制，比如这个机器人：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">person</span> = new Model(<span class="hljs-string">'person'</span>, <span class="hljs-literal">false</span>)<span class="hljs-comment">;</span>
+// 创建头部
+let <span class="hljs-attr">head</span> = new Model(<span class="hljs-string">'head'</span>)<span class="hljs-comment">;</span>
+head.setBufferInfo(bufferInfo)<span class="hljs-comment">;</span>
+head.translate(0, 2, 0)<span class="hljs-comment">;</span>
+head.scale(1.5,1.5,1.5)<span class="hljs-comment">;</span>
+head.setParent(person)<span class="hljs-comment">;</span>
+// 胸部
+let <span class="hljs-attr">torso</span> = new Model(<span class="hljs-string">'torso'</span>)<span class="hljs-comment">;</span>
+torso.setBufferInfo(bufferInfo)<span class="hljs-comment">;</span>
+torso.scale(2.2, 3, 2.2)<span class="hljs-comment">;</span>
+torso.setParent(person)<span class="hljs-comment">;</span>
+
+// 腰部
+let <span class="hljs-attr">waist</span> = new Model(<span class="hljs-string">'waist'</span>)<span class="hljs-comment">;</span>
+waist.setBufferInfo(bufferInfo)<span class="hljs-comment">;</span>
+waist.translate(0, -2, 0)<span class="hljs-comment">;</span>
+waist.setParent(person)<span class="hljs-comment">;</span>
+//左胳膊
+...略
+// 右胳膊
+...略
+...
+</code></pre><p>你会发现，我们的节点越多，我们就要重复编写这些设置代码，比较繁琐，所以，我们最好能有一个描述机器人的结构体，通过一个方法解析这个结构体，自动生成person 对象。</p>
+<p>我们用对象结构来描述模型之间关系，每个节点都有如下属性：</p>
+<ul>
+<li>name：节点名称</li>
+<li>isDraw：是否渲染</li>
+<li>scalation：缩放</li>
+<li>translation：平移</li>
+<li>rotation：旋转</li>
+<li>origination：原点位置</li>
+<li>children：子节点</li>
+<li>parent：父节点</li>
+<li>uniforms：当前节点的全局属性，用于传往着色器程序。</li>
+</ul>
+<pre><code lang="yaml" class="hljs language-yaml"> <span class="hljs-string">let</span> <span class="hljs-string">description</span> <span class="hljs-string">=</span> {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'person'</span>,
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">0.4</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">0.4</span>],
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'head'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1.5</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">1.5</span>],
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">uniforms:</span> {
+ <span class="hljs-attr">u_ColorFactor:</span> [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">u_ColorOffset:</span> [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>]
+ }
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'torso'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">2.2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2.2</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'leftArm'</span>,
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">-2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'leftBigArm'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">0.8</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">0.8</span>],
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'leftSmallArm'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">0.8</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">0.8</span>],
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-1.5</span>, <span class="hljs-number">0</span>]
+ }
+ ]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'rightArm'</span>,
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'rightBigArm'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">0.8</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">0.8</span>],
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'rightSmallArm'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">0.8</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">0.8</span>],
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-1.5</span>, <span class="hljs-number">0</span>]
+ }
+ ]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'waist'</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'leftLeg'</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">-1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'thigh'</span>,
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'crus'</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'crusScale'</span>,
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'foot'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">1.6</span>],
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">-0.25</span>]
+ }
+ ]
+ }
+ ]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'rightLeg'</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'thigh'</span>,
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'crus'</span>,
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">isDraw:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">children:</span> [
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'crusScale'</span>,
+ <span class="hljs-attr">origination:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+ },
+ {
+ <span class="hljs-attr">name:</span> <span class="hljs-string">'foot'</span>,
+ <span class="hljs-attr">scalation:</span> [<span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">1.6</span>],
+ <span class="hljs-attr">translation:</span> [<span class="hljs-number">0</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">-0.25</span>]
+ }
+ ]
+ }
+ ]
+ }
+ ]
+ }
+ ]
+ }<span class="hljs-string">;</span>
+</code></pre><p>接下来我们要有一个能够解析这个结构体的方法，通过这个结构体能够返回模型对象：</p>
+<pre><code lang="scss" class="hljs language-scss"> function <span class="hljs-built_in">createModel</span>(node) {
+ let model = new <span class="hljs-built_in">Model</span>(node.name, node.isDraw);
+ if (model.isDraw) {
+ model<span class="hljs-selector-class">.setBufferInfo</span>(bufferInfo);
+ }
+ <span class="hljs-comment">// 节点是否设置了平移</span>
+ if (node.translation) model<span class="hljs-selector-class">.translate</span>(node.translation);
+ <span class="hljs-comment">// 节点是否设置了旋转</span>
+ if (node.rotation) model<span class="hljs-selector-class">.rotate</span>(node.rotation);
+ <span class="hljs-comment">// 节点是否设置了缩放</span>
+ if (node.scalation) model<span class="hljs-selector-class">.scale</span>(node.scalation);
+ <span class="hljs-comment">// 节点是否设置了原点</span>
+ if (node.origination) model<span class="hljs-selector-class">.setOrigin</span>(node.origination);
+ <span class="hljs-comment">// 节点是否设置了全局变量</span>
+ if (node.uniforms) model<span class="hljs-selector-class">.setUniforms</span>(node.uniforms);
+ <span class="hljs-comment">// 节点是否有子节点，若有，遍历子节点</span>
+ if (node.children) {
+ node<span class="hljs-selector-class">.children</span><span class="hljs-selector-class">.forEach</span>(function(childNode) {
+ let childModel = <span class="hljs-built_in">createModel</span>(childNode);
+ childModel<span class="hljs-selector-class">.setParent</span>(model);
+ });
+ }
+ <span class="hljs-comment">// 返回模型对象。</span>
+ return model;
+ }
+</code></pre><p>利用这种方式，我们就不必每次都编写重复的设置代码了，只需要修改表示模型的结构体就可以了。</p>
+<p>利用上面的方法创建 person 对象就很简单了：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">person</span> = createModel(description)<span class="hljs-comment">;</span>
+</code></pre><p>有了机器人模型，接下来我们要让它动起来。
+首先，机器人走动时整体会移动。
+其次，胳膊和大腿会有幅度地摆动，同时，前臂和小腿会随着胳膊和大腿进一步摆动。</p>
+<p>在每次 render 的时候，更新 <code>person</code> 节点的 translate 平移属性，同时更新以下节点的旋转属性，假设某一刻，左臂旋转角度为 N 度时：</p>
+<ul>
+<li>左臂旋转 N 度
+<ul>
+<li>左前臂在左臂的基础上额外旋转 N / 2 度</li>
+</ul>
+</li>
+<li>右臂旋转 -N 度
+<ul>
+<li>右臂旋转 -N 度代表往后旋转，此时右前臂不设置旋转。</li>
+</ul>
+</li>
+<li>左腿旋转 -N 度
+<ul>
+<li>左腿旋转 -N 度，代表往后摆动，此时左小腿设置旋转。</li>
+</ul>
+</li>
+<li>右腿旋转 N 度
+<ul>
+<li>右小腿在右腿的基础上额外旋转 N / 2 度</li>
+</ul>
+</li>
+</ul>
+<p>分析出模型以及模型局部的运动规律之后，我们就可以在每一帧动画中改变他们的属性了：</p>
+<pre><code lang="ini" class="hljs language-ini"> function animate(person){
+ let <span class="hljs-attr">object</span> = person.moveInfo<span class="hljs-comment">;</span>
+ if (Math.abs(object.leftRotation) > rotationMax) {
+ <span class="hljs-attr">object.leftIndex</span> = -object.leftIndex<span class="hljs-comment">;</span>
+ }
+ object.leftRotation += object.leftIndex<span class="hljs-comment">;</span>
+ object.rightRotation += -object.leftIndex<span class="hljs-comment">;</span>
+ object.leftLegRotation <span class="hljs-attr">-</span>= object.leftIndex<span class="hljs-comment">;</span>
+ object.rightLegRotation += object.leftIndex<span class="hljs-comment">;</span>
+
+ if (Math.abs(person.translation<span class="hljs-section">[2]</span>) > 4) {
+ <span class="hljs-attr">object.moveIndex</span> = -object.moveIndex<span class="hljs-comment">;</span>
+ }
+
+ person.translateZ(
+ calFloat(person.translation<span class="hljs-section">[2]</span>, -0.2 * object.moveIndex)
+ )<span class="hljs-comment">;</span>
+
+ if (
+ Math.abs(person.translation<span class="hljs-section">[2]</span>) > 3 &&
+ person.translation<span class="hljs-section">[2]</span> * object.moveIndex > 0
+ ) {
+ let <span class="hljs-attr">unitAngle</span> = (<span class="hljs-number">180</span> * object.moveIndex) / <span class="hljs-number">5</span><span class="hljs-comment">;</span>
+ person.rotateY(person.rotation<span class="hljs-section">[1]</span> + unitAngle)<span class="hljs-comment">;</span>
+ }
+
+ person.children.forEach(function update(child) {
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'leftArm'</span>) {
+ child.rotateX(object.leftRotation)<span class="hljs-comment">;</span>
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'rightArm'</span>) {
+ child.rotateX(object.rightRotation)<span class="hljs-comment">;</span>
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'leftSmallArm'</span>) {
+ if (object.leftRotation > 0) {
+ child.rotateX(object.leftRotation / 2)<span class="hljs-comment">;</span>
+ }
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'rightSmallArm'</span>) {
+ if (object.rightRotation > 0) {
+ child.rotateX(object.rightRotation / 2)<span class="hljs-comment">;</span>
+ }
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'rightLeg'</span>) {
+ child.rotateX(object.rightLegRotation)<span class="hljs-comment">;</span>
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'leftLeg'</span>) {
+ child.rotateX(object.leftLegRotation)<span class="hljs-comment">;</span>
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'crus'</span> && child.parent.name == <span class="hljs-string">'leftLeg'</span>) {
+ if (object.leftLegRotation > 0) {
+ child.rotateX(-object.leftLegRotation)<span class="hljs-comment">;</span>
+ } else {
+ child.rotateX(object.leftLegRotation / 2)<span class="hljs-comment">;</span>
+ }
+ }
+ if (<span class="hljs-attr">child.name</span> == <span class="hljs-string">'crus'</span> && child.parent.name == <span class="hljs-string">'rightLeg'</span>) {
+ if (object.rightLegRotation > 0) {
+ child.rotateX(-object.rightLegRotation)<span class="hljs-comment">;</span>
+ } else {
+ child.rotateX(object.rightLegRotation / 2)<span class="hljs-comment">;</span>
+ }
+ }
+ child.children.forEach(update)<span class="hljs-comment">;</span>
+ })<span class="hljs-comment">;</span>
+}
+</code></pre><p>核心代码就是以上这些了，大家可以<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">点击这里</a>查看完整代码。</p>
+<h2 data-id="heading-8">回顾</h2>
+<p>以上就是层级建模的思路以及实现方法，主要是利用了矩阵乘法将节点间的世界变换矩阵和本地变换矩阵串联起来，从这里我们更能感受到矩阵和坐标系变换的重要性。</p>
+<p>层级建模原理比较简单，但前提是大家深刻理解了矩阵的运算法则以及坐标系变换的原理本质。如果大家模棱两可，那说明还是没有真正掌握，还需要下功夫搞明白。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

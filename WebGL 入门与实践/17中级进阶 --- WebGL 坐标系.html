@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- WebGL 坐标系。</h1>
+<p>在第十四章节我们简单介绍了数学中常用的笛卡尔坐标系，以及 3D 笛卡尔坐标系中判断 <code>Z</code> 轴正向的<code>左右手坐标系</code>，本节详细介绍<code>坐标系</code>在 3D 开发过程中所扮演的重要角色。</p>
+<h2 data-id="heading-1">WebGL 坐标系</h2>
+<p>WebGL 是如何把 3D 世界中的模型（物体）渲染到屏幕上的呢？
+这其中的最大难点就是<code>坐标系的变换</code>。在坐标系转换过程中都涉及哪些坐标系？为什么会有这么多的坐标系存在？他们存在的意义是什么？</p>
+<p>带着这三个问题，我们往下看，寻求答案。</p>
+<h3 data-id="heading-2">顶点如何渲染到屏幕上。</h3>
+<p>如果想在屏幕上绘制一个点，我们需要将点的坐标从 CPU 通过 JavaScript 传递给 GPU ，GPU 接收到顶点坐标，进行一些坐标转换（通常将转换过程放在 JavaScript 中），然后将坐标赋值给 gl_Position：</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">gl_Position</span> = vec4(x, y, z, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+</code></pre><p>请注意：gl_Position 接收一个 4 维向量表示的坐标，即(X, Y ,Z ,W)，W 不等于 0，这个坐标是在<code>裁剪坐标系</code>中，我们称它为裁剪坐标。</p>
+<h4 data-id="heading-3">透视除法</h4>
+<p>GPU 得到裁剪坐标后，下一步会对坐标进行透视除法。所谓透视除法就是将裁剪坐标的各个分量同时除以 W 分量，使得 W 分量为 1。经过透视除法得到的坐标便处在 <code>NDC</code> 坐标系（设备独立坐标系）中， NDC 坐标系是一个边长为 2 的正方体，超出正方体的顶点都将被抛弃，不会显示到屏幕上。</p>
+<blockquote>
+<p>在 NDC 坐标系内的坐标都会落在【-1，1】之间，因此很多顶点坐标往往都是小数。</p>
+</blockquote>
+<h4 data-id="heading-4">视口转换</h4>
+<p>接下来，GPU 就要将顶点绘制到屏幕上了，顶点此时的坐标已经转变到 NDC 坐标系中，但是 NDC 坐标系和屏幕坐标系不一致，所以就产生了最后一个坐标变换，视口转换，将顶点坐标从 NDC 坐标系下转换到屏幕坐标系下的坐标，最终将顶点显示在屏幕指定位置上。</p>
+<p>以上便是顶点的坐标转换过程。</p>
+<p>按照这种规则，我们传给 GPU 的顶点坐标需要遵循裁剪坐标系或者 NDC 坐标系的特点，将顶点坐标控制在 【-1，1】之间，这样的坐标往往掺杂着很多小数，不是很直观。</p>
+<p>我们给出的模型坐标一般都是易于理解的，比如：</p>
+<ul>
+<li>玩家的坐标是 (10, 10, 20)</li>
+<li>箱子长度、宽度、高度都是 10。</li>
+</ul>
+<p>但是 GPU 希望接收的是：</p>
+<ul>
+<li>玩家坐标(0.2333333, 0.222333, 0.3333444)。</li>
+<li>正方体边长 0.333333。</li>
+</ul>
+<p>难以理解的小数！</p>
+<p>为了将易于理解的起始坐标转换成 GPU 希望 接收的晦涩坐标，于是就有了坐标系的划分，开发者可以专心在各个坐标系内处理对应数据，至于具体的坐标转换过程交给通用的特定转换算法完成。</p>
+<h2 data-id="heading-5">坐标系分类</h2>
+<p>为了将模型坐标转换成裁剪坐标，我们增加了坐标转换流水线。顶点坐标起始于模型坐标系，在这里它被称为模型坐标。模型坐标在 CPU 中经过一系列坐标系变换，生成裁剪坐标，之后 CPU 将裁剪坐标传递给 GPU。</p>
+<p>WebGL 坐标系分为如下几类：<br>
+模型坐标系 -- 世界坐标系 -- 观察坐标系（又称相机坐标系、视图坐标系） -- 裁剪坐标系（<code>gl_Position</code>接收的值） -- NDC 坐标系 -- 屏幕坐标系。</p>
+<blockquote>
+<p>其中，裁剪坐标系之前的这几个坐标系，我们都可以使用 JavaScript 控制。从裁剪坐标系到 NDC 坐标系，这一个步骤是 顶点着色器的最后自动完成的，我们无法干预。</p>
+</blockquote>
+<h3 data-id="heading-6">坐标转换流水线</h3>
+<ul>
+<li>CPU 中将模型坐标转换成裁剪坐标
+<ul>
+<li>顶点在模型坐标系中的坐标经过模型变换，转换到世界坐标系中。</li>
+<li>然后通过摄像机观察这个世界，将物体从世界坐标系中转换到观察坐标系。</li>
+<li>之后进行投影变换，将物体从观察坐标系中转换到裁剪坐标系。</li>
+</ul>
+</li>
+<li>GPU 接收CPU 传递过来的裁剪坐标。
+<ul>
+<li>接收裁剪坐标，通过透视除法，将裁剪坐标转换成 NDC 坐标。</li>
+<li>GPU 将 NDC 坐标通过视口变换，渲染到屏幕上。</li>
+</ul>
+</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669b4e4af96327b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h3 data-id="heading-7">模型坐标系</h3>
+<p>一个物体通常由很多点构成，每个点在模型的什么位置？我们需要用一个坐标系来参照，这个坐标系就叫模型坐标系，模型坐标系原点通常在模型的中心，各个坐标轴遵循右手坐标系，即 X 轴向右，Y 轴向上，Z 轴朝向屏幕外。</p>
+<p>一般在建模软件中创建模型的时候，各个顶点的坐标都是以模型的某一个点为参照点建立的。</p>
+<h3 data-id="heading-8">世界坐标系</h3>
+<p>我们创建好的模型需要放置在世界中的各个位置，默认情况模型坐标系和世界坐标系重合。如果模型不在世界坐标系中心，那么就需要对模型坐标系进行转换，将模型的各个相对于模型中心的顶点坐标转换成世界坐标系下的坐标。</p>
+<p>世界坐标系也是遵循右手坐标系，X 轴水平向右，Y 轴垂直向上，Z 轴指向屏幕外面。</p>
+<p>假如模型中有一点 P ，相对于模型中心的坐标（1，1）。
+该模型在世界坐标系的（3，0）位置，那么，顶点 P 在世界坐标系中的坐标就变成了（4，1）。</p>
+<h3 data-id="heading-9">观察坐标系</h3>
+<p>观察坐标系是将世界空间坐标转化为用户视野前方的坐标而产生的结果。人眼或者摄像机看到的世界中的物体相对于他自身的位置所参照的坐标系就叫观察坐标系。</p>
+<p>在我们日常生活中，精准描述一个街道，我们一般用经纬度来表示，但是如果有人问你：某某街道在什么位置？如果我们告诉他世界坐标：某某街道在东经 M 度，北纬 N 度，我想他会打你。。</p>
+<p>一般我们都会用这样易于理解的描述：在<code>前面多远，往左或右走多远</code>。</p>
+<p>这种坐标就称为观察坐标，也叫相机坐标，他是以人眼/摄像机为原点而建立的坐标系。</p>
+<p>之所以有相机坐标系，是为了模仿人眼看待世界的效果。世界很大，有很多物体，但是不能把整个世界都显示到屏幕上，只显示人眼所能看到的一部分，这样我们就能通过改变<code>人眼所处的方位</code>，<code>人眼所在的位置</code>，看到整个 3D 空间的不同部分。</p>
+<h3 data-id="heading-10">裁剪坐标系</h3>
+<p>裁剪坐标是将相机坐标进行投影变换后得到的坐标，也就是 gl_Position 接收的坐标，顾名思义，以裁剪坐标系为参照。</p>
+<p>裁剪坐标系遵循<code>左手坐标系</code>。</p>
+<p>相机坐标系观察的空间是整个 3D 世界，而裁剪坐标系是希望所有的坐标都落在一个特定的范围内，超出这个范围的顶点坐标都将被裁剪掉，被裁剪掉的坐标就不会显示，这就是裁剪坐标系的由来。</p>
+<p>我们将坐标全部表示成【-1.0 , 1.0】之间的方式不是很直观，所以我们希望先将观察空间中的某一部分裁剪出来，这一部分作为要显示的区域。</p>
+<p>比如，我们希望将各个坐标轴在 【-1000-1000】 范围内的空间区域作为可视空间区域，这一区域的所有物体都将显示到屏幕上。那么如果一个顶点 P 的坐标是（1300，500，10），那么它就会被裁剪掉，因为它没有坐落在可视空间区域。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669ee4661f2b664~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>投影矩阵会创建一个观察箱<code>Viewing Box</code>，称为平截头体<code>Frustum</code>，出现在平截头体范围内的坐标最终都会显示在屏幕上。裁剪坐标系中的坐标转化到标准化设备坐标系的过程就很容易，这个过程被称之为投影<code>Projection</code>，使用投影矩阵能将 3D 坐标投影很容易地映射到 2D 的标准设备坐标系中。</p>
+<p>将观察坐标变换为裁剪坐标的投影矩阵可以为两种不同的形式，每种形式都定义了不同的平截头体。</p>
+<h4 data-id="heading-11">正射投影矩阵</h4>
+<p>又名正交投影，正射投影矩阵创建的是一个立方体的观察箱，它定义了一个裁剪空间，在该裁剪空间之外的坐标都会被丢弃。
+正射投影矩阵需要指定观察箱的长度、宽度和高度。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669f0269348d42d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>经过正射投影矩阵映射后的坐标 w 分量不会改变，始终是 1，所以在经过透视除法后物体的轮廓比例不会发生改变，这种投影一般用在建筑施工图纸中，不符合人眼观察世界所产生的近大远小的规律。
+所以就有了另一种投影：透视投影。</p>
+<h4 data-id="heading-12">透视投影矩阵</h4>
+<p>实际生活中给人带来的感觉是，离我们越远的东西看起来更小。这个奇怪的效果称之为透视<code>Perspective</code>，透视的效果在我们看远处时尤其明显，比如下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669f0901e7ede7a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>实际上，远处的群山是比近处的房屋大的，但是人眼看上去，群山比房屋小，这就是透视投影要实现的效果。</p>
+<p>透视投影矩阵将给定的平截头体范围映射到裁剪空间，除此之外它还会修改每个顶点坐标的 w 值，使得离人眼越远的物体的坐标 w 值越大。被变换到裁剪空间的坐标都会在 -w 到 w 的范围之间（任何大于这个范围的坐标都会被裁剪掉）。WebGL 要求所有可见的坐标都落在【-1.0 - 1.0】范围内，因此，一旦坐标转换到裁剪空间，透视除法就会被应用到裁剪坐标上。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669ff5e4796f287~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>透视除法要求顶点坐标的每个分量除以它的 W 分量，距离观察者越远，顶点坐标也就会越小，这就是 W 分量非常重要的另一个原因，它能够帮助我们进行透视投影，经过透视除法后，所有在【-W，W】范围内的坐标都会被转变到 NDC 坐标系中。</p>
+<p>透视投影需要设置近平面、远平面、透视深度。</p>
+<h3 data-id="heading-13">NDC 坐标系</h3>
+<p>一旦所有顶点被变换到裁剪空间，GPU 会对裁剪坐标执行透视除法，在这个过程中 GPU 会将顶点坐标的 X，Y，Z 分量分别除以齐次 W 分量。这一步会在每一个顶点着色器运行的最后被自动执行。最终所有坐标分量的范围都会在【-1，1】之间，超出这个范围的坐标都将被 GPU 丢弃。</p>
+<p>NDC 坐标系遵循<code>左手坐标系</code>，Z 轴朝向屏幕里面，Z轴值越小，越靠近我们的眼睛，我们可以通过开启 WebGL 的深度检测机制验证一下：</p>
+<p>绘制两个三角形，第一个三角形各个顶点 Z 轴坐标为 -0.5，颜色为红色， 第二个三角形各个顶点 Z 轴坐标为 0，颜色为绿色。</p>
+<p>开启深度检测前：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181023166a016e9c2fde05~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，第二个三角形绘制在了前面。不是说左手坐标系吗？按理说 Z 轴越小的越靠近视野，就会显示在前面。其实，在深度检测不开启的情况下，哪个顶点越靠后绘制，哪个顶点就绘制在前面，这时 Z 轴坐标不再决定顶点是否绘制在前面。</p>
+<p>开启深度检测后：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181023166a01846b1cbed0~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>深度检测开启之后，可以看到 Z 轴小的红色三角形显示在了前面，从而验证了 NDC 坐标系是左手坐标系。</p>
+<h3 data-id="heading-14">屏幕坐标系</h3>
+<p>有了 NDC 坐标之后，GPU 会执行最后一步变换操作，<code>视口变换</code>，这个过程会将所有在【-1, 1】之间的坐标映射到屏幕空间中，并被变换成片段。</p>
+<p>我们的模型历尽九九八十一难，终于显示到了屏幕上。</p>
+<h2 data-id="heading-15">坐标变换举例</h2>
+<p>上面的描述大家可能不太理解，接下来我们就以一个简单的例子演示坐标系变换的步骤。</p>
+<h3 data-id="heading-16">模型坐标</h3>
+<p>我们以一个顶点 P 为例，该顶点在边长为 3 的正方体上，初始时顶点所在坐标系是模型坐标系，也就是相对于正方体中心位置，该顶点在模型坐标系中的坐标：</p>
+<p><img alt="P_m=（3，3，0）" src="https://juejin.cn/equation?tex=P_m%3D%EF%BC%883%EF%BC%8C3%EF%BC%8C0%EF%BC%89" loading="lazy" class="medium-zoom-image"></p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669f6f2b6020078~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h3 data-id="heading-17">世界坐标系</h3>
+<p>默认情况下，模型坐标和世界坐标系重合，那该顶点在世界坐标系下的坐标：</p>
+<p><img alt="P_w = (3, 3, 0)" src="https://juejin.cn/equation?tex=P_w%20%3D%20(3%2C%203%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>假设我们将立方体向右移动 5 个单位，向上移动 5 个单位，那么立方体的原点 O 在世界坐标系中的坐标就变成了：</p>
+<p><img alt="O_w = (5, 5, 0)" src="https://juejin.cn/equation?tex=O_w%20%3D%20(5%2C%205%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>那顶点 P 在世界坐标系的坐标也就变成了：</p>
+<p><img alt="P_w = P_m + O_w = (5+3, 5+3, 0+0) = (8, 8, 0)" src="https://juejin.cn/equation?tex=P_w%20%3D%20P_m%20%2B%20O_w%20%3D%20(5%2B3%2C%205%2B3%2C%200%2B0)%20%3D%20(8%2C%208%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810231669f79276462624~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>到这里也很容易理解。</p>
+<h3 data-id="heading-18">观察坐标系</h3>
+<p>世界坐标系中有个人 <code>E</code> 在位置(3, 3, 0)处：</p>
+<p><img alt="E_w = (3, 3, 0)" src="https://juejin.cn/equation?tex=E_w%20%3D%20(3%2C%203%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>E 所看到的世界处于观察坐标系中，X 轴、Y 轴和世界坐标系一致，Z 轴和世界坐标系相反，指向屏幕里面。我们很容易就能想到世界坐标系在观察坐标系中的坐标为：</p>
+<p><img alt="O_e = -E_w = (-3, -3, 0)" src="https://juejin.cn/equation?tex=O_e%20%3D%20-E_w%20%3D%20(-3%2C%20-3%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<blockquote>
+<p><img alt="O_e" src="https://juejin.cn/equation?tex=O_e" loading="lazy" class="medium-zoom-image">代表世界坐标系的原点在观察坐标系中的坐标。</p>
+</blockquote>
+<p>因此顶点 P 在观察坐标系的坐标就变成了：</p>
+<p><img alt="P_e = P_w + O_e = (8, 8, 0) + (-3, -3, 0) = (5, 5, 0)" src="https://juejin.cn/equation?tex=P_e%20%3D%20P_w%20%2B%20O_e%20%3D%20(8%2C%208%2C%200)%20%2B%20(-3%2C%20-3%2C%200)%20%3D%20(5%2C%205%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-19">裁剪坐标系</h3>
+<p>这里我们为裁剪坐标系指定一个正射投影观察箱，观察箱左侧坐标 -5，右侧坐标 5，上方坐标 5，下方坐标 -5，近平面坐标 0， 远平面坐标 5，那么处于这个观察箱之间的顶点都将被转换到裁剪坐标系中。</p>
+<p>由于顶点 P 在观察坐标系的坐标为 (5, 5, 0)，所以它转变到裁剪坐标系下的坐标为：</p>
+<p><img alt="P_c = (5 / 5, 5 / 5, 0 / 2.5) = (1, 1, 0)" src="https://juejin.cn/equation?tex=P_c%20%3D%20(5%20%2F%205%2C%205%20%2F%205%2C%200%20%2F%202.5)%20%3D%20(1%2C%201%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>正射投影下， W 分量为 1，到了这一步就有了 W 分量：
+<img alt="P_c = (1, 1, 0, 1)" src="https://juejin.cn/equation?tex=P_c%20%3D%20%20(1%2C%201%2C%200%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-20">NDC 坐标系</h3>
+<p>NDC 坐标是在 GPU 中 将裁剪坐标执行透视除法，所以：</p>
+<p><img alt="P_n = (1/1, 1/1, 0/1, 1/1) = (1, 1, 0, 1)" src="https://juejin.cn/equation?tex=P_n%20%3D%20(1%2F1%2C%201%2F1%2C%200%2F1%2C%201%2F1)%20%3D%20(1%2C%201%2C%200%2C%201)" loading="lazy" class="medium-zoom-image"></p>
+<p>坐标没有改变。</p>
+<h3 data-id="heading-21">视口变换</h3>
+<p>接下来该执行视口变换了，视口变换将 NDC 坐标映射到屏幕坐标系。这一步是将 3D 坐标转变成 2D 坐标，在 GPU 中执行，我们无法通过编程干预，</p>
+<p>视口我们是通过 WebGL API 中的 <code>gl.viewport</code>来 设置，我们可以设置任意尺寸的视口，这里我们设置宽 500 ，高 300 的尺寸。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.viewport(0, 0, 500, 300)<span class="hljs-comment">;</span>
+</code></pre><p>接下来 GPU 就会将 NDC 坐标映射到视口范围内，即将 【-1，1】 的立方体范围内的坐标映射到宽 500，高 300 的屏幕坐标范围。</p>
+<p>我们仍然需要先找到 NDC 坐标系原点在 屏幕坐标系中的坐标。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2019327169bcf47c921c68f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>由于 NDC 坐标系 X 轴上的一个单位长度就等于视口宽度的一半，Y 轴上的一个单位长度等于视口高度的一半，所以 NDC 坐标系原点在屏幕坐标系下的坐标为</p>
+<p><img alt="O_s = (250, 150)" src="https://juejin.cn/equation?tex=O_s%20%3D%20(250%2C%20150)" loading="lazy" class="medium-zoom-image"></p>
+<p>又由于 NDC 坐标系 Y 轴方向和 屏幕坐标系 Y 轴方向相反，所以 NDC 坐标系下的 Y 轴坐标转化到屏幕坐标系时要取Y轴坐标的相反数。</p>
+<p>那么，顶点 P 转换到屏幕坐标系下的坐标为：</p>
+<p><img alt="P_s = P_n + O_s = (1 \times 250, -1 \times 150) + (250, 150) = (500, 0)" src="https://juejin.cn/equation?tex=P_s%20%3D%20P_n%20%2B%20O_s%20%3D%20(1%20%5Ctimes%20250%2C%20-1%20%5Ctimes%20150)%20%2B%20(250%2C%20150)%20%3D%20(500%2C%200)" loading="lazy" class="medium-zoom-image"></p>
+<p>很明显，顶点显示在 canvas 视口的右上角，这和顶点在裁剪坐标系中设置的观察箱中的位置相吻合。</p>
+<p>一个顶点的转换过程大致经历这么几步，我这里只是简单使用坐标偏移演示了一下，其实如果涉及到坐标系的旋转、缩放、Z 轴的加入、透视投影，计算过程将会更复杂。</p>
+<blockquote>
+<p>所幸的是，业界已经有成熟的坐标系变换算法，我们只需要调用他们的方法，传入指定参数，就能生成坐标变换矩阵。</p>
+</blockquote>
+<p>顶点从一个坐标系转换到另一个坐标系，只需要计算出这几点就可以：</p>
+<ul>
+<li>计算出原坐标系的原点 O 在新坐标系的坐标。（平移变换）</li>
+<li>计算出新坐标系坐标分量的单位向量在原坐标系下的长度。（缩放变换）</li>
+<li>计算出原坐标系的坐标分量（基向量）的方向。（旋转变换）</li>
+</ul>
+<p>看到平移、缩放、旋转，我们立刻想到了一种快速执行复杂计算的工具：矩阵。</p>
+<p>下一节我们讲解矩阵在坐标系变换过程中发挥了什么作用？</p>
+<h2 data-id="heading-22">回顾</h2>
+<p>本节我们讲述了WebGL 开发过程中涉及到的坐标系以及它们的作用，但它们之间具体是如何转换的呢？我相信有同学会有这样的好奇心。所以下一节，我们用矩阵实现坐标转换算法。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

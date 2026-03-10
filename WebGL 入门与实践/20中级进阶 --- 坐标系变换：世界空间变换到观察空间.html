@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 坐标系变换：世界空间变换到观察空间</h1>
+<p>上一节我们学习了坐标系变换的基本变换的原理以及算法实现，模型空间通过基本变换会转变到世界空间，转变到世界空间之后，就需要将世界空间映射到观察空间，本节我们学习世界空间向观察空间转换的算法实现。</p>
+<h2 data-id="heading-1">什么是观察空间</h2>
+<p><code>观察空间</code>是从人眼或者摄像机看到的 3D 空间，是整个3D 世界的一部分，观察变换的主要作用是将模型的顶点坐标从<code>世界坐标系</code>变换到<code>观察坐标系</code>中。</p>
+<blockquote>
+<p>观察坐标系也可以理解为相机坐标系。</p>
+</blockquote>
+<p>还记得上一节我们求解变换矩阵的思路吗？</p>
+<ul>
+<li>求出新坐标系原点在原坐标系中的位置。</li>
+<li>求出新坐标系基向量在原坐标系中的表示。</li>
+</ul>
+<h2 data-id="heading-2">视图变换</h2>
+<p>世界空间转变到观察空间这个过程通常称为视图变换，变换矩阵称为视图矩阵。在做视图变换之前，我们会在世界坐标系里指定摄像机或者人眼的位置<code>eyePosition</code>，以及摄像机头顶方向向量<code>upDirection</code>，然后我们要根据这两个条件计算出视图变换矩阵。</p>
+<p>按照矩阵求解步骤进行分析。</p>
+<h3 data-id="heading-3">新坐标系原点在原坐标系中的位置</h3>
+<p>首先我们要分清哪个是新坐标系，哪个是原坐标系。
+在世界空间变换到观察空间的过程中，新坐标系是观察坐标系，原坐标系是世界坐标系，我们已经知道的是世界坐标系下的顶点位置 P0，需要求出顶点在观察坐标系中的位置 P1。</p>
+<p><img alt="P1 = M \times P0。" src="https://juejin.cn/equation?tex=P1%20%3D%20M%20%5Ctimes%20P0%E3%80%82" loading="lazy" class="medium-zoom-image"></p>
+<p>其中 M 是世界坐标系变换到观察坐标系的观察矩阵。</p>
+<p>为了求M，我们需要知道世界坐标系的原点在观察坐标系中的位置，还需要知道世界坐标系基向量在观察坐标系中的表示。</p>
+<p>我们目前的已知量有如下三个：</p>
+<ul>
+<li>1、观察坐标系原点在世界坐标系中的位置。</li>
+<li>2、观察坐标系的 Z 轴在世界坐标系中的表示。</li>
+<li>3、顶点在世界坐标系中的位置P0。</li>
+</ul>
+<p>根据 1、2 两项可以得出观察坐标系到世界坐标系的观察矩阵 M 。</p>
+<p>但是我们需要求出的是 世界坐标系到观察坐标系的视图矩阵 N。</p>
+<h3 data-id="heading-4">逆变换</h3>
+<p>大家还记得在数学章节，我们学习了逆矩阵的含义与算法实现。在坐标系变换中，逆矩阵有着重要的意义。</p>
+<p>假设有一顶点在坐标系A中坐标 P0，经过矩阵变换 M 后顶点在坐标系 B 中的坐标 P1，</p>
+<p><img alt="P1 = M \times P0" src="https://juejin.cn/equation?tex=P1%20%3D%20M%20%5Ctimes%20P0" loading="lazy" class="medium-zoom-image"></p>
+<p>又有</p>
+<p><img alt="M \times M^{-1} = I" src="https://juejin.cn/equation?tex=M%20%5Ctimes%20M%5E%7B-1%7D%20%3D%20I" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="I \times P1 = P1" src="https://juejin.cn/equation?tex=I%20%5Ctimes%20P1%20%3D%20P1" loading="lazy" class="medium-zoom-image"></p>
+<p>所以</p>
+<p><img alt="M \times M^{-1} \times P1 = M \times P0" src="https://juejin.cn/equation?tex=M%20%5Ctimes%20M%5E%7B-1%7D%20%5Ctimes%20P1%20%3D%20M%20%5Ctimes%20P0" loading="lazy" class="medium-zoom-image"></p>
+<p>两边约去 M，可得</p>
+<p><img alt="M^{-1} \times P1 = P0" src="https://juejin.cn/equation?tex=M%5E%7B-1%7D%20%5Ctimes%20P1%20%3D%20P0" loading="lazy" class="medium-zoom-image"></p>
+<p>什么意思呢？</p>
+<p>意思就是顶点 P1 经过矩阵 M 的逆矩阵就可以变换回顶点 P0。我们看下逆矩阵在视图变换中如何应用。</p>
+<p>假设顶点在世界坐标系中的坐标 P0，观察坐标系变换到世界坐标系的变换矩阵为 M，那么顶点在观察坐标系中的坐标 P1 为：</p>
+<p><img alt="P0 = M \times P1" src="https://juejin.cn/equation?tex=P0%20%3D%20M%20%5Ctimes%20P1" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="\Longrightarrow M \times M^{-1} \times P0 = M \times P1" src="https://juejin.cn/equation?tex=%5CLongrightarrow%20M%20%5Ctimes%20M%5E%7B-1%7D%20%5Ctimes%20P0%20%3D%20M%20%5Ctimes%20P1" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="\Longrightarrow M^{-1} \times P0 = P1" src="https://juejin.cn/equation?tex=%5CLongrightarrow%20M%5E%7B-1%7D%20%5Ctimes%20%20P0%20%3D%20P1" loading="lazy" class="medium-zoom-image"></p>
+<p>同样地，我们只要求出观察坐标系变换到世界坐标系 的逆矩阵即可求出物体在观察坐标系中的坐标。</p>
+<p>在此，我们定义观察坐标系变换到世界坐标系的矩阵为相机矩阵 E，世界坐标系变换到观察坐标系的矩阵为视图矩阵 V，其中 E 和 V 互逆。</p>
+<h3 data-id="heading-5">求解相机矩阵</h3>
+<p>求解相机矩阵仍然按照上一节的求解步骤。</p>
+<p>我们已经知道的几个条件：</p>
+<ul>
+<li>假设相机在世界坐标系中的位置 <code>Pe (ex, ey, ez)</code>。</li>
+<li>看向目标位置为<code>T (tx,ty,tz)</code>。</li>
+<li>摄像机上方方向向量 <code>upDirection 为(ux, uy, uz)</code>。</li>
+</ul>
+<p>接下来我们要根据这些条件求出相机矩阵。</p>
+<h4 data-id="heading-6">1、相机坐标系的原点在世界坐标系的位置</h4>
+<p>由上面条件可知，相机坐标系原点在世界坐标系中的位置如下：</p>
+<p><img alt="P_e = (ex， ey， ez)" src="https://juejin.cn/equation?tex=P_e%20%3D%20(ex%EF%BC%8C%20ey%EF%BC%8C%20ez)" loading="lazy" class="medium-zoom-image"></p>
+<h4 data-id="heading-7">2、 求解相机坐标系的基向量在世界坐标系中的表示</h4>
+<p>从相机位置看像目标位置的方向称为观察方向，观察方向可以看做相机坐标系的 Z 轴方向，那么世界坐标系的 Z 轴基向量方向可以这样求出：</p>
+<figure><img alt="\begin{aligned}
+zAxis &= P_e - T \\\
+& =(ex - tx, ey - ty, ez - tz)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AzAxis%20%26%3D%20P_e%20-%20T%20%5C%5C%5C%0A%26%20%3D(ex%20-%20tx%2C%20ey%20-%20ty%2C%20ez%20-%20tz)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>有了 Z 轴方向向量<code>zAxis</code>和临时 Y 轴 方向<code>upDirection</code>，我们就可以利用向量叉乘来计算 X 轴方向了。</p>
+<p><img alt="xAxis = zAxis \times upDirection" src="https://juejin.cn/equation?tex=xAxis%20%3D%20zAxis%20%5Ctimes%20upDirection" loading="lazy" class="medium-zoom-image"></p>
+<p>计算出 X 轴方向之后，我们需要将 <code>xAxis</code> 和 <code>zAxis</code> 归一化，得到它们的<code>基向量</code>，这时还需要求一遍 Y 轴的方向向量，因为 <code>upDirection</code> 是我们一开始假想的，只是为了求解 X 轴方向，<code>upDirection</code> 和 <code>zAxis</code> 不一定是垂直关系。</p>
+<p>仍然利用向量叉乘求解 Y 轴方向：</p>
+<p><img alt="yAxis = zAxis \times xAxis" src="https://juejin.cn/equation?tex=yAxis%20%3D%20zAxis%20%5Ctimes%20xAxis" loading="lazy" class="medium-zoom-image"></p>
+<p>将 xAxis(xx, xy, xz)、yAxis(yx, yy, yz)、zAxis(zx, zy, zz)以及相机位置 Pe(ex, ey, ez) 代入矩阵变换框架，可以求得相机坐标系变换到世界坐标系的矩阵 E</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+xx & yx & zx & ex \\\
+xy & yy & zy & ey \\\
+xz & yz & zz & ez \\\
+0 & 0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0Axx%20%26%20yx%20%26%20zx%20%26%20ex%20%5C%5C%5C%0Axy%20%26%20yy%20%26%20%20zy%20%26%20ey%20%5C%5C%5C%0Axz%20%26%20yz%20%26%20zz%20%26%20ez%20%5C%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>这就是<code>相机矩阵E</code>，有了它 ，我们利用逆矩阵的算法求出 E 的逆矩阵 <img alt="E^{-1}" src="https://juejin.cn/equation?tex=E%5E%7B-1%7D" loading="lazy" class="medium-zoom-image">，即视图矩阵。</p>
+<p>之后就可以利用<code>视图矩阵</code>左乘顶点在世界坐标系的坐标，计算出顶点在观察坐标系中的坐标，也就完成了世界坐标系到观察坐标系的变换。</p>
+<h3 data-id="heading-8">算法实现</h3>
+<p>有了上面的分析，我们的算法就很容易实现了。</p>
+<p><strong>1、 首先，求出Z 轴基向量，即观察方向：</strong></p>
+<pre><code lang="scss" class="hljs language-scss">function <span class="hljs-built_in">lookAt</span>(cameraPosition, target, upDirection){
+ <span class="hljs-selector-tag">var</span> zAxis = (Vector3.subtractVectors(cameraPosition, target))<span class="hljs-selector-class">.normalize</span>();
+}
+</code></pre><p><strong>2、 其次，根据 zAxis 和 upDireciton 求出 X 轴基向量：</strong></p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">xAxis</span> = (Vector3.cross(upDirection, zAxis)).normalize()<span class="hljs-comment">;</span>
+</code></pre><p><strong>3、处理 zAxis 和 upDirection 平行的情况：</strong></p>
+<pre><code lang="ini" class="hljs language-ini">if(xAxis.length() == 0){
+ if (Math.abs(<span class="hljs-attr">upDirection.z</span> == <span class="hljs-number">1</span>)) {
+ zAxis.x += 0.0001<span class="hljs-comment">;</span>
+ } else {
+ zAxis.z += 0.0001<span class="hljs-comment">;</span>
+ }
+ zAxis.normalize()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">xAxis</span> = Vector3.cross(upDirection, zAxis).normalize()<span class="hljs-comment">;</span>
+}
+
+</code></pre><p><strong>4、接着，根据 zAxis 和 xAxis ，重新计算Y轴基向量 yAxis：</strong></p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">yAxis</span> = (Vector3.cross(zAxis, xAxis)).normalize()<span class="hljs-comment">;</span>
+</code></pre><p><strong>5、最后，将各个值代入矩阵框架</strong></p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">target</span> = new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+
+// 第一列，x 轴基向量
+target<span class="hljs-section">[0]</span> = xAxis.x<span class="hljs-comment">;</span>
+target<span class="hljs-section">[1]</span> = xAxis.y<span class="hljs-comment">;</span>
+target<span class="hljs-section">[2]</span> = xAxis.z<span class="hljs-comment">;</span>
+target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+
+// 第二列，y 轴基向量
+target<span class="hljs-section">[4]</span> = yAxis.x<span class="hljs-comment">;</span>
+target<span class="hljs-section">[5]</span> = yAxis.y<span class="hljs-comment">;</span>
+target<span class="hljs-section">[6]</span> = yAxis.z<span class="hljs-comment">;</span>
+target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+
+// 第三列，z 轴基向量
+target<span class="hljs-section">[8]</span> = zAxis.x<span class="hljs-comment">;</span>
+target<span class="hljs-section">[9]</span> = zAxis.y<span class="hljs-comment">;</span>
+target<span class="hljs-section">[10]</span> = zAxis.z<span class="hljs-comment">;</span>
+target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+
+// 第四列，坐标系原点位置
+target<span class="hljs-section">[8]</span> = cameraPosition.x<span class="hljs-comment">;</span>
+target<span class="hljs-section">[9]</span> = cameraPosition.y<span class="hljs-comment">;</span>
+target<span class="hljs-section">[10]</span> = cameraPosition.z<span class="hljs-comment">;</span>
+target<span class="hljs-section">[11]</span> = 1<span class="hljs-comment">;</span>
+
+return target<span class="hljs-comment">;</span>
+</code></pre><h3 data-id="heading-9">使用方法</h3>
+<p>有了上面的算法，我们构造一个观察矩阵就轻而易举了。</p>
+<ul>
+<li>首先定义摄像机的位置：</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">cameraPosition</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">10</span>)<span class="hljs-comment">;</span>
+</code></pre><ul>
+<li>接着指定视线看向的点：</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">target</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+</code></pre><ul>
+<li>假定一个方向向量代表摄像机上方：</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">upDirection</span> = new Vector3(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+</code></pre><ul>
+<li>将这三个参数代入 lookAt 方法，求出相机矩阵：</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">cameraMatrix</span> = matrix.lookAt(cameraPosition, target, upDirection)<span class="hljs-comment">;</span>
+</code></pre><ul>
+<li>最后一步，求相机矩阵的逆矩阵，即观察矩阵。</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">viewMatrix</span> = matrix.inverse(cameraMatrix)<span class="hljs-comment">;</span>
+</code></pre><h3 data-id="heading-10">效果演示</h3>
+<p>接下来，我们利用上面的观察矩阵，演示轨道摄像机和第一人称摄像机的效果。</p>
+<h4 data-id="heading-11">轨道摄像机</h4>
+<p>我们创建一个围绕场景中心的圆形摄像机轨道，半径为10，观察处于场景中心的一个立方体。其中，摄像机在圆形轨道上移动，并且观察方向始终看向场景中心的立方体，</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181031166c9538cea406e6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这是圆形轨道摄像机的观察效果，咋看之下，它给我们的感觉是立方体自己在动。其实是我们的摄像机在绕着圆形轨道移动，立方体的位置并没有变化。</p>
+<blockquote>
+<p>移动摄像机靠近物体等价于移动物体、远离摄像机的观察效果。</p>
+</blockquote>
+<h4 data-id="heading-12">跟踪摄像机</h4>
+<p>在一些第一人称游戏中，摄像机往往是跟随人物而动的，接下来我们模拟人物走动的视觉效果。</p>
+<p>我们将摄像机的位置和人物的位置保持一致，摄像机看向的目标点始终保持在人物前方 20 单位处，于是就产生了下面的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111166cadd121525b83~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-13">回顾</h2>
+<p>本节我们讲解了如何实现视图矩阵的推导，以及视图矩阵的简单应用，推导过程仍然涉及了很多数学知识的应用，在此建议大家一定要多加练习，熟练掌握这些数学知识。</p>
+<p>下一节，我们学习投影矩阵的推导以及应用。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

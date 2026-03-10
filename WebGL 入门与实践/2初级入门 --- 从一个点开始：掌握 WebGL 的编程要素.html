@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 从一个点开始：掌握 WebGL 的编程要素</h1>
+<p>本节内容涉及一些术语，为了便于大家理解，在讲解之前，我对相关术语做个简单解释：</p>
+<ul>
+<li>图元：WebGL 能够绘制的基本图形元素，包含三种：<code>点</code>、<code>线段</code>、<code>三角形</code>。</li>
+<li>片元：可以理解为像素，像素着色阶段是在片元着色器中。</li>
+<li>裁剪坐标系：裁剪坐标系是顶点着色器中的 <code>gl_Position</code> 内置变量接收到的坐标所在的坐标系。</li>
+<li>设备坐标系：又名 NDC 坐标系，是裁剪坐标系各个分量对 w 分量相除得到的坐标系，特点是 x、y、z 坐标分量的取值范围都在 【-1，1】之间，可以将它理解为边长为 2 的正方体，坐标系原点在正方体中心。</li>
+</ul>
+<h2 data-id="heading-1">目标</h2>
+<p>本节实现一个最简单的 WebGL 程序：鼠标点击一次，就会在点击位置处绘制一个随机颜色的点。</p>
+<p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc5bf0fe41b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>希望通过这个例子，能够让大家掌握 WebGL 的绘制过程。</p>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson1.1.html" title="http://ifanqi.top/webgl/pages/lesson1.1.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson1.1.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson1.1.html" ref="nofollow noopener noreferrer">源码地址</a>。</li>
+</ul>
+<h2 data-id="heading-2">编写第一个 WebGL 程序</h2>
+<p>上节我们讲到 WebGL 应用包含两个要素：<code>JavaScript程序</code>和<code>着色器程序</code>。本节我们通过绘制一个点来演示这个过程，麻雀虽小，但五脏俱全。使用 WebGL 绘制一个点虽然简单，但是它仍需要 JavaScript 程序和着色器程序共同完成。</p>
+<p>我们的目标是绘制一个在屏幕中心，大小为 10，颜色是红色的点。</p>
+<h3 data-id="heading-3">1、准备着色器源码</h3>
+<p>我们从<code>着色器程序</code>开始入手，先用GLSL编写<code>顶点着色器</code>和<code>片元着色器</code>。</p>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<p>顶点着色器的主要任务是告诉 GPU 在<code>裁剪坐标系</code>的原点（也就是屏幕中心）画一个大小为 10 的点。</p>
+<pre><code lang="ini" class="hljs language-ini">void main(){
+ //声明顶点位置
+ <span class="hljs-attr">gl_Position</span> = vec4(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+ //声明待绘制的点的大小。
+ <span class="hljs-attr">gl_PointSize</span> = <span class="hljs-number">10.0</span><span class="hljs-comment">;</span>
+}
+</code></pre><ul>
+<li>片元着色器</li>
+</ul>
+<p>顶点着色器中的数据经过<code>图元装配</code>和<code>光栅化</code>之后，来到了<code>片元着色器</code>，在本例中，片元着色器的任务是通知 GPU 将光栅化后的像素渲染成红色，所以片元着色器要对内置变量 <code>gl_FragColor</code> （代表像素要填充的颜色）进行赋值。</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span>()</span>{
+ <span class="hljs-comment">//设置像素的填充颜色为红色。</span>
+ gl_FragColor = vec4(<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>); 
+}
+</code></pre><p>至此，我们完成了着色器的开发，是不是很简单呢？</p>
+<p>但是我相信会有一部分细心的同学产生了疑问：</p>
+<ul>
+<li>gl_Position、gl_PointSize、gl_FragColor 代表什么？为什么没有声明就可以赋值？</li>
+<li>vec4 的含义？</li>
+<li>在 CSS 语法中或者一些制图软件中，<code>RGBA</code> 模式下红色用（255, 0, 0, 1）来表示，为什么片元着色器中颜色用 <code>vec4(1.0, 0.0, 0.0, 1.0)</code> 来表示呢？</li>
+</ul>
+<p>这些是 GLSL 的语法细节，后面章节我会对 GLSL 语法作详细介绍，但在这之前，我们先要认识一下它们。</p>
+<p>那么，解释一下上面列出的三个疑问：</p>
+<ul>
+<li>
+<p>gl_Position、gl_PointSize、gl_FragColor 是 GLSL 的内置属性。</p>
+<ul>
+<li>
+<p>gl_Position：顶点的<code>裁剪坐标系坐标</code>，包含 X, Y, Z，W 四个坐标分量，顶点着色器接收到这个坐标之后，对它进行透视除法，即将各个分量同时除以 W，转换成 <code>NDC 坐标</code>，NDC 坐标每个分量的取值范围都在【-1, 1】之间，GPU 获取这个属性值作为顶点的最终位置进行绘制。</p>
+</li>
+<li>
+<p>gl_FragColor：片元（像素）颜色，包含 R, G, B, A 四个颜色分量，且每个分量的取值范围在【0,1】之间，GPU 获取这个值作为像素的最终颜色进行着色。</p>
+</li>
+<li>
+<p>gl_PointSize：绘制到屏幕的点的大小，需要注意的是，gl_PointSize只有在绘制图元是<code>点</code>的时候才会生效。当我们绘制线段或者三角形的时候，gl_PointSize是不起作用的。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>vec4：包含四个浮点元素的<code>容器类型</code>，vec 是 vector（向量）的单词简写，vec4 代表包含 4 个浮点数的向量。此外，还有 <code>vec2</code>、<code>vec3</code> 等类型，代表包含<code>2个</code>或者<code>3个</code>浮点数的容器。</p>
+</li>
+<li>
+<p>GLSL 中 gl_Position 所接收的坐标所在坐标系是裁剪坐标系 ，不同于我们的浏览器窗口坐标系。所以当我们赋予 gl_Position 位置信息的时候，需要对其进行转换才能正确显示。</p>
+</li>
+<li>
+<p>gl_FragColor，属于 GLSL 内置属性，用来设置片元颜色，包含 4 个分量 (R, G, B, A)，各个颜色分量的取值范围是【0，1】，也不同于我们常规颜色的【0，255】取值范围，所以当我们给 gl_FragColor 赋值时，也需要对其进行转换。平常我们所采用的颜色值（R, G, B, A），对应的转换公式为： (R值/255，G值/255，B值/255，A值/1）。拿红色举例，在CSS中，红色用 <code>RGBA</code> 形式表示是（255，0，0，1），那么转换成 GLSL 形式就是(255 / 255, 0 / 255, 0 / 255, 1 / 1)，转换后的值为（1.0, 0.0, 0.0, 1.0)。</p>
+</li>
+</ul>
+<blockquote>
+<p>注意，GLSL 是强类型语言，定义变量时，数据类型和值一定要匹配正确，比如我们给浮点数 a 赋值 1，我们需要这样写：<code>float a = 1.0;</code> 如果用 <code>float a = 1;</code> 的话会报错。</p>
+</blockquote>
+<p>至此，着色器源码部分编写好了，那么着色器源码该如何使用呢？</p>
+<p>着色器源码本质是字符串，所以我们既可以把着色器源码存储在 JavaScript 变量里，也可以放在 script 标签里，甚至存储在数据库中并通过 ajax 请求获取。之后的章节，为了使用方便，我们把着色器源码放在 <code>script</code> 标签中。</p>
+<h3 data-id="heading-4">2、准备 HTML 文件</h3>
+<p>HTML 文件至少需要包含一个 <code>canvas</code> 标签，另外需要两个存储<code>着色器源码</code>的 script 标签。</p>
+<pre><code lang="xml" class="hljs language-xml"><span class="hljs-tag"><<span class="hljs-name">body</span>></span>
+	<span class="hljs-comment"><!-- 顶点着色器源码 --></span>
+	<span class="hljs-tag"><<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"shader-source"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"vertexShader"</span>></span><span class="javascript">
+	 <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-params"></span>){
+ 		<span class="hljs-comment">//声明顶点位置</span>
+ 		gl_Position = <span class="hljs-title function_">vec4</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>);
+ 		<span class="hljs-comment">//声明要绘制的点的大小。</span>
+ 		gl_PointSize = <span class="hljs-number">10.0</span>;
+ 	}
+	</span><span class="hljs-tag"></<span class="hljs-name">script</span>></span>
+	
+	<span class="hljs-comment"><!-- 片元着色器源码 --></span>
+	<span class="hljs-tag"><<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"shader-source"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"fragmentShader"</span>></span><span class="javascript">
+	 <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-params"></span>){
+	 	<span class="hljs-comment">//设置像素颜色为红色</span>
+		gl_FragColor = <span class="hljs-title function_">vec4</span>(<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>); 
+	}
+	</span><span class="hljs-tag"></<span class="hljs-name">script</span>></span>
+	
+	<span class="hljs-tag"><<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>></span><span class="hljs-tag"></<span class="hljs-name">canvas</span>></span>
+<span class="hljs-tag"></<span class="hljs-name">body</span>></span>
+</code></pre><h3 data-id="heading-5">3、JavaScript 程序</h3>
+<p>准备好了 HTML 文件，我们接着编写 JavaScript 部分。</p>
+<p>首先，获取 WebGL 绘图环境：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">canvas</span> = document.querySelector(<span class="hljs-string">'#canvas'</span>)<span class="hljs-comment">;</span>
+var <span class="hljs-attr">gl</span> = canvas.getContext(<span class="hljs-string">'webgl'</span>) || canvas.getContext(<span class="hljs-string">"experimental-webgl"</span>)<span class="hljs-comment">;</span>
+</code></pre><blockquote>
+<p>在某些浏览器中，我们还需要做下兼容处理，加上实验前缀。</p>
+</blockquote>
+<p>创建顶点着色器对象：</p>
+<pre><code lang="ini" class="hljs language-ini">// 获取顶点着色器源码
+var <span class="hljs-attr">vertexShaderSource</span> = document.querySelector(<span class="hljs-string">'#vertexShader'</span>).innerHTML<span class="hljs-comment">;</span>
+// 创建顶点着色器对象
+var <span class="hljs-attr">vertexShader</span> = gl.createShader(gl.VERTEX_SHADER)<span class="hljs-comment">;</span>
+// 将源码分配给顶点着色器对象
+gl.shaderSource(vertexShader, vertexShaderSource)<span class="hljs-comment">;</span>
+// 编译顶点着色器程序
+gl.compileShader(vertexShader)<span class="hljs-comment">;</span>
+</code></pre><p>接下来，创建片元着色器，该过程和顶点着色器的创建过程类似，区别在于<code>着色器源码</code>和<code>着色器类型</code>。</p>
+<pre><code lang="ini" class="hljs language-ini">// 获取片元着色器源码
+var <span class="hljs-attr">fragmentShaderSource</span> = document.querySelector(<span class="hljs-string">'#fragmentShader'</span>).innerHTML<span class="hljs-comment">;</span>
+// 创建片元着色器程序
+var <span class="hljs-attr">fragmentShader</span> = gl.createShader(gl.FRAGMENT_SHADER)<span class="hljs-comment">;</span>
+// 将源码分配给片元着色器对象
+gl.shaderSource(fragmentShader, fragmentShaderSource)<span class="hljs-comment">;</span>
+// 编译片元着色器
+gl.compileShader(fragmentShader)<span class="hljs-comment">;</span>
+</code></pre><p>着色器对象创建完毕，接下来我们开始创建着色器程序</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//创建着色器程序</span>
+<span class="hljs-selector-tag">var</span> program = gl<span class="hljs-selector-class">.createProgram</span>();
+<span class="hljs-comment">//将顶点着色器挂载在着色器程序上。</span>
+gl<span class="hljs-selector-class">.attachShader</span>(program, vertexShader); 
+<span class="hljs-comment">//将片元着色器挂载在着色器程序上。</span>
+gl<span class="hljs-selector-class">.attachShader</span>(program, fragmentShader);
+<span class="hljs-comment">//链接着色器程序</span>
+gl<span class="hljs-selector-class">.linkProgram</span>(program);
+</code></pre><p>有时候一个 WebGL 应用包含多个 program，所以在使用某个 program 绘制之前，我们要先启用它。</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">// 使用刚创建好的着色器程序。</span>
+gl<span class="hljs-selector-class">.useProgram</span>(program);
+</code></pre><p>准备工作做好了，接下来开始绘制：</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//设置清空画布颜色为黑色。</span>
+gl<span class="hljs-selector-class">.clearColor</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>);
+
+<span class="hljs-comment">//用上一步设置的清空画布颜色清空画布。</span>
+gl<span class="hljs-selector-class">.clear</span>(gl.COLOR_BUFFER_BIT);
+
+<span class="hljs-comment">//绘制点。</span>
+gl<span class="hljs-selector-class">.drawArrays</span>(gl.POINTS, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+</code></pre><p>gl.drawArrays 的语法简单介绍如下，详细介绍参见<a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FAPI%2FWebGLRenderingContext%2FdrawArrays" title="https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/drawArrays" ref="nofollow noopener noreferrer">这里</a>。</p>
+<blockquote>
+<p>void gl.drawArrays(mode, first, count);</p>
+</blockquote>
+<ul>
+<li>参数：
+<ul>
+<li>mode，代表图元类型。</li>
+<li>first，代表从第几个点开始绘制。</li>
+<li>count，代表绘制的点的数量。</li>
+</ul>
+</li>
+</ul>
+<p><code>gl.drawArrays</code> 是执行绘制的 API，上面示例中的第一个参数 <code>gl.POINTS</code> 代表我们要绘制的是<code>点图元</code>，第二个参数代表要绘制的顶点的起始位置，第三个参数代表顶点绘制个数。</p>
+<p>至此，着色器部分和 JavaScript 程序都写完了，运行看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc66b729ea4~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>上面这些代码实现了点的绘制。大家应该发现了，在 <code>gl.drawArrays</code> 方法之前有很多重复的代码，这些重复代码是我们实现每个 WebGL 应用都要编写的，为了避免重复工作，我们把这些代码封装一下，封装出的函数库放在 webgl-helper.js 文件中，优化过后的代码如下：</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//获取canvas</span>
+<span class="hljs-selector-tag">var</span> <span class="hljs-selector-tag">canvas</span> = <span class="hljs-built_in">getCanvas</span>(id);
+
+<span class="hljs-comment">//获取webgl绘图环境</span>
+<span class="hljs-selector-tag">var</span> gl = <span class="hljs-built_in">getWebGLContext</span>(canvas);
+
+<span class="hljs-comment">//创建顶点着色器</span>
+<span class="hljs-selector-tag">var</span> vertexShader = <span class="hljs-built_in">createShaderFromScript</span>(gl, gl.VERTEX_SHADER,'vertexShader');
+<span class="hljs-comment">//创建片元着色器</span>
+<span class="hljs-selector-tag">var</span> fragmentShader = <span class="hljs-built_in">createShaderFromScript</span>(gl, gl.FRAGMENT_SHADER,'fragmentShader');
+
+<span class="hljs-comment">//创建着色器程序</span>
+<span class="hljs-selector-tag">var</span> program = <span class="hljs-built_in">createProgram</span>(gl ,vertexShader, fragmentShader);
+<span class="hljs-comment">//告诉 WebGL 运行哪个着色器程序</span>
+gl<span class="hljs-selector-class">.useProgram</span>(program);
+
+<span class="hljs-comment">//设置清空画布颜色为黑色。</span>
+gl<span class="hljs-selector-class">.clearColor</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>);
+<span class="hljs-comment">//用上一步设置的清空画布颜色清空画布。</span>
+gl<span class="hljs-selector-class">.clear</span>(gl.COLOR_BUFFER_BIT);
+<span class="hljs-comment">//绘制点</span>
+gl<span class="hljs-selector-class">.drawArrays</span>(gl.POINTS, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+</code></pre><p>九行代码就实现了绘制点的程序，是不是简洁了很多？</p>
+<h2 data-id="heading-6">点的动态绘制</h2>
+<p>上例只是实现了一个静态点的绘制，但是真正的 WebGL 应用总是需要通过网页和用户进行交互，进而改变画面的。所以接下来，我们要实现一个简单交互程序：在鼠标点击过的位置绘制一个点，而且这个点的颜色是随机的。</p>
+<p>这要求我们有能力通过 JavaScript 往着色器程序中传入顶点位置和颜色数据，从而改变点的位置和颜色。</p>
+<h3 data-id="heading-7">着色器程序</h3>
+<p>我们修改一下着色器程序，修改后的着色器程序要能够接收 JavaScript 传递过来的数据：</p>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//设置浮点数精度为中等精度</span>
+precision mediump <span class="hljs-attribute">float</span>;
+<span class="hljs-comment">//接收点在 canvas 坐标系上的坐标 (x, y)</span>
+attribute vec2 a_Position;
+<span class="hljs-comment">//接收 canvas 的宽高尺寸</span>
+attribute vec2 a_Screen_Size;
+void <span class="hljs-selector-tag">main</span>(){
+ <span class="hljs-comment">//start 将屏幕坐标系转化为裁剪坐标（裁剪坐标系）</span>
+ vec2 <span class="hljs-attribute">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span>; 
+ <span class="hljs-attribute">position</span> = <span class="hljs-attribute">position</span> * <span class="hljs-built_in">vec2</span>(<span class="hljs-number">1.0</span>, -<span class="hljs-number">1.0</span>);
+ gl_Position = <span class="hljs-built_in">vec4</span>(position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+ <span class="hljs-comment">//end 将屏幕坐标系转化为裁剪坐标（裁剪坐标系）</span>
+ <span class="hljs-comment">//声明要绘制的点的大小。</span>
+ gl_PointSize = <span class="hljs-number">10.0</span>;
+}
+</code></pre><ul>
+<li>片元着色器</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//设置浮点数精度为中等精度</span>
+precision mediump <span class="hljs-attribute">float</span>;
+<span class="hljs-comment">//接收 JavaScript 传过来的颜色值（RGBA）。</span>
+uniform vec4 u_Color;
+void <span class="hljs-selector-tag">main</span>(){
+ <span class="hljs-comment">//将普通的颜色表示转化为 WebGL 需要的表示方式，即将【0-255】转化到【0,1】之间。</span>
+ vec4 <span class="hljs-attribute">color</span> = u_Color / <span class="hljs-built_in">vec4</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">1</span>);
+ gl_FragColor = <span class="hljs-attribute">color</span>; 
+}
+</code></pre><p>这次的着色器和上例中的着色器有很大不同，大家可以发现，顶点着色器中在给 <code>gl_Position</code> 赋值之前，进行了一系列运算。片元着色器中给 <code>gl_FragColor</code> 赋值之前，也进行了一系列运算。代码注释大家应该能看懂，我简单讲一下：</p>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<p>我们在顶点着色器中定义两个 attribute 变量： <code>a_Position</code> 和 <code>a_Screen_Size</code>，a_Position 接收 <code>canvas 坐标系</code>下的点击坐标。<br>
+<code>vec2</code> 代表存储两个浮点数变量的容器，因本节不涉及<code>深度计算</code>，所以我们只接收顶点的 x 和 y 坐标。<br>
+a_Screen_Size 变量用来接收 JavaScript 传递过来的 canvas 的宽高尺寸。</p>
+<pre><code lang="ini" class="hljs language-ini">vec2 <span class="hljs-attr">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span>
+</code></pre><p>上面这句代码用来将浏览器窗口坐标转换成裁剪坐标，之后通过透视除法，除以 w 值（此处为 1 ）转变成设备坐标（NDC坐标系）。这个算法首先将(x,y) 转化到【0, 1】区间，再将 【0, 1】之间的值乘以 2 转化到 【0, 2】区间，之后再减去 1 ，转化到 【-1, 1】之间的值，即 <code>NDC 坐标</code>。</p>
+<p>事实上，这是我们第一次接触坐标系变换: 从 Canvas 坐标系转变到 NDC 坐标系（即设备坐标系），这个变换比较简单，我们用基本运算就可以实现。</p>
+<blockquote>
+<p>在中级进阶阶段，我会给大家介绍一种更通用的转换方法：矩阵变换。</p>
+</blockquote>
+<ul>
+<li>片元着色器</li>
+</ul>
+<p>片元着色器定义了一个<code>全局变量</code> (被 uniform 修饰的变量) ，用来接收 JavaScript 传递过来的随机颜色。</p>
+<p>大家应该注意到了，到目前为止，我们定义变量采用过两种形式，一种是通过 attribute 修饰，一种是通过 uniform 修饰。同样都是用来接收 JavaScript 传递过来的信息，它们有什么区别呢？</p>
+<ul>
+<li>
+<p>attribue 变量：只能在<code>顶点着色器</code>中定义。</p>
+</li>
+<li>
+<p>uniform 变量：既可以在<code>顶点着色器</code>中定义，也可以在<code>片元着色器中</code>定义。</p>
+</li>
+<li>
+<p>最后一种变量类型 <code>varing</code> 变量：它用来从<code>顶点着色器</code>中往<code>片元着色器</code>传递数据。使用它我们可以在顶点着色器中声明一个变量并对其赋值，经过插值处理后，在片元着色器中取出插值后的值来使用。</p>
+</li>
+</ul>
+<h3 data-id="heading-8">HTML 部分</h3>
+<pre><code lang="ini" class="hljs language-ini"><script <span class="hljs-attr">type</span>=<span class="hljs-string">"shader-source"</span> id=<span class="hljs-string">"vertexShader"</span>>
+ precision mediump float<span class="hljs-comment">;</span>
+	//接收点在 canvas 坐标系上的坐标 (x, y)
+ attribute vec2 a_Position<span class="hljs-comment">;</span>
+	//接收 canvas 窗口尺寸(width, height)
+ attribute vec2 a_Screen_Size<span class="hljs-comment">;</span>
+ void main(){
+	 //将屏幕坐标系转化为 GLSL 限定的坐标值（NDC坐标系）
+ 	 vec2 <span class="hljs-attr">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span><span class="hljs-comment">; </span>
+ 	 <span class="hljs-attr">position</span> = position * vec2(<span class="hljs-number">1.0</span>, -<span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+ 	 <span class="hljs-attr">gl_Position</span> = vec4(position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ 	 //声明要绘制的点的大小。
+ 	 <span class="hljs-attr">gl_PointSize</span> = <span class="hljs-number">10.0</span><span class="hljs-comment">;</span>
+ } 
+ </script>
+
+ <!-- 片元着色器源码 -->
+ <script <span class="hljs-attr">type</span>=<span class="hljs-string">"shader-source"</span> id=<span class="hljs-string">"fragmentShader"</span>>
+ precision mediump float<span class="hljs-comment">;</span>
+ //接收 JavaScript 传过来的颜色值（rgba）。
+ uniform vec4 u_Color<span class="hljs-comment">;</span>
+ void main(){
+ 	 vec4 <span class="hljs-attr">color</span> = u_Color / vec4(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ 	 <span class="hljs-attr">gl_FragColor</span> = color<span class="hljs-comment">; </span>
+ }
+ </script>
+
+ <canvas <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>></canvas>
+
+</code></pre><h3 data-id="heading-9">JavaScript 程序</h3>
+<p>JavaScript 部分的实现与静态点的绘制大致相同，只是增加了为着色器中变量进行赋值的代码。</p>
+<p>动态绘制点的逻辑是：</p>
+<ul>
+<li>声明一个数组变量 <code>points</code>，存储点击位置的坐标。</li>
+<li>绑定 canvas 的点击事件。</li>
+<li>触发点击操作时，把点击坐标添加到数组 <code>points</code> 中。</li>
+<li>遍历每个点执行 <code>drawArrays(gl.Points, 0, 1)</code> 绘制操作。</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">...省略着色器创建部分。
+//找到顶点着色器中的变量a_Position
+var <span class="hljs-attr">a_Position</span> = gl.getAttribLocation(program, <span class="hljs-string">'a_Position'</span>)<span class="hljs-comment">;</span>
+//找到顶点着色器中的变量a_Screen_Size
+var <span class="hljs-attr">a_Screen_Size</span> = gl.getAttribLocation(program, <span class="hljs-string">'a_Screen_Size'</span>)<span class="hljs-comment">;</span>
+//找到片元着色器中的变量u_Color
+var <span class="hljs-attr">u_Color</span> = gl.getUniformLocation(program, <span class="hljs-string">'u_Color'</span>)<span class="hljs-comment">;</span>
+//为顶点着色器中的 a_Screen_Size 传递 canvas 的宽高信息
+gl.vertexAttrib2f(a_Screen_Size, canvas.width, canvas.height)<span class="hljs-comment">;</span>
+//存储点击位置的数组。
+var <span class="hljs-attr">points</span> = []<span class="hljs-comment">;</span>
+canvas.addEventListener('click', <span class="hljs-attr">e</span> => {
+ var <span class="hljs-attr">x</span> = e.pageX<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = e.pageY<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">color</span> = randomColor()<span class="hljs-comment">;</span>
+ points.push({ x: x, y: y, color: color })
+ gl.clearColor(0, 0, 0, 1.0)<span class="hljs-comment">;</span>
+ //用上一步设置的清空画布颜色清空画布。
+ 	gl.clear(gl.COLOR_BUFFER_BIT)<span class="hljs-comment">;</span>
+ for (let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i < points.length; i++) {</span>
+ var <span class="hljs-attr">color</span> = points[i].color<span class="hljs-comment">;</span>
+ //为片元着色器中的 u_Color 传递随机颜色
+ gl.uniform4f(u_Color, color.r, color.g, color.b, color.a)<span class="hljs-comment">;</span>
+ //为顶点着色器中的 a_Position 传递顶点坐标。
+ gl.vertexAttrib2f(a_Position, points<span class="hljs-section">[i]</span>.x, points<span class="hljs-section">[i]</span>.y)<span class="hljs-comment">;</span>
+ //绘制点
+ gl.drawArrays(gl.POINTS, 0, 1)<span class="hljs-comment">;</span>
+ }
+ })
+ // 设置清屏颜色
+ gl.clearColor(0, 0, 0, 1.0)<span class="hljs-comment">;</span>
+ // 用上一步设置的清空画布颜色清空画布。
+ gl.clear(gl.COLOR_BUFFER_BIT)<span class="hljs-comment">;</span>
+
+</code></pre><p>至此，我们实现了在 canvas 上进行点击，在点击位置处绘制一个随机颜色的点的程序。</p>
+<h4 data-id="heading-10">不足之处：</h4>
+<p>本示例我们采用 <code>gl.vertexAttrib2f</code> 直接给 a_Position 赋值，所以每绘制一个点，都要给着色器变量赋值一次，并且绘制一次，效率比较低。后面我们会介绍一种更快速的方式：利用缓冲区传递多个顶点数据。</p>
+<h2 data-id="heading-11">回顾</h2>
+<p>本小节通过演示如何使用 WebGL 绘制一个动态位置、随机颜色的点，向大家介绍 WebGL 程序的组成要素，以及一些简单的 GLSL 语法。
+总结一下本节所学内容：</p>
+<ul>
+<li>
+<p>GLSL</p>
+<ul>
+<li>gl_Position： 内置变量，用来设置顶点坐标。</li>
+<li>gl_PointSize： 内置变量，用来设置顶点大小。</li>
+<li>vec2：2 维向量容器，可以存储 2 个浮点数。</li>
+<li>gl_FragColor： 内置变量，用来设置像素颜色。</li>
+<li>vec4：4 维向量容器，可以存储 4 个浮点数。</li>
+<li>precision：精度设置限定符，使用此限定符设置完精度后，之后所有该数据类型都将沿用该精度，除非单独设置。</li>
+<li>运算符：向量的对应位置进行运算，得到一个新的向量。
+<ul>
+<li>vec * 浮点数： vec2(x, y) * 2.0 = vec(x * 2.0, y * 2.0)。</li>
+<li>vec2 * vec2：vec2(x1, y1) * vec2(x2, y2) = vec2(x1 * x2, y1 * y2)。</li>
+<li>加减乘除规则基本一致。但是要注意一点，如果参与运算的是两个 vec 向量，那么这两个 vec 的维数必须相同。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>JavaScript 程序如何连接着色器程序</p>
+<ul>
+<li>createShader：创建着色器对象</li>
+<li>shaderSource：提供着色器源码</li>
+<li>compileShader：编译着色器对象</li>
+<li>createProgram：创建着色器程序</li>
+<li>attachShader：绑定着色器对象</li>
+<li>linkProgram：链接着色器程序</li>
+<li>useProgram：启用着色器程序</li>
+</ul>
+</li>
+<li>
+<p>JavaScript 如何往着色器中传递数据</p>
+<ul>
+<li>getAttribLocation：找到着色器中的 <code>attribute 变量</code>地址。</li>
+<li>getUniformLocation：找到着色器中的 <code>uniform 变量</code>地址。</li>
+<li>vertexAttrib2f：给 <code>attribute 变量</code>传递两个浮点数。</li>
+<li>uniform4f：给<code>uniform变量</code>传递四个浮点数。</li>
+</ul>
+</li>
+<li>
+<p>WebGL 绘制函数</p>
+<ul>
+<li>drawArrays: 用指定的图元进行绘制。</li>
+</ul>
+</li>
+<li>
+<p>WebGL 图元</p>
+<ul>
+<li>gl.POINTS: 将绘制图元类型设置成<code>点图元</code>。</li>
+</ul>
+</li>
+</ul>
+<p>另外需要注意，本节例子的坐标系转换我们是在着色器阶段完成的，事实上，我们通常在 JavaScript 上计算出<code>转换矩阵</code>，然后将<code>转换矩阵</code>连同<code>顶点信息</code>一并传递给着色器。大家可以尝试把这部分坐标转换算法移到 JavaScript 中试试，效果是一样的。</p>
+<p>好好消化一下本节内容，之后的章节仍然会用到这些知识。</p>
+<p>接下来让我们进入下一环节，学习三角形图元的绘制吧~</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>
