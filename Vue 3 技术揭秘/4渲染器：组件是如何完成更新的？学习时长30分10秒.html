@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>上一小节，我们介绍了数据访问代理的过程以及组件实例初始化的过程，接下来，我们将介绍组件的更新逻辑，这部分逻辑主要包含在 <code>setupRenderEffect</code> 这个函数中。</p>
+<h2 data-id="heading-1">组件更新</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">componentUpdateFn</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">isMounted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      <span class="hljs-comment">// 初始化组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 更新组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 创建响应式的副作用渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  instance.<span class="hljs-property">update</span> = <span class="hljs-title function_">effect</span>(componentUpdateFn, prodEffectOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+</code></pre>
+<p>在前面的小节中，我们说完了关于 <code>mounted</code> 的流程。接下来我们将着重来看一下组件更新的逻辑：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">componentUpdateFn</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">isMounted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      <span class="hljs-comment">// 初始化组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 更新组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">let</span> { next, vnode } = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 如果有 next 的话说明需要更新组件的数组（props, slot 等）</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-keyword">if</span> (next) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        next.<span class="hljs-property">el</span> = vnode.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">        <span class="hljs-comment">// 更新组件实例信息</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">        <span class="hljs-title function_">updateComponentPreRender</span>(instance, next, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        next = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-comment">// 获取新的子树 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-keyword">const</span> nextTree = <span class="hljs-title function_">renderComponentRoot</span>(instance)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-comment">// 获取旧的子树 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-keyword">const</span> prevTree = instance.<span class="hljs-property">subTree</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-comment">// 更新子树 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      instance.<span class="hljs-property">subTree</span> = nextTree</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-comment">// patch 新老子树的 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        prevTree, </span>
+<span class="code-block-extension-codeLine" data-line-num="26">        nextTree,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        <span class="hljs-comment">// 处理 teleport 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">        <span class="hljs-title function_">hostParentNode</span>(prevTree.<span class="hljs-property">el</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-comment">// 处理 fragment 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">        <span class="hljs-title function_">getNextHostNode</span>(prevTree),</span>
+<span class="code-block-extension-codeLine" data-line-num="31">        instance,</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="33">        isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-comment">// 缓存更新后的 DOM 节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">      next.<span class="hljs-property">el</span> = nextTree.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="37">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="38">  <span class="hljs-comment">// 创建响应式的副作用渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">  instance.<span class="hljs-property">update</span> = <span class="hljs-title function_">effect</span>(componentUpdateFn, prodEffectOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="40">}</span>
+</code></pre>
+<p>这里的核心流程是通过 <code>next</code> 来判断当前是否需要更新 <code>vnode</code> 的节点信息，然后渲染出新的子树 <code>nextTree</code>，再进行比对新旧子树并找出需要更新的点，进行 <code>DOM</code> 更新。我们先来看一下 <code>patch</code> 的更新流程：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">patch</span>(<span class="hljs-params">n1, n2, container = <span class="hljs-literal">null</span>, anchor = <span class="hljs-literal">null</span>, parentComponent = <span class="hljs-literal">null</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 对于类型不同的新老节点，直接进行卸载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (n1 &amp;&amp; !<span class="hljs-title function_">isSameVNodeType</span>(n1, n2)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    anchor = <span class="hljs-title function_">getNextHostNode</span>(n1)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">unmount</span>(n1, parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    n1 = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 基于 n2 的类型来判断</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 因为 n2 是新的 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">const</span> { type, shapeFlag } = n2;</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">switch</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Text</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">processText</span>(n1, n2, container);</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">break</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-comment">// 其中还有几个类型比如： static fragment comment</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Fragment</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-title function_">processFragment</span>(n1, n2, container);</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-keyword">break</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-comment">// 这里就基于 shapeFlag 来处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ELEMENT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-title function_">processElement</span>(n1, n2, container, anchor, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">STATEFUL_COMPONENT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-title function_">processComponent</span>(n1, n2, container, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">}</span>
+</code></pre>
+<p>首先判断当 <code>n1</code> 存在，即存在老节点，但新节点和老节点不是同类型的节点情况，那么执行销毁老节点，新增新节点。那么 <code>Vue</code> 如何判断是否是不同类型的节点呢？答案就在 <code>isSameVNodeType</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">isSameVNodeType</span>(<span class="hljs-params">n1, n2</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 新老节点的 type 和 key 都相同</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">return</span> n1.<span class="hljs-property">type</span> === n2.<span class="hljs-property">type</span> &amp;&amp; n1.<span class="hljs-property">key</span> === n2.<span class="hljs-property">key</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<p>这里比如从 <code>div</code> 变成了 <code>p</code> 标签，那么 <code>isSameVNodeType</code> 就会是个 <code>false</code>。</p>
+<p>如果当新老节点是同类型的节点，则会根据 <code>shapeFlag</code>不同走到不同的逻辑，如果是普通元素更新，那么就会走到 <code>processElement</code> 的逻辑中；如果是组件更新，则会走到 <code>processComponent</code> 中。</p>
+<p>接下来分别看看这两种更新机制有什么不同。</p>
+<h3 data-id="heading-2">processElement</h3>
+<p>这里我们也着重看一下 <code>processElement</code> 的更新流程：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">processElement</span> = (<span class="hljs-params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  isSVG = isSVG || n2.<span class="hljs-property">type</span> === <span class="hljs-string">'svg'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 初始化的过程</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 更新的过程</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">patchElement</span>(n1, n2, parentComponent, parentSuspense, isSVG, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p><code>processElement</code> 更新逻辑调用 <code>patchElement</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchElement</span> = (<span class="hljs-params">n1, n2, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> el = (n2.<span class="hljs-property">el</span> = n1.<span class="hljs-property">el</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">let</span> { patchFlag, dynamicChildren, dirs } = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 旧节点的 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> oldProps = (n1 &amp;&amp; n1.<span class="hljs-property">props</span>) || <span class="hljs-variable constant_">EMPTY_OBJ</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 新节点的 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">const</span> newProps = n2.<span class="hljs-property">props</span> || <span class="hljs-variable constant_">EMPTY_OBJ</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 对比 props 并更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">patchProps</span>(el, n2, oldProps, newProps, parentComponent, parentSuspense, isSVG)  </span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 先省略 dynamicChildren 的逻辑，后续介绍... </span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 全量比对子节点更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-title function_">patchChildren</span>(n1, n2, el, <span class="hljs-literal">null</span>, parentComponent, parentSuspense, areChildrenSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>可以看到普通元素的更新主要做的就是先更新 <code>props</code> ，当 <code>props</code> 更新完成后，然后再统一更新子节点。关于如何进行 <code>patchProps</code> 做节点的属性更新不是本小节的重点，这里先跳过。</p>
+<blockquote>
+<p>这里省略了对 <code>dynamicChildren</code> 存在时，执行 <code>patchBlockChildren</code> 的优化 <code>diff</code> 过程，我们直接先看全量 <code>diff</code> 也就是 <code>patchChildren</code> 函数。关于 <code>patchBlockChildren</code> 我们将在<strong>编译过程中的优化</strong>小节中进行详细介绍</p>
+</blockquote>
+<p>接着来看 <code>patchChildren</code> 更新子节点的函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchChildren</span> = (<span class="hljs-params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized = <span class="hljs-literal">false</span></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// c1 代表旧节点的子节点元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> c1 = n1 &amp;&amp; n1.<span class="hljs-property">children</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> prevShapeFlag = n1 ? n1.<span class="hljs-property">shapeFlag</span> : <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// c2 代表新节点的子节点元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> c2 = n2.<span class="hljs-property">children</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">const</span> { patchFlag, shapeFlag } = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 新节点是文本</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TEXT_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 旧节点是数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (prevShapeFlag &amp; <span class="hljs-variable constant_">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// 卸载旧节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">unmountChildren</span>(c1, parentComponent, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">if</span> (c2 !== c1) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-comment">// 新旧节点都是文本，但内容不一样，则替换</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-title function_">hostSetElementText</span>(container, c2)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 新节点不为文本</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-comment">// 旧节点是数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-keyword">if</span> (prevShapeFlag &amp; <span class="hljs-variable constant_">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-comment">// 新节点也是数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-variable constant_">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        <span class="hljs-comment">// 进行新旧节点的 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-title function_">patchKeyedChildren</span>(c1, c2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        <span class="hljs-comment">// 卸载旧节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-title function_">unmountChildren</span>(c1, parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-comment">// 新节点不为文本</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      <span class="hljs-comment">// 旧节点不是数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-comment">// 旧节点是文本</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">      <span class="hljs-keyword">if</span> (prevShapeFlag &amp; <span class="hljs-variable constant_">TEXT_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">        <span class="hljs-comment">// 则把它清空</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">        <span class="hljs-title function_">hostSetElementText</span>(container, <span class="hljs-string">''</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="39">      <span class="hljs-comment">// 新节点是数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">      <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-variable constant_">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">        <span class="hljs-comment">// 挂载新节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">        <span class="hljs-title function_">mountChildren</span>(c2, container, anchor, parentComponent, parentSuspense, isSVG, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="43">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="44">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="46">}</span>
+</code></pre>
+<p>对于子节点来说，节点类型只会有三种可能，分别是：文本节点、数组节点、空节点。所以这个方法里所有的 <code>if else</code> 分支就是在考虑新旧节点可能的全部情况，并进行相应的处理。这里流程分支有点多，画个图大家就明白在做啥了：</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp66213e6cf7cb4e33a7a4a99ec19e7a4b~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>其中新旧节点都是数组的情况涉及到我们平常所说的 <code>diff</code> 算法，会放到后面专门去解析。</p>
+<p>看完处理<code>DOM</code>元素的情况，接下来看处理<code>vue</code>组件。</p>
+<h3 data-id="heading-3">processComponent</h3>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">processComponent</span> = (<span class="hljs-params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// 初始化的过程</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 更新的过程</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-title function_">updateComponent</span>(n1, n2, parentComponent, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p><code>processComponent</code> 更新逻辑调用 <code>updateComponent</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">updateComponent</span> = (<span class="hljs-params">n1, n2, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> instance = (n2.<span class="hljs-property">component</span> = n1.<span class="hljs-property">component</span>)!</span>
+<span class="code-block-extension-codeLine" data-line-num="3">   <span class="hljs-comment">// 根据新老节点判断是否需要更新子组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">shouldUpdateComponent</span>(n1, n2, optimized)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">//...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 如果需要更新，则将新节点 vnode 赋值给 next</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    instance.<span class="hljs-property">next</span> = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-comment">// 执行前面定义在 instance 上的 update 函数。</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    instance.<span class="hljs-title function_">update</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// 如果不需要更新，则将就节点的内容更新到新节点上即可</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    n2.<span class="hljs-property">el</span> = n1.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    instance.<span class="hljs-property">vnode</span> = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p><code>updateComponent</code> 函数首先通过 <code>shouldUpdateComponent</code> 函数来判断当前是否需要更新。 因为有些 <code>VNode</code> 值的变化并不需要立即显示更新子组件，举个例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">   <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{{msg}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">   <span class="hljs-tag">&lt;<span class="hljs-name">Child</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">setup</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">'hello'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">&lt;script&gt;</span>
+<span class="code-block-extension-codeLine" data-line-num="10"></span>
+</code></pre>
+<p>因为子组件不依赖父组件的状态数据，所以子组件是不需要更新的。这也从侧面反映出 <code>Vue</code> 的更新不仅是组件层面的细粒度更新，更在源码层面帮我们处理了一些不必要的子节点更新！</p>
+<p>最后执行的 <code>instance.update</code>，这个函数其实就是在 <code>setupRenderEffect</code> 内创建的。最终子组件的更新还会走一遍自己副作用函数的渲染，然后 <code>patch</code> 子组件的子模板 <code>DOM</code>，接上上面的流程。</p>
+<p>回过头来再看这里我们多次出现了 <code>next</code> 变量。为了更好地理解整体的流程，我们再来看一个 <code>demo</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    hello world</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-tag">&lt;<span class="hljs-name">hello</span> <span class="hljs-attr">:msg</span>=<span class="hljs-string">"msg"</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"changeMsg"</span>&gt;</span>修改 msg<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  setup () {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">'你好'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">function</span> <span class="hljs-title function_">changeMsg</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      msg.<span class="hljs-property">value</span> = <span class="hljs-string">'你好啊，我变了'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      msg,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      changeMsg</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+<span class="code-block-extension-codeLine" data-line-num="22"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23"></span>
+<span class="code-block-extension-codeLine" data-line-num="24">// hello.vue</span>
+<span class="code-block-extension-codeLine" data-line-num="25"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">    {{msg}}</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="31"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  <span class="hljs-attr">props</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-attr">msg</span>: <span class="hljs-title class_">String</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="35">}</span>
+<span class="code-block-extension-codeLine" data-line-num="36"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>这里有个 <code>App.vue</code> 组件，内部有一个 <code>hello</code> 组件，我们来从头再捋一下整体的流程，就清楚了 <code>next</code> 的作用。</p>
+<ol>
+<li>当点击 <code>修改 msg</code> 后， <code>App</code> 组件自身的数据变化，导致 <code>App</code> 组件进入 <code>update</code> 逻辑，此时是没有 <code>next</code> 的，接下来渲染新的子组件<code>vnode</code>，得到真实的模板<code>vnode nextTree</code>，用新旧<code>subTree</code>进行<code>patch</code>。</li>
+<li>此时<code>patch</code>的元素类型是 <code>div</code>，进入更新普通元素的流程，先更新<code>props</code>，再更新子节点，当前<code>div</code>下的子节点有<code>Hello</code>组件时，进入组件的的更新流程。</li>
+<li>在更新 <code>Hello</code> 组件时，根据 <code>updateComponent</code> 函数执行的逻辑，会先将<code>Hello</code>组件 <code>instance.next</code> 赋值为最新的子组件 <code>vnode</code>，之后再主动调用<code>instance.update</code> 进入上面的副作用渲染函数，这次的实例是 <code>Hello</code> 组件自身的渲染，且 <code>next</code> 存在值。</li>
+</ol>
+<p>当 <code>next</code> 存在时，会执行 <code>updateComponentPreRender</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">updateComponentPreRender</span> = (<span class="hljs-params">instance, nextVNode, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 新节点 vnode.component 赋值为 instance</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  nextVNode.<span class="hljs-property">component</span> = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 获取老节点的 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> prevProps = instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 为 instance.vnode 赋值为新的组件 vnode </span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  instance.<span class="hljs-property">vnode</span> = nextVNode</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  instance.<span class="hljs-property">next</span> = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 更新 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">updateProps</span>(instance, nextVNode.<span class="hljs-property">props</span>, prevProps, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 更新 slots</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-title function_">updateSlots</span>(instance, nextVNode.<span class="hljs-property">children</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+</code></pre>
+<p><code>updateComponentPreRender</code> 函数核心功能就是完成了对实例上的属性、<code>vnode</code> 信息、<code>slots</code> 进行更新，当后续组件渲染的时候，得到的就是最新的值。</p>
+<p>总而言之，<code>next</code> 就是用来标记接下来需要渲染的子组件，如果 <code>next</code> 存在，则会进行子组件实例相关内容属性的更新操作，再进行子组件的更新流程。</p>
+<h2 data-id="heading-4">总结</h2>
+<p>本节着重介绍了组件的更新逻辑，我们再补齐一下<a href="https://juejin.cn/book/7146465352120008743/section/7146465352287780875" target="_blank" title="https://juejin.cn/book/7146465352120008743/section/7146465352287780875">第二节</a>中的流程图：</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf0088d60c2054ec9b204f662e55d22cc~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>本节介绍了关于普通元素的简单更新过程，那关于复杂的更新过程的逻辑，也就是新老子节点都是数组的普通元素，应该如何进行更新呢？这就涉及到了 <code>diff</code> 算法，我们下节接着介绍。</p></div>
+    </body>
+    </html>

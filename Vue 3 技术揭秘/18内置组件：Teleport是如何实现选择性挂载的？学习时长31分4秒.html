@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p><code>Teleport</code> 内置组件的功能是可以将一个组件内部的一部分 <code>vnode</code> 元素 “传送” 到该组件的 <code>DOM</code> 结构外层的位置去挂载。那什么情况下可能会用到该组件呢？如果开发过组件库的小伙伴可能深有体会，当我们开发全局 <code>Dialog</code> 组件来说，我们希望 <code>Dialog</code> 的组件可以渲染到全局 <code>&lt;body&gt;</code> 标签上，这个时候我们写的 <code>Dialog</code> 组件的源代码可能是这样的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">&lt;!-- 这里是 dialog 组件的容器逻辑 --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">mounted</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 在 dom 被挂载完成后，再转移到 body 上</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">$el</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-title function_">destroyed</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// 在组件被销毁之前，移除 DOM</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-variable language_">this</span>.<span class="hljs-property">$el</span>.<span class="hljs-property">parentNode</span>.<span class="hljs-title function_">removeChild</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">$el</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>这么做确实可是实现挂载到特定容器中，但这样一方面让 <code>Dialog</code> 组件内部需要维护复杂的 <code>DOM</code> 节点转换的逻辑，另一方面导致了浏览器需要进行 <code>2</code> 次刷新操作，一次初始化挂载，一次迁移。</p>
+<p>所以 <code>Vue 3</code> 很贴心的为我们了提供了 <code>Teleport</code> 组件，帮助我们以简便的方式<strong>高性能</strong>的完成节点的转移工作:</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">Teleport</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"body"</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"modal"</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Hello from the modal!<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">Teleport</span>&gt;</span></span>
+</code></pre>
+<p>接下来我们将一起探秘 <code>Teleport</code> 组件是如何实现 “传送” 挂载的。</p>
+<h2 data-id="heading-1">Teleport 的挂载</h2>
+<p>先来看看 <code>Teleport</code> 组件的源码定义：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TeleportImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 组件标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">__isTeleport</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">process</span>(<span class="hljs-params">...</span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// ... </span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 初始化的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">if</span> (n1 === <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// 更新逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  </span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-comment">// 卸载的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-title function_">remove</span>(<span class="hljs-params">...</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="20"></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-comment">// 移动的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-attr">move</span>: moveTeleport,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<p>接下来，我们看一下这个内部组件是如何实现组件挂载的，这块的逻辑集中在组件的 <code>process</code> 函数中，<code>process</code> 函数是在渲染器 <code>renderer</code> 的 <code>patch</code> 函数中被调用的，在前面渲染器章节中，我们提到过 <code>patch</code> 函数内部会根据 <code>vnode</code> 的 <code>type</code> 和 <code>shapeFlag</code> 的类型调用不同的处理函数，而 <code>&lt;Teleport&gt;</code> 组件的 <code>process</code> 正是在这里被判断调用的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patch</span> = (<span class="hljs-params">n1, n2, container, anchor, ...</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> { type, ref, shapeFlag } = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">switch</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 根据 type 类型处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Text</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 对文本节点的处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">processText</span>(n1, n2, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 这里省略了一些其他节点处理，比如注释、Fragment 节点等等</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// 根据 shapeFlag 来处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TELEPORT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        <span class="hljs-comment">// 对 Teleport 节点进行处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">        type.<span class="hljs-title function_">process</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="18">          n1,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">          n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">          container,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">          anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">          parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">          optimized,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">          internals</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        );</span>
+<span class="code-block-extension-codeLine" data-line-num="29">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">}</span>
+</code></pre>
+<p>然后一起来看看 <code>process</code> 中是如何完成对 <code>Teleport</code> 中的节点进行挂载的，这里我们先只关注挂载逻辑，对于更新逻辑后面再介绍：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TeleportImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 组件标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">__isTeleport</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">process</span>(<span class="hljs-params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized, internals</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 从内在对象上结构关键功能函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-attr">mc</span>: mountChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-attr">pc</span>: patchChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-attr">pbc</span>: patchBlockChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-attr">o</span>: {insert, querySelector, createText, createComment}</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    } = internals</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    </span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-comment">// 是否禁用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">const</span> disabled = <span class="hljs-title function_">isTeleportDisabled</span>(n2.<span class="hljs-property">props</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">let</span> {shapeFlag, children, dynamicChildren} = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// 初始化的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-comment">// 向主视图中插入锚点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-keyword">const</span> placeholder = (n2.<span class="hljs-property">el</span> = __DEV__</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        ? <span class="hljs-title function_">createComment</span>(<span class="hljs-string">'teleport start'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        : <span class="hljs-title function_">createText</span>(<span class="hljs-string">''</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">const</span> mainAnchor = (n2.<span class="hljs-property">anchor</span> = __DEV__</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        ? <span class="hljs-title function_">createComment</span>(<span class="hljs-string">'teleport end'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        : <span class="hljs-title function_">createText</span>(<span class="hljs-string">''</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      <span class="hljs-title function_">insert</span>(placeholder, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      <span class="hljs-title function_">insert</span>(mainAnchor, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-comment">// 获取需要挂载的位置元素，如果目标元素不存在于DOM中，则返回 null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">      <span class="hljs-keyword">const</span> target = (n2.<span class="hljs-property">target</span> = <span class="hljs-title function_">resolveTarget</span>(n2.<span class="hljs-property">props</span>, querySelector))</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-comment">// 目标挂载节点的锚点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">const</span> targetAnchor = (n2.<span class="hljs-property">targetAnchor</span> = <span class="hljs-title function_">createText</span>(<span class="hljs-string">''</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-comment">// 如果存在目标元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      <span class="hljs-keyword">if</span> (target) {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">        <span class="hljs-comment">// 将锚点插入到目标元素当中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">        <span class="hljs-title function_">insert</span>(targetAnchor, target)</span>
+<span class="code-block-extension-codeLine" data-line-num="36">        isSVG = isSVG || <span class="hljs-title function_">isTargetSVG</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      </span>
+<span class="code-block-extension-codeLine" data-line-num="39">      <span class="hljs-keyword">const</span> <span class="hljs-title function_">mount</span> = (<span class="hljs-params">container: RendererElement, anchor: RendererNode</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="40">        <span class="hljs-comment">// teleport 子节点需要是个数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="41">        <span class="hljs-comment">// 挂载子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">        <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="43">          <span class="hljs-title function_">mountChildren</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="44">            children,</span>
+<span class="code-block-extension-codeLine" data-line-num="45">            container,</span>
+<span class="code-block-extension-codeLine" data-line-num="46">            anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="47">            parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="48">            parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="49">            isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="50">            slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="51">            optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="52">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="53">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="54">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-comment">// 如果禁用 teleport 则直接挂载到当前渲染节点中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-keyword">if</span> (disabled) {</span>
+<span class="code-block-extension-codeLine" data-line-num="57">        <span class="hljs-title function_">mount</span>(container, mainAnchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="58">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (target) {</span>
+<span class="code-block-extension-codeLine" data-line-num="59">        <span class="hljs-comment">// 否则，以 targetAnchor 为参照物进行挂载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="60">        <span class="hljs-title function_">mount</span>(target, targetAnchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="61">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="62">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="63">      <span class="hljs-comment">// 进入更新逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="65">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="66">}</span>
+</code></pre>
+<p>这里，我们先不着急着看源码，我们先看看一个 <code>teleport</code> 节点在开发环境会被渲染成什么样子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">Teleport</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"body"</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"modal"</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Hello from the modal!<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;/<span class="hljs-name">Teleport</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>上述的模版，的渲染结果如下：</p>
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp085dc3ff6e4542e19324b723d9d51c5b~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" width="80%" loading="lazy" class="medium-zoom-image">
+<p>可以看到，已经被渲染到 <code>body</code> 元素当中，除了这个变化外，之前的容器中，还多了两个额外的注释符：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">&lt;!--teleport start--&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-comment">&lt;!--teleport end--&gt;</span></span>
+</code></pre>
+<p>这下我们再来看看源码，或许就能更好的理解这些变化了。首先，在初始化中，会先创建两个占位符，分别是 <code>placeholder</code> 和 <code>mainAnchor</code> 然后再讲这两个占位符挂载到组件容器中，这两个占位符也就是上文中的注释节点。</p>
+<p>接着又创建了一个目标节点的占位符 <code>targetAnchor</code> 这个则会被挂载到目标容器中，只不过这里是个文本节点，所以在 <code>DOM</code> 上没有体现出来，我们把这里稍微改一下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> targetAnchor = (n2.<span class="hljs-property">targetAnchor</span> = <span class="hljs-title function_">createComment</span>(<span class="hljs-string">'teleport target'</span>))</span>
+</code></pre>
+<p>这样再看一下 <code>DOM</code> 的渲染结果：</p>
+<img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpbb70396b873b42deae16088c43b4a009~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" width="80%" loading="lazy" class="medium-zoom-image">
+<p>最后再根据 <code>disabled</code> 这个 <code>props</code> 属性来判断当前的节点需要采用哪种方式渲染，如果 <code>disabled = true</code> 则会以 <code>mainAnchor</code> 为参考节点进行挂载，也就是挂载到主容器中，否则会以 <code>targetAnchor</code> 为参考节点进行挂载，挂载到目标元素容器中。至此，完成节点的初始化挂载逻辑。</p>
+<h2 data-id="heading-2">Teleport 的更新</h2>
+<p>如果 <code>Teleport</code> 组件需要进行更新，则会进入更新的逻辑：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TeleportImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 组件标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">__isTeleport</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">process</span>(<span class="hljs-params">n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized, internals</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 从内在对象上结构关键功能函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-attr">mc</span>: mountChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-attr">pc</span>: patchChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-attr">pbc</span>: patchBlockChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-attr">o</span>: {insert, querySelector, createText, createComment}</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    } = internals</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    </span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-comment">// 是否禁用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">const</span> disabled = <span class="hljs-title function_">isTeleportDisabled</span>(n2.<span class="hljs-property">props</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">let</span> {shapeFlag, children, dynamicChildren} = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// 初始化的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-comment">// 从老节点上获取相关参照系等属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      n2.<span class="hljs-property">el</span> = n1.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">const</span> mainAnchor = (n2.<span class="hljs-property">anchor</span> = n1.<span class="hljs-property">anchor</span>)!</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-keyword">const</span> target = (n2.<span class="hljs-property">target</span> = n1.<span class="hljs-property">target</span>)!</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-keyword">const</span> targetAnchor = (n2.<span class="hljs-property">targetAnchor</span> = n1.<span class="hljs-property">targetAnchor</span>)!</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      <span class="hljs-comment">// 之前是不是禁用态  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">      <span class="hljs-keyword">const</span> wasDisabled = <span class="hljs-title function_">isTeleportDisabled</span>(n1.<span class="hljs-property">props</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-comment">// 当前的渲染容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">      <span class="hljs-keyword">const</span> currentContainer = wasDisabled ? container : target</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-comment">// 参照节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">const</span> currentAnchor = wasDisabled ? mainAnchor : targetAnchor</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      isSVG = isSVG || <span class="hljs-title function_">isTargetSVG</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="33">      <span class="hljs-comment">// 通过 dynamicChildren 更新节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-keyword">if</span> (dynamicChildren) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        <span class="hljs-comment">// fast path when the teleport happens to be a block root</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">        <span class="hljs-title function_">patchBlockChildren</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="37">          n1.<span class="hljs-property">dynamicChildren</span>!,</span>
+<span class="code-block-extension-codeLine" data-line-num="38">          dynamicChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="39">          currentContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="40">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="41">          parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">          slotScopeIds</span>
+<span class="code-block-extension-codeLine" data-line-num="44">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="45">        <span class="hljs-title function_">traverseStaticChildren</span>(n1, n2, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!optimized) {</span>
+<span class="code-block-extension-codeLine" data-line-num="47">        <span class="hljs-comment">// 全量更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">        <span class="hljs-title function_">patchChildren</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="49">          n1,</span>
+<span class="code-block-extension-codeLine" data-line-num="50">          n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="51">          currentContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="52">          currentAnchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="53">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="54">          parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="55">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="56">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="57">          <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="58">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="59">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="60">  </span>
+<span class="code-block-extension-codeLine" data-line-num="61">      <span class="hljs-keyword">if</span> (disabled) {</span>
+<span class="code-block-extension-codeLine" data-line-num="62">        <span class="hljs-keyword">if</span> (!wasDisabled) {</span>
+<span class="code-block-extension-codeLine" data-line-num="63">          <span class="hljs-comment">// enabled -&gt; disabled</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">          <span class="hljs-comment">// 移动回主容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="65">          <span class="hljs-title function_">moveTeleport</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="66">            n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="67">            container,</span>
+<span class="code-block-extension-codeLine" data-line-num="68">            mainAnchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="69">            internals,</span>
+<span class="code-block-extension-codeLine" data-line-num="70">            <span class="hljs-title class_">TeleportMoveTypes</span>.<span class="hljs-property">TOGGLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="71">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="72">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="73">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="74">        <span class="hljs-comment">// 目标元素被改变</span></span>
+<span class="code-block-extension-codeLine" data-line-num="75">        <span class="hljs-keyword">if</span> ((n2.<span class="hljs-property">props</span> &amp;&amp; n2.<span class="hljs-property">props</span>.<span class="hljs-property">to</span>) !== (n1.<span class="hljs-property">props</span> &amp;&amp; n1.<span class="hljs-property">props</span>.<span class="hljs-property">to</span>)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="76">          <span class="hljs-comment">// 获取新的目标元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="77">          <span class="hljs-keyword">const</span> nextTarget = (n2.<span class="hljs-property">target</span> = <span class="hljs-title function_">resolveTarget</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="78">            n2.<span class="hljs-property">props</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="79">            querySelector</span>
+<span class="code-block-extension-codeLine" data-line-num="80">          ))</span>
+<span class="code-block-extension-codeLine" data-line-num="81">          <span class="hljs-comment">// 移动到新的元素当中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="82">          <span class="hljs-keyword">if</span> (nextTarget) {</span>
+<span class="code-block-extension-codeLine" data-line-num="83">            <span class="hljs-title function_">moveTeleport</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="84">              n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="85">              nextTarget,</span>
+<span class="code-block-extension-codeLine" data-line-num="86">              <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="87">              internals,</span>
+<span class="code-block-extension-codeLine" data-line-num="88">              <span class="hljs-title class_">TeleportMoveTypes</span>.<span class="hljs-property">TARGET_CHANGE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="89">            )</span>
+<span class="code-block-extension-codeLine" data-line-num="90">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="91">        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (wasDisabled) {</span>
+<span class="code-block-extension-codeLine" data-line-num="92">          <span class="hljs-comment">// disabled -&gt; enabled</span></span>
+<span class="code-block-extension-codeLine" data-line-num="93">          <span class="hljs-comment">// 移动到目标元素中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="94">          <span class="hljs-title function_">moveTeleport</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="95">            n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="96">            target,</span>
+<span class="code-block-extension-codeLine" data-line-num="97">            targetAnchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="98">            internals,</span>
+<span class="code-block-extension-codeLine" data-line-num="99">            <span class="hljs-title class_">TeleportMoveTypes</span>.<span class="hljs-property">TOGGLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="100">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="101">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="102">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="103">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="104">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="105">}</span>
+</code></pre>
+<p>代码量虽然挺多的，但所做的事情是特别明确的，首先 <code>Teleprot</code> 组件的更新需要和普通节点更新一样进行子节点的 <code>diff</code>。然后会判断 <code>Teleport</code> 组件的 <code>props</code> 是否有变更，主要就是 <code>disabled</code> 和 <code>to</code> 这两个参数。</p>
+<p>如果 <code>disabled</code> 变化，无非就是从 <code>可用 -&gt; 不可用</code> 或者从 <code>不可用 -&gt; 可用</code>。从 <code>可用 -&gt; 不可用</code> 就是将原来挂在在 <code>target</code> 容器中的节点重新移动到主容器中，而从 <code>不可用 -&gt; 可用</code> 就是将主容器中的节点再挂载到 <code>target</code> 中。</p>
+<p>如果 <code>to</code> 这个参数变化了，那么就需要重新寻找目标节点，再进行挂载。</p>
+<h2 data-id="heading-3">Teleport 的移除</h2>
+<p>当组件卸载时，我们需要移除 <code>Teleport</code> 组件，一起再看看卸载重对于 <code>Teleport</code> 组件的处理：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">unmount</span> = (<span class="hljs-params">vnode, parentComponent, parentSuspense, doRemove, optiomized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  </span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TELEPORT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    vnode.<span class="hljs-property">type</span>.<span class="hljs-title function_">remove</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      optimized,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      internals,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      doRemove</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p><code>unmount</code> 卸载函数对于 <code>Teleport</code> 组件的处理就是直接调用 <code>remove</code> 方法：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TeleportImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 组件标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">__isTeleport</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-title function_">remove</span>(<span class="hljs-params">vnode, parentComponent, parentSuspense, optimized, { um: unmount, o: { remove: hostRemove } }, doRemove</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> { shapeFlag, children, anchor, targetAnchor, target, props } = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 如果存在 target，移除 targetAnchor</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-keyword">if</span> (target) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">hostRemove</span>(targetAnchor!)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    </span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// 在未禁用状态下，需要卸载 teleport 的子元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">if</span> (doRemove || !<span class="hljs-title function_">isTeleportDisabled</span>(props)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">hostRemove</span>(anchor!)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; children.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">          <span class="hljs-keyword">const</span> child = children[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="17">          <span class="hljs-title function_">unmount</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="18">            child,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">            parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">            parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">            <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">            !!child.<span class="hljs-property">dynamicChildren</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">}</span>
+</code></pre>
+<p><code>remove</code> 方法的操作，看起来也比较好理解，首先先移除掉 <code>targetAnchor</code> 锚点内容，然后再调用 <code>unmount</code> 函数挨个卸载子组件，从而完成卸载功能。</p>
+<h2 data-id="heading-4">总结</h2>
+<p>本小节，我们分析了 <code>Teleport</code> 组件的核心实现原理，<code>Teleport</code> 相比于之前的那种挂载方式他的性能优势就在于 <code>Teleport</code> 节点的挂载是在 <code>patch</code> 阶段进行的，也就是在 <code>patch</code> 阶段就确定了需要挂载到哪里，而不会出现先挂在到主容器再迁移到目标容器的情况。</p></div>
+    </body>
+    </html>

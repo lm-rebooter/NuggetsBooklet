@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>本小节，我们将进入模版编译的最后一步：<strong>代码生成器 genetate</strong>。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">generate</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  ast,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">extend</span>({}, options, {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    prefixIdentifiers</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  })</span>
+<span class="code-block-extension-codeLine" data-line-num="6">)</span>
+</code></pre>
+<p>一起来看一下 <code>generate</code> 的核心实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">generate</span>(<span class="hljs-params">ast, options = {}</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 创建代码生成上下文</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> context = <span class="hljs-title function_">createCodegenContext</span>(ast, options)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    mode,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    push,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    prefixIdentifiers,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    indent,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    deindent,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    newline,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    scopeId,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    ssr</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  } = context</span>
+<span class="code-block-extension-codeLine" data-line-num="14"></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">const</span> hasHelpers = ast.<span class="hljs-property">helpers</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-keyword">const</span> useWithBlock = !prefixIdentifiers &amp;&amp; mode !== <span class="hljs-string">'module'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-keyword">const</span> genScopeId = !__BROWSER__ &amp;&amp; scopeId != <span class="hljs-literal">null</span> &amp;&amp; mode === <span class="hljs-string">'module'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-keyword">const</span> isSetupInlined = !__BROWSER__ &amp;&amp; !!options.<span class="hljs-property">inline</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  </span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-comment">// 生成预设代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-keyword">const</span> preambleContext = isSetupInlined</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    ? <span class="hljs-title function_">createCodegenContext</span>(ast, options)</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    : context</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-comment">// 不在浏览器的环境且 mode 是 module   </span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-keyword">if</span> (!__BROWSER__ &amp;&amp; mode === <span class="hljs-string">'module'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-title function_">genModulePreamble</span>(ast, preambleContext, genScopeId, isSetupInlined)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    <span class="hljs-title function_">genFunctionPreamble</span>(ast, preambleContext)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  <span class="hljs-comment">// 进入 render 函数构造</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">  <span class="hljs-keyword">const</span> functionName = <span class="hljs-string">`render`</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">  <span class="hljs-keyword">const</span> args = [<span class="hljs-string">'_ctx'</span>, <span class="hljs-string">'_cache'</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="33"> </span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-keyword">const</span> signature = args.<span class="hljs-title function_">join</span>(<span class="hljs-string">', '</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="35">  </span>
+<span class="code-block-extension-codeLine" data-line-num="36">  <span class="hljs-title function_">push</span>(<span class="hljs-string">`function <span class="hljs-subst">${functionName}</span>(<span class="hljs-subst">${signature}</span>) {`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">  </span>
+<span class="code-block-extension-codeLine" data-line-num="38">  <span class="hljs-title function_">indent</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="39"></span>
+<span class="code-block-extension-codeLine" data-line-num="40">  <span class="hljs-keyword">if</span> (useWithBlock) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">    <span class="hljs-comment">// 处理带 with 的情况，Web 端运行时编译</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`with (_ctx) {`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="43">    <span class="hljs-title function_">indent</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="44">    <span class="hljs-keyword">if</span> (hasHelpers) {</span>
+<span class="code-block-extension-codeLine" data-line-num="45">      <span class="hljs-title function_">push</span>(<span class="hljs-string">`const { <span class="hljs-subst">${ast.helpers.map(aliasHelper).join(<span class="hljs-string">', '</span>)}</span> } = _Vue`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-title function_">push</span>(<span class="hljs-string">`\n`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="48">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="49">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="50">  </span>
+<span class="code-block-extension-codeLine" data-line-num="51">  <span class="hljs-comment">// 生成自定义组件声明代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">components</span>.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="53">    <span class="hljs-title function_">genAssets</span>(ast.<span class="hljs-property">components</span>, <span class="hljs-string">'component'</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="54">    <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">directives</span>.<span class="hljs-property">length</span> || ast.<span class="hljs-property">temps</span> &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="56">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="57">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="58">  <span class="hljs-comment">// 生成自定义指令声明代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="59">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">directives</span>.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="60">    <span class="hljs-title function_">genAssets</span>(ast.<span class="hljs-property">directives</span>, <span class="hljs-string">'directive'</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="61">    <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">temps</span> &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="62">      <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="63">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="64">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="65">  <span class="hljs-comment">// 生成临时变量代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="66">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">temps</span> &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="67">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`let `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="68">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; ast.<span class="hljs-property">temps</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="69">      <span class="hljs-title function_">push</span>(<span class="hljs-string">`<span class="hljs-subst">${i &gt; <span class="hljs-number">0</span> ? <span class="hljs-string">`, `</span> : <span class="hljs-string">``</span>}</span>_temp<span class="hljs-subst">${i}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="70">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="71">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="72">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">components</span>.<span class="hljs-property">length</span> || ast.<span class="hljs-property">directives</span>.<span class="hljs-property">length</span> || ast.<span class="hljs-property">temps</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="73">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`\n`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="74">    <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="75">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="76"></span>
+<span class="code-block-extension-codeLine" data-line-num="77">  <span class="hljs-keyword">if</span> (!ssr) {</span>
+<span class="code-block-extension-codeLine" data-line-num="78">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`return `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="79">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="80">  </span>
+<span class="code-block-extension-codeLine" data-line-num="81">  <span class="hljs-comment">// 生成创建 VNode 树的表达式</span></span>
+<span class="code-block-extension-codeLine" data-line-num="82">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">codegenNode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="83">    <span class="hljs-title function_">genNode</span>(ast.<span class="hljs-property">codegenNode</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="84">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="85">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`null`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="86">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="87"></span>
+<span class="code-block-extension-codeLine" data-line-num="88">  <span class="hljs-keyword">if</span> (useWithBlock) {</span>
+<span class="code-block-extension-codeLine" data-line-num="89">    <span class="hljs-title function_">deindent</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="90">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`}`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="91">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="92"></span>
+<span class="code-block-extension-codeLine" data-line-num="93">  <span class="hljs-title function_">deindent</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="94">  <span class="hljs-title function_">push</span>(<span class="hljs-string">`}`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="95"></span>
+<span class="code-block-extension-codeLine" data-line-num="96">  <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="97">    ast,</span>
+<span class="code-block-extension-codeLine" data-line-num="98">    <span class="hljs-attr">code</span>: context.<span class="hljs-property">code</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="99">    <span class="hljs-attr">preamble</span>: isSetupInlined ? preambleContext.<span class="hljs-property">code</span> : <span class="hljs-string">``</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="100">    <span class="hljs-attr">map</span>: context.<span class="hljs-property">map</span> ? (context.<span class="hljs-property">map</span> <span class="hljs-keyword">as</span> any).<span class="hljs-title function_">toJSON</span>() : <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="101">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="102">}</span>
+</code></pre>
+<p>这个函数看起来有点复杂，我们先来简单了解一下：<code>generate</code> 函数，接收两个参数，分别是经过转换器处理的 <code>ast</code> 抽象语法树，以及 <code>options</code> 代码生成选项。最终返回一个 <code>CodegenResult</code> 类型的对象：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  ast, <span class="hljs-comment">// 抽象语法树</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  code, <span class="hljs-comment">// render 函数代码字符串</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  preamble, <span class="hljs-comment">// 代码字符串的前置部分</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  map, <span class="hljs-comment">//可选的 sourceMap</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">}</span>
+</code></pre>
+<p>接下来开始深入了解一下该函数的核心功能。</p>
+<h2 data-id="heading-1">1. 创建代码生成上下文</h2>
+<p><code>generate</code> 函数的第一步是通过 <code>createCodegenContext</code> 来创建 <code>CodegenContext</code> 上下文对象。一起来看一下其核心实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createCodegenContext</span>(<span class="hljs-params">ast, { mode = <span class="hljs-string">'function'</span>, prefixIdentifiers = mode === <span class="hljs-string">'module'</span>, sourceMap = <span class="hljs-literal">false</span>, filename = <span class="hljs-string">`template.vue.html`</span>, scopeId = <span class="hljs-literal">null</span>, optimizeBindings = <span class="hljs-literal">false</span>, runtimeGlobalName = <span class="hljs-string">`Vue`</span>, runtimeModuleName = <span class="hljs-string">`vue`</span>, ssr = <span class="hljs-literal">false</span> }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> context = {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    mode,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    prefixIdentifiers,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    sourceMap,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    filename,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    scopeId,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    optimizeBindings,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    runtimeGlobalName,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    runtimeModuleName,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    ssr,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">source</span>: ast.<span class="hljs-property">loc</span>.<span class="hljs-property">source</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-attr">code</span>: <span class="hljs-string">``</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-attr">column</span>: <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-attr">line</span>: <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-attr">offset</span>: <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-attr">indentLevel</span>: <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-attr">pure</span>: <span class="hljs-literal">false</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-attr">map</span>: <span class="hljs-literal">undefined</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-title function_">helper</span>(<span class="hljs-params">key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-keyword">return</span> <span class="hljs-string">`_<span class="hljs-subst">${helperNameMap[key]}</span>`</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    <span class="hljs-title function_">push</span>(<span class="hljs-params">code</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      context.<span class="hljs-property">code</span> += code</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-comment">// ... 省略 非浏览器环境下的 addMapping</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-title function_">indent</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-title function_">newline</span>(++context.<span class="hljs-property">indentLevel</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    <span class="hljs-title function_">deindent</span>(<span class="hljs-params">withoutNewLine = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">if</span> (withoutNewLine) {</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        --context.<span class="hljs-property">indentLevel</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        <span class="hljs-title function_">newline</span>(--context.<span class="hljs-property">indentLevel</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="37">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-title function_">newline</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="39">      <span class="hljs-title function_">newline</span>(context.<span class="hljs-property">indentLevel</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="40">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="41">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="42">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">newline</span>(<span class="hljs-params">n</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="43">    context.<span class="hljs-title function_">push</span>(<span class="hljs-string">'\n'</span> + <span class="hljs-string">`  `</span>.<span class="hljs-title function_">repeat</span>(n))</span>
+<span class="code-block-extension-codeLine" data-line-num="44">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  <span class="hljs-keyword">return</span> context</span>
+<span class="code-block-extension-codeLine" data-line-num="46">}</span>
+</code></pre>
+<p>可以看出 <code>createCodegenContext</code> 创建的 <code>context</code> 中，核心维护了一些基础配置变量和一些工具函数，我们来看几个比较常用的函数：</p>
+<ol>
+<li><code>push</code>：该函数的功能是将传入的字符串拼接入上下文中的 <code>code</code> 属性中。并且会生成对应的 <code>sourceMap</code>。</li>
+<li><code>indent</code>: 作用是缩进</li>
+<li><code>deindent</code>: 回退缩进</li>
+<li><code>newline</code>: 插入新的一行</li>
+</ol>
+<p>其中，<code>index</code>、<code>deindent</code>、<code>newline</code> 是用来辅助生成的代码字符串，用来格式化结构，让生成的代码字符串非常直观，就像在 <code>ide</code> 中敲入的制表符、换行、格式化代码块一样。</p>
+<p>在创建上下文变量完成后，接着进入生成预设代码的流程：</p>
+<h2 data-id="heading-2">2. 生成预设代码</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">scss</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-scss code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 不在浏览器的环境且 mode 是 module</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">if (!__BROWSER__ &amp;&amp; mode === 'module') {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 使用 ES module 标准的 import 来导入 helper 的辅助函数，处理生成代码的前置部分</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-built_in">genModulePreamble</span>(ast, preambleContext, genScopeId, isSetupInlined)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">} else {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 否则生成的代码前置部分是一个单一的 const { helpers... } = Vue 处理代码前置部分</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-built_in">genFunctionPreamble</span>(ast, preambleContext)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">}</span>
+</code></pre>
+<p><code>mode</code> 有两个选项:</p>
+<ol>
+<li><code>module</code>: 会通过 <code>ES module</code> 的 <code>import</code> 来导入 <code>ast</code> 中的 <code>helpers</code> 辅助函数，并用 <code>export</code> 默认导出 <code>render</code> 函数。</li>
+<li><code>function</code> 时，就会生成一个单一的&nbsp;<code>const { helpers... } = Vue</code>&nbsp;声明，并且 <code>return</code> 返回 <code>render</code> 函数。</li>
+</ol>
+<p>先看一下 <code>genModulePreamble</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">genModulePreamble</span>(<span class="hljs-params">ast, context, genScopeId, inline</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    push,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    newline,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    optimizeImports,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    runtimeModuleName,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    ssrRuntimeModuleName</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  } = context</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  </span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11"></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-keyword">if</span> (ast.<span class="hljs-property">helpers</span>.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">if</span> (optimizeImports) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 生成 import 声明代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-title function_">push</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        <span class="hljs-string">`import { <span class="hljs-subst">${ast.helpers</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">          .map(s =&gt; helperNameMap[s])</span>
+<span class="code-block-extension-codeLine" data-line-num="18">          .join(<span class="hljs-string">', '</span>)} } from <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(runtimeModuleName)}</span>\n`</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-title function_">push</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        <span class="hljs-string">`\n// Binding optimization for webpack code-split\nconst <span class="hljs-subst">${ast.helpers</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">          .map(s =&gt; <span class="hljs-string">`_<span class="hljs-subst">${helperNameMap[s]}</span> = <span class="hljs-subst">${helperNameMap[s]}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="23">          .join(<span class="hljs-string">', '</span>)}\n`</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      <span class="hljs-title function_">push</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        <span class="hljs-string">`import { <span class="hljs-subst">${ast.helpers</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">          .map(s =&gt; <span class="hljs-string">`<span class="hljs-subst">${helperNameMap[s]}</span> as _<span class="hljs-subst">${helperNameMap[s]}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">          .join(<span class="hljs-string">', '</span>)} } from <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(runtimeModuleName)}</span>\n`</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="31">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-comment">// 提升静态节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-title function_">genHoists</span>(ast.<span class="hljs-property">hoists</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="35">  <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="36"></span>
+<span class="code-block-extension-codeLine" data-line-num="37">  <span class="hljs-keyword">if</span> (!inline) {</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`export `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="39">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="40">}</span>
+</code></pre>
+<p>其中 <code>ast.helpers</code> 是在 <code>transform</code> 阶段通过 <code>context.helper</code> 方法添加的，它的值如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">[</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title class_">Symbol</span>(resolveComponent),</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title class_">Symbol</span>(createVNode),</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-title class_">Symbol</span>(createCommentVNode),</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title class_">Symbol</span>(toDisplayString),</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-title class_">Symbol</span>(openBlock),</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-title class_">Symbol</span>(createBlock)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">]</span>
+</code></pre>
+<p>所以这一步结束后，得到的代码为</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+</code></pre>
+<p>然后执行 <code>genHoists</code> ：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">genHoists</span>(<span class="hljs-params">hoists, context</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (!hoists.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  context.<span class="hljs-property">pure</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> { push, newline } = context</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  </span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  hoists.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">exp, i</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">if</span> (exp) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-title function_">push</span>(<span class="hljs-string">`const _hoisted_<span class="hljs-subst">${i + <span class="hljs-number">1</span>}</span> = `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-title function_">genNode</span>(exp, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">newline</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  })</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  </span>
+<span class="code-block-extension-codeLine" data-line-num="17">  context.<span class="hljs-property">pure</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">}</span>
+</code></pre>
+<p>核心功能就是遍历 <code>ast.hoists</code> 数组，该数组是我们在 <code>transfrom</code> 的时候构造的，然生成静态提升变量定义的方法。在进行 <code>hoists</code> 数组遍历的时候，这里有个 <code>geNode</code> 函数，是用来生成节点的创建字符串的，一起来看一下其实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">genNode</span>(<span class="hljs-params">node, context</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isString</span>(node)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    context.<span class="hljs-title function_">push</span>(node)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSymbol</span>(node)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    context.<span class="hljs-title function_">push</span>(context.<span class="hljs-title function_">helper</span>(node))</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 根据 node 节点类型不同，调用不同的生成函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">switch</span> (node.<span class="hljs-property">type</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">ELEMENT</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">IF</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">FOR</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-title function_">genNode</span>(node.<span class="hljs-property">codegenNode</span>!, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">TEXT</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-title function_">genText</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">SIMPLE_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-title function_">genExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">INTERPOLATION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-title function_">genInterpolation</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">TEXT_CALL</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      <span class="hljs-title function_">genNode</span>(node.<span class="hljs-property">codegenNode</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">COMPOUND_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-title function_">genCompoundExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">COMMENT</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="33">      <span class="hljs-title function_">genComment</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">VNODE_CALL</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      <span class="hljs-title function_">genVNodeCall</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38"></span>
+<span class="code-block-extension-codeLine" data-line-num="39">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_CALL_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="40">      <span class="hljs-title function_">genCallExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_OBJECT_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="43">      <span class="hljs-title function_">genObjectExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="44">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_ARRAY_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-title function_">genArrayExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_FUNCTION_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      <span class="hljs-title function_">genFunctionExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="50">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="51">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_CONDITIONAL_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="52">      <span class="hljs-title function_">genConditionalExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_CACHE_EXPRESSION</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-title function_">genCacheExpression</span>(node, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="57">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">JS_BLOCK_STATEMENT</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="58">      <span class="hljs-title function_">genNodeList</span>(node.<span class="hljs-property">body</span>, context, <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="59">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="60"></span>
+<span class="code-block-extension-codeLine" data-line-num="61">    <span class="hljs-comment">/* istanbul ignore next */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="62">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NodeTypes</span>.<span class="hljs-property">IF_BRANCH</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="63">      <span class="hljs-comment">// noop</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="65">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="66">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="67">}</span>
+</code></pre>
+<p>根据上一小节的 <code>demo</code></p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>hello world<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ msg }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>我们经过 <code>transform</code> 后得到的 <code>AST</code> 内容大致如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp394405922a8d4117b675e98b556e35be~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>其中 <code>hoists</code> 内容中存储的是 <code>&lt;p&gt;hello world&lt;/p&gt;</code> 节点的信息，其中 <code>type = 13</code> 表示的是 <code>VNODE_CALL</code> 类型，进入 <code>genVNodeCall</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">genVNodeCall</span>(<span class="hljs-params">node, context</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> { push, helper, pure } = context</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    tag,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    props,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    children,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    patchFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    dynamicProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    directives,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    isBlock,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    disableTracking,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    isComponent</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  } = node</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">if</span> (directives) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-title function_">push</span>(<span class="hljs-title function_">helper</span>(<span class="hljs-variable constant_">WITH_DIRECTIVES</span>) + <span class="hljs-string">`(`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-keyword">if</span> (isBlock) {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`(<span class="hljs-subst">${helper(OPEN_BLOCK)}</span>(<span class="hljs-subst">${disableTracking ? <span class="hljs-string">`true`</span> : <span class="hljs-string">``</span>}</span>), `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-keyword">if</span> (pure) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-title function_">push</span>(<span class="hljs-variable constant_">PURE_ANNOTATION</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-keyword">const</span> callHelper = isBlock</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    ? <span class="hljs-title function_">getVNodeBlockHelper</span>(context.<span class="hljs-property">inSSR</span>, isComponent)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    : <span class="hljs-title function_">getVNodeHelper</span>(context.<span class="hljs-property">inSSR</span>, isComponent)</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  <span class="hljs-title function_">push</span>(<span class="hljs-title function_">helper</span>(callHelper) + <span class="hljs-string">`(`</span>, node)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  <span class="hljs-title function_">genNodeList</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    <span class="hljs-title function_">genNullableArgs</span>([tag, props, children, patchFlag, dynamicProps]),</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    context</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="31">  <span class="hljs-title function_">push</span>(<span class="hljs-string">`)`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  <span class="hljs-keyword">if</span> (isBlock) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`)`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="34">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="35">  <span class="hljs-keyword">if</span> (directives) {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`, `</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-title function_">genNode</span>(directives, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-title function_">push</span>(<span class="hljs-string">`)`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="39">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="40">}</span>
+</code></pre>
+<p>在执行 <code>genVNodeCall</code> 函数时，因为 <code>directives</code> 不存在，<code>isBlock = false</code> 此时我们生成的代码内容如下</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+</code></pre>
+<p><code>genModulePreamble</code> 函数的最后，执行 <code>push('export')</code> 完成 <code>genModulePreamble</code> 的所有逻辑，得到以下内容：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span></span>
+</code></pre>
+<p>然后再看一下 <code>genFunctionPreamble</code> 函数，该函数的功能和 <code>genModulePreamble</code> 类似，就不再赘述，直接来看一下生成的结果：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> _Vue = <span class="hljs-title class_">Vue</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> { <span class="hljs-attr">createElementVNode</span>: _createElementVNode } = _Vue</span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">return</span> </span>
+</code></pre>
+<p>要注意以上代码仅仅是代码前置部分，还没有开始解析其他资源和节点，所以仅仅是到了 <code>export</code> 或者 <code>return</code> 就结束了。</p>
+<h2 data-id="heading-3">2. 生成渲染函数</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 进入 render 函数构造</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> functionName = <span class="hljs-string">`render`</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> args = [<span class="hljs-string">'_ctx'</span>, <span class="hljs-string">'_cache'</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">const</span> signature = args.<span class="hljs-title function_">join</span>(<span class="hljs-string">', '</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-title function_">push</span>(<span class="hljs-string">`function <span class="hljs-subst">${functionName}</span>(<span class="hljs-subst">${signature}</span>) {`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8"></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-title function_">indent</span>()</span>
+</code></pre>
+<p>这些代码还是比较好理解的，核心也是在通过 <code>push</code> 函数，继续生成 <code>code</code> 字符串，看一下经过这个步骤后，我们的代码字符串变成的内容：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) {</span>
+</code></pre>
+<p>到这里，后面的内容也就不言而喻了，就是生成 <code>render</code> 函数的主题内容代码，我们先忽略对 <code>components</code>、<code>directives</code>、<code>temps</code> 代码块的生成，有兴趣的可以在源码里面调试打印。</p>
+<p>我们知道之前的 <code>transform</code> 在处理节点内容时，会生成 <code>codegenNode</code> 对象，这个对象就是在这里被使用转换成代码字符串的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">if</span> (ast.<span class="hljs-property">codegenNode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">genNode</span>(ast.<span class="hljs-property">codegenNode</span>, context)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">} <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-title function_">push</span>(<span class="hljs-string">`null`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">}</span>
+</code></pre>
+<p>上面的例子中，我们生产的模版节点的 <code>codegenNode</code> 内容如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd06897e0dce74384a135537b16afd709~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>其中 <code>type = 13</code> 表示的是 <code>VNODE_CALL</code> 类型，也进入 <code>genVNodeCall</code> 函数中，这里需要注意的是，因为我们 <code>template</code> 下包含了 2 个同级的标签，所以在 <code>transform</code> 阶段会创建一个 <code>patchFlag = STABLE_FRAGMENT</code> 这样一个根 <code>fragment</code> 的 <code>ast</code> 节点来包含 2 个 <code>p</code> 标签节点。</p>
+<p>针对我们上面的示例，<code>directives</code> 没有，<code>isBlock</code> 是 <code>true</code>。那么经过 <code>genVNodeCall</code> 后生成的代码如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(_Fragment, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    _hoisted_1,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-title function_">_toDisplayString</span>(msg), <span class="hljs-number">1</span> <span class="hljs-comment">/* TEXT */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  ], <span class="hljs-number">64</span> <span class="hljs-comment">/* STABLE_FRAGMENT */</span>))</span>
+</code></pre>
+<p>那么至此，根节点 <code>vnode</code> 树的表达式就创建好了。我们再回到 <code>generate</code> 函数，<code>generate</code> 函数的最后就是添加右括号 <code>}</code> 来闭合渲染函数，最终生成如下代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(_Fragment, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    _hoisted_1,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-title function_">_toDisplayString</span>(msg), <span class="hljs-number">1</span> <span class="hljs-comment">/* TEXT */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  ], <span class="hljs-number">64</span> <span class="hljs-comment">/* STABLE_FRAGMENT */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>通过上述流程我们大致清楚了 <code>generate</code> 是 <code>compile</code> 阶段的最后一步，它的作用是将 <code>transform</code> 转换后的 <code>AST</code> 生成对应的可执行代码，从而在之后 <code>Runtime</code> 的 <code>Render</code> 阶段时，就可以通过可执行代码生成对应的 <code>VNode Tree</code>，然后最终映射为真实的 <code>DOM Tree</code> 在页面上。其中我们也省略了一些细节的介绍，但整体流程还是很容易理解的。</p>
+<h2 data-id="heading-4">总结</h2>
+<p>这里我们花了三个小节，为大家整体介绍了一个模版字符串是如何一步步的编译成 <code>render</code> 函数的。</p>
+<p>我们知道 <code>Vue</code> 相对于 <code>React</code> 的不同之处也是其支持 <code>&lt;template&gt;</code> 模版字符串的写法，虽然最终也是会被编译成渲染函数，也正是因为这个特性，可以让 <code>Vue</code> 可以在编译成渲染函数的期间做很多优化的事情。那到底做了哪些优化呢？我们下一章节接着介绍！</p></div>
+    </body>
+    </html>

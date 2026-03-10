@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>上一节，我们介绍了关于新旧子节点不同为数组的情况下的更新过程，下面将接着上节的内容继续介绍如果子节点都是数组的情况，那么更新过程会变成什么样呢？</p>
+<h2 data-id="heading-1">1. 从头比对</h2>
+<p><code>Vue 3</code> 的 <code>diff</code> 算法第一步就是进行新老节点从头比对的方式来判断是否是同类型的节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchKeyedChildren</span> = (<span class="hljs-params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> l2 = c2.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 旧节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">let</span> e1 = c1.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 新节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">let</span> e2 = l2 - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 从头部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// (a b) c</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// (a b) d e</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">while</span> (i &lt;= e1 &amp;&amp; i &lt;= e2) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">const</span> n1 = c1[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">const</span> n2 = (c2[i] = optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      ? <span class="hljs-title function_">cloneIfMounted</span>(c2[i] <span class="hljs-keyword">as</span> <span class="hljs-title class_">VNode</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      : <span class="hljs-title function_">normalizeVNode</span>(c2[i]))</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-comment">// 如果是 sameVnode 则递归执行 patch  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSameVNodeType</span>(n1, n2)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-title function_">patch</span>(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    i++</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<p>这里有几个变量需要说明一下：</p>
+<ol>
+<li><code>i</code> 代表的是头部的标记位；</li>
+<li><code>e1</code> 代表的是旧的子节点的尾部标记位；</li>
+<li><code>e2</code> 代表的是新的子节点的尾部标记位。</li>
+</ol>
+<p>从头比对就是通过不断移动 <code>i</code> 这个头部标记位来判断对应的节点是否是 <code>sameVnode</code>。如果是，则进行递归 <code>patch</code> 操作，递归 <code>patch</code> 就是继续进入到我们上一小节的内容。如果不满足条件，则退出头部比对，进入从尾比对流程。</p>
+<h2 data-id="heading-2">2. 从尾比对</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchKeyedChildren</span> = (<span class="hljs-params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> l2 = c2.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 旧节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">let</span> e1 = c1.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 新节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">let</span> e2 = l2 - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 从头部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 从尾部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// a (b c)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// d e (b c)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">while</span> (i &lt;= e1 &amp;&amp; i &lt;= e2) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">const</span> n1 = c1[e1]</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">const</span> n2 = (c2[i] = optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      ? <span class="hljs-title function_">cloneIfMounted</span>(c2[i] <span class="hljs-keyword">as</span> <span class="hljs-title class_">VNode</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      : <span class="hljs-title function_">normalizeVNode</span>(c2[i]))</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-comment">// 如果是 sameVnode 则递归执行 patch  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSameVNodeType</span>(n1, n2)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-title function_">patch</span>(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    e1--</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    e2--</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">}</span>
+</code></pre>
+<p>从尾比对就是通过不断移动新旧节点 <code>e1</code> 和 <code>e2</code> 的尾部指针来判断对应的节点是否是 <code>sameVnode</code>。如果是则进行递归 <code>patch</code> 操作，递归 <code>patch</code> 也是继续进入到我们上一小节的内容。如果不满足条件，则退出头部比对，进入后续流程。</p>
+<h2 data-id="heading-3">3. 新增节点</h2>
+<p>假设我们有这样一个旧列表：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>新列表的变更是在中间插入了一个新节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>e<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>那么先进入第一步头部比对流程：</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp074804630b39471e809def7080e9614d~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>第一步执行时，会完成对 <code>a</code> 和 <code>b</code> 头部这 2 个节点进行 <code>patch</code>。当 <code>i = 2</code> 时，由于此时的 <code>c</code> 和 <code>e</code> 节点的 <code>key</code> 不一样，所以退出了头部比对流程，进入尾部比对：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp8b9733b3694f4c81a22015672b56cdf0~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>第二步执行时，会完成对 <code>c</code> 和 <code>d</code> 尾部这 2 个节点进行 <code>patch</code>。当 <code>e1 = 1</code> 时，由于<code>i &gt; e1</code>，所以退出了尾部比对流程。肉眼可见，此时的情况是新节点多了个 <code>e</code> 节点的情况，所以我们需要添加多余的剩余节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchKeyedChildren</span> = (<span class="hljs-params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> l2 = c2.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 旧节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">let</span> e1 = c1.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 新节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">let</span> e2 = l2 - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 从头部开始必须</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 从尾部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 如果有多余的新节点，则执行新增逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">if</span> (i &gt; e1) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">if</span> (i &lt;= e2) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">const</span> nextPos = e2 + <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">const</span> anchor = nextPos &lt; l2 ? c2[nextPos].<span class="hljs-property">el</span> : parentAnchor</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-keyword">while</span> (i &lt;= e2) {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        <span class="hljs-comment">// 新增新节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">        <span class="hljs-title function_">patch</span>(<span class="hljs-literal">null</span>, c2[i], container, anchor, parentComponent, parentSuspense, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        i++</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<h2 data-id="heading-4">4. 删除节点</h2>
+<p>类比新增节点的情况，假设我们有这样一个旧列表：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>e<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>新列表的变更是在中间删除了一个旧节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>那么先进入第一步头部比对流程：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp41f9b957775b441580d331f3c4f3656b~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>第一步执行时，会完成对&nbsp;<code>a</code>&nbsp;和&nbsp;<code>b</code>&nbsp;头部这 2 个节点进行&nbsp;<code>patch</code>。当&nbsp;<code>i = 2</code>&nbsp;时，由于此时的&nbsp;<code>e</code>&nbsp;和&nbsp;<code>c</code>&nbsp;节点的&nbsp;<code>key</code>&nbsp;不一样，所以退出了头部比对流程，进入尾部比对：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp5d570fbb6d864c379a0eaf6011cc3521~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>第二步执行时，会完成对 <code>c</code> 和 <code>d</code> 尾部这 2 个节点进行 <code>patch</code>。当 <code>e2 = 1</code> 时，由于<code>i &gt; e2</code>，所以退出了尾部比对流程。肉眼可见，此时的情况是新节点少了个 <code>e</code> 节点的情况，所以我们需要删除节点 <code>e</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchKeyedChildren</span> = (<span class="hljs-params">c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> l2 = c2.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 旧节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">let</span> e1 = c1.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 新节点的尾部标记位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">let</span> e2 = l2 - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 从头部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 从尾部开始比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 如果有多余的新节点，则执行新增逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-comment">// 如果有多余的旧节点，则执行卸载逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (i &gt; e2) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">while</span> (i &lt;= e1) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-comment">// 卸载节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-title function_">unmount</span>(c1[i], parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      i++</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">}</span>
+</code></pre>
+<h2 data-id="heading-5">5. 未知子序列</h2>
+<p>经过步骤 1、2 的操作后如果可以直接进入步骤 3、4 那是非常方便的操作了，直接进行多余删除缺少新增的操作。如果步骤 3、4 的条件都不满足的情况，那么 <code>Vue</code> 是如何处理的呢？再来看这样一个例子。</p>
+<p>旧子节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"e"</span>&gt;</span>e<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"f"</span>&gt;</span>f<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"g"</span>&gt;</span>g<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"h"</span>&gt;</span>h<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>新子节点：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"a"</span>&gt;</span>a<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"b"</span>&gt;</span>b<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"e"</span>&gt;</span>e<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"c"</span>&gt;</span>c<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"d"</span>&gt;</span>d<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"i"</span>&gt;</span>i<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"g"</span>&gt;</span>g<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"h"</span>&gt;</span>h<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+</code></pre>
+<p>此时经过步骤 1、2 后的结果可以表示为如下图：</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp29972b7a05414f8daf0ffcd348b650b3~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这种情况，既不满足 <code>i &gt; e1</code> 也不满足 <code>i &gt; e2</code> 的条件，所以对于这种情况应该如何处理呢？我们知道 <code>DOM</code> 更新的性能优劣关系大致为：<code>属性更新</code> &gt; <code>位置移动</code> &gt; <code>增删节点</code>。所以，我们需要尽可能地复用老节点，做属性更新，减少移动次数和增删节点的次数。</p>
+<p>那么上述更新策略假设有这样 2 种方式。</p>
+<ol>
+<li><code>c</code> 和 <code>d</code> 节点不动，只做 <code>patch</code>，<code>e</code> 节点 <code>patch</code> 后移动到 <code>c</code> 节点前面，删除 <code>f</code> 节点，然后在 <code>d</code> 节点后面添加 <code>i</code> 节点。</li>
+<li><code>e</code> 节点不动，只做 <code>patch</code>，<code>c</code> 和 <code>d</code> 节点 <code>patch</code> 后移动到 <code>e</code> 节点后面，删除 <code>f</code> 节点，然后在 <code>d</code> 节点后面添加 <code>i</code> 节点。</li>
+</ol>
+<p>根据上面的性能优劣关系，我们需要尽可能多地保障最多的公共子节点位置不变，只做 <code>patch</code> 更新。然后找出多余的节点删除，找出新的节点添加，找出有需要移动的节点移动。</p>
+<p>当需要进行移动操作时，那么这个问题就变成了求取新旧子树上的<strong>最长公共子序列</strong>。当知道了最长公共子序列，所有的操作就可以简化为：</p>
+<ol>
+<li>如果节点在新节点中，不在旧节点中，那么新增节点。</li>
+<li>如果节点在旧节点中，不在新节点中，那么删除节点。</li>
+<li>如果节点既在旧节点中，也在新节点中，那么更新。</li>
+<li>如果节点需要移动，那么求取最长公共子序列后，进行最小位置移动。</li>
+</ol>
+<p>接下来看看 <code>Vue</code> 是如何实现上述能力的。</p>
+<h3 data-id="heading-6">构造新老节点位置映射 keyToNewIndexMap</h3>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 旧子序列开始位置</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> s1 = i</span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 新子序列开始位置</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">const</span> s2 = i</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-comment">// 5.1 构建 key:index 关系索引 map</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">const</span> keyToNewIndexMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">for</span> (i = s2; i &lt;= e2; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">const</span> nextChild = (c2[i] = optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    ? <span class="hljs-title function_">cloneIfMounted</span>(c2[i] <span class="hljs-keyword">as</span> <span class="hljs-title class_">VNode</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    : <span class="hljs-title function_">normalizeVNode</span>(c2[i]))</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-keyword">if</span> (nextChild.<span class="hljs-property">key</span> != <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    keyToNewIndexMap.<span class="hljs-title function_">set</span>(nextChild.<span class="hljs-property">key</span>, i)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p>这里的新旧子节点开始位置通过 <code>s1</code> 和 <code>s2</code> 作为标记，然后开始进行构造新老节点位置映射，这里新节点 <code>key</code> -&gt; <code>index</code> 关系的索引图是保存在了 <code>keyToNewIndexMap</code> 这样一个 <code>Map</code> 结构中，其中的 <code>key</code> 就是新节点的 <code>key</code> 值，而 <code>value</code> 则是旧节点对应的位置关系 <code>index</code>。这一步完成后，生成的 <code>keyToNewIndexMap</code> 结果可以表示为：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">keyToNewIndexMap = {<span class="hljs-attr">e</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">d</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">i</span>: <span class="hljs-number">5</span>}</span>
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb9846f1800394683a19b5a68950f7fe6~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-7">继续处理旧节点</h3>
+<p>有了上面的 <code>keyToNewIndexMap</code> 新节点的索引图，接下来我们就需要遍历旧的节点，寻找旧节点在新节点中对应的位置信息，如果找到则做更新，找不到则移除。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 记录新节点已更新的数目</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">let</span> patched = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 记录新节点还有多少个没有更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">const</span> toBePatched = e2 - s2 + <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 标记是否有必要进行节点的位置移动</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">let</span> moved = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-comment">// 标记是否有节点进行了位置移动</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">let</span> maxNewIndexSoFar = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-comment">// 记录新节点在旧节点中的位置数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-keyword">const</span> newIndexToOldIndexMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(toBePatched)</span>
+<span class="code-block-extension-codeLine" data-line-num="11"><span class="hljs-comment">// newIndexToOldIndexMap 全部置为 0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12"><span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; toBePatched; i++) newIndexToOldIndexMap[i] = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13"><span class="hljs-comment">// 开始遍历旧子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14"><span class="hljs-keyword">for</span> (i = s1; i &lt;= e1; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-comment">// prevChild 代表旧节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-keyword">const</span> prevChild = c1[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 还有多余的旧节点，则删除</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-keyword">if</span> (patched &gt;= toBePatched) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-title function_">unmount</span>(prevChild, parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-keyword">continue</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// 记录旧节点在新节点中的位置数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-keyword">let</span> newIndex = keyToNewIndexMap.<span class="hljs-title function_">get</span>(prevChild.<span class="hljs-property">key</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  </span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-comment">// 如果旧节点不存在于新节点中，则删除该节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">  <span class="hljs-keyword">if</span> (newIndex === <span class="hljs-literal">undefined</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-title function_">unmount</span>(prevChild, parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-comment">// newIndexToOldIndexMap 中元素为 0 表示着新节点不存在于旧节点中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">    newIndexToOldIndexMap[newIndex - s2] = i + <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    <span class="hljs-comment">// 默认不移动的话，所有相同节点都是增序排列的</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">    <span class="hljs-comment">// 如果有移动，必然出现节点降序的情况</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-keyword">if</span> (newIndex &gt;= maxNewIndexSoFar) {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      maxNewIndexSoFar = newIndex</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      moved = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-comment">// 更新节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">    <span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="40">      prevChild,</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      c2[newIndex] <span class="hljs-keyword">as</span> <span class="hljs-title class_">VNode</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">      container,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">      <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="44">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="45">      parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="48">      optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="49">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="50">    <span class="hljs-comment">// 记录更新的数量</span></span>
+<span class="code-block-extension-codeLine" data-line-num="51">    patched++</span>
+<span class="code-block-extension-codeLine" data-line-num="52">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="53">}</span>
+</code></pre>
+<p>我们简单来总结一下这一步的一些核心操作。</p>
+<p><strong>Step 1：</strong> 定义一个初始长度为新节点数组长度且默认值全为 0 的变量 <code>newIndexToOldIndexMap</code>，记录新节点中的元素在旧节点中的位置关系。</p>
+<p><strong>Step 2：</strong> 遍历旧的节点数组，如果旧节点不存在于新节点中，则表示旧的节点其实是多余的节点，需要被移除。</p>
+<p><strong>Step 3：</strong> 如果旧节点存在于新节点数组中，则将它在旧子序列中的位置信息记录到 <code>newIndexToOldIndexMap</code> 中，同时根据 <code>newIndex</code> 是否大于 <code>maxNewIndexSoFar</code> 来判断是否有节点移动。</p>
+<p>这里我们结合个例子来说明。假如旧节点信息为 <code>abc</code>、新节点为 <code>cab</code>，当旧节点遍历到 <code>c</code> 节点时，此时的<code>newIndex</code> 的值为 <code>0</code> 而 <code>maxNewIndexSoFar</code> 的值为 <code>2</code>。这就意味着此时的 <code>c</code> 节点并不是升序位于 <code>ab</code> 节点之后的，因此需要标记为有需要移动的节点。</p>
+<p><strong>Step 4：</strong> 更新相同节点。</p>
+<p>经过上面的一系列操作，我们最终得到了一个 <code>newIndexToOldIndexMap</code> 和一个 <code>moved</code> 两个变量 ，这两个变量将在下文的移动和新增节点中被使用。</p>
+<p>我们来看一下示例处理后的结果，如下图所示：</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpdba3693544114cf19ff3114c8becab61~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>此时 <code>c</code>、<code>d</code>、<code>e</code> 因为是相同节点，所以进行 <code>patch</code> 更新，<code>f</code> 节点因为不存在于新的索引中，所以被删除。最后得到的 <code>newIndexToOldIndexMap</code> 数据结构大致如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">newIndexToOldIndexMap = [<span class="hljs-number">5</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">0</span>]</span>
+</code></pre>
+<p>而且此时的 <code>moved</code> 也被标记为 <code>true</code>。</p>
+<h3 data-id="heading-8">移动和增加新节点</h3>
+<p>通过前面的操作，我们完成了对旧节点的移除和更新，那么接下来就是需要进行对节点的移动和新节点的增加了：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 根据 newIndexToOldIndexMap 求取最长公共子序列</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> increasingNewIndexSequence = moved</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  ? <span class="hljs-title function_">getSequence</span>(newIndexToOldIndexMap)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  : <span class="hljs-variable constant_">EMPTY_ARR</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 最长公共子序列尾部索引  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">j = increasingNewIndexSequence.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-comment">// 从尾部开始遍历</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">for</span> (i = toBePatched - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">const</span> nextIndex = s2 + i</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">const</span> nextChild = c2[nextIndex]</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">const</span> anchor = nextIndex + <span class="hljs-number">1</span> &lt; l2 ? c2[nextIndex + <span class="hljs-number">1</span>].<span class="hljs-property">el</span> : parentAnchor</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 如果新子序列中的节点在旧子序列中不存在，则新增节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">if</span> (newIndexToOldIndexMap[i] === <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-title function_">patch</span>(<span class="hljs-literal">null</span>, nextChild, container, anchor, parentComponent, parentSuspense, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (moved) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-comment">// 如果需要移动且</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// 没有最长递增子序列</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-comment">// 当前的节点不在最长递增子序列中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-keyword">if</span> (j &lt; <span class="hljs-number">0</span> || i !== increasingNewIndexSequence[j]) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-title function_">move</span>(nextChild, container, anchor, <span class="hljs-title class_">MoveType</span>.<span class="hljs-property">REORDER</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      j--</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">}</span>
+</code></pre>
+<p><strong>Step 1：</strong> 这里针对 <code>moved</code> 是 <code>true</code> 的情况，则会进行求取最长递增子序列的索引操作。</p>
+<p>什么是最长递增子序列？简单来说指的是找到一个特定的最长的子序列，并且子序列中的所有元素单调递增。本例中，<code>newIndexToOldIndexMap = [5, 3, 4, 0]</code> 最长递增子序列的值为 <code>[3, 4]</code>, 对应到 <code>newIndexToOldIndexMap</code> 中的索引即 <code>increasingNewIndexSequence = [1, 2]</code>。关于具体的算法细节，我们后面再详细探讨。</p>
+<p><strong>Step 2：</strong> 从尾部开始遍历新的子序列，在遍历的过程中，如果新子序列中的节点在旧子序列中不存在，也就是 <code>newIndexToOldIndexMap[i] === 0</code>，则新增节点。</p>
+<p><strong>Step 3：</strong> 判断是否存在节点移动的情况，如果存在的话则看节点的索引是不是在最长递增子序列中，如果不在，则将它移动到锚点的前面，否则仅移动最长子序列的尾部指针。</p>
+<p>针对上述例子中，新的子序列为 <code>e,c,d,i</code>。最长递增子序列的索引为 <code>[1, 2]</code>。开始遍历到 <code>i</code> 节点时，因为 <code>newIndexToOldIndexMap[i] = 0</code> 所以新增，然后遍历到 <code>c,d</code> 节点，因为存在于最长子序列中，所以最后 <code>j = -1</code>。当遍历到 <code>e</code> 节点时，此时 <code>j = -1</code> 并且 <code>e</code> 节点不存在于最长递增子序列索引中，索引最后一步就是把节点 <code>e</code> 进行一次移动：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">move</span>(nextChild, container, anchor, <span class="hljs-title class_">MoveType</span>.<span class="hljs-property">REORDER</span>)</span>
+</code></pre>
+<p>其中 <code>anchor</code> 是参照物，记录着上一次更新的节点信息，也就是节点 <code>c</code> 的信息，所以这里的意思就是将节点 <code>e</code> 移动到节点 <code>c</code> 前面。</p>
+<p>至此，完成了所有节点的增、删、更新、移动的操作，此次操作结果如下：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp1dcba8989ae348e6af85333a22280da2~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-9">最长递增子序列</h2>
+<p>求最长递增子序列是 <code>LeetCode</code> 上的一道经典算法题，原题：<a href="https://link.juejin.cn?target=https%3A%2F%2Fleetcode.cn%2Fproblems%2Flongest-increasing-subsequence%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://leetcode.cn/problems/longest-increasing-subsequence/" ref="nofollow noopener noreferrer">300.&nbsp;最长递增子序列</a>。</p>
+<p>什么是上升子序列？简单来说指的是找到一个特定的最长的子序列，并且子序列中的所有元素单调递增。</p>
+<p>假设我们的序列为 <code>[5, 3, 4, 9]</code> ，那么最长的递增子序列是 <code>[3, 4]</code>。</p>
+<p>那么如何找到最长的递增子序列呢？<code>Vue</code> 内部使用的是一套 <code>贪心 + 二分查找</code> 的算法，关于贪心和二分查找的解释如下。</p>
+<ol>
+<li>贪心算法：贪心算法在每一步都做出了当时看起来最佳的选择，也就是说，它总是做出局部最优的选择，寄希望这样的选择能导致全局最优解。<a href="https://link.juejin.cn?target=https%3A%2F%2Fleetcode.cn%2Fproblems%2Fassign-cookies%2Fdescription%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://leetcode.cn/problems/assign-cookies/description/" ref="nofollow noopener noreferrer">leetCode 455.&nbsp;分发饼干。</a></li>
+<li>二分查找：每次的查找都是和区间的中间元素对比，将待查找的区间缩小为一半，直到找到目标元素，或者区间被缩小为 0（没找到）。<a href="https://link.juejin.cn?target=https%3A%2F%2Fleetcode.cn%2Fproblems%2Fbinary-search%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://leetcode.cn/problems/binary-search/" ref="nofollow noopener noreferrer">leetCode 704.&nbsp;二分查找。</a></li>
+</ol>
+<p>那么这里我们再结合一下贪心算法的思想，在求取最长上升子序列时，对于同样长度是二的序列 <code>[2, 3]</code> 一定比 <code>[2, 5]</code> 好，因为要想让子序列尽可能地长，那么上升得尽可能慢，这样潜力更大。</p>
+<p>所以我们可以创建一个临时数组，用来保存最长的递增子序列，如果当前遍历的元素大于临时数组中的最后一个元素（也就是临时数组的最大值）时，那么将其追加到临时数组的尾部，否则，查找临时数组，找到第一个大于该元素的数并替换它，这样就保证了临时数组上升时最慢的。因为是单调递增的序列，我们也可以在临时数组中用二分查找，降低时间复杂度。</p>
+<p>以输入序列 <code>[1, 4, 5, 2, 8, 7, 6, 0]</code> 为例，根据上面算法的描述，我们大致可以得到如下的计算步骤：</p>
+<ol>
+<li><code>[1]</code></li>
+<li><code>[1, 4]</code></li>
+<li><code>[1, 4, 5]</code></li>
+<li><code>[1, 2, 5]</code></li>
+<li><code>[1, 2, 5, 8]</code></li>
+<li><code>[1, 2, 5, 7]</code></li>
+<li><code>[0, 2, 5, 6]</code></li>
+</ol>
+<p>可以看到，如果单纯地按照上述算法的模式，得到的结果的长度虽然一致，但位置顺序和值并不符合预期，预期结果是 <code>[1, 4, 5, 6]</code>。那么在 <code>Vue</code> 中是如何解决这个顺序和值错乱的问题呢？</p>
+<p>我们一起来看看源码的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getSequence</span> (arr) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> p = arr.<span class="hljs-title function_">slice</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> result = [<span class="hljs-number">0</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">let</span> i, j, u, v, c</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> len = arr.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; len; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-keyword">const</span> arrI = arr[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-comment">// 排除等于 0 的情况</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-keyword">if</span> (arrI !== <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      j = result[result.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// 与最后一项进行比较</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-keyword">if</span> (arr[j] &lt; arrI) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        <span class="hljs-comment">// 存储在 result 更新前的最后一个索引的值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">        p[i] = j</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        result.<span class="hljs-title function_">push</span>(i)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        <span class="hljs-keyword">continue</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      u = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">      v = result.<span class="hljs-property">length</span> - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-comment">// 二分搜索，查找比 arrI 小的节点，更新 result 的值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-keyword">while</span> (u &lt; v) {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-comment">// 取整得到当前位置</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">        c = ((u + v) / <span class="hljs-number">2</span>) | <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-keyword">if</span> (arr[result[c]] &lt; arrI) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">          u = c + <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">          v = c</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">if</span> (arrI &lt; arr[result[u]]) {</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        <span class="hljs-keyword">if</span> (u &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">          <span class="hljs-comment">// 正确的结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">          p[i] = result[u - <span class="hljs-number">1</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="36">        <span class="hljs-comment">// 有可能替换会导致结果不正确，需要一个新数组 p 记录正确的结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">        result[u] = i</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="39">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="40">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="41">  u = result.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">  v = result[u - <span class="hljs-number">1</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="43"></span>
+<span class="code-block-extension-codeLine" data-line-num="44">  <span class="hljs-comment">// 回溯数组 p，找到最终的索引</span></span>
+<span class="code-block-extension-codeLine" data-line-num="45">  <span class="hljs-keyword">while</span> (u-- &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="46">    result[u] = v</span>
+<span class="code-block-extension-codeLine" data-line-num="47">    v = p[v]</span>
+<span class="code-block-extension-codeLine" data-line-num="48">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="49">  <span class="hljs-keyword">return</span> result</span>
+<span class="code-block-extension-codeLine" data-line-num="50">}</span>
+</code></pre>
+<p>其中 <code>result</code> 中存储的是长度为 <code>i</code> 的递增子序列最小末尾值的索引。<code>p</code> 是来存储在每次更新 <code>result</code> 前最后一个索引的值，并且它的 <code>key</code> 是这次要更新的 <code>result</code> 值：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"> <span class="hljs-comment">// 插入</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"> p[i] = j</span>
+<span class="code-block-extension-codeLine" data-line-num="3"> result.<span class="hljs-title function_">push</span>(i)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"> <span class="hljs-comment">// 替换</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"> p[i] = result[u - <span class="hljs-number">1</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="6"> result[u] = i</span>
+</code></pre>
+<p>对于上述的实例，我们在进行最后一步回溯数组 <code>p</code> 之前，得到的数据机构如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">result = [ <span class="hljs-number">0</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span> ] <span class="hljs-comment">// =&gt; [0, 2, 5, 6]</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3">p = [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>]</span>
+</code></pre>
+<p>从 <code>result</code> 最后一个元素 <code>6</code> 对应的索引 <code>6</code> 开始回溯，可以看到 <code>p[6] = 2</code>，<code>p[2] = 1</code>，<code>p[1] = 0</code>，所以通过对 <code>p</code> 的回溯，得到最终的 <code>result</code> 值是 <code>[0, 1, 2, 6]</code>，也就找到最长递增子序列的最终索引了。</p>
+<h2 data-id="heading-10">总结</h2>
+<p>至此我们介绍完了关于 <code>Vue3</code> 的 <code>diff</code> 算法。接下来小伙伴们可以思考两个问题：</p>
+<ol>
+<li>为什么 <code>Vue 3</code> 不再沿用之前 <code>Vue 2</code> 的双端 <code>diff</code> 算法而改成现在的这种模式呢？</li>
+<li>我们使用 <code>v-for</code> 编写列表时为什么不建议使用 <code>index</code> 作为 <code>key</code>?</li>
+</ol></div>
+    </body>
+    </html>

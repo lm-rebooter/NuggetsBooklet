@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p><code>Vue</code> 提供了一个 <code>&lt;slot&gt;</code> 插槽的内置特殊元素，用来实现为子组件传递一些模板片段，然后由子组件完成对这些模版的渲染工作。一个简单的例子，这里有一个父组件，写入了一段插槽模版内容：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ChildComponent</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">&lt;!-- 插槽内容 --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  hello world</span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">ChildComponent</span>&gt;</span></span>
+</code></pre>
+<p>在子组件 <code>&lt;ChildComponent&gt;</code> 中则通过 <code>&lt;slot&gt;</code> 元素来实现对插槽内容的出口渲染：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">&lt;!-- 插槽出口 --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">slot</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">slot</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</code></pre>
+<p><code>&lt;slot&gt;</code>&nbsp;元素是一个<strong>插槽出口</strong>&nbsp;(slot outlet)，标示了父元素提供的<strong>插槽内容</strong>&nbsp;(slot content) 将在哪里被渲染。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp8979e66c0c914abc9a97c92c228393fd~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>接下来，我们将一起探索，插槽内容是如何被渲染到指定出口的。</p>
+<h2 data-id="heading-1">插槽内容渲染</h2>
+<p>一个组件如果携带一些插槽内容，那么这个组件在渲染的时候，会有哪些变化。先来看一个较为常规的 <code>&lt;slot&gt;</code> 插槽内容用法：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">ChildComponent</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">template</span> #<span class="hljs-attr">header</span>&gt;</span>header<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">template</span> #<span class="hljs-attr">content</span>&gt;</span>content<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">template</span> #<span class="hljs-attr">footer</span>&gt;</span>footer<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">ChildComponent</span>&gt;</span></span>
+</code></pre>
+<p>经过编译器转换后，生成的渲染函数如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createTextVNode <span class="hljs-keyword">as</span> _createTextVNode, resolveComponent <span class="hljs-keyword">as</span> _resolveComponent, withCtx <span class="hljs-keyword">as</span> _withCtx, openBlock <span class="hljs-keyword">as</span> _openBlock, createBlock <span class="hljs-keyword">as</span> _createBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> _component_ChildComponent = <span class="hljs-title function_">_resolveComponent</span>(<span class="hljs-string">"ChildComponent"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createBlock</span>(_component_ChildComponent, <span class="hljs-literal">null</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-attr">header</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"header"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-attr">content</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"content"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-attr">footer</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"footer"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-attr">_</span>: <span class="hljs-number">1</span> <span class="hljs-comment">/* STABLE */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  }))</span>
+<span class="code-block-extension-codeLine" data-line-num="18">}</span>
+</code></pre>
+<p>可以看到，<code>createBlock</code> 的第三个参数 <code>children</code> 相对于普通父子节点来说，由一个数组变成一个对象的形式，这个对象包含了以插槽内容名称命名的函数，以及一个 <code>_</code> 属性，这个属性的含义是 <code>slotFlag</code>。</p>
+<p>下面我们再详细看一下 <code>createBlock</code> 这个函数的实现，前面的章节中，我们提到 <code>createBlock</code> 函数本质就是调用了 <code>createVNode</code> 函数创建 <code>vnode</code> 节点，不过会增加一些和编译时优化相关的属性 <code>dynamicChildren</code> 罢了。那么核心看一下在创建 <code>vnode</code> 的时候产生的一些变化：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">_createVNode</span>(<span class="hljs-params">type, props, children, patchFlag, dynamicProps = <span class="hljs-literal">null</span>, isBlockNode = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isVNode</span>(type)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// clone vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> cloned = <span class="hljs-title function_">cloneVNode</span>(type, props, <span class="hljs-literal">true</span> <span class="hljs-comment">/* mergeRef: true */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">if</span> (children) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 标准化子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">normalizeChildren</span>(cloned, children)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">return</span> cloned</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+</code></pre>
+<p><code>createVNode</code> 函数在执行的时候，针对 <code>vnode</code> 节点如果存在子节点的话，会调用 <code>normalizeChildren</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">normalizeChildren</span>(<span class="hljs-params">vnode, children</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> type = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> { shapeFlag } = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (children == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    children = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isArray</span>(children)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">//  子节点是数组的情况</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    type = <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ARRAY_CHILDREN</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> children === <span class="hljs-string">'object'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 针对 children 是对象的处理内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// 对于 ELEMENT 或者 TELEPORT slot 的处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">if</span> (shapeFlag &amp; (<span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ELEMENT</span> | <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TELEPORT</span>)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-keyword">const</span> slot = (children <span class="hljs-keyword">as</span> any).<span class="hljs-property">default</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">if</span> (slot) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        slot.<span class="hljs-property">_c</span> &amp;&amp; (slot.<span class="hljs-property">_d</span> = <span class="hljs-literal">false</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        <span class="hljs-title function_">normalizeChildren</span>(vnode, <span class="hljs-title function_">slot</span>())</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        slot.<span class="hljs-property">_c</span> &amp;&amp; (slot.<span class="hljs-property">_d</span> = <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-comment">// 标记子节点类型为 SLOTS_CHILDREN</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      type = <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SLOTS_CHILDREN</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">const</span> slotFlag = (children <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-keyword">if</span> (!slotFlag &amp;&amp; !(<span class="hljs-title class_">InternalObjectKey</span> <span class="hljs-keyword">in</span> children!)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        <span class="hljs-comment">// 如果 slots 还没有被标准化，添加上下文实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">        ;(children <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_ctx</span> = currentRenderingInstance</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (slotFlag === <span class="hljs-title class_">SlotFlags</span>.<span class="hljs-property">FORWARDED</span> &amp;&amp; currentRenderingInstance) {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        <span class="hljs-comment">// 处理 slotFlag 为 FORWARDED 的情况</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-comment">// 处理 STABLE slot</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">        <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="31">          (currentRenderingInstance.<span class="hljs-property">slots</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span> === <span class="hljs-title class_">SlotFlags</span>.<span class="hljs-property">STABLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">        ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">          ;(children <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span> = <span class="hljs-title class_">SlotFlags</span>.<span class="hljs-property">STABLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">        } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">          <span class="hljs-comment">// 添加 DYNAMIC slot</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">          ;(children <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span> = <span class="hljs-title class_">SlotFlags</span>.<span class="hljs-property">DYNAMIC</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">          vnode.<span class="hljs-property">patchFlag</span> |= <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">DYNAMIC_SLOTS</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="39">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="40">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="41">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="42">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">  vnode.<span class="hljs-property">children</span> = children</span>
+<span class="code-block-extension-codeLine" data-line-num="44">  vnode.<span class="hljs-property">shapeFlag</span> |= type</span>
+<span class="code-block-extension-codeLine" data-line-num="45">}</span>
+</code></pre>
+<p>这里我们只需要关注，如果传入的子节点类型是个 <code>Object</code> 的情况下，会为 <code>vnode.shapeFlag</code> 属性添加 <code>SLOTS_CHILDREN</code> 类型。那这个 <code>shapeFlag</code> 在哪里会被用到了？再回到我们之前的组件挂载过程中的 <code>setupComponent</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">setupComponent</span>(<span class="hljs-params">instance</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 1. 处理 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 取出存在 vnode 里面的 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> { props, children } = instance.<span class="hljs-property">vnode</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">initProps</span>(instance, props);</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 2. 处理 slots</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-title function_">initSlots</span>(instance, children);</span>
+<span class="code-block-extension-codeLine" data-line-num="8"></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 3. 调用 setup 并处理 setupResult</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">setupStatefulComponent</span>(instance);</span>
+<span class="code-block-extension-codeLine" data-line-num="11">}</span>
+</code></pre>
+<p>这里我们重点看一下是如何处理 <code>slots</code> 的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">initSlots</span> = (<span class="hljs-params">instance, children</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// shapeFlag 有 SLOTS_CHILDREN 类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SLOTS_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 对于我们的示例中，slotFlag 类型是 STABLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> type = (children <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">if</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 用户可以使用 this.$slots 来获取 slots 对象的浅拷贝内部实例上的 slots</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-comment">// 所以这里应该避免 proxy 对象污染</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 为 instance slots 属性赋值 children</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      instance.<span class="hljs-property">slots</span> = <span class="hljs-title function_">toRaw</span>(children)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// 标记不可枚举</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-title function_">def</span>(children, <span class="hljs-string">'_'</span>, type)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    instance.<span class="hljs-property">slots</span> = {}</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-title function_">def</span>(instance.<span class="hljs-property">slots</span>, <span class="hljs-title class_">InternalObjectKey</span>, <span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">}</span>
+</code></pre>
+<p>针对我们上面的示例，首先 <code>slots</code> 渲染的 <code>slotFlag</code> 类型为 <code>STABLE</code>，所以这里的 <code>initSlot</code> 所做的操作就是为 <code>instance.slots</code> 赋值为 <code>toRaw(children)</code>。</p>
+<p>到这里，我们可以认为，对于一个组件中如果包含 <code>slot</code> 内容，那么这个组件实例在被渲染的时候，这些内容将会被添加到当前组件实例的 <code>instance.slots</code> 属性上：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// ChildComponent 组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">{</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">type</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-attr">name</span>: <span class="hljs-string">"ChildComponent"</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-attr">render</span>: <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) { ... },</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-attr">slots</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-attr">header</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"header"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">content</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"content"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-attr">footer</span>: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"footer"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-attr">vnode</span>: {...}</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+</code></pre>
+<blockquote>
+<p>注意，<code>slots</code> 是被挂载到了子组件实例 <code>ChildComponent</code> 中，而非父组件中。</p>
+</blockquote>
+<h2 data-id="heading-2">插槽出口渲染</h2>
+<p>插槽除了有内容外，还需要制定对象的出口，我们再一起看一下上述示例中对应的出口内容：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">slot</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"header"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">slot</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">slot</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"content"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">slot</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">slot</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"footer"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">slot</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</code></pre>
+<p>上面的模版会被编译器编译成如下渲染函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { renderSlot <span class="hljs-keyword">as</span> _renderSlot, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(<span class="hljs-string">"div"</span>, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">_renderSlot</span>(_ctx.<span class="hljs-property">$slots</span>, <span class="hljs-string">"header"</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title function_">_renderSlot</span>(_ctx.<span class="hljs-property">$slots</span>, <span class="hljs-string">"content"</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-title function_">_renderSlot</span>(_ctx.<span class="hljs-property">$slots</span>, <span class="hljs-string">"footer"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  ]))</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p>可以看到，带有 <code>&lt;slot&gt;</code> 内容的元素，会被 <code>renderSlot</code> 函数进行包裹，一起来看一下这个函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">renderSlot</span>(<span class="hljs-params">slots, name, props, fallback, noSlotted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 根据 name 获取 slot 内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">let</span> slot = slots[name]</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">openBlock</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> validSlotContent = slot &amp;&amp; <span class="hljs-title function_">ensureValidVNode</span>(<span class="hljs-title function_">slot</span>(props))</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 创建 slot vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">const</span> rendered = <span class="hljs-title function_">createBlock</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-title class_">Fragment</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-attr">key</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        props.<span class="hljs-property">key</span> ||</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        (validSlotContent &amp;&amp; (validSlotContent <span class="hljs-keyword">as</span> any).<span class="hljs-property">key</span>) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        <span class="hljs-string">`_<span class="hljs-subst">${name}</span>`</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    validSlotContent || (fallback ? <span class="hljs-title function_">fallback</span>() : []),</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    validSlotContent &amp;&amp; (slots <span class="hljs-keyword">as</span> <span class="hljs-title class_">RawSlots</span>).<span class="hljs-property">_</span> === <span class="hljs-title class_">SlotFlags</span>.<span class="hljs-property">STABLE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      ? <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">STABLE_FRAGMENT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">      : <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">BAIL</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// 返回 slot vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-keyword">return</span> rendered</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<p>可以看到，<code>renderSlot</code> 函数核心功能就是根据 <code>slot</code> 的 <code>name</code> 属性去子组件实例上的 <code>slots</code> 中查找对应的执行函数，然后创建一个以 <code>slot</code> 为子节点的 <code>Fragment</code> 类型的 <code>vnode</code> 节点。</p>
+<p>上述 <code>slot</code> 容器中的内容是通过 <code>withCtx(...)</code> 函数进行封装执行的，那么这个函数的作用是什么呢？先来看一下这个函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">withCtx</span>(<span class="hljs-params">fn, ctx= currentRenderingInstance, isNonScopedSlot</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> <span class="hljs-attr">renderFnWithContext</span>: <span class="hljs-title class_">ContextualRenderFn</span> = <span class="hljs-function">(<span class="hljs-params">...args: any[]</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (renderFnWithContext.<span class="hljs-property">_d</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-title function_">setBlockTracking</span>(-<span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 暂存子组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">const</span> prevInstance = <span class="hljs-title function_">setCurrentRenderingInstance</span>(ctx)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-keyword">let</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">try</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// 运行创建 vnode 的函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      res = <span class="hljs-title function_">fn</span>(...args)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    } <span class="hljs-keyword">finally</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 重置回子组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-title function_">setCurrentRenderingInstance</span>(prevInstance)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-keyword">return</span> renderFnWithContext</span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+</code></pre>
+<p><code>withCtx</code> 函数巧妙的利用了闭包的特性，在运行父组件的时候，通过 <code>withCtx</code> 保存了父组件的实例到 <code>currentRenderingInstance</code> 变量上，然后在子组件执行 <code>renderFnWithContext</code> 函数时，先恢复父组件的实例上下文，再执行生成 <code>vnode</code> 函数，执行完成后，再重置回子组件的实例。这样做的好处是在做 <code>&lt;slot&gt;</code> 渲染内容的时候，让 <code>slot</code> 的内容可以访问到父组件的实例，因为 <code>slot</code> 内容本身也是在父组件中定义的，只是被渲染到了指定的子组件中而已。</p>
+<h2 data-id="heading-3">Dynamic Slots</h2>
+<p>什么是 <code>dynamic slots</code> ? 我们之前还有一种动态类型叫做 <code>dynamic children</code> 在 <code>DOM</code> 更新时做靶向更新。而 <code>dynamic slots</code> 则是用于判断 <code>slot</code> 内容是否需要更新。</p>
+<p>那么 <code>Vue 3</code> 会为哪些组价添加 <code>dynamic slots</code> 属性呢？</p>
+<p><code>Vue 3</code> 中，对于动态的插槽名、条件判断、循环等场景的 <code>&lt;slot&gt;</code>，则会被标记为 <code>dynamic slots</code>，拿动态的插槽名举例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">child-component</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">template</span> #[<span class="hljs-attr">dynamicSlotName</span>]&gt;</span>header<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-tag">&lt;/<span class="hljs-name">child-component</span>&gt;</span></span>
+</code></pre>
+<p>则会被渲染成：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createTextVNode <span class="hljs-keyword">as</span> _createTextVNode, resolveComponent <span class="hljs-keyword">as</span> _resolveComponent, withCtx <span class="hljs-keyword">as</span> _withCtx, openBlock <span class="hljs-keyword">as</span> _openBlock, createBlock <span class="hljs-keyword">as</span> _createBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> _component_child_component = <span class="hljs-title function_">_resolveComponent</span>(<span class="hljs-string">"child-component"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createBlock</span>(_component_child_component, <span class="hljs-literal">null</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    [_ctx.<span class="hljs-property">dynamicSlotName</span>]: <span class="hljs-title function_">_withCtx</span>(<span class="hljs-function">() =&gt;</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">_createTextVNode</span>(<span class="hljs-string">"header"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-attr">_</span>: <span class="hljs-number">2</span> <span class="hljs-comment">/* DYNAMIC */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }, <span class="hljs-number">1024</span> <span class="hljs-comment">/* DYNAMIC_SLOTS */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+</code></pre>
+<p>可以看到，对于动态的插槽名，组件渲染函数会为 <code>patchFlag</code> 标记为 <code>DYNAMIC_SLOTS</code>。在执行组件更新时，则会根据这个标记来判断当前组件是否需要更新：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">updateComponent</span> = (<span class="hljs-params">n1, n2, vnode</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">shouldUpdateComponent</span>(n1, n2, optimized)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">//  执行更新逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">}</span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">function</span> <span class="hljs-title function_">shouldUpdateComponent</span>(<span class="hljs-params">prevVNode, nextVNode, optimized</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">const</span> { <span class="hljs-attr">props</span>: nextProps, <span class="hljs-attr">children</span>: nextChildren, patchFlag } = nextVNode</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// patchFlag 是 DYNAMIC_SLOTS 的情况，shouldUpdateComponent 返回 true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-keyword">if</span> (optimized &amp;&amp; patchFlag &gt;= <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">DYNAMIC_SLOTS</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}</span>
+</code></pre>
+<h2 data-id="heading-4">总结</h2>
+<p>这里我们介绍了关于 <code>&lt;slot&gt;</code> 内置元素的实现原理，本质上就是父组件在渲染的时候，如果遇到了 <code>&lt;slot&gt;</code> 内容，则会暂时将其缓存到组件实例上，然后在组件实例化的过程中，从父组件中取出对应的 <code>slots</code> 按照名称进行渲染到指定位置。</p>
+<p>同时配合 <code>PatchFlags</code> 属性，可以做到只有在 <code>DYNAMIC_SLOTS</code> 的情况下，才去更新含有 <code>slot</code> 的组件，减少了不必要的渲染性能负担。</p></div>
+    </body>
+    </html>

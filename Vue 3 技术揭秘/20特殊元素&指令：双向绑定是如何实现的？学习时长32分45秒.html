@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>有些小伙伴在理解 <code>Vue</code> 的响应式原理的时候，可能会认为 <code>Vue</code> 的响应式是双向绑定的，但实际上这是不准确的，所谓数据的双向绑定可以体现为以下两部分：</p>
+<ol>
+<li>数据流向 <code>DOM</code> 的绑定：数据的更新最终映射到对应的视图更新。</li>
+<li><code>DOM</code> 流向数据的绑定：操作 <code>DOM</code> 的变化引起数据的更新。</li>
+</ol>
+<p>我们在前面的章节花了不少篇幅介绍了响应式原理，其实这块就是着重在介绍数据流向 <code>DOM</code> 的过程。</p>
+<p>在 <code>Vuejs</code> 中，我们则会经常通过 <code>v-model</code> 指令来实现数据的 “双向绑定”。 <code>v-model</code> 指令既可以作用在普通表单元素，也可以作用在一些组件上。接下来我们将分别介绍这两种情况的实现原理。</p>
+<h2 data-id="heading-1">表单元素</h2>
+<p>在使用 <code>Vuejs</code> 编写表单类的 <code>UI</code> 控件时，经常会使用 <code>v-model</code> 指令来为 <code>&lt;input&gt;</code>、<code>&lt;select&gt;</code>、<code>&lt;textarea&gt;</code> 进行数据的双向绑定。</p>
+<p>我们使用 <code>Vue</code> 提供的官方<a href="https://link.juejin.cn?target=https%3A%2F%2Fvue-next-template-explorer.netlify.app%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://vue-next-template-explorer.netlify.app/" ref="nofollow noopener noreferrer">模版转换工具</a>来尝试一下在 <code>&lt;input&gt;</code>、<code>&lt;select&gt;</code>、<code>&lt;textarea&gt;</code> 输入类型的表单中使用 <code>v-model</code> 指令会被编译成什么样子：</p>
+<p><strong>模版：</strong></p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">v-model</span>=<span class="hljs-string">'value1'</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">v-model</span>=<span class="hljs-string">'value2'</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">v-model</span>=<span class="hljs-string">'value3'</span> /&gt;</span></span>
+</code></pre>
+<p><strong>编译结果</strong></p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { vModelText <span class="hljs-keyword">as</span> _vModelText, createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, withDirectives <span class="hljs-keyword">as</span> _withDirectives, vModelSelect <span class="hljs-keyword">as</span> _vModelSelect, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = [<span class="hljs-string">"onUpdate:modelValue"</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">const</span> _hoisted_2 = [<span class="hljs-string">"onUpdate:modelValue"</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">const</span> _hoisted_3 = [<span class="hljs-string">"onUpdate:modelValue"</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(_Fragment, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-title function_">_withDirectives</span>(<span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"input"</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-string">"onUpdate:modelValue"</span>: $event =&gt; ((_ctx.<span class="hljs-property">value1</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, _hoisted_1), [</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      [_vModelText, _ctx.<span class="hljs-property">value1</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-title function_">_withDirectives</span>(<span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"textarea"</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-string">"onUpdate:modelValue"</span>: $event =&gt; ((_ctx.<span class="hljs-property">value2</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, _hoisted_2), [</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      [_vModelText, _ctx.<span class="hljs-property">value2</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    ]),</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-title function_">_withDirectives</span>(<span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"select"</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-string">"onUpdate:modelValue"</span>: $event =&gt; ((_ctx.<span class="hljs-property">value3</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, _hoisted_3), [</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      [_vModelSelect, _ctx.<span class="hljs-property">value3</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    ])</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  ], <span class="hljs-number">64</span> <span class="hljs-comment">/* STABLE_FRAGMENT */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="25">}</span>
+</code></pre>
+<p>可以看到通过 <code>v-model</code> 绑定的元素，在转成渲染函数的时候，最外层都被套上了一个 <code>withDirectives</code> 函数，这个函数传入了两个变量，一个通过 <code>createElementVNode</code> 创建的 <code>vnode</code> 节点，另一个是一个数组类型的参 <code>directives</code>，这个我们后面再介绍。我们先来简单看一下 <code>withDirectives</code> 这个函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">withDirectives</span>(<span class="hljs-params">vnode, directives</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> internalInstance = currentRenderingInstance</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (internalInstance === <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span> vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> instance = <span class="hljs-title function_">getExposeProxy</span>(internalInstance) || internalInstance.<span class="hljs-property">proxy</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 获取指令集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">const</span> bindings = vnode.<span class="hljs-property">dirs</span> || (vnode.<span class="hljs-property">dirs</span> = [])</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 遍历 directives</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; directives.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">let</span> [dir, value, arg, modifiers = <span class="hljs-variable constant_">EMPTY_OBJ</span>] = directives[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-comment">// 如果存在指令</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">if</span> (dir) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 指令是个函数，构造 mounted、updated 钩子</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isFunction</span>(dir)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        dir = {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">          <span class="hljs-attr">mounted</span>: dir,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">          <span class="hljs-attr">updated</span>: dir</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-comment">// 存在 deep 属性，遍历访问每个属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-keyword">if</span> (dir.<span class="hljs-property">deep</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        <span class="hljs-title function_">traverse</span>(value)</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-comment">// bindings 中添加构造好的指令元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">      bindings.<span class="hljs-title function_">push</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        dir,</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        instance,</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        value,</span>
+<span class="code-block-extension-codeLine" data-line-num="30">        <span class="hljs-attr">oldValue</span>: <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="31">        arg,</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        modifiers</span>
+<span class="code-block-extension-codeLine" data-line-num="33">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="34">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="35">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="36">  <span class="hljs-keyword">return</span> vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="37">}</span>
+</code></pre>
+<p>可以看到 <code>withDirectives</code> 函数主要就是为 <code>vnode</code> 节点上添加 <code>dirs</code> 属性，对于我们示例中的 <code>&lt;input&gt;</code> 节点而言，生成的 <code>dir</code> 内容大致为（ <code>select</code> 节点类似，这里就不再介绍了，有兴趣的可以在源码详细了解）：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">yaml</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-yaml code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">{</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">dir:</span> <span class="hljs-string">vModelText</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">value:</span> <span class="hljs-string">_ctx.value1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-string">...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">}</span>
+</code></pre>
+<p>其中 <code>vModelText</code> 是一个对象，内置了 <code>v-model</code> 指令相关的生命周期的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">typescript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-typescript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> vModelText = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// created 生命周期</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">created</span>(<span class="hljs-params">el, { modifiers: { lazy, trim, <span class="hljs-built_in">number</span> } }, vnode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 获取 props 上 onUpdate:modelValue 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    el.<span class="hljs-property">_assign</span> = <span class="hljs-title function_">getModelAssigner</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">const</span> castToNumber =</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-built_in">number</span> || (vnode.<span class="hljs-property">props</span> &amp;&amp; vnode.<span class="hljs-property">props</span>.<span class="hljs-property">type</span> === <span class="hljs-string">'number'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-comment">// 注册 input/change 事件  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-title function_">addEventListener</span>(el, lazy ? <span class="hljs-string">'change'</span> : <span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">let</span> domValue = el.<span class="hljs-property">value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// .trim 修饰符</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-keyword">if</span> (trim) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        domValue = domValue.<span class="hljs-title function_">trim</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">if</span> (castToNumber) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        domValue = <span class="hljs-title function_">looseToNumber</span>(domValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-comment">// 执行 onUpdate:modelValue 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">      el.<span class="hljs-title function_">_assign</span>(domValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    })</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-keyword">if</span> (trim) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-title function_">addEventListener</span>(el, <span class="hljs-string">'change'</span>, <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        el.<span class="hljs-property">value</span> = el.<span class="hljs-property">value</span>.<span class="hljs-title function_">trim</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="29">  <span class="hljs-title function_">mounted</span>(<span class="hljs-params">el, { value }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    <span class="hljs-comment">// 赋值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    el.<span class="hljs-property">value</span> = value == <span class="hljs-literal">null</span> ? <span class="hljs-string">''</span> : value</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-title function_">beforeUpdate</span>(<span class="hljs-params">el, { value, modifiers: { lazy, trim, <span class="hljs-built_in">number</span> } }, vnode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">    <span class="hljs-comment">// 更新 el._assign</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">    el.<span class="hljs-property">_assign</span> = <span class="hljs-title function_">getModelAssigner</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    <span class="hljs-keyword">if</span> (el.<span class="hljs-property">composing</span>) <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">document</span>.<span class="hljs-property">activeElement</span> === el &amp;&amp; el.<span class="hljs-property">type</span> !== <span class="hljs-string">'range'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      <span class="hljs-keyword">if</span> (lazy) {</span>
+<span class="code-block-extension-codeLine" data-line-num="39">        <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-keyword">if</span> (trim &amp;&amp; el.<span class="hljs-property">value</span>.<span class="hljs-title function_">trim</span>() === value) {</span>
+<span class="code-block-extension-codeLine" data-line-num="42">        <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="44">      <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="45">        (<span class="hljs-built_in">number</span> || el.<span class="hljs-property">type</span> === <span class="hljs-string">'number'</span>) &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="46">        <span class="hljs-title function_">looseToNumber</span>(el.<span class="hljs-property">value</span>) === value</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="48">        <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="49">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="50">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="51">    <span class="hljs-comment">// 更新值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">    <span class="hljs-keyword">const</span> newValue = value == <span class="hljs-literal">null</span> ? <span class="hljs-string">''</span> : value</span>
+<span class="code-block-extension-codeLine" data-line-num="53">    <span class="hljs-keyword">if</span> (el.<span class="hljs-property">value</span> !== newValue) {</span>
+<span class="code-block-extension-codeLine" data-line-num="54">      el.<span class="hljs-property">value</span> = newValue</span>
+<span class="code-block-extension-codeLine" data-line-num="55">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="56">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="57">}</span>
+</code></pre>
+<p>可以看到 <code>vModelText</code> 内置了 <code>created</code>、<code>mounted</code>、<code>beforeUpdate</code> 钩子函数。</p>
+<p>在 <code>created</code> 的时候，会从 <code>pops</code> 上获取 <code>onUpdate:modelValue</code> 函数，这个函数也就是我们在遇到 <code>v-model</code> 指令后，<code>Vue</code> 的编译器自动转换生成的。然后再监听对应 <code>DOM</code> 上的 <code>change</code> 或者 <code>input</code> 事件，事件触发时再回调执行 <code>onUpdate:modelValue</code> 函数。</p>
+<p>在 <code>mounted</code> 的时候，会将当前的值 <code>value</code> 赋值给 <code>el.value</code>。</p>
+<h3 data-id="heading-2">指令生命周期的触发</h3>
+<p>前面我们提到了 <code>v-model</code> 注册的指令节点，会生成一个带有 <code>dirs</code> 的属性，属性中会包含类似于 <code>vModelText</code> 这样的对象，这个对象内部包含了一些生命周期函数，那这些生命周期函数又是在何时执行的呢？再回到我们之前的 <code>mountElement</code> 函数内，这次我们着重看一下与指令相关的代码实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">mountElement</span> = (<span class="hljs-params">vnode, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> { type, props, shapeFlag, transition, dirs } = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">if</span> (dirs) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 执行 created 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-title function_">invokeDirectiveHook</span>(vnode, <span class="hljs-literal">null</span>, parentComponent, <span class="hljs-string">'created'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">if</span> (props) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// 处理 props，比如 class、style、event 等属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">if</span> (dirs) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-comment">// 执行 beforeMount 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-title function_">invokeDirectiveHook</span>(vnode, <span class="hljs-literal">null</span>, parentComponent, <span class="hljs-string">'beforeMount'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 挂载 dom</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-title function_">hostInsert</span>(el, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  </span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    (vnodeHook = props &amp;&amp; props.<span class="hljs-property">onVnodeMounted</span>) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    needCallTransitionHooks ||</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    dirs</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    <span class="hljs-title function_">queuePostRenderEffect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      vnodeHook &amp;&amp; <span class="hljs-title function_">invokeVNodeHook</span>(vnodeHook, parentComponent, vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      needCallTransitionHooks &amp;&amp; transition!.<span class="hljs-title function_">enter</span>(el)</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-comment">// 执行 mounted 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">      dirs &amp;&amp; <span class="hljs-title function_">invokeDirectiveHook</span>(vnode, <span class="hljs-literal">null</span>, parentComponent, <span class="hljs-string">'mounted'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    }, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="31">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="32">}</span>
+</code></pre>
+<p>可以看到指令相关的钩子函数在进行 <code>vnode</code> 初始化挂载的时候，会在挂载的各个阶段被分别调用，从而完成生命周期函数的执行过程。</p>
+<h2 data-id="heading-3">组件</h2>
+<p>我们首先来看一下，<code>v-model</code> 在组件中一些常规的使用方式：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> <span class="hljs-attr">v-model</span>=<span class="hljs-string">"value1"</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> <span class="hljs-attr">v-model:title</span>=<span class="hljs-string">"bookTitle"</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> <span class="hljs-attr">v-model:first-name</span>=<span class="hljs-string">"first"</span> <span class="hljs-attr">v-model:last-name</span>=<span class="hljs-string">"last"</span> /&gt;</span></span>
+</code></pre>
+<p>在组件上，<code>v-model</code>&nbsp;不仅仅可以使用&nbsp;<code>modelValue</code>&nbsp;作为 <code>prop</code>，以&nbsp;<code>update:modelValue</code>&nbsp;作为对应的事件，还支持了给 <code>v-model</code> 一个自定义参数来更改这些名字。因为有了自定义参数的功能，所以也就支持了一个组件多个 <code>v-model</code> 绑定的功能。</p>
+<p>接下来再看看通过 <a href="https://link.juejin.cn?target=https%3A%2F%2Fvue-next-template-explorer.netlify.app%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://vue-next-template-explorer.netlify.app/" ref="nofollow noopener noreferrer">Vue 3 Template Explorer</a> 将上述模版转出来的渲染函数的表达形式：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { resolveComponent <span class="hljs-keyword">as</span> _resolveComponent, createVNode <span class="hljs-keyword">as</span> _createVNode, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> _component_Component = <span class="hljs-title function_">_resolveComponent</span>(<span class="hljs-string">"Component"</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(_Fragment, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-title function_">_createVNode</span>(_component_Component, {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-attr">modelValue</span>: _ctx.<span class="hljs-property">value1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-string">"onUpdate:modelValue"</span>: $event =&gt; ((_ctx.<span class="hljs-property">value1</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, [<span class="hljs-string">"modelValue"</span>, <span class="hljs-string">"onUpdate:modelValue"</span>]),</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-title function_">_createVNode</span>(_component_Component, {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-attr">title</span>: _ctx.<span class="hljs-property">bookTitle</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-string">"onUpdate:title"</span>: $event =&gt; ((_ctx.<span class="hljs-property">bookTitle</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, [<span class="hljs-string">"title"</span>, <span class="hljs-string">"onUpdate:title"</span>]),</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-title function_">_createVNode</span>(_component_Component, {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-string">"first-name"</span>: _ctx.<span class="hljs-property">first</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-string">"onUpdate:firstName"</span>: $event =&gt; ((_ctx.<span class="hljs-property">first</span>) = $event),</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-string">"last-name"</span>: _ctx.<span class="hljs-property">last</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-string">"onUpdate:lastName"</span>: $event =&gt; ((_ctx.<span class="hljs-property">last</span>) = $event)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    }, <span class="hljs-literal">null</span>, <span class="hljs-number">8</span> <span class="hljs-comment">/* PROPS */</span>, [<span class="hljs-string">"first-name"</span>, <span class="hljs-string">"onUpdate:firstName"</span>, <span class="hljs-string">"last-name"</span>, <span class="hljs-string">"onUpdate:lastName"</span>])</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  ], <span class="hljs-number">64</span> <span class="hljs-comment">/* STABLE_FRAGMENT */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="22">}</span>
+</code></pre>
+<p>可以看到，编译器在处理组件带有 <code>v-model</code> 指令的时候，会将其根据相关参数进行解析，最后组成一个 <code>props</code> 传入组件中。拿一个 <code>v-model:title = 'bookTitle'</code> 举例，生成的 <code>props</code> 大致是这样的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">{</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">title</span>: value,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-string">"onUpdate:title"</span>: $event =&gt; _ctx.<span class="hljs-property">bookTitle</span> = $event</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<p>所以这也解释了为什么组件内部需要定义一个 <code>props</code> 用来承接 <code>title</code> 的值；定义一个 <code>emit</code>，在 <code>title</code> 值变化的时候，用来触发 <code>onUpdate:title</code>，并传入更新后的值。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">&lt;!-- Component.vue --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">setup</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-title function_">defineProps</span>([<span class="hljs-string">'title'</span>])</span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-title function_">defineEmits</span>([<span class="hljs-string">'update:title'</span>])</span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-tag">&lt;<span class="hljs-name">input</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-attr">:value</span>=<span class="hljs-string">"title"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    @<span class="hljs-attr">input</span>=<span class="hljs-string">"$emit('update:title', $event.target.value)"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  /&gt;</span>
+<span class="code-block-extension-codeLine" data-line-num="13"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>接下来我们再看看这个 <code>$emit</code> 是如何触发 <code>onUpdate:title</code> 函数的执行的。先来看看 <code>$emit</code> 函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">emit</span>(<span class="hljs-params">instance, event, ...rawArgs</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (instance.<span class="hljs-property">isUnmounted</span>) <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> props = instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">props</span> || <span class="hljs-variable constant_">EMPTY_OBJ</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">let</span> args = rawArgs</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  </span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 定义事件名称</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">let</span> handlerName</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// update:xxx =&gt; onUpdate:xxx</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">let</span> handler =</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    props[(handlerName = <span class="hljs-title function_">toHandlerKey</span>(event))] ||</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    props[(handlerName = <span class="hljs-title function_">toHandlerKey</span>(<span class="hljs-title function_">camelize</span>(event)))]</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-comment">// 找到了 handler 触发调用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">if</span> (handler) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-title function_">callWithAsyncErrorHandling</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      handler,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      instance,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">COMPONENT_EVENT_HANDLER</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      args</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">}</span>
+</code></pre>
+<p>其中第一个参数是当前组件实例，<code>$emit</code> 自动为我们绑定了当前组件，<code>event</code> 为事件名称，<code>rawArgs</code> 就是传入的一些参数。整个函数逻辑还是很清晰的，就是将传入的 <code>event</code> 名称转成 <code>onUpdate:xxx</code> 的写法，然后在 <code>props</code> 上找对应的函数，也就是我们传入的那个事件函数。找到了后就通过 <code>callWithAsyncErrorHandling</code> 方法进行调用，完成事件的执行。</p>
+<h2 data-id="heading-4">总结</h2>
+<p><code>v-model</code> 不管是在表单元素还是在组件元素上都会被编译器转成一个 <code>props</code> 对象，在表单元素上是这样的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">{</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-string">"onUpdate:modelValue"</span>: $event =&gt; _ctx.<span class="hljs-property">bookTitle</span> = $event</span>
+<span class="code-block-extension-codeLine" data-line-num="3">}</span>
+</code></pre>
+<p>而在组件时则会编译成：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">{</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">title</span>: value,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-string">"onUpdate:title"</span>: $event =&gt; _ctx.<span class="hljs-property">bookTitle</span> = $event</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<p>那么，所谓的双向数据绑定的 <code>DOM</code> 操作触发数据的更新就可以理解为：</p>
+<p>在表单元素上，事件名 <code>modelValue</code> 是默认的，通过 <code>vModelText</code> 函数在内部实现了一个监听 <code>DOM</code> 变更的事件 <code>change/input</code> 来实现对数据值的更新操作。</p>
+<p>在组件元素上，则是通过组件内部自定义值接受和事件派发机制完成对数据的更新操作。</p></div>
+    </body>
+    </html>

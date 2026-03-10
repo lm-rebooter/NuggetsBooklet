@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p><code>&lt;Suspense&gt;</code>&nbsp;是一个内置组件，用来在组件树中协调对异步依赖的处理。可以帮助我们更好的完成组件树父组件对子组件的多个嵌套异步依赖关系的管理，当父组件处于等待中时，允许我们自定挂载一个加载中状态。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa44178ca30404637b8e775d4e5760271~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image">
+上图中，红色字体代表的是组件有异步的 <code>setup()</code> 。 通过 <code>&lt;Suspense&gt;</code> 组件我们可以很容易实现在组件异步加载时统一展示加载中状态，在所有组件完成加载时，再统一展示：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">&lt;!-- 具有深层异步依赖的组件 --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">Dashboard</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">&lt;!-- 在 #fallback 插槽中显示 “正在加载中” --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-tag">&lt;<span class="hljs-name">template</span> #<span class="hljs-attr">fallback</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    Loading...</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span></span>
+</code></pre>
+<p>接下来我们将深度解读 <code>&lt;Suspense&gt;</code> 组件实现的原理。</p>
+<h2 data-id="heading-1">Suspense 挂载</h2>
+<p><code>&lt;Suspense&gt;</code> 组件和所有内置组件一样，也是有初始化挂载的过程，先来看看 <code>Vue</code> 对 <code>&lt;Suspense&gt;</code> 组件的源码定义：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">SuspenseImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">name</span>: <span class="hljs-string">'Suspense'</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// Suspense 组件标识符</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-attr">__isSuspense</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title function_">process</span>(<span class="hljs-params">...</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 初始化挂载的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// diff 的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-attr">create</span>: createSuspenseBoundary,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-attr">normalize</span>: normalizeSuspenseChildren</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p><code>process</code> 的执行时机和前面提到的 <code>&lt;Teleport&gt;</code> 组件是一致的，会在 <code>patch</code> 的时候根据组件的 <code>shapeFlag</code> 标志来判断是否需要执行 <code>process</code> 函数的调用。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patch</span> = (<span class="hljs-params">n1, n2, container, anchor, ...</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> { type, ref, shapeFlag } = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">switch</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 根据 type 类型处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Text</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 对文本节点的处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">processText</span>(n1, n2, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 这里省略了一些其他节点处理，比如注释、Fragment 节点等等</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// 根据 shapeFlag 来处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (__FEATURE_SUSPENSE__ &amp;&amp; shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SUSPENSE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        <span class="hljs-comment">// 对 Suspense 节点进行处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">        type.<span class="hljs-title function_">process</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="18">          n1,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">          n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">          container,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">          anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">          parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">          optimized,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">          internals</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        );</span>
+<span class="code-block-extension-codeLine" data-line-num="29">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">}</span>
+</code></pre>
+<p>接下来，我们着重先来看看 <code>Suspense</code> 的初始化挂载逻辑，这块的代码集中在 <code>mountSuspense</code> 中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mountSuspense</span>(<span class="hljs-params">vnode, container, anchor, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized, rendererInternals</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-attr">p</span>: patch,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-attr">o</span>: { createElement }</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  } = rendererInternals</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 创建隐藏容器，用来实例化挂载 default 插槽内的内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">const</span> hiddenContainer = <span class="hljs-title function_">createElement</span>(<span class="hljs-string">'div'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 构造一个 suspense 对象，并赋值给 vnode.suspense</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">const</span> suspense = (vnode.<span class="hljs-property">suspense</span> = <span class="hljs-title function_">createSuspenseBoundary</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    container,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    optimized,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    rendererInternals</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  ))</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  </span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// 离线挂载 default 插槽内的内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    (suspense.<span class="hljs-property">pendingBranch</span> = vnode.<span class="hljs-property">ssContent</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="31">    slotScopeIds</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-comment">// 如果有异步依赖</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-keyword">if</span> (suspense.<span class="hljs-property">deps</span> &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    <span class="hljs-comment">// 触发 onPending，onFallback 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">    <span class="hljs-title function_">triggerEvent</span>(vnode, <span class="hljs-string">'onPending'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-title function_">triggerEvent</span>(vnode, <span class="hljs-string">'onFallback'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    </span>
+<span class="code-block-extension-codeLine" data-line-num="39">    <span class="hljs-comment">// 初始化挂载 fallback 插槽内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">    <span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">      vnode.<span class="hljs-property">ssFallback</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">      container,</span>
+<span class="code-block-extension-codeLine" data-line-num="44">      anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="45">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-comment">// fallback tree 不会有 suspense context</span></span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-literal">null</span>, </span>
+<span class="code-block-extension-codeLine" data-line-num="48">      isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      slotScopeIds</span>
+<span class="code-block-extension-codeLine" data-line-num="50">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="51">    <span class="hljs-comment">// 将 fallback vnode 设置为 activeBranch</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">    <span class="hljs-title function_">setActiveBranch</span>(suspense, vnode.<span class="hljs-property">ssFallback</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="53">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="54">    <span class="hljs-comment">// 如果 suspense 没有异步依赖，直接调用 resolve</span></span>
+<span class="code-block-extension-codeLine" data-line-num="55">    suspense.<span class="hljs-title function_">resolve</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="56">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="57">}</span>
+</code></pre>
+<p>在开始解读源码之前，我们需要提前认识几个关键变量的含义：</p>
+<ol>
+<li><code>ssContent</code> 代表的是 <code>default</code> 插槽内的内容的 <code>vnode</code>。</li>
+<li><code>ssFallback</code> 代表的是 <code>fallback</code> 插槽内的内容的 <code>vnode</code>。</li>
+<li><code>activeBranch</code> 代表的是当前激活的分支，就是挂载到页面中的 <code>vnode</code>。</li>
+<li><code>pendingBranch</code> 代表的是正处于 <code>pending</code> 状态的分支，一般指还未被激活的 <code>default</code> 插槽内的内容中的 <code>vnode</code></li>
+</ol>
+<p>然后我们再来看一下整个 <code>mountSuspense</code> 的过程，首先会创建一个隐藏的 <code>DOM</code> 元素，该元素将作为 <code>default</code> 插槽内容的初始化挂载容器。然后创建了一个 <code>suspense</code> 变量，该变量内部包含了一些的对 <code>&lt;Suspense&gt;</code> 组件的处理函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSuspenseBoundary</span>(<span class="hljs-params">vnode, parent, parentComponent, container, hiddenContainer, anchor, isSVG, slotScopeIds, optimized, rendererInternals, isHydrating = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> suspense = {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    parent,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    container,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-attr">deps</span>: <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">pendingId</span>: <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-attr">timeout</span>: <span class="hljs-keyword">typeof</span> timeout === <span class="hljs-string">'number'</span> ? timeout : -<span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-attr">activeBranch</span>: <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-attr">pendingBranch</span>: <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-attr">isInFallback</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    isHydrating,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-attr">isUnmounted</span>: <span class="hljs-literal">false</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-attr">effects</span>: [],</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    </span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-title function_">resolve</span>(<span class="hljs-params">resume = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    </span>
+<span class="code-block-extension-codeLine" data-line-num="25">    <span class="hljs-title function_">fallback</span>(<span class="hljs-params">fallbackVNode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    </span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-title function_">move</span>(<span class="hljs-params">container, anchor, type</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    </span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-title function_">next</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    </span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-title function_">registerDep</span>(<span class="hljs-params">instance, setupRenderEffect</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="40">    </span>
+<span class="code-block-extension-codeLine" data-line-num="41">    <span class="hljs-title function_">unmount</span>(<span class="hljs-params">parentSuspense, doRemove</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="42">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="44">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  </span>
+<span class="code-block-extension-codeLine" data-line-num="46">  <span class="hljs-keyword">return</span> suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="47">}</span>
+</code></pre>
+<p>可以看到，这个 <code>createSuspenseBoundary</code> 函数本身其实并没有做太多的事情，本质上就是为了构造一个 <code>suspense</code> 对象。</p>
+<p>接下来会进入到对 <code>default</code> 容器中的内容进行 <code>patch</code> 的过程。在本课程的第二小节中，我们提到了 <code>patch</code> 函数在进行组件实例化的过程中，会执行 <code>setupStatefulComponent</code> 这个设置并运行副作用渲染函数的方法，之前我们只是介绍了该方法处理同步 <code>setup</code> 的情况，而对于 <code>&lt;Suspense&gt;</code> 组件来说，<code>setup</code> 会返回个 <code>promise</code>。我们再来看看对于这种情况的处理：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setupStatefulComponent</span>(<span class="hljs-params">instance, isSSR</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 对于 setup 返回是个 promise 的情况</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isPromise</span>(setupResult)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    setupResult.<span class="hljs-title function_">then</span>(unsetCurrentInstance, unsetCurrentInstance)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">if</span> (__FEATURE_SUSPENSE__) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 在 suspense 模式下，为实例 asyncDep 赋值为 setupResult</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      instance.<span class="hljs-property">asyncDep</span> = setupResult</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">}</span>
+</code></pre>
+<p>可以看到对于 <code>Suspense</code> 组件来说，其中的 <code>default</code> 内容的 <code>setup</code> 如果返回的是个 <code>pormise</code> 对象的话，则会为将 <code>setup</code> 函数执行的结果 <code>setupResult</code> 赋值给实例属性 <code>asyncDep</code>。那 <code>asyncDep</code> 有什么用呢？</p>
+<p>在渲染器执行 <code>mountComponent</code> 的时候，如果存在 <code>asyncDep</code> 变量，则会调用 <code>suspense</code> 上的 <code>registerDep</code> 方法，并为 <code>default</code> 中的插槽节点创建了一个占位符：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">mountComponent</span> = (<span class="hljs-params">initialVNode, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 依赖于 suspense 的异步 setup</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (__FEATURE_SUSPENSE__ &amp;&amp; instance.<span class="hljs-property">asyncDep</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    parentSuspense &amp;&amp; parentSuspense.<span class="hljs-title function_">registerDep</span>(instance, setupRenderEffect)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    </span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 为插槽 vnode 创建注释节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">if</span> (!initialVNode.<span class="hljs-property">el</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">const</span> placeholder = (instance.<span class="hljs-property">subTree</span> = <span class="hljs-title function_">createVNode</span>(<span class="hljs-title class_">Comment</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-title function_">processCommentNode</span>(<span class="hljs-literal">null</span>, placeholder, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p>这里的 <code>parentSuspense</code> 就是 <code>default</code> 插槽内的第一个父级 <code>suspense</code> 对象。接下来看看 <code>registerDep</code> 的执行逻辑：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSuspenseBoundary</span>(<span class="hljs-params">vnode, parent, parentComponent, container, hiddenContainer, anchor, isSVG, slotScopeIds, optimized, rendererInternals, isHydrating = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> suspense = {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">registerDep</span>(<span class="hljs-params">instance, setupRenderEffect</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// 是否有异步未处理的分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">const</span> isInPendingSuspense = !!suspense.<span class="hljs-property">pendingBranch</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">if</span> (isInPendingSuspense) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        <span class="hljs-comment">// deps 这里会被递增，记录依赖的异步数量</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">        suspense.<span class="hljs-property">deps</span>++</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// asyncDep promise 执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      instance</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        .<span class="hljs-property">asyncDep</span>.<span class="hljs-title function_">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">          <span class="hljs-comment">// setup return 的 promise 异常捕获</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">          <span class="hljs-title function_">handleError</span>(err, instance, <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">SETUP_FUNCTION</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        })</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        .<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">asyncSetupResult</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">          <span class="hljs-comment">// 处理一些异常结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">          <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="21">            instance.<span class="hljs-property">isUnmounted</span> ||</span>
+<span class="code-block-extension-codeLine" data-line-num="22">            suspense.<span class="hljs-property">isUnmounted</span> ||</span>
+<span class="code-block-extension-codeLine" data-line-num="23">            suspense.<span class="hljs-property">pendingId</span> !== instance.<span class="hljs-property">suspenseId</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">          ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">            <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">          instance.<span class="hljs-property">asyncResolved</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">          <span class="hljs-keyword">const</span> {vnode} = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="29">          <span class="hljs-comment">// setup 处理完成调用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">          <span class="hljs-title function_">handleSetupResult</span>(instance, asyncSetupResult, <span class="hljs-literal">false</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="31">          <span class="hljs-comment">// 占位内容，就是 mountComponent 中创建的注释节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">          <span class="hljs-keyword">const</span> placeholder = !hydratedEl &amp;&amp; instance.<span class="hljs-property">subTree</span>.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">          <span class="hljs-comment">// 执行 render 挂载节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">          <span class="hljs-title function_">setupRenderEffect</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="35">            instance,</span>
+<span class="code-block-extension-codeLine" data-line-num="36">            vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="37">            <span class="hljs-comment">// 找到注释占位内容的父节点，作为容器节点，也就是我们之前创建的隐藏 dom</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38">            <span class="hljs-title function_">parentNode</span>(hydratedEl || instance.<span class="hljs-property">subTree</span>.<span class="hljs-property">el</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="39">            hydratedEl ? <span class="hljs-literal">null</span> : <span class="hljs-title function_">next</span>(instance.<span class="hljs-property">subTree</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="40">            suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="41">            isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">            optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="43">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="44">          <span class="hljs-comment">// 移除占位符</span></span>
+<span class="code-block-extension-codeLine" data-line-num="45">          <span class="hljs-keyword">if</span> (placeholder) {</span>
+<span class="code-block-extension-codeLine" data-line-num="46">            <span class="hljs-title function_">remove</span>(placeholder)</span>
+<span class="code-block-extension-codeLine" data-line-num="47">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="48">          <span class="hljs-comment">// 更新 vnode el 属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="49">          <span class="hljs-title function_">updateHOCHostEl</span>(instance, vnode.<span class="hljs-property">el</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="50">        </span>
+<span class="code-block-extension-codeLine" data-line-num="51">          <span class="hljs-comment">// 当所有的异步依赖处理完成后执行 suspense.resolve()</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">          <span class="hljs-keyword">if</span> (isInPendingSuspense &amp;&amp; --suspense.<span class="hljs-property">deps</span> === <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="53">            suspense.<span class="hljs-title function_">resolve</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="54">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="55">        })</span>
+<span class="code-block-extension-codeLine" data-line-num="56">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="57">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="58">  </span>
+<span class="code-block-extension-codeLine" data-line-num="59">  <span class="hljs-keyword">return</span> suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="60">}</span>
+</code></pre>
+<p>这里在执行 <code>createSuspenseBoundary</code> 函数的时候，有一个变量需要先了解一下，就是 <code>suspense.deps</code>。这个变量记录着需要处理的异步数量，比如我们上面的图例：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa44178ca30404637b8e775d4e5760271~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这里生成的 <code>deps = 3</code>。</p>
+<p>然后会对 <code>instance.asyncDep</code> 的执行结果进行处理，如果有异常，则进入到 <code>handleError</code> 的逻辑，<code>handleError</code> 内部会调用 <code>onErrorCaptured</code> 钩子，可以让我们监听到组件的错误。</p>
+<p>如果正常返回，则会进入到 <code>then</code> 的处理逻辑中，这里的处理主要做了以下几件事儿：</p>
+<ol>
+<li>首先对一些异常场景进行降级，这里的异常场景包含了组件实例在异步执行完成后被卸载，或者 <code>Suspense</code> 实例被卸载等情况。</li>
+<li>然后就是为组件设置 <code>render</code> 函数。如果 <code>setup promise</code> 返回的时候函数，那么这里也会将这个函数设置为渲染函数。</li>
+<li>接着就是通过 <code>setupRenderEffect</code> 函数的调用，完成渲染函数的调用执行，生成 <code>DOM</code> 节点</li>
+<li>最后，根据 <code>deps</code> 判断是否所有的异步依赖都已执行完，如果执行完，则进入 <code>suspense.resolve()</code> 的逻辑。</li>
+</ol>
+<p>介绍完了 <code>patch</code> 的过程，再回到 <code>mountSuspense</code> 函数体当中，如果存在异步依赖，此时的 <code>suspense.deps &gt; 0</code> 会进入到对异步处理的逻辑中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 触发 onPending，onFallback 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-title function_">triggerEvent</span>(vnode, <span class="hljs-string">'onPending'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-title function_">triggerEvent</span>(vnode, <span class="hljs-string">'onFallback'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 初始化挂载 fallback 插槽内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  vnode.<span class="hljs-property">ssFallback</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  container,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// fallback tree 不会有 suspense context</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-literal">null</span>, </span>
+<span class="code-block-extension-codeLine" data-line-num="14">  isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  slotScopeIds</span>
+<span class="code-block-extension-codeLine" data-line-num="16">)</span>
+<span class="code-block-extension-codeLine" data-line-num="17"><span class="hljs-comment">// 将 fallback vnode 设置为 activeBranch</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18"><span class="hljs-title function_">setActiveBranch</span>(suspense, vnode.<span class="hljs-property">ssFallback</span>)</span>
+</code></pre>
+<p>这里的核心逻辑就是在 <code>default</code> 插槽中的异步未执行完成时，先挂载 <code>fallback</code> 的内容。然后将 <code>activeBranch</code> 设置为 <code>fallback</code>。</p>
+<p>如果不存在异步依赖，<code>suspense.deps = 0</code> 此时，也会直接执行 <code>suspense.resolve()</code>。</p>
+<p>接下来，我们看看这个 <code>resolve</code> 到底做了哪些事：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSuspenseBoundary</span>(<span class="hljs-params">vnode, parent, parentComponent, container, hiddenContainer, anchor, isSVG, slotScopeIds, optimized, rendererInternals, isHydrating = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> suspense = {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">resolve</span>(<span class="hljs-params">resume = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-keyword">const</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">        vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">        activeBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        pendingBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        pendingId,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        effects,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        container</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      } = suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-comment">// 服务端渲染的逻辑，这里不关心</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">if</span> (suspense.<span class="hljs-property">isHydrating</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        suspense.<span class="hljs-property">isHydrating</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!resume) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">        <span class="hljs-keyword">let</span> {anchor} = suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        <span class="hljs-comment">// 卸载当前激活分支，即 fallback</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-keyword">if</span> (activeBranch) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">          anchor = <span class="hljs-title function_">next</span>(activeBranch)</span>
+<span class="code-block-extension-codeLine" data-line-num="24">          <span class="hljs-title function_">unmount</span>(activeBranch, parentComponent, suspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-keyword">if</span> (!delayEnter) {</span>
+<span class="code-block-extension-codeLine" data-line-num="27">          <span class="hljs-comment">// 将 default 容器中的内容移动到可视区域</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">          <span class="hljs-title function_">move</span>(pendingBranch, container, anchor, <span class="hljs-title class_">MoveType</span>.<span class="hljs-property">ENTER</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-comment">// 将 pendingBranch 设置为激活分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-title function_">setActiveBranch</span>(suspense, pendingBranch)</span>
+<span class="code-block-extension-codeLine" data-line-num="33">      suspense.<span class="hljs-property">pendingBranch</span> = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">      suspense.<span class="hljs-property">isInFallback</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">      </span>
+<span class="code-block-extension-codeLine" data-line-num="36">      <span class="hljs-comment">// 获取父节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">      <span class="hljs-keyword">let</span> parent = suspense.<span class="hljs-property">parent</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38">      <span class="hljs-comment">// 标记是否还有未处理完成的 suspense</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">      <span class="hljs-keyword">let</span> hasUnresolvedAncestor = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">      <span class="hljs-keyword">while</span> (parent) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">        <span class="hljs-keyword">if</span> (parent.<span class="hljs-property">pendingBranch</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="42">          <span class="hljs-comment">//  如果存在还未处理完的父级 suspense，将当前 effect 合并到父级当中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">          parent.<span class="hljs-property">effects</span>.<span class="hljs-title function_">push</span>(...effects)</span>
+<span class="code-block-extension-codeLine" data-line-num="44">          hasUnresolvedAncestor = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="45">          <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="47">        parent = parent.<span class="hljs-property">parent</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      <span class="hljs-comment">// 全部处理完suspense，一次性 queuePostFlushCb</span></span>
+<span class="code-block-extension-codeLine" data-line-num="50">      <span class="hljs-keyword">if</span> (!hasUnresolvedAncestor) {</span>
+<span class="code-block-extension-codeLine" data-line-num="51">        <span class="hljs-title function_">queuePostFlushCb</span>(effects)</span>
+<span class="code-block-extension-codeLine" data-line-num="52">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      suspense.<span class="hljs-property">effects</span> = []</span>
+<span class="code-block-extension-codeLine" data-line-num="54">      </span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-comment">// 调用 onResolve 钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-title function_">triggerEvent</span>(vnode, <span class="hljs-string">'onResolve'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="57">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="58">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="59">  </span>
+<span class="code-block-extension-codeLine" data-line-num="60">  <span class="hljs-keyword">return</span> suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="61">}</span>
+</code></pre>
+<p>这里要做的事情也是比较明确的，我们也来一一枚举一下</p>
+<ol>
+<li>卸载 <code>fallback</code> 的插槽内容，因为已经完成了异步逻辑，所以没必要了。</li>
+<li>将之前缓存在内存中的 <code>default</code> 节点移动到可是区域。</li>
+<li>遍历父节点，找到是否还有未完成的 <code>suspense</code> 节点，将当前的渲染 <code>effects</code> 合并到父节点上进行统一更新。</li>
+<li>触发 <code>onResolve</code> 钩子函数。</li>
+</ol>
+<p>这里我想重点说一下第三点，什么情况下会出现子节点已经完成异步依赖执行单父节点还有未完成的异步依赖呢？可以来看一个 <code>demo</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createApp, ref, h, onMounted } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 构造一个异步渲染容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">function</span> <span class="hljs-title function_">defineAsyncComponent</span>(<span class="hljs-params"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  comp,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  delay = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-title function_">setup</span>(<span class="hljs-params">props, { slots }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">          <span class="hljs-title function_">resolve</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">h</span>(comp, props, slots))</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        }, delay)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}</span>
+<span class="code-block-extension-codeLine" data-line-num="18"><span class="hljs-comment">// 定义一个外层异步组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19"><span class="hljs-keyword">const</span> <span class="hljs-title class_">AsyncOuter</span> = <span class="hljs-title function_">defineAsyncComponent</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-attr">setup</span>: <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-title function_">onMounted</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'outer mounted'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">h</span>(<span class="hljs-string">'div'</span>, <span class="hljs-string">'async outer'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-number">2000</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">)</span>
+<span class="code-block-extension-codeLine" data-line-num="30"><span class="hljs-comment">// 定义一个内层异步组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31"><span class="hljs-keyword">const</span> <span class="hljs-title class_">AsyncInner</span> = <span class="hljs-title function_">defineAsyncComponent</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-attr">setup</span>: <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-title function_">onMounted</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'inner mounted'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="37">      <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">h</span>(<span class="hljs-string">'div'</span>, <span class="hljs-string">'async inner'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="39">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="40">  <span class="hljs-number">1000</span></span>
+<span class="code-block-extension-codeLine" data-line-num="41">)</span>
+<span class="code-block-extension-codeLine" data-line-num="42"><span class="hljs-comment">// 定义一个内层 Suspense 组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Inner</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="44">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-title function_">h</span>(<span class="hljs-title class_">Suspense</span>, <span class="hljs-literal">null</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="47">        <span class="hljs-attr">default</span>: <span class="hljs-title function_">h</span>(<span class="hljs-title class_">AsyncInner</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="48">        <span class="hljs-attr">fallback</span>: <span class="hljs-title function_">h</span>(<span class="hljs-string">'div'</span>, <span class="hljs-string">'fallback inner'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="50">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="51">}</span>
+<span class="code-block-extension-codeLine" data-line-num="52"><span class="hljs-title function_">createApp</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="53">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="54">    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-comment">// 定义一个外层 Suspense 组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-title function_">h</span>(<span class="hljs-title class_">Suspense</span>, <span class="hljs-literal">null</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="57">        <span class="hljs-attr">default</span>: <span class="hljs-title function_">h</span>(<span class="hljs-string">'div'</span>, [<span class="hljs-title function_">h</span>(<span class="hljs-title class_">AsyncOuter</span>), <span class="hljs-title function_">h</span>(<span class="hljs-title class_">Inner</span>)]),</span>
+<span class="code-block-extension-codeLine" data-line-num="58">        <span class="hljs-attr">fallback</span>: <span class="hljs-title function_">h</span>(<span class="hljs-string">'div'</span>, <span class="hljs-string">'fallback outer'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="59">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="60">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="61">}).<span class="hljs-title function_">mount</span>(<span class="hljs-string">'#app'</span>)</span>
+</code></pre>
+<p>这里呢，我们构造了一个包含了 <code>Suspense</code> 异步渲染的 <code>Outer</code> 组件，<code>Outer</code> 中又包含了另一个通过 <code>Suspense</code> 渲染的 <code>Inner</code> 组件。我们通过 <code>defineAsyncComponent</code> 函数来模拟组件的异步过程，此时的 <code>AsyncInner</code> 组件是优先于 <code>AsyncOuter</code> 组件的异步完成的，对于这种情况，就满足了存在父的 <code>Suspense</code> 且父级 <code>Suspense</code> 还有 <code>pendingBranch</code> 待处理的情况，那么会把子组件的 <code>suspense.effects</code> 合入父组件当中。</p>
+<p><code>suspense.effects</code> 是个什么东西呢？</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// queuePostRenderEffect 在 suspense 模式下指的是 queueEffectWithSuspense</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> queuePostRenderEffect = __FEATURE_SUSPENSE__</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  ? queueEffectWithSuspense</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  : queuePostFlushCb</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  </span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">queueEffectWithSuspense</span>(<span class="hljs-params">fn, suspense</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 针对 suspense 处理，会将渲染函数推送到 suspense.effects 中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">if</span> (suspense &amp;&amp; suspense.<span class="hljs-property">pendingBranch</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isArray</span>(fn)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      suspense.<span class="hljs-property">effects</span>.<span class="hljs-title function_">push</span>(...fn)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      suspense.<span class="hljs-property">effects</span>.<span class="hljs-title function_">push</span>(fn)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-title function_">queuePostFlushCb</span>(fn)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}</span>
+</code></pre>
+<p><code>suspense.effects</code> 在 <code>suspense</code> 模式下，就是通过 <code>queuePostRenderEffect</code> 生成的副作用函数的数组。我们的示例中，会在组件中调用 <code>onMounted</code> 钩子函数，在组件被挂载的时候，就会执行通过 <code>queuePostRenderEffect</code> 函数，将 <code>onMounted</code> 推入 <code>suspense.effects</code> 数组中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 设置并运行带副作用的渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">...</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> <span class="hljs-title function_">componentUpdateFn</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">isMounted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-keyword">const</span> { m } = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// mounted hook 推入到 suspense.effects</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">if</span> (m) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        <span class="hljs-title function_">queuePostRenderEffect</span>(m, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">     </span>
+<span class="code-block-extension-codeLine" data-line-num="12">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">let</span> { u } = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-comment">// updated hook 推入到 suspense.effects</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">if</span> (u) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        <span class="hljs-title function_">queuePostRenderEffect</span>(u, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">}</span>
+</code></pre>
+<p>所以上述的示例中，父子组件的 <code>onMounted</code> 钩子将会被在父组件异步完成后统一执行。</p>
+<h2 data-id="heading-2">Suspense 更新</h2>
+<p>接下来我们看一下 <code>Suspense</code> 更新的逻辑，这块的逻辑都集中在 <code>patchSuspense</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">scss</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-scss code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">function <span class="hljs-built_in">patchSuspense</span>(n1, n2, container, anchor, parentComponent, isSVG, slotScopeIds, optimized, { p: patch, um: unmount, o: { createElement } }) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 初始化赋值操作</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  const suspense = (n2.suspense = n1.suspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    suspense<span class="hljs-selector-class">.vnode</span> = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  n2<span class="hljs-selector-class">.el</span> = n1<span class="hljs-selector-class">.el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 最新的 default 分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  const newBranch = n2<span class="hljs-selector-class">.ssContent</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 最新的 fallback 分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  const newFallback = n2<span class="hljs-selector-class">.ssFallback</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  </span>
+<span class="code-block-extension-codeLine" data-line-num="11">  const { activeBranch, pendingBranch, isInFallback, isHydrating } = suspense</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 存在旧的 pendingBranch</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  if (pendingBranch) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    suspense<span class="hljs-selector-class">.pendingBranch</span> = newBranch</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-comment">// 新旧分支是属于 isSameVNodeType</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    if (isSameVNodeType(newBranch, pendingBranch)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-comment">// 新旧分支进行 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        pendingBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        suspense.hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        null,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">        slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="29">      <span class="hljs-comment">// 没有依赖则直接 resolve</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">      if (suspense.deps &lt;= <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="31">        suspense<span class="hljs-selector-class">.resolve</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      } else if (isInFallback) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">        <span class="hljs-comment">// 处于 fallback 中，激活分支和 newFallback 进行 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">        <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="35">          activeBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="36">          newFallback,</span>
+<span class="code-block-extension-codeLine" data-line-num="37">          container,</span>
+<span class="code-block-extension-codeLine" data-line-num="38">          anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="39">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="40">          null, // fallback tree will not have suspense context</span>
+<span class="code-block-extension-codeLine" data-line-num="41">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">          optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="44">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="45">        <span class="hljs-comment">// 更新激活分支为 newFallback</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">        <span class="hljs-built_in">setActiveBranch</span>(suspense, newFallback)</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="48">    } else {</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      suspense<span class="hljs-selector-class">.pendingId</span>++</span>
+<span class="code-block-extension-codeLine" data-line-num="50">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="51">      <span class="hljs-comment">// 卸载旧分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">      <span class="hljs-built_in">unmount</span>(pendingBranch, parentComponent, suspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">      <span class="hljs-comment">//  创建隐藏容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="55">      suspense<span class="hljs-selector-class">.hiddenContainer</span> = <span class="hljs-built_in">createElement</span>('div')</span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-comment">// 处于 fallback 态</span></span>
+<span class="code-block-extension-codeLine" data-line-num="57">      if (isInFallback) {</span>
+<span class="code-block-extension-codeLine" data-line-num="58">        <span class="hljs-comment">// 挂载新的分支到隐藏容器中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="59">        <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="60">          null,</span>
+<span class="code-block-extension-codeLine" data-line-num="61">          newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="62">          suspense.hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="63">          null,</span>
+<span class="code-block-extension-codeLine" data-line-num="64">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="65">          suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="66">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="67">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="68">          optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="69">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="70">        <span class="hljs-comment">// 没有依赖则直接 resolve</span></span>
+<span class="code-block-extension-codeLine" data-line-num="71">        if (suspense.deps &lt;= <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="72">          suspense<span class="hljs-selector-class">.resolve</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="73">        } else {</span>
+<span class="code-block-extension-codeLine" data-line-num="74">          <span class="hljs-comment">// 激活分支和 newFallback 进行 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="75">          <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="76">            activeBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="77">            newFallback,</span>
+<span class="code-block-extension-codeLine" data-line-num="78">            container,</span>
+<span class="code-block-extension-codeLine" data-line-num="79">            anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="80">            parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="81">            null, // fallback tree will not have suspense context</span>
+<span class="code-block-extension-codeLine" data-line-num="82">            isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="83">            slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="84">            optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="85">          )</span>
+<span class="code-block-extension-codeLine" data-line-num="86">          <span class="hljs-built_in">setActiveBranch</span>(suspense, newFallback)</span>
+<span class="code-block-extension-codeLine" data-line-num="87">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="88">      } else if (activeBranch &amp;&amp; isSameVNodeType(newBranch, activeBranch)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="89">        <span class="hljs-comment">// 激活分支和新分支进行 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="90">        <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="91">          activeBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="92">          newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="93">          container,</span>
+<span class="code-block-extension-codeLine" data-line-num="94">          anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="95">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="96">          suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="97">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="98">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="99">          optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="100">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="101">        suspense<span class="hljs-selector-class">.resolve</span>(true)</span>
+<span class="code-block-extension-codeLine" data-line-num="102">      } else {</span>
+<span class="code-block-extension-codeLine" data-line-num="103">        <span class="hljs-comment">// 挂载新分支到隐藏分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="104">        <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="105">          null,</span>
+<span class="code-block-extension-codeLine" data-line-num="106">          newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="107">          suspense.hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="108">          null,</span>
+<span class="code-block-extension-codeLine" data-line-num="109">          parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="110">          suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="111">          isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="112">          slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="113">          optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="114">        )</span>
+<span class="code-block-extension-codeLine" data-line-num="115">        if (suspense.deps &lt;= <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="116">          suspense<span class="hljs-selector-class">.resolve</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="117">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="118">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="119">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="120">  } else {</span>
+<span class="code-block-extension-codeLine" data-line-num="121">    if (activeBranch &amp;&amp; isSameVNodeType(newBranch, activeBranch)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="122">      <span class="hljs-comment">// activeBranch 和 newBranch 进行 diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="123">      <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="124">        activeBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="125">        newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="126">        container,</span>
+<span class="code-block-extension-codeLine" data-line-num="127">        anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="128">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="129">        suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="130">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="131">        slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="132">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="133">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="134">      <span class="hljs-built_in">setActiveBranch</span>(suspense, newBranch)</span>
+<span class="code-block-extension-codeLine" data-line-num="135">    } else {</span>
+<span class="code-block-extension-codeLine" data-line-num="136">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="137">      <span class="hljs-comment">// 挂载新分支到隐藏分支</span></span>
+<span class="code-block-extension-codeLine" data-line-num="138">      <span class="hljs-built_in">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="139">        null,</span>
+<span class="code-block-extension-codeLine" data-line-num="140">        newBranch,</span>
+<span class="code-block-extension-codeLine" data-line-num="141">        suspense.hiddenContainer,</span>
+<span class="code-block-extension-codeLine" data-line-num="142">        null,</span>
+<span class="code-block-extension-codeLine" data-line-num="143">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="144">        suspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="145">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="146">        slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="147">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="148">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="149">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="150">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="151">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="152">}</span>
+</code></pre>
+<p>这个函数核心作用是通过判断 <code>ssConent</code>、<code>ssFallback</code>、<code>pendingBranch</code>、<code>activeBranch</code> 的内容，进行不同条件的 <code>diff</code>。 <code>diff</code> 完成后的工作和上面初始化的过程是大致一样的，会进行异步依赖 <code>deps</code> 数目的判断，如果没有依赖 <code>deps</code> 则直接进行 <code>suspense.resolve</code>。</p>
+<p>该函数看起来分支逻辑比较多，我们可以通过一个简单的脑图捋顺其中的逻辑：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd1d3dceb3cf84c509c458a291fb45fc6~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">总结</h2>
+<p>这里我们详细介绍了 <code>&lt;Suspense&gt;</code> 组件的实现原理，本质上就是通过一个计数器 <code>deps</code> 来记录需要被处理的依赖数量，当异步状态执行完成后，响应的计数器进行递减，当所有 <code>deps</code> 清空时，则达到统一完成态。于此同时，如果有父子嵌套的情况出现，会根据父节点的 <code>suspense</code> 状态来判断是否需要统一处理 <code>effects</code>。</p>
+<p>最后，<code>&lt;Suspense&gt;</code> 组件到目前为止，还是一个实验性的功能，这也意味着这个功能在后续迭代中可能会被随时调整，作者也会持续关注组件的变更。</p></div>
+    </body>
+    </html>

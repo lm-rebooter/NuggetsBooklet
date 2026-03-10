@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>在组合式 API 中，我们可以使用&nbsp;<a href="https://link.juejin.cn?target=https%3A%2F%2Fcn.vuejs.org%2Fapi%2Freactivity-core.html%23watch" target="_blank" rel="nofollow noopener noreferrer" title="https://cn.vuejs.org/api/reactivity-core.html#watch" ref="nofollow noopener noreferrer"><code>watch</code>&nbsp;函数</a>在每次响应式状态发生变化时触发回调函数，<code>watch</code>&nbsp;的第一个参数可以是不同形式的数据类型：它可以是一个 <code>ref</code>（包括计算属性）、一个响应式对象、一个 <code>getter 函数</code>、或多个数据源组成的数组。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> x = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> y = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({ <span class="hljs-attr">num</span>: <span class="hljs-number">0</span> })</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 单个 ref</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-title function_">watch</span>(x, <span class="hljs-function">(<span class="hljs-params">newX</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`x is <span class="hljs-subst">${newX}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">})</span>
+<span class="code-block-extension-codeLine" data-line-num="9"></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-comment">// getter 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11"><span class="hljs-title function_">watch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-function">() =&gt;</span> x.<span class="hljs-property">value</span> + y.<span class="hljs-property">value</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-function">(<span class="hljs-params">sum</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`sum of x + y is: <span class="hljs-subst">${sum}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">)</span>
+<span class="code-block-extension-codeLine" data-line-num="17"></span>
+<span class="code-block-extension-codeLine" data-line-num="18"><span class="hljs-comment">// 响应式对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19"><span class="hljs-title function_">watch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  state,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-function">(<span class="hljs-params">newState</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`new state num is: <span class="hljs-subst">${newState.num}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">)</span>
+<span class="code-block-extension-codeLine" data-line-num="25"></span>
+<span class="code-block-extension-codeLine" data-line-num="26"><span class="hljs-comment">// 多个来源组成的数组</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27"><span class="hljs-title function_">watch</span>([x, <span class="hljs-function">() =&gt;</span> y.<span class="hljs-property">value</span>], <span class="hljs-function">(<span class="hljs-params">[newX, newY]</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`x is <span class="hljs-subst">${newX}</span> and y is <span class="hljs-subst">${newY}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">})</span>
+</code></pre>
+<p>了解了一些基础的 <code>watch</code> 使用示例后，我们开始分析一下 <code>watch</code> 函数是如何实现的呢。</p>
+<h2 data-id="heading-1">标准化 source</h2>
+<p>先来看一下 <code>watch</code> 函数实现的代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">watch</span>(<span class="hljs-params">source, cb, options</span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">doWatch</span>(source, cb, options) </span>
+<span class="code-block-extension-codeLine" data-line-num="4">} </span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">} </span>
+</code></pre>
+<p><code>watch</code> 函数内部是通过 <code>doWatch</code> 来执行的，在分析 <code>doWatch</code> 函数实现前，我们先看看前面的示例中，<code>watch</code> 监听的 <code>source</code> 可以是多种类型，一个函数可以支持多种类型的参数入参，那么实现该函数最好的设计模式就是 <code>adapter</code> 代理模式。就是将底层模型设计成一致的，抹平调用差异，这也是 <code>doWatch</code> 函数实现的第一步：标准化 <code>source</code> 参数。</p>
+<p>一起来看看其中的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// source 不合法的时候警告函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> <span class="hljs-title function_">warnInvalidSource</span> = (<span class="hljs-params">s: unknown</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">warn</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-string">`Invalid watch source: `</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      s,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-string">`A watch source can only be a getter/effect function, a ref, `</span> +</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-string">`a reactive object, or an array of these types.`</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  </span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">const</span> instance = currentInstance</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">let</span> getter</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">let</span> forceTrigger = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-keyword">let</span> isMultiSource = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17"></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-comment">// 判断是不是 ref 类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRef</span>(source)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    getter = <span class="hljs-function">() =&gt;</span> source.<span class="hljs-property">value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    forceTrigger = <span class="hljs-title function_">isShallow</span>(source)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// 判断是不是响应式对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isReactive</span>(source)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    getter = <span class="hljs-function">() =&gt;</span> source</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    deep = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-comment">// 判断是不是数组类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isArray</span>(source)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    isMultiSource = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    forceTrigger = source.<span class="hljs-title function_">some</span>(<span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-title function_">isReactive</span>(s) || <span class="hljs-title function_">isShallow</span>(s))</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    getter = <span class="hljs-function">() =&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      source.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="34">        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRef</span>(s)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">          <span class="hljs-keyword">return</span> s.<span class="hljs-property">value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isReactive</span>(s)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="37">          <span class="hljs-keyword">return</span> <span class="hljs-title function_">traverse</span>(s)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isFunction</span>(s)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="39">          <span class="hljs-keyword">return</span> <span class="hljs-title function_">callWithErrorHandling</span>(s, instance, <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">WATCH_GETTER</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="40">        } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">          __DEV__ &amp;&amp; <span class="hljs-title function_">warnInvalidSource</span>(s)</span>
+<span class="code-block-extension-codeLine" data-line-num="42">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="43">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="44">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  <span class="hljs-comment">// 判断是不是函数类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isFunction</span>(source)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="47">    <span class="hljs-keyword">if</span> (cb) {</span>
+<span class="code-block-extension-codeLine" data-line-num="48">      <span class="hljs-comment">// getter with cb</span></span>
+<span class="code-block-extension-codeLine" data-line-num="49">      getter = <span class="hljs-function">() =&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="50">        <span class="hljs-title function_">callWithErrorHandling</span>(source, instance, <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">WATCH_GETTER</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="51">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="52">      <span class="hljs-comment">// 如果只有一个函数作为source 入参，则执行 watchEffect 的逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="55">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="56">  <span class="hljs-comment">// 都不符合，则告警</span></span>
+<span class="code-block-extension-codeLine" data-line-num="57">  <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="58">    getter = <span class="hljs-variable constant_">NOOP</span></span>
+<span class="code-block-extension-codeLine" data-line-num="59">    __DEV__ &amp;&amp; <span class="hljs-title function_">warnInvalidSource</span>(source)</span>
+<span class="code-block-extension-codeLine" data-line-num="60">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="61"></span>
+<span class="code-block-extension-codeLine" data-line-num="62">  <span class="hljs-comment">// 深度监听</span></span>
+<span class="code-block-extension-codeLine" data-line-num="63">  <span class="hljs-keyword">if</span> (cb &amp;&amp; deep) {</span>
+<span class="code-block-extension-codeLine" data-line-num="64">    <span class="hljs-keyword">const</span> baseGetter = getter</span>
+<span class="code-block-extension-codeLine" data-line-num="65">    getter = <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">traverse</span>(<span class="hljs-title function_">baseGetter</span>())</span>
+<span class="code-block-extension-codeLine" data-line-num="66">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="67">  </span>
+<span class="code-block-extension-codeLine" data-line-num="68">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="69">}</span>
+</code></pre>
+<p>由于 <code>doWatch</code> 函数代码量比较多，我们先一部分一部分地来解读，这里我们只关注于标准化 <code>source</code> 的逻辑。可以看到 <code>doWatch</code> 函数会对入参的 <code>source</code> 做不同类型的判断逻辑，然后生成一个统一的 <code>getter</code> 函数：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3e2b1423d5514933923e62c6985a270e~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p><code>getter</code> 函数就是简单地对不同数据类型设置一个访问 <code>source</code> 的操作，比如对于 <code>ref</code> 就是一个创建了一个访问 <code>source.value</code> 的函数。</p>
+<p>那么为什么需要<strong>访问</strong>呢？由之前的响应式原理我们知道，只有在触发 <code>proxy getter</code> 的时候，才会进行依赖收集，所以，这里标准化的 <code>source</code> 函数中，不管是什么类型的 <code>source</code> 都会设计一个访问器函数。</p>
+<p>另外，需要注意的是当 <code>source</code> 是个响应式对象时，源码中会同时设置 <code>deep = true</code>。这是因为对于响应式对象，需要进行深度监听，因为响应式对象中的属性变化时，都需要进行反馈。那是怎么做到深度监听的呢？在回答这个问题之前，我们前面说了监听一个对象的属性就是需要先访问对象的属性，触发 <code>proxy getter</code>，把副作用 <code>cb</code> 收集起来。源码中则是通过 <code>traverse</code> 函数来实现对响应式对象属性的遍历访问：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">traverse</span>(<span class="hljs-params">value, seen</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRef</span>(value)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 如果是 ref 类型，继续递归执行 .value值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">traverse</span>(value.<span class="hljs-property">value</span>, seen)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 如果是数组类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; value.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 递归调用 traverse 进行处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-title function_">traverse</span>(value[i], seen)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isPlainObject</span>(value)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-comment">// 如果是对象，使用 for in 读取对象的每一个值，并递归调用 traverse 进行处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> value) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-title function_">traverse</span>((value <span class="hljs-keyword">as</span> any)[key], seen)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-keyword">return</span> value</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<h2 data-id="heading-2">构造副作用 effect</h2>
+<p>前面说到，我们通过一系列操作，标准化了用户传入的 <code>source</code> 成了一个 <code>getter</code> 函数，此时的 <code>getter</code> 函数一方面还没有真正执行，也就没有触发对属性的访问操作。</p>
+<p><code>watch</code> 的本质是对数据源进行依赖收集，当依赖变化时，回调执行 <code>cb</code> 函数并传入新旧值。所以我们需要构造一个副作用函数，完成对数据源的变化追踪：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> effect = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReactiveEffect</span>(getter, scheduler)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">} </span>
+</code></pre>
+<p>这里的 <code>getter</code> 就是前面构造的属性访问函数，我们在介绍响应式原理的章节中，介绍过 <code>ReactiveEffect</code> 函数，这里再来回顾一下 <code>ReactiveEffect</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ReactiveEffect</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    public fn: () =&gt; T,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    public scheduler: EffectScheduler | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    scope?: EffectScope</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-title function_">recordEffectScope</span>(<span class="hljs-variable language_">this</span>, scope)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  </span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">run</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// ...  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fn</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>这里细节部分可以详细阅读响应式原理的部分，我们只需要知道这里的 <code>ReactiveEffect run</code> 函数内部执行了 <code>this.fn()</code> 也就是上面传入的 <code>getter</code> 函数，所以，本质上是在此时完成了对 <code>watch source</code> 的访问。</p>
+<p>然后再看一下 <code>ReactiveEffect</code> 的第二个参数 <code>scheduler</code>，是如何构造的呢？</p>
+<h2 data-id="heading-3">构造 scheduler 调度</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">let</span> oldValue = isMultiSource </span>
+<span class="code-block-extension-codeLine" data-line-num="4">    ? <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(source.<span class="hljs-property">length</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">INITIAL_WATCHER_VALUE</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    : <span class="hljs-variable constant_">INITIAL_WATCHER_VALUE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> <span class="hljs-title function_">job</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 被卸载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">if</span> (!effect.<span class="hljs-property">active</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (cb) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// 获取新值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-keyword">const</span> newValue = effect.<span class="hljs-title function_">run</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-comment">// 执行 cb 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-title function_">callWithAsyncErrorHandling</span>(cb, instance, <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">WATCH_CALLBACK</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        newValue,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        <span class="hljs-comment">// 第一次更改时传递旧值为 undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">        oldValue === <span class="hljs-variable constant_">INITIAL_WATCHER_VALUE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">          ? <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">          : (isMultiSource &amp;&amp; oldValue[<span class="hljs-number">0</span>] === <span class="hljs-variable constant_">INITIAL_WATCHER_VALUE</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">            ? []</span>
+<span class="code-block-extension-codeLine" data-line-num="23">            : oldValue,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        onCleanup</span>
+<span class="code-block-extension-codeLine" data-line-num="25">        ])</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      oldValue = newValue</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-comment">// watchEffect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">      effect.<span class="hljs-title function_">run</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="32"></span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-keyword">let</span> scheduler</span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-comment">// 直接赋值为 job 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">  <span class="hljs-keyword">if</span> (flush === <span class="hljs-string">'sync'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    scheduler = job</span>
+<span class="code-block-extension-codeLine" data-line-num="37">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (flush === <span class="hljs-string">'post'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-comment">// 渲染后执行，放入 postRenderEffect 队列</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">    scheduler = <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">queuePostRenderEffect</span>(job, instance &amp;&amp; instance.<span class="hljs-property">suspense</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="40">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">    <span class="hljs-comment">// 默认是渲染更新之前执行，设置 job.pre = true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">    job.<span class="hljs-property">pre</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">    <span class="hljs-keyword">if</span> (instance) job.<span class="hljs-property">id</span> = instance.<span class="hljs-property">uid</span></span>
+<span class="code-block-extension-codeLine" data-line-num="44">    scheduler = <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">queueJob</span>(job)</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="46">}</span>
+</code></pre>
+<blockquote>
+<p><code>scheduler</code> 我们在批量调度更新章节有简单介绍过，本质这里是根据不同的 <code>watch options</code> 中的 <code>flush</code> 参数来设置不同的调度节点，这里默认是渲染更新前执行，也就是在异步更新队列 <code>queue</code> 执行前执行。</p>
+</blockquote>
+<p><code>scheduler</code> 核心就是将 <code>job</code> 放入异步执行队列中，但有个特殊，也就是 <code>flush = 'sync'</code> 时，是放入同步执行的。那么 <code>job</code> 是个什么啥玩意呢？</p>
+<p>上述代码的注释已经很详尽了，<code>job</code> 其实就是一个用来执行回调函数 <code>cb</code> 的函数而已，在执行 <code>cb</code> 的同时，传入了 <code>source</code> 的新旧值。</p>
+<h2 data-id="heading-4">effect run 函数执行</h2>
+<p>前面我们说到了，<code>ReactiveEffect</code> 内部的 <code>run</code> 函数，执行了依赖访问的 <code>getter</code> 函数，所以 <code>run</code> 函数是如何被执行的呢？</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">//...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 如果存在 cb</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (cb) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 立即执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">if</span> (immediate) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 首次直接执行 job</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">job</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-comment">// 执行run 函数，获取旧值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      oldValue = effect.<span class="hljs-title function_">run</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>可以看到在执行 <code>effect.run</code> 的前面判断了是否是立即执行的模式，如果是立即执行，则直接执行上面的 <code>job</code> 函数，而此时的 <code>job</code> 函数是没有旧值的，所以此时执行的 <code>oldValue = undefined</code>。</p>
+<h2 data-id="heading-5">返回销毁函数</h2>
+<p>最后，会返回侦听器销毁函数，也就是 <code>watch API</code> 执行后返回的函数。我们可以通过调用它来停止 <code>watcher</code> 对数据的侦听。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doWatch</span>(<span class="hljs-params">source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">//...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    effect.<span class="hljs-title function_">stop</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (instance &amp;&amp; instance.<span class="hljs-property">scope</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-title function_">remove</span>(instance.<span class="hljs-property">scope</span>.<span class="hljs-property">effects</span>!, effect)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p>销毁函数内部会执行 <code>effect.stop</code> 方法，用来停止对数据的 <code>effect</code> 响应。并且，如果是在组件中注册的 <code>watcher</code>，也会移除组件 <code>effects</code> 对这个 <code>runner</code> 的引用。</p>
+<h2 data-id="heading-6">总结</h2>
+<p>所谓 <code>watch</code>，就是观测一个响应式数据或者监测一个副作用函数里面的响应式数据，当数据发生变化的时候通知并执行相应的回调函数。而内部实现，就是通过构造一个 <code>effect</code> 副作用对象，通过对 <code>watch</code> 监听属性的访问触发副作用收集，当修改监听属性时，根据 <code>flush</code> 的状态触发 <code>job</code> 的不同阶段更新。</p></div>
+    </body>
+    </html>

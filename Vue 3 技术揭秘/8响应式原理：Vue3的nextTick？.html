@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>通过前面的几个章节的学习，我们大致了解了对于 <code>Vue 3</code> 中的响应式原理：我们通过对 <code>state</code> 数据的响应式拦截，当触发 <code>proxy setter</code> 的时候，执行对应状态的 <code>effect</code> 函数。接下来看一个经典的例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{{number}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"handleClick"</span>&gt;</span>click<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-keyword">const</span> number = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleClick</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        number.<span class="hljs-property">value</span> ++;</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      number,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      handleClick</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">}</span>
+<span class="code-block-extension-codeLine" data-line-num="21"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>当我们按下 <code>click</code> 按钮的时候，<code>number</code>&nbsp;会被循环增加 <code>1000</code> 次。那么 <code>Vue</code> 的视图会在点击按钮的时候，从 <code>1 -&gt; 1000</code> 刷新 <code>1000</code> 次吗？这一小节，我们将一起探探究竟。</p>
+<h2 data-id="heading-1">queueJob</h2>
+<p>我们小册<a href="https://juejin.cn/book/7146465352120008743/section/7146510212571070471" target="_blank" title="https://juejin.cn/book/7146465352120008743/section/7146510212571070471">第四节</a>介绍关于“组件更新策略”的时候，提到了 <code>setupRenderEffect</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">componentUpdateFn</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">isMounted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      <span class="hljs-comment">// 初始化组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 更新组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 创建响应式的副作用渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  instance.<span class="hljs-property">update</span> = <span class="hljs-title function_">effect</span>(componentUpdateFn, prodEffectOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+</code></pre>
+<p>当时这里为了方便介绍组件的更新策略，我们简写了 <code>instance.update</code> 的函数创建过程，现在我们来详细看一下 <code>instance.update</code> 这个函数的创建：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">componentUpdateFn</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 创建响应式的副作用渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> effect = (instance.<span class="hljs-property">effect</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReactiveEffect</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    componentUpdateFn,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">queueJob</span>(update),</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    instance.<span class="hljs-property">scope</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  ))</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  </span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 生成 instance.update 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-keyword">const</span> update = (instance.<span class="hljs-property">update</span> = <span class="hljs-function">() =&gt;</span> effect.<span class="hljs-title function_">run</span>())</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  update.<span class="hljs-property">id</span> = instance.<span class="hljs-property">uid</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  </span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-comment">// 组件允许递归更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-title function_">toggleRecurse</span>(instance, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="18"></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-comment">// 执行更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-title function_">update</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+</code></pre>
+<p>可以看到在创建 <code>effect</code> 副作用函数的时候，会给 <code>ReactiveEffect</code> 传入一个 <code>scheduler</code> 调度函数，这样生成的 <code>effect</code> 中就包含了 <code>scheduler</code> 属性。同时为组件实例生成了一个 <code>update</code> 属性，该属性的值就是执行 <code>effect.run</code> 的函数，另外需要注意的一点是 <code>update</code> 中包含了一个 <code>id</code> 信息，该值是一个初始值为 <code>0</code> 的自增数字，下文我们再详细介绍其作用。</p>
+<p>当我们触发 <code>proxy setter</code> 的时候，触发执行了 <code>triggerEffect</code> 函数，这次，我们补全 <code>triggerEffect</code> 函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">triggerEffect</span>(<span class="hljs-params">effect, debuggerEventExtraInfo</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (effect !== activeEffect || effect.<span class="hljs-property">allowRecurse</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// effect 上存在 scheduler</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (effect.<span class="hljs-property">scheduler</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      effect.<span class="hljs-title function_">scheduler</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      effect.<span class="hljs-title function_">run</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>可以看到，如果 <code>effect</code> 上有 <code>scheduler</code> 属性时，执行的是 <code>effect.scheduler</code> 函数，否则执行 <code>effect.run</code> 进行视图更新。而这里显然我们需要先执行调度函数 <code>scheduler</code>。通过上面的信息，我们也清楚地知道 <code>scheduler</code> 函数的本质就是执行了 <code>queueJob(update)</code> 函数，一起来看一下 <code>queueJob</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">queueJob</span>(<span class="hljs-params">job</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 去重判断</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    !queue.<span class="hljs-property">length</span> ||</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    !queue.<span class="hljs-title function_">includes</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      job,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      isFlushing &amp;&amp; job.<span class="hljs-property">allowRecurse</span> ? flushIndex + <span class="hljs-number">1</span> : flushIndex</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 添加到队列尾部</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (job.<span class="hljs-property">id</span> == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      queue.<span class="hljs-title function_">push</span>(job)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 按照 job id 自增的顺序添加</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      queue.<span class="hljs-title function_">splice</span>(<span class="hljs-title function_">findInsertionIndex</span>(job.<span class="hljs-property">id</span>), <span class="hljs-number">0</span>, job)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-title function_">queueFlush</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p><code>queueJob</code> 就是维护了一个 <code>queue</code> 队列，目的是向 <code>queue</code> 队列中添加 <code>job</code> 对象，这里的 <code>job</code> 就是我们前面的 <code>update</code> 对象。</p>
+<p>这里有几点需要说明一下。</p>
+<p>第一个是该函数会有一个 <code>isFlushing &amp;&amp; job.allowRecurse</code> 判断，这个作用是啥呢？简单点说就是当队列正处于更新状态中（<code>isFlushing = true</code>） 且允许递归调用（&nbsp;<code>job.allowRecurse = true</code>）时，将搜索起始位置加一，无法搜索到自身，也就是允许递归调用了。什么情况下会出现递归调用？</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">&lt;!-- 父组件 --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{{msg}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">Child</span> /&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">import</span> { ref, provide } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">import</span> <span class="hljs-title class_">Child</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Child.vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">"initial"</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-title function_">provide</span>(<span class="hljs-string">"CONTEXT"</span>, { msg });</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      msg</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    };</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-attr">components</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-title class_">Child</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">}</span>
+<span class="code-block-extension-codeLine" data-line-num="21"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22"></span>
+<span class="code-block-extension-codeLine" data-line-num="23"><span class="hljs-comment">&lt;!-- 子组件 Child --&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>child<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="28"><span class="hljs-keyword">import</span> { inject } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="29"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="31">    <span class="hljs-keyword">const</span> ctx = <span class="hljs-title function_">inject</span>(<span class="hljs-string">"CONTEXT"</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    ctx.<span class="hljs-property">msg</span>.<span class="hljs-property">value</span> = <span class="hljs-string">"updated"</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="34">}</span>
+<span class="code-block-extension-codeLine" data-line-num="35"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>对于这种情况，首先是父组件进入 <code>job</code> 然后渲染父组件，接着进入子组件渲染，但是子组件内部修改了父组件的状态 <code>msg</code>。此时父组件需要支持递归渲染，也就是递归更新。</p>
+<blockquote>
+<p>注意，这里的更新已经不属于单选数据流了，<strong>如果过多地打破单向数据流，会导致多次递归执行更新，可能会导致性能下降。</strong></p>
+</blockquote>
+<p>第二个是，<code>queueJob</code> 函数向 <code>queue</code> 队列中添加的 <code>job</code> 是按照 <code>id</code> 排序的，<code>id</code> 小的 <code>Job</code> 先被推入 <code>queue</code> 中执行，这保证了，<strong>父组件永远比子组件先更新</strong>（因为先创建父组件，再创建子组件，子组件可能依赖父组件的数据）。</p>
+<p>再回到函数的本身来说，当我们执行 <code>for</code> 循环 <code>1000</code> 次 <code>setter</code> 的时候，因为在第一步进行了去重判断，所以 <code>update</code> 函数只会被添加一次到 <code>queue</code> 中。<strong>这里的 <code>update</code> 函数就是组件的渲染函数</strong>。所以无论这里执行多少次循环，渲染更新函数只会被执行一次。</p>
+<h2 data-id="heading-2">queueFlush</h2>
+<p>上面说到了无论循环多少次 <code>setter</code>，这里相同 <code>id</code> 的 <code>update</code> 只会被添加一次到 <code>queue</code> 中。</p>
+<p>细心的小伙伴可能会有这样的疑问：<strong>那么为什么视图不是从 <code>0 -&gt; 1</code> 而是直接从 <code>0 -&gt; 1000</code> 了呢？</strong></p>
+<p>要回答上面的问题，就得了解一下 <code>queue</code> 的执行更新相关的内容了，也就是 <code>queueJob</code> 的最后一步 <code>queueFlush</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">queueFlush</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 是否正处于刷新状态</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (!isFlushing &amp;&amp; !isFlushPending) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    isFlushPending = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    currentFlushPromise = resolvedPromise.<span class="hljs-title function_">then</span>(flushJobs)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p>可以看到这里，<code>vue 3</code> 完全抛弃了除了 <code>promise</code> 之外的异步方案，不再支持<code>vue 2</code> 的 <code>Promise &gt; MutationObserver &gt; setImmediate &gt; setTimeout</code> 其他三种异步操作了。</p>
+<p>所以这里，<code>vue 3</code> 直接通过 <code>promise</code> 创建了一个微任务 <code>flushJobs</code> 进行异步调度更新，只要在浏览器当前 <code>tick</code> 内的所有更新任务都会被推入 <code>queue</code> 中，然后在下一个 <code>tick</code> 中统一执行更新。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">flushJobs</span>(<span class="hljs-params">seen</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 是否正在等待执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  isFlushPending = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 正在执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  isFlushing = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 在更新前，重新排序好更新队列 queue 的顺序</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 这确保了:</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 1. 组件都是从父组件向子组件进行更新的。（因为父组件都在子组件之前创建的</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 所以子组件的渲染的 effect 的优先级比较低）</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 2. 如果父组件在更新前卸载了组件，这次更新将会被跳过。</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  queue.<span class="hljs-title function_">sort</span>(comparator)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  </span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">try</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-comment">// 遍历主任务队列，批量执行更新任务</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">for</span> (flushIndex = <span class="hljs-number">0</span>; flushIndex &lt; queue.<span class="hljs-property">length</span>; flushIndex++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-keyword">const</span> job = queue[flushIndex]</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-keyword">if</span> (job &amp;&amp; job.<span class="hljs-property">active</span> !== <span class="hljs-literal">false</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        <span class="hljs-title function_">callWithErrorHandling</span>(job, <span class="hljs-literal">null</span>, <span class="hljs-title class_">ErrorCodes</span>.<span class="hljs-property">SCHEDULER</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  } <span class="hljs-keyword">finally</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    <span class="hljs-comment">// 队列任务执行完，重置队列索引</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">    flushIndex = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">    <span class="hljs-comment">// 清空队列</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">    queue.<span class="hljs-property">length</span> = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-comment">// 执行后置队列任务</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">    <span class="hljs-title function_">flushPostFlushCbs</span>(seen)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-comment">// 重置队列执行状态</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">    isFlushing = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    <span class="hljs-comment">// 重置当前微任务为 Null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">    currentFlushPromise = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">    <span class="hljs-comment">// 如果主任务队列、后置任务队列还有没被清空，就继续递归执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">    <span class="hljs-keyword">if</span> (queue.<span class="hljs-property">length</span> || pendingPostFlushCbs.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">      <span class="hljs-title function_">flushJobs</span>(seen)</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="37">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="38">}</span>
+</code></pre>
+<p>在详细介绍 <code>flushJobs</code> 之前，我想先简单介绍一下 <code>Vue</code> 的更新任务执行机制中的一个重要概念：<strong>更新时机。</strong> <code>Vue</code> 整个更新过程分成了三个部分：</p>
+<ol>
+<li>更新前，称之为 <code>pre</code> 阶段；</li>
+<li>更新中，也就是 <code>flushing</code> 中，执行 <code>update</code> 更新；</li>
+<li>更新后，称之为 <code>flushPost</code> 阶段。</li>
+</ol>
+<h3 data-id="heading-3">更新前</h3>
+<p>什么是 <code>pre</code> 阶段呢？拿组件更新举例，就是在 <code>Vue</code> 组件更新<strong>之前</strong>被调用执行的阶段。默认情况下，<code>Vue</code> 的 <code>watch</code> 和 <code>watchEffect</code> 函数中的 <code>callback</code> 函数都是在这个阶段被执行的，我们简单看一下 <code>watch</code> 中的源码实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">watch</span>(<span class="hljs-params">surce, cb, {immediate, deep, flush, onTrack, onTrigger} = {}</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (flush === <span class="hljs-string">'sync'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    scheduler = job</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (flush === <span class="hljs-string">'post'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    scheduler = <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">queuePostRenderEffect</span>(job, instance &amp;&amp; instance.<span class="hljs-property">suspense</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-comment">// 默认会给 job 打上 pre 的标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    job.<span class="hljs-property">pre</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">if</span> (instance) job.<span class="hljs-property">id</span> = instance.<span class="hljs-property">uid</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    scheduler = <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">queueJob</span>(job)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+</code></pre>
+<p>可以看到 <code>watch</code> 的 <code>job</code> 会被默认打上 <code>pre</code> 的标签。而带 <code>pre</code> 标签的 <code>job</code> 则会在渲染前被执行：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">updateComponent</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ... 省略 n 行代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">updateComponentPreRender</span>(instance, n2, optimized)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">function</span> <span class="hljs-title function_">updateComponentPreRender</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// ... 省略 n 行代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">flushPreFlushCbs</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+<span class="code-block-extension-codeLine" data-line-num="10"></span>
+<span class="code-block-extension-codeLine" data-line-num="11"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">flushPreFlushCbs</span>(<span class="hljs-params">seen, i = isFlushing ? flushIndex + <span class="hljs-number">1</span> : <span class="hljs-number">0</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-keyword">for</span> (; i &lt; queue.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">const</span> cb = queue[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">if</span> (cb &amp;&amp; cb.<span class="hljs-property">pre</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      queue.<span class="hljs-title function_">splice</span>(i, <span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      i--</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-title function_">cb</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">}</span>
+</code></pre>
+<p>可以看到，在执行 <code>updateComponent</code> 更新组件之前，会调用 <code>flushPreFlushCbs</code> 函数，执行所有带上 <code>pre</code> 标签的 <code>job</code>。</p>
+<h3 data-id="heading-4">更新中</h3>
+<p>更新中的过程就是 <code>flushJobs</code> 函数体前面的部分，首先会通过一个 <code>comparator</code> 函数对 <code>queue</code> 队列进行排序，这里排序的目的主要是保证父组件优先于子组件执行，另外在执行后续循环执行 <code>job</code> 任务的时候，通过判断 <code>job.active !== false</code> 来剔除被 <code>unmount</code> 卸载的组件，卸载的组件会有 <code>active = false</code> 的标记。</p>
+<p>最后即通过 <code>callWithErrorHandling</code> 函数执行 <code>queue</code> 队列中的每一个 <code>job</code>:</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">php</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-php code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">export <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">callWithErrorHandling</span>(<span class="hljs-params">fn, instance, type, args</span>) </span>{</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  let res</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">try</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    res = args ? <span class="hljs-function"><span class="hljs-keyword">fn</span>(<span class="hljs-params">...args</span>) : <span class="hljs-title">fn</span>(<span class="hljs-params"></span>)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  } <span class="hljs-title">catch</span> (<span class="hljs-params">err</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title function_ invoke__">handleError</span>(err, instance, type)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<h3 data-id="heading-5">更新后</h3>
+<p>当页面更新后，需要执行的一些回调函数都存储在 <code>pendingPostFlushCbs</code> 中，通过 <code>flushPostFlushCbs</code> 函数来进行回调执行：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">flushPostFlushCbs</span>(<span class="hljs-params">seen</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 存在 job 才执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (pendingPostFlushCbs.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 去重</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> deduped = [...<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(pendingPostFlushCbs)]</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    pendingPostFlushCbs.<span class="hljs-property">length</span> = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    </span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-comment">// #1947 already has active queue, nested flushPostFlushCbs call</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-comment">// 已经存在activePostFlushCbs，嵌套flushPostFlushCbs调用，直接return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">if</span> (activePostFlushCbs) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      activePostFlushCbs.<span class="hljs-title function_">push</span>(...deduped)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    </span>
+<span class="code-block-extension-codeLine" data-line-num="15">    activePostFlushCbs = deduped</span>
+<span class="code-block-extension-codeLine" data-line-num="16"></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// 按job.id升序</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    activePostFlushCbs.<span class="hljs-title function_">sort</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> <span class="hljs-title function_">getId</span>(a) - <span class="hljs-title function_">getId</span>(b))</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    </span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 循环执行job</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-keyword">for</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      postFlushIndex = <span class="hljs-number">0</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      postFlushIndex &lt; activePostFlushCbs.<span class="hljs-property">length</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      postFlushIndex++</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      activePostFlushCbs[postFlushIndex]()</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    activePostFlushCbs = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">    postFlushIndex = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">}</span>
+</code></pre>
+<p>一些需要渲染完成后再执行的钩子函数都会在这个阶段执行，比如 <code>mounted hook</code> 等等。</p>
+<h2 data-id="heading-6">总结</h2>
+<p>通过上面的一些介绍，我们可以了解到本小节开头的示例中，<code>number</code> 的更新函数只会被同步地添加一次到更新队列 <code>queue</code> 中，但更新是异步的，会在 <code>nextTick</code> 也就是 <code>Promise.then</code> 的微任务中执行 <code>update</code>，所以更新会直接从 <code>0 -&gt; 1000</code>。</p>
+<p>另外，需要注意的是一个组件内的相同 <code>update</code> 只会有一个被推入 <code>queue</code> 中。比如下面的例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{{number}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{{msg}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"handleClick"</span>&gt;</span>click<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">const</span> number = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">'init'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleClick</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        number.<span class="hljs-property">value</span> ++;</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      msg.<span class="hljs-property">value</span> = <span class="hljs-string">'hello world'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      number,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      msg,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      handleClick</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+<span class="code-block-extension-codeLine" data-line-num="25"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>当点击按钮时，因为 <code>update</code> 内部执行的是当前组件的同一个 <code>componentUpdateFn</code> 函数，状态 <code>msg</code> 和 <code>number</code> 的 <code>update</code> 的 <code>id</code> 是一致的，所以 <code>queue</code> 中，只有一个 <code>update</code> 函数，只会进行一次统一的更新。</p></div>
+    </body>
+    </html>
