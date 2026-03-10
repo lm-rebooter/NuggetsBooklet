@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 为什么选择 npm script？
 
 可能在你翻开这个页面的同时，心里在嘀咕，为什么要选择 npm script？我用着 grunt、gulp 不是挺好的么？

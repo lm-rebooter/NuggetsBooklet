@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 4.2 在 Git Hooks 中执行 npm script
 
 严肃的研发团队都会使用 Git 之类的版本管理系统来管理代码，随着 GitHub 的广受欢迎，相信大家对 Git 并不陌生。Git 在代码版本管理之外，也提供了类似 npm script 里 `pre`、`post` 的钩子机制，叫做 [Git Hooks](https://git-scm.com/book/gr/v2/Customizing-Git-Git-Hooks)，钩子机制能让我们在代码 commit、push 之前（后）做自己想做的事情。

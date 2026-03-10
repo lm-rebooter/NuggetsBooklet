@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 1.3 给 npm script 传递参数和添加注释
 
 本小节会介绍 3 个知识点：给 npm script 传递参数以减少重复的 npm script；增加注释提高 npm script 脚本的可读性；控制运行时日志输出能让你专注在重要信息上。
