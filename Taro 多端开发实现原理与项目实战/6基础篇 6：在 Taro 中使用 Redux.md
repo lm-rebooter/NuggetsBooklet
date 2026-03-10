@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 在 Taro 中使用 Redux
 
 ## 前言
