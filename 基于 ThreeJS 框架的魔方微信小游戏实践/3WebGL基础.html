@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">WebGL基础</h1>
+<h2 data-id="heading-1">前言</h2>
+<p>在这一章中你将学到脱离 ThreeJS 框架直接使用 WebGL 技术构建 3D 场景，同时还会涉及到的一些 3D 图形学的基础概念；</p>
+<p>另外这一章的例子和上一章例子的效果基本相同，主要是为了通过<code>对比相同效果不同方式的实现</code>，从而更好的了解 ThreeJS 框架，知道它所封装的技术细节，从而避免在学习和使用的过程中出现效果出来了，但是不知道为什么的情况；</p>
+<p><code>WebGL 相关内容较多，没办法在短短的一章中面面俱到，后续会涉及到一些 WebGL 的 API，对于初学者来说没必要了解的很详细，知道其大概作用就好了</code>；如果有兴趣想要了解的更多可以去看看《WebGL编程指南》这本书。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018102216697bc5841c5caf~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-2">概述</h2>
+<p><code>WebGL</code>是一种 3D 绘图协议，这种绘图技术标准结合了<code>JavaScript</code>和<code>OpenGL ES 2.0</code>，在<code>HTML5</code>的<code>Canvas</code>元素中使用，从而可以在 Web 浏览器中呈现 3D 场景，无需使用其它插件。</p>
+<p>直接使用<code>WebGL</code>编程稍微有点复杂，特别是对于那些很少接触<code>OpenGL</code>的 Web 开发人员；因此出现了很多 WebGL 开源框架，ThreeJS 是其中比较优秀的一个。</p>
+<p>根据多次从入门到放弃的经验来看，单独学习 ThreeJS 容易给人造成不知其然的感觉，而单独学习 WebGL 又太枯燥，比较好的办法是把二者结合起来，前边的章节简单介绍了 <code>ThreeJS 基础</code>，那么这章就准备讲讲 <code>WebGL 基础</code>。</p>
+<p>为了更好的对比学习，这章用相同的程序结构实现和上一章相同的例子；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-variable language_">window</span>.<span class="hljs-property">onload</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+    <span class="hljs-title function_">createWorld</span>();
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createWorld</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">var</span> gl = <span class="hljs-title function_">initRender</span>();<span class="hljs-comment">//创建渲染器</span>
+    <span class="hljs-keyword">var</span> shaderProgram = <span class="hljs-title function_">initShaders</span>(gl);<span class="hljs-comment">//初始化着色器程序</span>
+    <span class="hljs-keyword">var</span> cameraMatrix = <span class="hljs-title function_">initCamera</span>();<span class="hljs-comment">//创建相机</span>
+    <span class="hljs-title function_">initLight</span>(gl,shaderProgram);<span class="hljs-comment">//创建光源</span>
+    <span class="hljs-keyword">var</span> num = <span class="hljs-title function_">initObject</span>(gl,shaderProgram);<span class="hljs-comment">//创建物体</span>
+    <span class="hljs-title function_">render</span>(gl,num,shaderProgram,cameraMatrix);<span class="hljs-comment">//渲染</span>
+}
+</code></pre>
+<p>WebGL 基础例子链接为<a href="https://link.juejin.cn?target=https%3A%2F%2Fnewbieyoung.github.io%2FThreejs_rubik%2Flesson%2Fdemo1.html" target="_blank" rel="nofollow noopener noreferrer" title="https://newbieyoung.github.io/Threejs_rubik/lesson/demo1.html" ref="nofollow noopener noreferrer">newbieyoung.github.io/Threejs_rub…</a>；</p>
+<p>最终效果如下：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018102216699a6cd79de15b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">创建渲染器</h2>
+<p>浏览器通过<code>Canvas</code>元素支持<code>WebGL</code>，因此页面中需要一个 Canvas 元素；</p>
+<pre><code class="hljs language-HTML" lang="HTML"><span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"retina"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"width:100%;"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">var</span> width = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> * <span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span>;<span class="hljs-comment">//实际尺寸为显示尺寸乘以设备像素比</span>
+<span class="hljs-keyword">var</span> height = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * <span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">initRender</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">var</span> canvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">'#retina'</span>);
+    canvas.<span class="hljs-property">width</span> = width;
+    canvas.<span class="hljs-property">height</span> = height;
+    <span class="hljs-keyword">var</span> gl = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">'webgl'</span>);<span class="hljs-comment">//获取webgl上下文</span>
+    gl.<span class="hljs-title function_">clearColor</span>(<span class="hljs-number">1.0</span>,<span class="hljs-number">1.0</span>,<span class="hljs-number">1.0</span>,<span class="hljs-number">1.0</span>);<span class="hljs-comment">//设置背景颜色</span>
+    gl.<span class="hljs-title function_">enable</span>(gl.<span class="hljs-property">DEPTH_TEST</span>);<span class="hljs-comment">//开启隐藏面消除</span>
+    <span class="hljs-keyword">return</span> gl;
+}
+</code></pre>
+<p>使用 Canvas 元素绘制图形时，需要通过<code>getContext</code>获取<code>上下文对象</code>，传入的参数不一样获取的上下文对象也不一样，比如传入参数<code>2d</code>返回的是 2D 绘图的上下文对象；要获取 WebGL 的绘图上下文对象，需要传入<code>webgl</code>；</p>
+<p>给 Canvas 元素的<code>width</code>和<code>height</code>属性赋值设置渲染器宽度和高度（ Canvas 元素的尺寸为显示尺寸乘以设备像素比），以及调用<code>clearColor</code>方法设置背景颜色这两个逻辑均可以在 ThreeJS 基础例子中找到；</p>
+<p>但是调用<code>gl.enable(gl.DEPTH_TEST)</code>开启隐藏面消除这个逻辑在 ThreeJS 基础例子则没有，这就属于 ThreeJS 框架所隐藏的 WebGL 的技术细节。</p>
+<p>在人眼看到的实际场景中的物体可能会出现相互遮挡的情况，在计算机中绘制时也要处理这种情况，为了解决这个问题，WebGL 提供了<code>隐藏面消除</code>功能，启动这个功能后 WebGL 会自动帮助我们消除那些被遮挡的物体表面；</p>
+<p>其原理在于 WebGL 绘制图形之前，会根据<code>深度缓冲区</code>的数据进行一次<code>深度检测</code>，始终只绘制层级最高的<code>片元</code>。</p>
+<p>好了！解释完一个概念，多了三个新概念！</p>
+<p><code>片元</code>可以简单理解为像素点，也就是下图中的小方块；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669ae0b2d189b04~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在构建 3D 物体时通过顶点组成<code>三角形网格</code>，但这些三角形网格都是矢量图形，最终在屏幕上显示时还是需要转化为像素图形，这种转化过程被称为<code>光栅化</code>，是计算机图形学的关键技术之一。</p>
+<p>在 CSS 中有<code>z-index</code>属性用来决定元素的层级顺序，层级高显示在上边，层级低的显示在下边；在 WebGL 同样也是通过类似的属性来决定显示顺序的，只不过因为物体位置的复杂性（多个物体混在一起时可能出现相互遮挡一部分的情况），因此渲染时每个片元都需要有一个层级数据，存储所有片元层级数据的内存空间，就被称为<code>深度缓冲区</code>。</p>
+<p>绘制片元时如果其层级数据高于深度缓冲区的层级数据则绘制出来，并更新深度缓冲区的层级数据，反之则放弃该片元，这个过程就被称为<code>深度检测</code>。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669a1f4f1db644b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>另外还有注意的一点是<code>颜色分量</code>的取值，在平时前端开发中我们一般使用的<code>RGBA颜色分量取值范围</code>是从<code>0</code>到<code>255</code>，但是由于 WebGL 继承自 OpenGL，所以它遵循传统 OpenGL 颜色分量的取值范围，即从<code>0.0</code>到<code>1.0</code>。</p>
+<h2 data-id="heading-4">初始化着色器程序</h2>
+<p>这一步骤在 ThreeJS 基础例子中也没有，同样属于 ThreeJS 框架所隐藏的 WebGL 的技术细节。</p>
+<p>WebGL 程序和普通的 JavaScript 程序不一样，WebGL 程序除了 JavaScript 部分之外，还包含两个着色器程序，分别是<code>顶点着色器</code>和<code>片元着色器</code>；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669a23228ea9874~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在 ThreeJS 基础中曾提到过描述一个 3D 物体，需要<code>轮廓</code>、<code>材质</code>和<code>纹理</code>三个要素；那么可以简单的理解为<code>顶点着色器是用来处理物体轮廓的程序，片元着色器是用来处理物体材质和纹理的程序</code>。</p>
+<h3 data-id="heading-5">顶点着色器</h3>
+<pre><code class="hljs language-glsl" lang="glsl">attribute vec4 a_Position;//顶点
+attribute vec4 a_Color;//颜色
+attribute vec4 a_Normal;//法向量
+
+uniform mat4 u_MvpMatrix;//投影矩阵
+uniform mat4 u_NormalMatrix;//法向量变换矩阵
+uniform mat4 u_ModelMatrix;//模型矩阵
+
+varying vec3 v_Position;
+varying vec4 v_Color;
+varying vec3 v_Normal;
+void main() {
+    gl_Position = u_MvpMatrix * a_Position;
+    v_Position = vec3(u_ModelMatrix * a_Position);
+    v_Color = a_Color;
+    v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
+}
+</code></pre>
+<p>这段程序使用的是类似于<code>C语言</code>的着色器语言<code>GLSLES</code>来编写的，要看懂其实不难；</p>
+<p>了解一段程序首先得了解其输入、输出，再然后才是内部逻辑；</p>
+<ul>
+<li>输入</li>
+</ul>
+<p>顶点着色器会接收从 JavaScript 程序中传过来的数据，也就是代码片段中的<code>attribute</code>和<code>uniform</code>变量；</p>
+<p>attribute、uniform 和 varying 都是<code>存储限定符</code>，都可以用来修饰变量；</p>
+<p>attribute 变量只能用于顶点着色器；uniform 变量既可以用于顶点着色器，也可以用于片元着色器，用来表示不变的数据；（ uniform 表示不变的数据的意思是在 GLSL 程序内部不能再被改变，但是可以再次由 JavaScript 程序赋予新的值）。</p>
+<p><code>vec4</code>类似于 ThreeJS 框架中的<code>Vector4</code>对象，表示四维向量，<code>mat4</code>类似于 ThreeJS 框架中的<code>Matrix4</code>对象，表示四阶矩阵。</p>
+<ul>
+<li>输出</li>
+</ul>
+<p><code>varying</code>变量意味着该变量会从顶点着色器传入到片元着色器，这些变量也就是顶点着色器的输出了；<code>vec3</code>则类似于 ThreeJS 框架中的<code>Vector3</code>对象，表示三维向量。</p>
+<ul>
+<li>逻辑</li>
+</ul>
+<p><code>gl_Position = u_MvpMatrix * a_Position</code>投影矩阵乘以顶点坐标可以把三维空间中的物体投影到二维平面；</p>
+<p><code>v_Position = vec3(u_ModelMatrix * a_Position)</code>模型矩阵也就是物体的变换矩阵乘以顶点坐标可以获得物体经过某种变换之后新的顶点坐标；</p>
+<p><code>v_Color = a_Color</code>颜色向量不作处理直接赋值；</p>
+<p><code>v_Normal = normalize(vec3(u_NormalMatrix * a_Normal))</code>法向量变换矩阵乘以物体表面法向量可以得到物体经过某种变换之后新的面的法向量。</p>
+<p>综上所述这段顶点着色器接收从 JavaScript 程序中传入的<code>顶点</code>、<code>颜色</code>、<code>法向量</code>以及一些<code>变换矩阵</code>，然后计算变换之后的新的<code>顶点</code>、<code>颜色</code>和<code>法向量</code>数据，并将其传输给片元着色器。</p>
+<h3 data-id="heading-6">片元着色器</h3>
+<pre><code class="hljs language-glsl" lang="glsl">precision mediump float;
+uniform vec3 u_LightColor;
+uniform vec3 u_LightPosition;
+uniform vec3 u_AmbientLight;
+
+varying vec3 v_Position;//变换后的顶点坐标
+varying vec4 v_Color;
+varying vec3 v_Normal;//变换后的法向量
+void main() {
+    vec3 normal = normalize(v_Normal);
+    vec3 lightDirection = normalize(u_LightPosition - v_Position);
+    float nDotL = max(dot(lightDirection,normal),0.0);//如果反射角大于90度，则该光线无法照射到该片元。
+    vec3 diffuse = u_LightColor * v_Color.rgb * nDotL;
+    vec3 ambient = u_AmbientLight * v_Color.rgb;
+    gl_FragColor = vec4(diffuse + ambient, v_Color.a);
+}
+</code></pre>
+<p>还是按照输入、输出、逻辑的相关顺序来了解这段程序；</p>
+<ul>
+<li>输入</li>
+</ul>
+<p>片元着色器的输入分为两部分，第一部分是从 JavaScript 程序中传入的变量，包括<code>u_LightColor</code>点光源颜色向量、<code>u_LightPosition</code>点光源位置向量、<code>u_AmbientLight</code>环境光颜色向量；第二部分则是从顶点着色器传入的<code>v_Position</code>变换后的顶点坐标、<code>v_Color</code>顶点颜色、<code>v_Normal</code>变换后的法向量；</p>
+<ul>
+<li>输出</li>
+</ul>
+<p>可以简单理解为片元着色器的输出只有当前片元的颜色，也就是<code>gl_FragColor</code>；</p>
+<ul>
+<li>逻辑</li>
+</ul>
+<p>在具体阐述之前我们得了解几个公式：</p>
+<p><code>surfaceColor</code> = <code>emissive</code> + <code>ambient</code>+ <code>diffuse</code>+ <code>specular</code>；</p>
+<p>简单来说就是物体表面的颜色是<code>漫反射光</code>（ diffuse ）、<code>环境光</code>（ ambient ）、<code>自发光</code>（ emissive ）和<code>镜面反射光</code>（ specular ）等光照作用的总和。</p>
+<p>示例中没有考虑自发光和镜面反射，因此物体表面颜色只需要考虑漫反射和环境光的共同作用，这也就不难理解<code>gl_FragColor = vec4(diffuse + ambient, v_Color.a)</code>这句代码了。</p>
+<p>漫反射是指粗糙的物体表面反射光以不固定的角度反射出去，因此漫反射的反射光在各个方向是均匀的；</p>
+<p><code>漫反射光颜色</code> = <code>入射光颜色</code> * <code>表面颜色</code> * <code>入射角余弦</code>；</p>
+<p>根据漫反射光颜色计算公式可得<code>vec3 diffuse = u_LightColor * v_Color.rgb * nDotL</code>；</p>
+<p><code>nDotL</code>表示入射角余弦，可由<code>入射光向量</code>和<code>照射平面的法向量</code>点乘得到，对应代码中的<code>float nDotL = max(dot(lightDirection,normal),0.0)</code>；</p>
+<p>知道点光源位置以及当前片元位置，也就不难求出入射光向量了，比如<code>vec3 lightDirection = normalize(u_LightPosition - v_Position)</code>。</p>
+<p>综上所述这段片元着色器主要是接收变换后的物体轮廓和颜色信息以及设定的光源信息，依据一系列模拟现实光照的规则，计算出最终的片元颜色。</p>
+<h2 data-id="heading-7">编译着色器程序</h2>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810221669a997c7a03642~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在示例中顶点着色器和片元着色器，虽然是以<code>script</code>标签的形式嵌入在页面中，但是其实是以普通文本形式存在的，需要对其进行编译才能被执行；</p>
+<p>编译过程需要依赖<code>WebGL</code>上下文，具体代码可以去查看示例中的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Fblob%2Fmaster%2Flib%2Fcompile.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/blob/master/lib/compile.js" ref="nofollow noopener noreferrer">compile.js</a> 文件，基本流程如下：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811131670c18d18d23bd3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-8">创建相机</h2>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">initCamera</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">var</span> viewMatrix = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Matrix4</span>();<span class="hljs-comment">//视图矩阵</span>
+    viewMatrix.<span class="hljs-title function_">setLookAt</span>(<span class="hljs-title class_">EyePoint</span>.<span class="hljs-property">x</span>,<span class="hljs-title class_">EyePoint</span>.<span class="hljs-property">y</span>,<span class="hljs-title class_">EyePoint</span>.<span class="hljs-property">z</span>,<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">var</span> projMatrix = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Matrix4</span>();<span class="hljs-comment">//透视投影矩阵</span>
+    projMatrix.<span class="hljs-title function_">setPerspective</span>(<span class="hljs-title class_">PerspParams</span>.<span class="hljs-property">fovy</span>, width/height, <span class="hljs-title class_">PerspParams</span>.<span class="hljs-property">g_near</span>, <span class="hljs-title class_">PerspParams</span>.<span class="hljs-property">g_far</span>);
+
+    <span class="hljs-keyword">var</span> cameraMatrix = projMatrix.<span class="hljs-title function_">multiply</span>(viewMatrix);
+    <span class="hljs-keyword">return</span> cameraMatrix;
+}
+</code></pre>
+<p>相机主要的作用是投影，把三维场景投影到二维屏幕，可以用一个矩阵来表示；这个矩阵和相机的位置、焦点以及其投影方式相关，分别对应代码中的<code>viewMatrix</code>和<code>projMatrix</code>矩阵；</p>
+<p>具体的计算方式就不详细说明了，示例中使用的是第三方类库，其中封装了矩阵、向量等对象以及相关的常用方法，具体代码可以去 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Fblob%2Fmaster%2Flib%2Fmatrix4.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/blob/master/lib/matrix4.js" ref="nofollow noopener noreferrer">matrix4.js</a> 文件中查看。</p>
+<h2 data-id="heading-9">创建光源</h2>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">initLight</span>(<span class="hljs-params">gl,shaderProgram</span>){
+    <span class="hljs-comment">//点光源</span>
+    <span class="hljs-keyword">var</span> u_LightColor = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_LightColor'</span>);
+    gl.<span class="hljs-title function_">uniform3f</span>(u_LightColor, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>);
+    <span class="hljs-keyword">var</span> u_LightPosition = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_LightPosition'</span>);
+    gl.<span class="hljs-title function_">uniform3f</span>(u_LightPosition, <span class="hljs-number">2.5</span>, <span class="hljs-number">4.0</span>, <span class="hljs-number">3.5</span>);
+    <span class="hljs-comment">//环境光</span>
+    <span class="hljs-keyword">var</span> u_AmbientLight = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_AmbientLight'</span>);
+    gl.<span class="hljs-title function_">uniform3f</span>(u_AmbientLight, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>);
+}
+</code></pre>
+<p>示例中只考虑了点光源和环境光，在 JavaScript 程序中设定相关参数并传输给着色器即可；</p>
+<p>在 JavaScript 程序中给<code>uniform</code>变量赋值需要用到两个方法，先通过<code>getUniformLocation</code>获取着色器中的变量，然后通过<code>uniform3f</code>给其赋值即可。</p>
+<p>比如设置光源颜色<code>u_LightColor</code>：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">var</span> u_LightColor = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_LightColor'</span>);
+gl.<span class="hljs-title function_">uniform3f</span>(u_LightColor, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>);
+</code></pre>
+<h2 data-id="heading-10">创建物体</h2>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">initObject</span>(<span class="hljs-params">gl,shaderProgram</span>){
+
+    <span class="hljs-comment">//    v6----- v5</span>
+    <span class="hljs-comment">//   /|      /|</span>
+    <span class="hljs-comment">//  v1------v0|</span>
+    <span class="hljs-comment">//  | |     | |</span>
+    <span class="hljs-comment">//  | |v7---|-|v4</span>
+    <span class="hljs-comment">//  |/      |/</span>
+    <span class="hljs-comment">//  v2------v3</span>
+
+    <span class="hljs-comment">//顶点</span>
+    <span class="hljs-keyword">var</span> vertices = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>([
+        <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-comment">// v0-v1-v2-v3 front</span>
+        <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-comment">// v0-v3-v4-v5 right</span>
+        <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-comment">// v0-v5-v6-v1 up</span>
+        -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-comment">// v1-v6-v7-v2 left</span>
+        -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>, <span class="hljs-comment">// v7-v4-v3-v2 down</span>
+        <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,  -<span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>,   <span class="hljs-number">2.0</span>, <span class="hljs-number">2.0</span>,-<span class="hljs-number">2.0</span>  <span class="hljs-comment">// v4-v7-v6-v5 back</span>
+    ]);
+
+    <span class="hljs-comment">//颜色</span>
+    <span class="hljs-keyword">var</span> colors = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>([
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,     <span class="hljs-comment">// v0-v1-v2-v3 front</span>
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,     <span class="hljs-comment">// v0-v3-v4-v5 right</span>
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,     <span class="hljs-comment">// v0-v5-v6-v1 up</span>
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,     <span class="hljs-comment">// v1-v6-v7-v2 left</span>
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,     <span class="hljs-comment">// v7-v4-v3-v2 down</span>
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,   <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>    <span class="hljs-comment">// v4-v7-v6-v5 back</span>
+    ]);
+
+    <span class="hljs-comment">//法向量</span>
+    <span class="hljs-keyword">var</span> normals = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>([
+        <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>,  <span class="hljs-comment">// v0-v1-v2-v3 front</span>
+        <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,  <span class="hljs-comment">// v0-v3-v4-v5 right</span>
+        <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,  <span class="hljs-comment">// v0-v5-v6-v1 up</span>
+        -<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,  -<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,  -<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,  -<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,  <span class="hljs-comment">// v1-v6-v7-v2 left</span>
+        <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,   <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>,  <span class="hljs-comment">// v7-v4-v3-v2 down</span>
+        <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>,   <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>,-<span class="hljs-number">1.0</span>   <span class="hljs-comment">// v4-v7-v6-v5 back</span>
+    ]);
+
+    <span class="hljs-comment">//索引</span>
+    <span class="hljs-keyword">var</span> indices = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint8Array</span>([
+        <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>,   <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>,    <span class="hljs-comment">// front</span>
+        <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>,   <span class="hljs-number">4</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>,    <span class="hljs-comment">// right</span>
+        <span class="hljs-number">8</span>, <span class="hljs-number">9</span>,<span class="hljs-number">10</span>,   <span class="hljs-number">8</span>,<span class="hljs-number">10</span>,<span class="hljs-number">11</span>,    <span class="hljs-comment">// up</span>
+        <span class="hljs-number">12</span>,<span class="hljs-number">13</span>,<span class="hljs-number">14</span>,  <span class="hljs-number">12</span>,<span class="hljs-number">14</span>,<span class="hljs-number">15</span>,   <span class="hljs-comment">// left</span>
+        <span class="hljs-number">16</span>,<span class="hljs-number">17</span>,<span class="hljs-number">18</span>,  <span class="hljs-number">16</span>,<span class="hljs-number">18</span>,<span class="hljs-number">19</span>,   <span class="hljs-comment">// down</span>
+        <span class="hljs-number">20</span>,<span class="hljs-number">21</span>,<span class="hljs-number">22</span>,  <span class="hljs-number">20</span>,<span class="hljs-number">22</span>,<span class="hljs-number">23</span>    <span class="hljs-comment">// back</span>
+    ]);
+
+    <span class="hljs-keyword">var</span> num = indices.<span class="hljs-property">length</span>;
+    
+    <span class="hljs-keyword">if</span>(!<span class="hljs-title function_">_initElementBuffer</span>(gl,indices)) <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<span class="hljs-comment">//创建索引缓冲区</span>
+    <span class="hljs-keyword">if</span>(!<span class="hljs-title function_">_initArrayBuffer</span>(gl,shaderProgram,<span class="hljs-string">'a_Normal'</span>,normals,<span class="hljs-number">3</span>,gl.<span class="hljs-property">FLOAT</span>)) <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<span class="hljs-comment">//创建法向量缓冲区</span>
+    <span class="hljs-keyword">if</span>(!<span class="hljs-title function_">_initArrayBuffer</span>(gl,shaderProgram,<span class="hljs-string">'a_Position'</span>,vertices,<span class="hljs-number">3</span>,gl.<span class="hljs-property">FLOAT</span>)) <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<span class="hljs-comment">//创建顶点缓冲区</span>
+    <span class="hljs-keyword">if</span>(!<span class="hljs-title function_">_initArrayBuffer</span>(gl,shaderProgram,<span class="hljs-string">'a_Color'</span>,colors,<span class="hljs-number">3</span>,gl.<span class="hljs-property">FLOAT</span>)) <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<span class="hljs-comment">////创建颜色缓冲区</span>
+
+    <span class="hljs-keyword">return</span> num;
+}
+</code></pre>
+<p>在 ThreeJS 框架中创建一个正方体只需要创建一个<code>BoxGeometry</code>对象就好了，脱离框架之后我们需要准备<code>顶点</code>、<code>颜色</code>、<code>法向量</code>以及<code>索引</code>等数据；</p>
+<p>前三个很好理解，这里只简单解释下<code>索引</code>，其实就是顶点序号集合，每三个顶点序号可以组成一个<code>三角形网格</code>；</p>
+<p>以代码中的索引数组为例，第一行<code>0, 1, 2,</code>表示编号为 0、1、2 的三个顶点组成一个三角形网格，接着的<code>0, 2, 3,</code>表示编号为 0、2、3 的三个顶点组成一个另一个三角形网格，这两个三角形网格刚好就构成了正方体的正面。</p>
+<blockquote>
+<p>注释中<code>v0</code>、<code>v1</code>、<code>v2</code>、<code>v3</code>、<code>v4</code>、<code>v5</code>、<code>v6</code>、<code>v7</code>表示顶点，数字为其编号；<code>front</code>、<code>right</code>、<code>up</code>、<code>left</code>、<code>down</code>、<code>back</code>分别表示正方体的<code>前</code>、<code>右</code>、<code>上</code>、<code>左</code>、<code>下</code>、<code>后</code>面。</p>
+</blockquote>
+<p>准备好这些数据之后，需要传输给顶点着色器，具体代码封装在<code>_initArrayBuffer</code>方法中；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">//初始化数据缓冲区</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">_initArrayBuffer</span> (gl,shaderProgram,attribute, data, num, type) {
+    <span class="hljs-comment">//创建缓冲区</span>
+    <span class="hljs-keyword">var</span> buffer = gl.<span class="hljs-title function_">createBuffer</span>();
+    <span class="hljs-keyword">if</span> (!buffer) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'Failed to create the buffer object!'</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-comment">//将缓冲区对象绑定到目标</span>
+    gl.<span class="hljs-title function_">bindBuffer</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, buffer);
+    gl.<span class="hljs-title function_">bufferData</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, data, gl.<span class="hljs-property">STATIC_DRAW</span>);
+    <span class="hljs-comment">//把缓冲区数据赋予指定变量</span>
+    <span class="hljs-keyword">var</span> a_attribute = gl.<span class="hljs-title function_">getAttribLocation</span>(shaderProgram, attribute);
+    <span class="hljs-keyword">if</span> (a_attribute &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'Failed to get the storage location of '</span> + attribute);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    gl.<span class="hljs-title function_">vertexAttribPointer</span>(a_attribute, num, type, <span class="hljs-literal">false</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    gl.<span class="hljs-title function_">enableVertexAttribArray</span>(a_attribute);
+    <span class="hljs-comment">//解绑缓冲区</span>
+    gl.<span class="hljs-title function_">bindBuffer</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, <span class="hljs-literal">null</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+</code></pre>
+<ol>
+<li>首先调用<code>gl.createBuffer</code>创建<code>数据缓冲区</code>，可以简单理解为一块内存空间；</li>
+<li>然后调用<code>gl.bindBuffer</code>、<code>gl.bufferData</code>把数据绑定到创建的缓冲区；</li>
+<li>接着调用<code>gl.getAttribLocation</code>获取着色器变量；</li>
+<li>再然后调用<code>gl.vertexAttribPointer</code>设置数据的划分方式，因为传入的数据是浮点型数组，但是着色器中接收的变量类型要么是向量要么是矩阵，自然需要在传入数据的时候确定其划分方式（比如在每三个一组解释索引数据时，其实就是按照设定的划分方式解释的）；</li>
+<li>最后调用<code>gl.enableVertexAttribArray</code>激活。</li>
+</ol>
+<h2 data-id="heading-11">渲染</h2>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">var</span> rotateAngle = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">gl,num,shaderProgram,cameraMatrix</span>){
+    <span class="hljs-comment">//模型矩阵</span>
+    rotateAngle += <span class="hljs-number">.3</span>;
+    <span class="hljs-keyword">var</span> modelMatrix = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Matrix4</span>();
+    modelMatrix.<span class="hljs-title function_">rotate</span>(rotateAngle, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    modelMatrix.<span class="hljs-title function_">rotate</span>(rotateAngle, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">var</span> u_ModelMatrix = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_ModelMatrix'</span>);
+    gl.<span class="hljs-title function_">uniformMatrix4fv</span>(u_ModelMatrix, <span class="hljs-literal">false</span>, modelMatrix.<span class="hljs-property">elements</span>);
+
+    <span class="hljs-comment">//投影矩阵</span>
+    <span class="hljs-keyword">var</span> mvpMatrix = cameraMatrix;
+    <span class="hljs-keyword">var</span> originMatrix = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Matrix4</span>();
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">var</span> i=<span class="hljs-number">0</span>;i&lt;cameraMatrix.<span class="hljs-property">elements</span>.<span class="hljs-property">length</span>;i++){
+        originMatrix.<span class="hljs-property">elements</span>[i] = cameraMatrix.<span class="hljs-property">elements</span>[i];
+    }
+    mvpMatrix.<span class="hljs-title function_">multiply</span>(modelMatrix);
+    <span class="hljs-keyword">var</span> u_MvpMatrix = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_MvpMatrix'</span>);
+    gl.<span class="hljs-title function_">uniformMatrix4fv</span>(u_MvpMatrix, <span class="hljs-literal">false</span>, mvpMatrix.<span class="hljs-property">elements</span>);
+
+    <span class="hljs-comment">//法向量变换矩阵</span>
+    <span class="hljs-keyword">var</span> normalMatrix = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Matrix4</span>(); 
+    normalMatrix.<span class="hljs-title function_">setInverseOf</span>(modelMatrix);
+    normalMatrix.<span class="hljs-title function_">transpose</span>();
+    <span class="hljs-keyword">var</span> u_NormalMatrix = gl.<span class="hljs-title function_">getUniformLocation</span>(shaderProgram, <span class="hljs-string">'u_NormalMatrix'</span>);
+    gl.<span class="hljs-title function_">uniformMatrix4fv</span>(u_NormalMatrix, <span class="hljs-literal">false</span>, normalMatrix.<span class="hljs-property">elements</span>);
+
+    gl.<span class="hljs-title function_">clear</span>(gl.<span class="hljs-property">COLOR_BUFFER_BIT</span> | gl.<span class="hljs-property">DEPTH_BUFFER_BIT</span>);
+    gl.<span class="hljs-title function_">drawElements</span>(gl.<span class="hljs-property">TRIANGLES</span>, num, gl.<span class="hljs-property">UNSIGNED_BYTE</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+        <span class="hljs-title function_">render</span>(gl,num,shaderProgram,originMatrix);
+    });
+}
+</code></pre>
+<p>基本逻辑和 ThreeJS 基础例子中的渲染方法类似；</p>
+<p>先处理物体的旋转<code>modelMatrix.rotate(rotateAngle, 1, 0, 0)</code>表示绕<code>X轴</code>旋转一定的角度，<code>modelMatrix.rotate(rotateAngle, 0, 1, 0)</code>则表示绕<code>Y轴</code>旋转一定的角度；</p>
+<p>投影时除了要考虑相机的影响之外，物体本身的变换也会有影响，因此相机矩阵还需要乘以物体本身的变换矩阵（模型矩阵）；</p>
+<p>另外物体的变换还会导致物体表面的法向量也发生变化，但是和顶点不一样，法向量的变换矩阵是物体变换矩阵的<code>逆转置矩阵</code>，因此需要单独计算；</p>
+<p>最后调用<code>gl.clear</code>清空上一次的渲染结果，调用<code>gl.drawElements</code>重新绘制。</p>
+<h2 data-id="heading-12">总结</h2>
+<p>上文中介绍了 WebGL 程序的基本结构，并对示例子中的<code>顶点着色器</code>和<code>片元着色器</code>进行了简单的讲解，主要内容包括：<code>GLSL 语言的基本数据类型</code>、<code>存储限定符</code>、<code>物体表面光照处理</code>、<code>漫反射光颜色计算</code>、<code>入射光向量计算</code>以及<code>着色器编译流程</code>等；</p>
+<p>同时还解释了<code>光栅化</code>、<code>隐藏面消除</code>、<code>深度缓冲区</code>、<code>深度检测</code>、<code>片元</code>等基础概念；</p>
+<p>另外还介绍了<code>如何在 JavaScript 程序中传输数据给着色器程序</code>；</p>
+<p>通过这一章的学习我们不难发现在 WebGL 程序中，JavaScript 的主要作用是编译着色器程序、准备以及传输数据，而渲染相关的工作还是由着色器程序负责的；</p>
+<p>再对比上一个例子可以清楚的看到<code>ThreeJS 框架既隐藏了 WebGL 的相关技术细节，还提供了很多方便易用的数学工具；另外还抽象出很多易于理解的概念，极大的降低了开发门槛</code>。</p></div>
+    </body>
+    </html>

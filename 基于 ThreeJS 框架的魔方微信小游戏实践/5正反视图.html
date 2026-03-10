@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">正反视图</h1>
+<h2 data-id="heading-1">前言</h2>
+<p>在这一章中你将学到以下知识点：</p>
+<ol>
+<li>实现魔方微信小游戏正反视图功能；</li>
+<li>ThreeJS 框架<code>Group</code>集合对象的使用；</li>
+<li>进一步理解透视投影相机相关参数，并计算其任一裁切面的宽高；</li>
+<li>ThreeJS 框架中简单的<code>位移变换</code>，比如改变物体中心、缩放物体大小、旋转物体等；</li>
+<li>ThreeJS 框架中加载器的相关知识以及<code>TextureLoader</code>纹理加载器的使用；</li>
+<li>ThreeJS 框架中<code>PlaneGeometry</code>平面对象的使用；</li>
+<li>ThreeJS 框架中<code>MeshBasicMaterial</code>基础材质对象的使用；</li>
+<li>微信小游戏触摸事件机制在 3D 场景中应用；</li>
+<li>在 ThreeJS 框架中绘制 UI 元素并处理其事件监听。</li>
+</ol>
+<h2 data-id="heading-2">概述</h2>
+<p>所谓的<code>正反视图</code>即如下图所示：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811181672696fd2dc383f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>之所以会有这个功能，主要是因为我个人感觉，对于那些<code>空间想象能力强</code>的人来说<code>如果能同时看到六个面，那么在使用时应该是不需要再进行魔方整体转动操作了</code>；</p>
+<p>另外两个视角还能扩展为<code>智能教学视图</code>以及<code>操作视图</code>这样就可以新增<code>教学功能</code>了（当然这个功能暂时没有）；</p>
+<p>同时出于方便操作的考虑，允许滑动控制两个视图的大小。</p>
+<p>示例代码在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Ftree%2Fmaster%2Flesson%2Fdemo3" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/tree/master/lesson/demo3" ref="nofollow noopener noreferrer">Threejs_rubik</a> 项目中；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111816726aa961f10991~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">实现</h2>
+<p>对于这个功能而言需要实现三点：</p>
+<h3 data-id="heading-4">1. 场景中需要再增加一个魔方；</h3>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第78行至第92行 */</span>
+<span class="hljs-title function_">initObject</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">//正视角魔方</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BasicRubik</span>(<span class="hljs-variable language_">this</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-title function_">model</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontViewName</span>);
+
+    <span class="hljs-comment">//反视角魔方</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BasicRubik</span>(<span class="hljs-variable language_">this</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>.<span class="hljs-title function_">model</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">endViewName</span>);
+}
+</code></pre>
+<p>在初始化物体时创建两个简易三阶魔方即可，同时赋予它们不同的名称方便区分；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第18、19行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontViewName</span> = <span class="hljs-string">'front-rubik'</span>;<span class="hljs-comment">//正视角魔方名称</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">endViewName</span> = <span class="hljs-string">'end-rubik'</span>;<span class="hljs-comment">//反视角魔方名称</span>
+</code></pre>
+<h3 data-id="heading-5">2. 控制魔方所占区域大小</h3>
+<p>在场景中创建两个魔方后会发现它们重叠在一起了，究其原因在于这两个魔方<code>位置相同</code>，为了解决这个问题需要对它们进行位移变换，改变它们的<code>中心点</code>让它们处于<code>页面上部</code>和<code>页面下部</code>两个不同区域；</p>
+<p>另外还要改变它们的<code>大小</code>，防止所占区域变小时显示不全。</p>
+<p>进行位移变换时需要注意一个问题，在代码中我们所谓的<code>创建一个魔方</code>，其实只是创建了<code>27 个小方块</code>，然后让它们按某种规律排列而已；</p>
+<p>程序中并不存在<code>魔方对象</code>，因此进行位移变换时没办法对魔方对象进行<code>整体的位移变换</code>，只能遍历这 27 个小方块然后对它们分别进行位移变换，这种方式很麻烦，特别是当独立的子元素数量很多的时候。</p>
+<p>考虑到这种情况 ThreeJS 框架提供了<code>Group</code>集合对象，当一个物体由很多独立的子元素组成时，可以创建一个集合对象，然后把所有子元素加入到集合对象中；</p>
+<p>当需要对物体进行整体位移变换时只需要对集合对象进行位移变换即可。</p>
+<p>因此需要修改<code>Rubik</code>对象的<code>model()</code>方法；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第85行至第111行 */</span>
+<span class="hljs-title function_">model</span>(<span class="hljs-params">type</span>) {
+    <span class="hljs-comment">//创建魔方集合</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Group</span>();
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-property">childType</span> = type;
+
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span> = <span class="hljs-title class_">SimpleCube</span>(<span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">x</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">y</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">z</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">num</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">len</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">colors</span>);<span class="hljs-comment">//生成魔方小正方体</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span>.<span class="hljs-property">length</span>; i++) {
+      <span class="hljs-keyword">var</span> item = <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span>[i];
+
+      <span class="hljs-comment">/**
+       * 小方块不再直接加入场景了；
+       * 而是先加入魔方集合，然后再把魔方集合加入场景。
+       */</span>
+      <span class="hljs-comment">//this.main.scene.add(item);</span>
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">add</span>(item);
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">scene</span>.<span class="hljs-title function_">add</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>);
+}
+</code></pre>
+<p><code>new THREE.Group()</code>可以直接创建<code>Group</code>集合对象，加入子元素需要调用其<code>add</code>方法，把所有小方块放入到魔方集合中之后就只需要对<code>this.group</code>进行位移变换就可以了。</p>
+<p>当一个魔方占<code>100%</code>页面区域时，它的中心点在原点；那当这个魔方所占页面区域高度<code>p</code>，页面区域总高度为<code>h</code>时，新的中心点在哪呢？</p>
+<p>对于这个问题我们可以先画个辅助图：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5dbf1ab0929e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>区域总高度为<code>h</code>，上区域高度为<code>p</code>，坐标轴<code>X、Y</code>过原点<code>O</code>，很容易推导出上区域中心点<code>A</code>的<code>Y</code>轴取值为<code>y = h/2-p/2</code>；</p>
+<p>当上区域高度<code>p</code>在总高度<code>h</code>中的比例为<code>percent</code>时，也就是说<code>p = h*percent</code>，那么公式可以写成<code>y = h/2 - h*percent/2</code>，进一步简化可以得到<code>y = h(0.5-percent/2)</code>。</p>
+<p>根据上述公式可以实现设置魔方区域的函数：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第116行至125行 */</span>
+<span class="hljs-title function_">resizeHeight</span>(<span class="hljs-params">percent, transformTag</span>) {
+    <span class="hljs-keyword">if</span> (percent &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>) {
+      percent = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>;
+    }
+    <span class="hljs-keyword">if</span> (percent &gt; (<span class="hljs-number">1</span> - <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>)) {
+      percent = <span class="hljs-number">1</span> - <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>;
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-property">scale</span>.<span class="hljs-title function_">set</span>(percent, percent, percent);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">originHeight</span> * (<span class="hljs-number">0.5</span> - percent / <span class="hljs-number">2</span>) * transformTag;
+}
+</code></pre>
+<p><code>percent</code>表示魔方所占区域的<code>百分比</code>，<code>transformTag</code>表示中心的<code>变换方向</code>，<code>负号</code>表示向着 Y 轴负方向移动，<code>正号</code>表示向着 Y 轴正方向移动；</p>
+<p><code>minPercent</code>表示魔方所占区域的<code>最小值</code>，因为魔方所占区域的大小会随着滑动条的滑动而变化，滑动条靠近顶部或者底部时，魔方所占区域会很小，以至于看不清而且也无法操作，因此需要设置一个最小值；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第20行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">minPercent</span> = <span class="hljs-number">0.25</span>;<span class="hljs-comment">//正反视图至少占25%区域</span>
+</code></pre>
+<p><code>this.group.scale.set(percent, percent, percent)</code>则是对魔方进行缩放从而改变其大小，三个参数分别表示在<code>X轴</code>、<code>Y轴</code>和<code>Z轴</code>的缩放倍数；</p>
+<p>对于<code>this.group.position.y = this.main.originHeight * (0.5 - percent / 2) * transformTag</code>除了需要注意<code>transformTag</code>还需要注意<code>originHeight</code>表示的是<code>透视投影相机中原点所在裁切面</code>的高度；</p>
+<p>虽然最终效果是为了控制魔方在屏幕上显示时所占区域的大小，但是代码中的<code>originHeight</code>并不能直接使用屏幕高度；</p>
+<p>主要是因为屏幕的上的内容都是 3D 场景通过透视投影相机投影之后的效果，originHeight 应该等于魔方上下移动时其中心点所在平面的高度，而初始化魔方时指定其中心点在原点，也就是说<code>originHeight</code>等于过原点且垂直于<code>相机-原点</code>向量的平面的高度；</p>
+<p>感觉比较拗口的话，可以看示例图：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5de8e966c82e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>这是透视投影相机的示例图，在<code>ThreeJS基础</code>那一章也出现过，不同的地方在于在过坐标系原点的位置多了一个同时平行于<code>近平面</code>和<code>远平面</code>的裁切面，其高度就是代码中的<code>originHeight</code>，这个裁切面也就是所谓的<code>透视投影相机中原点所在裁切面</code>。</p>
+<p>在求透视投影相机中原点所在裁切面的高度之前需要弄清楚一个问题；在<code>ThreeJS基础</code>那一章曾介绍过创建<code>透视投影相机</code>时需要设置<code>视角</code>、<code>近平面距离</code>、<code>远平面距离</code>以及<code>裁切面宽高比</code>四个参数，但是你仔细想过这几个参数是怎么相互配合决定相机的可视区域的吗？</p>
+<p>你可能会想当然的觉得<code>视角</code>决定了<code>相机的观察范围（示例图中锥形区域）</code>，然后<code>近平面距离</code>和<code>远平面距离</code>则又从该锥形区域中选取一部分，最终确定为可视区域；</p>
+<p>如果是这样的话，创建相机时根本就不需要<code>裁切面宽高比</code>这个参数了，因为你已经默认<code>视角</code>既是水平视角又是垂直视角，然后锥形区域裁切面宽高比肯定为 1 且不能改变；</p>
+<p>真实的情况是参数中的<code>视角</code>表示的是<code>垂直视角</code>，设置了垂直视角只能决定相机观察区域的的上下范围，上下范围确定之后配合<code>裁切面宽高比</code>才能决定相机观察区域的水平范围。</p>
+<p>明确了垂直视角之后就可以求透视投影相机中原点所在裁切面的高度了，如图所示：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5e05c2889ec7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><code>α</code>为创建相机时设定的垂直视角，<code>z</code>表示相机离裁切面的距离，<code>h</code>为裁切面的高度，公式如下：</p>
+<pre><code class="hljs language-ini" lang="ini"><span class="hljs-attr">h</span> = tan(α/<span class="hljs-number">2</span>)*z*<span class="hljs-number">2</span>
+</code></pre>
+<p>程序中垂直视角为<code>45</code>度，<code>z</code>等于相机的<code>Z</code>轴坐标，<code>Math.tan</code>参数为弧度，最终可得：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第57行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">originHeight</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(<span class="hljs-number">22.5</span>/<span class="hljs-number">180</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>)*<span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>*<span class="hljs-number">2</span>;
+</code></pre>
+<p>在实现滑动控制区域大小功能之前，先固定正反视图分别占一半区域；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第82、87行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-title function_">resizeHeight</span>(<span class="hljs-number">0.5</span>,<span class="hljs-number">1</span>);
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>.<span class="hljs-title function_">resizeHeight</span>(<span class="hljs-number">0.5</span>,-<span class="hljs-number">1</span>);
+</code></pre>
+<p>此时编译运行即可看到如下效果：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811181672694004c727e2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-6">3. 增加控制条；</h3>
+<p>控制条素材图片如下：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181116167182c3c4bf0041~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>新增<code>images</code>目录用于存放项目中需要用到的图片素材，并在<code>object</code>目录中新增<code>TouchLine.js</code>；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111716720d35c366b7c0~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在 3D 场景中绘制 2D 的 UI 元素，目前想到的解决办法是选取 3D 场景中的某个平行于屏幕的平面，然后把 UI 元素绘制到上边去。</p>
+<p>因为在控制正反视图所占区域比例时使用的是<code>透视投影相机中原点所在裁切面</code>，因此为了方便计算（<code>因为我们已经求出了该裁切面的宽度和高度了，绘制UI图片时可以直接根据裁切面的尺寸和图片的实际尺寸比较得到缩放比例</code>），控制条也绘制到这个裁切面。</p>
+<p>完整实现代码如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js */</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable constant_">THREE</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'../threejs/three.js'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TouchLine</span> {
+
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params">main</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span> = main;
+        
+        <span class="hljs-keyword">var</span> self = <span class="hljs-variable language_">this</span>;
+        
+        <span class="hljs-comment">//实际尺寸</span>
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">realWidth</span> = <span class="hljs-number">750</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">realHeight</span> = <span class="hljs-number">64</span>;
+        
+        <span class="hljs-comment">//逻辑尺寸</span>
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">originWidth</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">height</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">realHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> / <span class="hljs-variable language_">this</span>.<span class="hljs-property">realWidth</span>;
+        
+        <span class="hljs-comment">//加载图片</span>
+        <span class="hljs-keyword">var</span> loader = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">TextureLoader</span>();
+        loader.<span class="hljs-title function_">load</span>(<span class="hljs-string">'images/touch-line.png'</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">texture</span>) {
+            <span class="hljs-keyword">var</span> geometry = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PlaneGeometry</span>(self.<span class="hljs-property">width</span>, self.<span class="hljs-property">height</span>);
+            <span class="hljs-keyword">var</span> material = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({ <span class="hljs-attr">map</span>: texture, <span class="hljs-attr">transparent</span>: <span class="hljs-literal">true</span> });
+            self.<span class="hljs-property">plane</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(geometry, material);
+            self.<span class="hljs-property">plane</span>.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+            self.<span class="hljs-property">main</span>.<span class="hljs-property">scene</span>.<span class="hljs-title function_">add</span>(self.<span class="hljs-property">plane</span>)
+        }, <span class="hljs-keyword">function</span> (<span class="hljs-params">xhr</span>) {
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>((xhr.<span class="hljs-property">loaded</span> / xhr.<span class="hljs-property">total</span> * <span class="hljs-number">100</span>) + <span class="hljs-string">'% loaded'</span>);
+        }, <span class="hljs-keyword">function</span> (<span class="hljs-params">xhr</span>) {
+            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'An error happened'</span>);
+        });
+    }
+}
+</code></pre>
+<h4 data-id="heading-7">3.1 加载素材图片</h4>
+<p>首先在代码中定义素材图片的<code>实际尺寸</code>；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第12、13行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">realWidth</span> = <span class="hljs-number">750</span>;
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">realHeight</span> = <span class="hljs-number">64</span>;
+</code></pre>
+<p>然后再定义<code>逻辑尺寸</code>，所谓的逻辑尺寸是指把图片等比例缩放绘制到目标平面后的宽高；</p>
+<p>因为要保证图片完全展示，因此逻辑尺寸的宽度肯定等于目标平面的宽度；前边计算过目标平面的高度<code>originHeight</code>，根据<code>透视投影相机中所有裁切面的宽高比不变</code>，在已知高度的情况下，可以求出其宽度；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第57行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">originWidth</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">originHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-property">aspect</span>;
+</code></pre>
+<p>因为还有其它对象也需要用到<code>originWidth</code>变量，因此把它定义在<code>main.js</code>文件中。</p>
+<p>综上所述逻辑尺寸定义如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第16、17行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">originWidth</span>;
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">height</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">realHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> / <span class="hljs-variable language_">this</span>.<span class="hljs-property">realWidth</span>;
+</code></pre>
+<p>因为涉及到外部图片素材，因此需要用到 ThreeJS 框架提供的加载器；ThreeJS 框架提供了各种各样的加载器，方便开发者在程序中使用，比如：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111716720f78d0b4d18c~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>有的用来加载字体，比如<code>FontLoader</code>；有的用来加载音频，比如<code>AudioLoader</code>；有的用来加载 3D 模型，比如<code>OBJLoader</code>；还有的则可以用来加载图片，比如后边会用到的<code>TextureLoader</code>；</p>
+<p>使用<code>纹理加载器</code>加载图片的用法很简单，只需先创建，然后执行其<code>load</code>方法即可；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第28行至第40行 */</span>
+<span class="hljs-keyword">var</span> loader = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">TextureLoader</span>();
+loader.<span class="hljs-title function_">load</span>(<span class="hljs-string">'images/touch-line.png'</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">texture</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(texture);
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(texture.<span class="hljs-property">image</span>);
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(texture.<span class="hljs-property">image</span>.<span class="hljs-property">width</span>+<span class="hljs-string">' '</span>+texture.<span class="hljs-property">image</span>.<span class="hljs-property">height</span>);
+}, <span class="hljs-keyword">function</span> (<span class="hljs-params">xhr</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>((xhr.<span class="hljs-property">loaded</span> / xhr.<span class="hljs-property">total</span> * <span class="hljs-number">100</span>) + <span class="hljs-string">'% loaded'</span>);
+}, <span class="hljs-keyword">function</span> (<span class="hljs-params">xhr</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'An error happened'</span>);
+});
+</code></pre>
+<p>在<code>加载图片</code>时需要先设置图片的路径，然后定义好回调方法；在加载成功的回调函数中可以直接获得由图片生成的纹理对象，图片被保存在纹理对象的<code>image</code>属性中。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811171672103a5130762e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h4 data-id="heading-8">3.2 绘制控制条</h4>
+<p>在明确了<code>绘制到什么地方</code>以及<code>怎么加载图片素材</code>这两个问题之后，还有一个问题需要解决，<code>用什么绘制？</code>。</p>
+<p>比如说要在 3D 场景中绘制一个小方块，可以使用<code>BoxGeometry</code>对象；那现在要在 3D 场景中绘制 2D 的 UI 元素应该用啥呢？</p>
+<p>ThreeJS 框架提供了<code>PlaneGeometry</code>对象，用来创建平面，刚好可以用来绘制 2D 的 UI 元素；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第30行至第34行 */</span>
+<span class="hljs-keyword">var</span> geometry = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PlaneGeometry</span>(self.<span class="hljs-property">width</span>, self.<span class="hljs-property">height</span>);
+<span class="hljs-keyword">var</span> material = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({ <span class="hljs-attr">map</span>: texture, <span class="hljs-attr">transparent</span>: <span class="hljs-literal">true</span> });
+self.<span class="hljs-property">plane</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(geometry, material);
+self.<span class="hljs-property">plane</span>.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+self.<span class="hljs-property">main</span>.<span class="hljs-property">scene</span>.<span class="hljs-title function_">add</span>(self.<span class="hljs-property">plane</span>);
+</code></pre>
+<p>在纹理加载器的成功回调函数中，创建好轮廓、纹理、材质之后就可以绘制控制条了，设置好位置，然后把它加入到场景中即可；</p>
+<p>在一般情况下 UI 元素不应该受到光照的影响，因此这里使用基础材质对象<code>MeshBasicMaterial</code>。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第4行 */</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">TouchLine</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'object/TouchLine.js'</span>
+
+<span class="hljs-comment">/* main.js 第90行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TouchLine</span>(<span class="hljs-variable language_">this</span>);
+</code></pre>
+<p>最后在<code>main.js</code>中引入并在初始化物体<code>initObject</code>函数中创建<code>TouchLine</code>对象就可以看到如下效果了：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811181672692c7228def5~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h4 data-id="heading-9">3.3 控制条支持拖拽</h4>
+<p>目前只是把控制条绘制出来了，并不能用手指拖拽然后控制正反两个视图所占区域的大小，要实现这个功能需要监听触摸事件；</p>
+<p>在微信小游戏以及 ThreeJS 框架中并没有像浏览器那样支持对每个元素绑定事件监听，要判断是否在拖拽控制条，只能是获得手指在屏幕上触摸的位置坐标，然后根据坐标计算是否在控制条的范围内，如果在控制条的范围内则认为是在拖拽控制条，如果不在则认为没有拖拽控制条。</p>
+<p>要获得手指在屏幕上触摸的坐标位置，需要使用微信小游戏提供的全局触摸事件监听；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第97行至第101行 */</span>
+<span class="hljs-title function_">initEvent</span>(<span class="hljs-params"></span>) {
+    wx.<span class="hljs-title function_">onTouchStart</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchStart</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>));
+    wx.<span class="hljs-title function_">onTouchMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchMove</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>));
+    wx.<span class="hljs-title function_">onTouchEnd</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchEnd</span>.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>));
+}
+</code></pre>
+<p><code>onTouchStart</code>表示监听开始触摸事件，<code>onTouchMove</code>表示监听触摸移动事件，<code>onTouchEnd</code>监听触摸结束事件；其回调函数分别为<code>touchStart</code>、<code>touchMove</code>、<code>touchMove</code>。</p>
+<ul>
+<li>触摸开始回调函数</li>
+</ul>
+<pre><code class="hljs language-js" lang="js">    <span class="hljs-comment">/* main.js 第106行至第112行 */</span>
+    <span class="hljs-title function_">touchStart</span>(<span class="hljs-params">event</span>){
+        <span class="hljs-keyword">var</span> touch = event.<span class="hljs-property">touches</span>[<span class="hljs-number">0</span>];
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(touch);
+    }
+</code></pre>
+<p>在触摸开始回调函数中可以通过<code>event</code>事件对象获得开始触摸点的屏幕坐标，因为不需要考虑多指触控操作，因此以触摸点数组中的第一个元素坐标为准。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811171672142aca2b95c9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>获得开始触摸点的屏幕坐标之后，还需要获得控制条的<code>屏幕尺寸</code>才能进行判断；控制条刚好占满屏幕，因此其屏幕宽度等于屏幕的宽度，再然后根据等比缩放的原则可以得到其屏幕高度；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第20行至第23行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span> = {
+    <span class="hljs-attr">width</span>: <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>,
+    <span class="hljs-attr">height</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">realHeight</span> * <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / self.<span class="hljs-property">realWidth</span>
+}
+</code></pre>
+<p>因为控制条默认位置在屏幕中间，已知其屏幕尺寸就可以求出其左上角顶点的屏幕坐标了；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第24、25行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">left</span> = <span class="hljs-number">0</span>;
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> / <span class="hljs-number">2</span> - <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> / <span class="hljs-number">2</span>;
+</code></pre>
+<p>为了防止大家混淆，这里再重申下一个 UI 元素涉及的三个尺寸：</p>
+<ol>
+<li><code>实际尺寸</code>：因为这里的 UI 元素完全由图片构成，因此这里的实际尺寸其实就是指<code>图片的实际尺寸</code>；</li>
+<li><code>逻辑尺寸</code>：因为需要把 UI 元素绘制到 3D 场景中，因此绘制时需要知道 UI 元素<code>在 3D 场景坐标系中的位置以及尺寸</code>，也就是逻辑尺寸；</li>
+<li><code>屏幕尺寸</code>：把 UI 元素绘制到 3D 场景之后会被渲染到屏幕上，此时<code>展现在屏幕中的尺寸</code>就是屏幕尺寸。</li>
+</ol>
+<p>在知道控制条屏幕尺寸之后，就可以通过<code>边界</code>判断触摸点是否在控制条范围之内了。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第82至88行 */</span>
+<span class="hljs-title function_">isHover</span>(<span class="hljs-params">touch</span>) {
+    <span class="hljs-keyword">var</span> isHover = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (touch.<span class="hljs-property">clientY</span> &gt;= <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> &amp;&amp; touch.<span class="hljs-property">clientY</span> &lt;= <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> &amp;&amp; touch.<span class="hljs-property">clientX</span> &gt;= <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">left</span> &amp;&amp; touch.<span class="hljs-property">clientX</span> &lt;= <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">left</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">width</span>) {
+        isHover = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">return</span> isHover;
+}
+</code></pre>
+<p>在触摸开始事件回调中使用<code>startPoint</code>变量记录触摸开始坐标，当触摸开始坐标在控制条范围内时，激活控制条，设置其状态为<code>正在被操控</code>；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第106行至第112行 */</span>
+<span class="hljs-title function_">touchStart</span>(<span class="hljs-params">event</span>){
+    <span class="hljs-keyword">var</span> touch = event.<span class="hljs-property">touches</span>[<span class="hljs-number">0</span>];
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span> = touch;
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-title function_">isHover</span>(touch)) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-title function_">enable</span>();
+    }
+}
+</code></pre>
+<p>之所以需要设置状态，是因为后续还会增加一些 UI 元素，比如<code>打乱按钮</code>、<code>重置按钮</code>、<code>存档按钮</code>、<code>读取按钮</code>等；另外还有魔方整体转动以及操作魔方等都依赖于微信小游戏提供的全局触摸事件监听，为了防止各种操作之间相互干扰，<code>需要在触摸开始事件就决定此次滑动是进行哪种特定的操作</code>。</p>
+<p>在<code>TouchLine</code>对象中新增两个方法，并使用<code>isActive</code>表示其<code>是否正在被操控</code>；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第52行至第58行 */</span>
+<span class="hljs-title function_">enable</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">isActive</span> = <span class="hljs-literal">true</span>;
+}
+<span class="hljs-title function_">disable</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">isActive</span> = <span class="hljs-literal">false</span>;
+}
+</code></pre>
+<ul>
+<li>触摸移动回调函数</li>
+</ul>
+<p>在触摸移动回调函数中需要根据移动后触摸点的新坐标计算控制条的新位置并重新绘制；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第117行至第125行 */</span>
+<span class="hljs-title function_">touchMove</span>(<span class="hljs-params">event</span>){
+    <span class="hljs-keyword">var</span> touch = event.<span class="hljs-property">touches</span>[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-property">isActive</span>) {<span class="hljs-comment">//滑动touchline</span>
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-title function_">move</span>(touch.<span class="hljs-property">clientY</span>);
+        <span class="hljs-keyword">var</span> frontPercent = touch.<span class="hljs-property">clientY</span> / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+        <span class="hljs-keyword">var</span> endPercent = <span class="hljs-number">1</span> - frontPercent;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rubikResize</span>(frontPercent, endPercent);
+    }
+}
+</code></pre>
+<p>同样是通过事件对象获得移动后触摸点的新坐标，如果控制条状态为已激活状态状态，就更新控制条位置；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第120行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-title function_">move</span>(touch.<span class="hljs-property">clientY</span>);
+</code></pre>
+<p><code>TouchLine</code>对象的<code>move</code>方法具体实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第60行至第77行 */</span>
+<span class="hljs-title function_">move</span>(<span class="hljs-params">y</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">isActive</span>) {
+        <span class="hljs-keyword">if</span> (y &lt; <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span> || y &gt; <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * (<span class="hljs-number">1</span> - <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>)) {
+            <span class="hljs-keyword">if</span> (y &lt; <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>) {
+                y = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>;
+            } <span class="hljs-keyword">else</span> {
+                y = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> * (<span class="hljs-number">1</span> - <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">minPercent</span>);
+            }
+        }
+    
+        <span class="hljs-keyword">var</span> len = <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> / <span class="hljs-number">2</span> - y;<span class="hljs-comment">//屏幕移动距离</span>
+        <span class="hljs-keyword">var</span> percent = len / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+        <span class="hljs-keyword">var</span> len2 = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">originHeight</span> * percent;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">plane</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> += len2;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> = y - <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> / <span class="hljs-number">2</span>;
+    }
+}
+</code></pre>
+<p>因为设置了正反视图所占区域的最小比例，因此更新控制条位置时需要根据这个比例计算控制条移动距离的阀值。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第70、71行 */</span>
+<span class="hljs-keyword">var</span> len = <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> / <span class="hljs-number">2</span> - y;<span class="hljs-comment">//屏幕移动距离</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> = y - <span class="hljs-variable language_">this</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span> / <span class="hljs-number">2</span>;
+</code></pre>
+<p>移动后新触摸点即为控制条新的中心点，旧的中心点的纵坐标减去新的中心点的纵坐标即可得到此次控制条移动的距离，此外还得更新控制条左上角顶点的屏幕坐标。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* TouchLine.js 第73行至75行 */</span>
+<span class="hljs-keyword">var</span> percent = len / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+<span class="hljs-keyword">var</span> len2 = <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">originHeight</span> * percent;
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">plane</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> += len2;
+</code></pre>
+<p>因为得到的移动距离是在屏幕上移动的距离，而更新控制条位置时需要更新控制条在 3D 场景中的坐标；可以先求出屏幕移动距离占屏幕总高度的百分比，这个百分比和裁切面移动距离占裁切面总高度的百分比应该是相同的，就可以求出控制条在裁切面的移动距离，然后更新控制条的 Y 轴坐标即可。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第121行至第123行 */</span>
+<span class="hljs-keyword">var</span> frontPercent = touch.<span class="hljs-property">clientY</span> / <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+<span class="hljs-keyword">var</span> endPercent = <span class="hljs-number">1</span> - frontPercent;
+<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rubikResize</span>(frontPercent, endPercent);
+</code></pre>
+<p>控制条位置更新之后，还需要更新正反视角魔方的位置，先计算新的占比，然后根据新的占比更新位置；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第146行至149行 */</span>
+<span class="hljs-title function_">rubikResize</span>(<span class="hljs-params">frontPercent, endPercent</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-title function_">resizeHeight</span>(frontPercent, <span class="hljs-number">1</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>.<span class="hljs-title function_">resizeHeight</span>(endPercent, -<span class="hljs-number">1</span>);
+}
+</code></pre>
+<p>更新位置时只需要调用魔方对象的<code>rubikResize</code>方法即可。</p>
+<ul>
+<li>触摸结束回调函数</li>
+</ul>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第130至132行 */</span>
+<span class="hljs-title function_">touchEnd</span>(<span class="hljs-params"></span>){
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-title function_">disable</span>();
+}
+</code></pre>
+<p>在触摸结束回调函数中目前只需要做一件事，把控制条的状态设置为未激活状态，表示此次滑动拖拽结束。</p>
+<h4 data-id="heading-10">3.4 去掉视角控制器干扰</h4>
+<p>一切都 OK 了吗？</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181118167269176342e0e7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>其实并没有，上述绘制 UI 元素的方法存在一个问题，即当相机位置变化时，如果 UI 元素的位置没有跟着变化，就会出现上边那种情况；</p>
+<p>解决办法有两个，第一个是 UI 元素的位置随着相机位置的变化而变化，使得 UI 元素始终正面朝向相机；第二个办法是固定相机位置；</p>
+<p>这里采用第二个办法，主要原因在于<code>对于魔方小游戏来说，太自由的视角控制反而不好，会让人感觉整个操作过程比较难控制</code>。</p>
+<p>固定相机位置需要去掉动态改变其位置的控制器；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181118167266c81629d017~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181118167266eb0d57ba3c~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>去掉之后就基本正常了。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018111816726900b771bc5e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h4 data-id="heading-11">3.5 优化</h4>
+<p>到此还有最后一个问题需要解决，现在的正反视图只能看到魔方的两个面；</p>
+<p>要解决这个问题则需要对魔方再做一些的位移变换，确保正反视角魔方均有三个面可见；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第103行至108行 */</span>
+<span class="hljs-keyword">if</span>(type==<span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">frontViewName</span>){
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">rotateY</span>(<span class="hljs-number">45</span>/<span class="hljs-number">180</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);
+}<span class="hljs-keyword">else</span>{
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">rotateY</span>((<span class="hljs-number">270</span>-<span class="hljs-number">45</span>) / <span class="hljs-number">180</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);
+}
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">rotateOnAxis</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-number">25</span> / <span class="hljs-number">180</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);
+</code></pre>
+<p>在 ThreeJS 框架中<code>Object3D</code>对象有很多进行位移变换的函数以及属性；</p>
+<p>其中<code>rotateY</code>顾名思义是绕 Y 轴旋转，<code>this.group.rotateY(45/180*Math.PI)</code>表示绕 Y 轴水平转动 45 度，这样就可以看到魔方的两个侧面了；</p>
+<p><code>rotateOnAxis</code>则表示绕某个向量旋转，当魔方需要绕着其对角线转动时，知道其对角线向量为<code>new THREE.Vector3(1, 0, 1)</code>，传入到<code>rotateOnAxis</code>方法中即可；</p>
+<p><code>this.group.rotateOnAxis(new THREE.Vector3(1, 0, 1), 25 / 180 * Math.PI)</code>表示魔方绕着其对角线在垂直方向旋转 25 度，这样就可以看到正视角魔方的上表面和反视视角魔方的下表面了。</p>
+<p>最后就实现了如下效果：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181118167268e0ceb28f79~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-12">总结</h2>
+<p>在这一章中我们学会了如何实现魔方小游戏的正反视图功能；在绘制 UI 元素时需要注意尺寸问题，<code>对于图形相关的问题想不明白的时候就画个图试试！</code></p></div>
+    </body>
+    </html>
