@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上一章我们学习了如何用 Sparrow 和 <a href="https://link.juejin.cn?target=https%3A%2F%2Fs2.antv.vision%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://s2.antv.vision/" ref="nofollow noopener noreferrer">AntV S2</a> 去绘制表格，简单了解了一下我们分析任务中的数据。这一章我们将完成其中一个任务：<strong>揭露中世纪是一个压抑的时代</strong>，也就是去看看压抑的中世纪到底发生了什么？</p>
+<p>本章我们先简单回顾一下之前学习的视觉编码理论，并且进行一些比较深入了解。这之后我们会用 Sparrow 基于提到的理论去完成相应的可视化，最后给大家介绍如何用信息图展示我们的结果。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp73146a5c03984ad4a3851191fb60f1dc~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-0">视觉编码理论基础</h2>
+<ul>
+<li>visual encodings 视觉编码是可视化设计的核心环节之一。</li>
+<li>如何视觉编码？即让 mark 标记和控制其外观的 channel 视觉通道进行正交组合。</li>
+</ul>
+<p>《Visualization Analysis &amp; Design》中，作者专门使用一章节介绍 mark 和 channel ：mark 标记是描述项目或链接的「基本几何元素」，channel 通道控制 mark 的「外观」。下面我们就以这本书的内容作为理论指导，介绍如何设计更有效、更友好的可视化。</p>
+<p>简单回顾一下 mark 标记的类型：点、线、面。channel 通道类型：位置、颜色、形状、角度、尺寸。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp66597bb2e02249a6afbcd14737c2e36d~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>channel 通道的有效性取决于它的类型：在感知上「magnitude 程度」通道与「ordered 有序」数据很匹配，而「identity 特征」通道与「categorical 分类」数据很匹配。下图总结了 channel 的有效性排行情况。我们可以看到左列排名前几为：同比例尺的位置通道、不同比例尺的位置通道、长度、角度、面积等等，右列则是空间区域、色相、运动、形状。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa77304e485994d6aa9328d6a94dcf427~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>上述 channel 的有效性排行还包括了5个维度的考虑：<strong>准确性、可辨别性、可分离性、凸显性</strong>和<strong>分组能力</strong>。我们进一步了解可视化设计还应该注意的维度：</p>
+<ul>
+<li>
+<p>准确性：Cleveland 和 McGill 提供了每种通道类型的感知准确性的排名（针对 magnitude 程度通道）：<strong>这个排名是和上面图的左列排名相对应</strong>。同为：同比例尺的位置通道、不同比例尺的位置通道、长度、角度、面积。Heer 和 Bostock 后来的工作发现长度和角度的准确性大致相等。</p>
+</li>
+<li>
+<p>可辨别性：通道的程度差异是否是可感知的？如果程度差异很小，视觉上是很难区分差异的。因此应该确保该通道的<strong>每个 bin 是有区分度的分段</strong>。例如线的宽度：图下中用三个程度（500、250、100）来展示线宽度的分段范围。</p>
+</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2d758c2be54c4aff919ac43debeacf53~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li>可分离的：如下图所示，**左1图是一对完全可分离的通道：位置和色相。**我们可以很容易地看到点的位置分布及其颜色。左2图是大小和色相的组合。我们很容易根据圆的大小对其分类，但是色相在大小映射的混淆下不那么容易被区分。宽度和高度的组合衍生出了大小这个视觉通道，也变得更难被区分了。红色与绿色的组合则更甚。</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe5a355c52f6e4d45a664c6d69a0a9560~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li>凸显性：许多通道具备凸显性，包括（a）倾斜，（b）大小，（c）形状，（d）接近，和（e）阴影方向。(f) 平行线的效果没有前者们佳。</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3472281e5347454b98eb9875f007b29f~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li>分组能力：如何设计才能展示分组的效果呢？
+<ul>
+<li>方式一：<strong>使用链接型的 mark 标记。</strong> containment 包含区的分组性高于 connection 连接线。</li>
+</ul>
+</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp590948d62bd347deb70f1a2b3a7d09cb~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li>方式二：<strong>使用 identity 特征型通道。</strong> identity 通道的感知分组不像使用 connection 或 containment 标记那样效果强烈，但好处是不会增加额外的杂乱。</li>
+<li>方式三：<strong>使用“亲近性”原则进行分组。</strong> 即同组元素放置同一个区域里。</li>
+</ul>
+<p>通过上述的知识，我们了解到了如何更有效地利用 channel 来展示可视化。但光是了解 mark 和 channel 还是不够的，设计还要从最根本的数据类型出发。</p>
+<h2 data-id="heading-1">针对表格型数据的视觉编码理论</h2>
+<p>表格型数据无处不在，《苏菲的世界》的数据当然也包括了它。</p>
+<p>那么我们如何对「表格型数据」进行可视化设计呢？包括两个方面：「arrange 排布」数据以及「map 映射」数据。</p>
+<ul>
+<li>「arrange 排布」表格型数据：下图显示了四种设计选择。一是直接表达值。二是三种位置排布方式：对区域的分散、排序和对齐。三是轴的方向：矩形的、平行的或径向的。四是布局密度：密集的、空间填充型的。我们可以看到，他们都<strong>与空间通道（位置）相关。</strong></li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp45c73364394a46d79e82b329c13825ff~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li>「 map映射 」数据：颜色以及其他通道也是视觉编码的重要组成部分。这些与第一部分的 channel 介绍是差不多的，我们会在下面的分析问题中，将这些理论应用到可视化设计中去。</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb83a5cbc84af426480d26ce805cbc4ee~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-2">问题分析</h2>
+<p>还记得小册子第二章的分析任务吗？我们可以用 Sparrow 来解决下面前两个问题：</p>
+<ul>
+<li>揭露中世纪是一个压抑的时代。（Present）</li>
+<li>哲学家们的年龄分布如何？有多少哲学家的寿命超过了 40 岁？（Discover）</li>
+<li>进一步探索：研究哲学的国家随时间发生了变化吗？最小寿命的哲学家是谁？感兴趣的哲学家都发表了什么样的观点？（Discover）</li>
+</ul>
+<p>上面两个问题可以换个思路提问：时代和哲学家寿命之间的<strong>关系是</strong>怎样的？这个问题可以侧面反映出哲学家在时代中的<strong>分布情况</strong>，同时又展现了哲学家的寿命情况（<strong>异常值</strong>）。</p>
+<h2 data-id="heading-3">可视分析</h2>
+<p><em><strong>第一步：准备数据，认识数据</strong></em></p>
+<p>根据想要了解的内容，我们从《苏菲的世界》中获取了关于哲学家信息的数据（<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world" ref="nofollow noopener noreferrer">Github</a>）：</p>
+<pre><code class="hljs language-javascript" lang="javascript"><span class="hljs-keyword">const</span> rawData = [
+  {
+    <span class="hljs-string">"points"</span>: [<span class="hljs-string">"水是万物之源。"</span>],
+    <span class="hljs-string">"words"</span>: [{
+        <span class="hljs-string">"word"</span>: <span class="hljs-string">"水是"</span>,
+        <span class="hljs-string">"weight"</span>: <span class="hljs-number">11.739204307083542</span>
+    }, {
+        <span class="hljs-string">"word"</span>: <span class="hljs-string">"之源"</span>,
+        <span class="hljs-string">"weight"</span>: <span class="hljs-number">9.23723855786</span>
+    }, {
+        <span class="hljs-string">"word"</span>: <span class="hljs-string">"万物"</span>,
+        <span class="hljs-string">"weight"</span>: <span class="hljs-number">7.75434839431</span>
+    }],
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"泰利斯"</span>,
+    <span class="hljs-string">"lifespan"</span>: [-<span class="hljs-number">624</span>, -<span class="hljs-number">546</span>],
+    <span class="hljs-string">"country"</span>: <span class="hljs-string">"希腊"</span>,
+    <span class="hljs-string">"id"</span>: <span class="hljs-number">66</span>
+	},
+	...
+]
+</code></pre>
+<p>观察数据后，我们知道「时代」和「哲学家的寿命」都可以从字段 lifespan 得来。将数据进行预处理一下，添加 born 出生年份和 age 年龄的维度：
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc8b29be61f25469395ec295028d25663~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-javascript" lang="javascript"><span class="hljs-keyword">const</span> data = rawData.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">datum</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> { lifespan } = datum;
+  <span class="hljs-keyword">return</span> {
+    ...datum,
+    <span class="hljs-attr">born</span>: lifespan[<span class="hljs-number">0</span>],
+    <span class="hljs-attr">age</span>: lifespan[<span class="hljs-number">1</span>] - lifespan[<span class="hljs-number">0</span>],
+  }
+})
+</code></pre>
+<p><strong><em>第二步：视觉编码</em></strong></p>
+<p>现在数据和想要的维度已经有了，那么我们可以用什么图表来展示数据呢？</p>
+<ul>
+<li>思路：考虑维度的类型和数量（what），结合目标任务（why），进而选择「排布 arrange」方式，接着完善「mark」+「channel」映射（how），形成最终的图表。</li>
+<li>例子1：如果想查看两个具有数值型维度的组合结果（what），如观察相关性或关系（why），首先针对都是数值型的维度，对应直接表达值（arrange：express value）这种排布方式，即数值型维度被映射到沿轴分布的位置，且 mark 为一个点，因此用散点图来展示；</li>
+<li>例子2：如果想组合一个分类型维度和一个数值型维度（what），以比较各类型的值大小（why），可以使用元素对其布局（arrange：align），即将分类维度在轴上排开排布，再用长度通道映射数值型维度。对应的 mark 是 line。因此用柱形图来表示；</li>
+<li>例子3：如果我们要同时展示三个维度（why），维度分别是两个分类型+一个数值型（what），则让两个分类型维度分别沿着行、列对齐分布（arrange：align），mark 为 area，将数值型维度编码成颜色，因此热力图是合适的。</li>
+</ul>
+<p>根据本文提供的两个属于「数值型」 的维度（born、age），通过下表分析可以得出散点图这个设计方案。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><strong>charts</strong></th><th>scatter plot</th></tr></thead><tbody><tr><td><strong>What：Data</strong></td><td>表格型数据：born 和 age 都是为数值型的数据维度。</td></tr><tr><td><strong>How：Encode</strong></td><td>1. arrange：express value（横、纵方向）；2. mark：point ；3. channel：position on common scale</td></tr><tr><td><strong>Why：Task</strong></td><td>关系：时代和哲学家寿命之间的关系；分布：哲学家的寿命分布；异常值：哲学家寿命的异常值</td></tr></tbody></table>
+<p><em><strong>第三步：数据可视化</strong></em></p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp82241c24e1a140599f561c38addb4e87~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-javascript" lang="javascript">(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/d345d2d7-a35d-4d27-af92-4982b3e6b213.json"</span>
+  );
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+  <span class="hljs-keyword">return</span> sp.<span class="hljs-title function_">plot</span>({
+    data,
+    <span class="hljs-comment">// 简单处理一下数据</span>
+    <span class="hljs-attr">transforms</span>: [
+      <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span>
+        data.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> ({
+          <span class="hljs-attr">born</span>: +<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(d.<span class="hljs-property">lifespan</span>[<span class="hljs-number">0</span>], <span class="hljs-number">0</span>, <span class="hljs-number">1</span>),
+          <span class="hljs-attr">age</span>: d.<span class="hljs-property">lifespan</span>[<span class="hljs-number">1</span>] - d.<span class="hljs-property">lifespan</span>[<span class="hljs-number">0</span>],
+          <span class="hljs-attr">name</span>: d.<span class="hljs-property">name</span>,
+        })),
+    ],
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"point"</span>,
+    <span class="hljs-attr">paddingTop</span>: <span class="hljs-number">30</span>,
+    <span class="hljs-attr">guides</span>: {
+      <span class="hljs-attr">x</span>: {
+        <span class="hljs-attr">formatter</span>: <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> {
+          <span class="hljs-keyword">const</span> year = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(d).<span class="hljs-title function_">getFullYear</span>();
+          <span class="hljs-keyword">return</span> ((year / <span class="hljs-number">50</span>) | <span class="hljs-number">0</span>) * <span class="hljs-number">50</span>;
+        },
+      },
+    },
+    <span class="hljs-attr">encodings</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-string">"born"</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-string">"age"</span>,
+    },
+  });
+})();
+</code></pre>
+<p><em><strong>第四步：数据洞察</strong></em></p>
+<ul>
+<li>上述的图表印证了我们的第一个观点：中世纪是一个压抑的时代。中世纪的范围是-5～1500年，从图中看出很少有哲学家被提及。当时的主流观点是，人类只是自然界的一部分，他们更关注上帝而不是自己。</li>
+<li>不同时期的哲学家大部分都是比较长寿的，在 60～90 岁之间。</li>
+<li>有一位哲学家小于 40 岁。</li>
+</ul>
+<h2 data-id="heading-4">丰富表现力</h2>
+<p>上文我们通过位置的通道映射，用散点图印证了「抑郁的时代」，了解了时代与哲学家年龄的关系以及年龄的情况。但是，这个图表显然不是令人印象深刻的。并且 Sparrow 还不能进一步做交互来发现细节信息。</p>
+<p>接下来，我们使用 g2 ，采用<strong>隐喻的手法</strong>进一步丰富视觉效果，并增加一些交互，回答这些问题：研究哲学的国家随时间发生了变化吗？最小寿命的哲学家是谁？感兴趣的哲学家都发表了什么样的观点？</p>
+<p>我们把每一位哲学家比作一朵花，来营造「百花齐放」的氛围。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4306885761474e0bb98f23a66981f919~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>最终效果图如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp73146a5c03984ad4a3851191fb60f1dc~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>对应的映射设计思路如下：我们基于原有的散点图来扩展设计。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp78e7f5ef71b84ee58c51339ea89bc16a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>首先 born 和 age 的映射不变，然后让颜色映射不同的国家，并增加元素花瓣来隐喻哲学家的观点：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><strong>数据属性</strong></th><th><strong>视觉标记 mark</strong></th><th><strong>视觉通道 channel</strong></th><th><strong>隐喻</strong></th></tr></thead><tbody><tr><td>born</td><td>花蕊 (point)</td><td>position</td><td>所在时间轴位置反应出生的时间</td></tr><tr><td>age</td><td>花蕊 (point)</td><td>position</td><td>高度比喻寿命长短</td></tr><tr><td>points</td><td>花瓣</td><td>/</td><td>一个花瓣比喻一个观点，花瓣越多，产出的观点越多</td></tr><tr><td>country</td><td>花瓣</td><td>color</td><td>不同的花瓣颜色=不同种类，比喻不同的国家</td></tr></tbody></table>
+<p>实现如下：我们需要用 g2 的 registerShape 方法来自定义一些图形。先来实现一个简单的花蕊（散点）+花瓣：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2703cf9309be4230a74a4af82d4c4598~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-javascript" lang="javascript"><span class="hljs-comment">// 1. 自定义 shape</span>
+<span class="hljs-variable constant_">G2</span>.<span class="hljs-title function_">registerShape</span>(<span class="hljs-string">'point'</span>, <span class="hljs-string">'glyph'</span>, {
+  <span class="hljs-title function_">draw</span>(<span class="hljs-params">cfg, container</span>) {
+    cfg.<span class="hljs-property">points</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">parsePoints</span>(cfg.<span class="hljs-property">points</span>);
+    <span class="hljs-keyword">const</span> group = container.<span class="hljs-title function_">addGroup</span>();
+    <span class="hljs-comment">// 花瓣</span>
+    <span class="hljs-title function_">createPetals</span>(group, cfg);
+    <span class="hljs-comment">// 花蕊</span>
+    <span class="hljs-title function_">createStamen</span>(group, cfg);
+    <span class="hljs-keyword">return</span> group;
+  }
+});
+
+<span class="hljs-comment">// 2. 创建图表</span>
+<span class="hljs-keyword">const</span> chart = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">G2</span>.<span class="hljs-title class_">Chart</span>({
+  <span class="hljs-attr">container</span>: <span class="hljs-string">'container'</span>,
+  <span class="hljs-attr">autoFit</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">width</span>: <span class="hljs-number">700</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">400</span>,
+});
+
+<span class="hljs-comment">// 3. 绑定数据，调整比例尺</span>
+chart
+  .<span class="hljs-title function_">data</span>(data)
+  .<span class="hljs-title function_">scale</span>(<span class="hljs-string">'born'</span>, {
+    <span class="hljs-attr">tickCount</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">nice</span>: <span class="hljs-literal">true</span>,
+  })
+  .<span class="hljs-title function_">scale</span>(<span class="hljs-string">'age'</span>, {
+    <span class="hljs-attr">nice</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">max</span>: <span class="hljs-number">100</span>
+  });
+
+<span class="hljs-comment">// 4. 绘制点，绑定维度（包括组件样式调整）</span>
+chart.<span class="hljs-title function_">point</span>()
+  .<span class="hljs-title function_">shape</span>(<span class="hljs-string">'circle'</span>)
+  .<span class="hljs-title function_">position</span>(<span class="hljs-string">'born*age'</span>)
+	.<span class="hljs-title function_">color</span>(<span class="hljs-string">'#7693eb'</span>)
+
+chart.<span class="hljs-title function_">legend</span>(<span class="hljs-string">'age'</span>, <span class="hljs-literal">false</span>);
+chart.<span class="hljs-title function_">axis</span>(<span class="hljs-string">'age'</span>, {
+  <span class="hljs-attr">grid</span>: <span class="hljs-literal">null</span>
+});
+
+<span class="hljs-comment">// 5. 渲染图表</span>
+chart.<span class="hljs-title function_">render</span>();
+</code></pre>
+<p>对应的 createPetals 和 createStamen 函数：</p>
+<pre><code class="hljs language-javascript" lang="javascript"><span class="hljs-comment">/**
+ * 创建花瓣
+ * <span class="hljs-doctag">@param</span> group 元素容器
+ * <span class="hljs-doctag">@param</span> cfg 每个 item 的 cfg 配置信息
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createPetals</span>(<span class="hljs-params">group, cfg</span>) {
+  <span class="hljs-keyword">const</span> { data, color } = cfg;
+  <span class="hljs-keyword">const</span> { points } = data;
+  <span class="hljs-keyword">const</span> maxCount = points.<span class="hljs-property">length</span> === <span class="hljs-number">2</span> ? <span class="hljs-number">5</span> : points.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">const</span> angleUnit = (<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * <span class="hljs-number">2</span>) / maxCount;
+  <span class="hljs-keyword">const</span> { x, y } = cfg.<span class="hljs-property">points</span>[<span class="hljs-number">0</span>];
+  <span class="hljs-keyword">const</span> petalSize = <span class="hljs-number">25</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> index <span class="hljs-keyword">in</span> points) {
+    <span class="hljs-keyword">const</span> petal = group.<span class="hljs-title function_">addShape</span>(<span class="hljs-string">"path"</span>, {
+      <span class="hljs-attr">attrs</span>: {
+        <span class="hljs-attr">path</span>: <span class="hljs-string">`
+        M<span class="hljs-subst">${x}</span> <span class="hljs-subst">${y}</span>
+        C<span class="hljs-subst">${x - petalSize / <span class="hljs-number">2.7</span>}</span> <span class="hljs-subst">${y - petalSize / <span class="hljs-number">2.5</span>}</span>
+        <span class="hljs-subst">${x - petalSize / <span class="hljs-number">2.7</span>}</span> <span class="hljs-subst">${y - petalSize / <span class="hljs-number">1.5</span>}</span>
+        <span class="hljs-subst">${x}</span> <span class="hljs-subst">${y - petalSize / <span class="hljs-number">1.2</span>}</span>
+        C<span class="hljs-subst">${x + petalSize / <span class="hljs-number">2.7</span>}</span> <span class="hljs-subst">${y - petalSize / <span class="hljs-number">1.5</span>}</span>
+        <span class="hljs-subst">${x + petalSize / <span class="hljs-number">2.7</span>}</span> <span class="hljs-subst">${y - petalSize / <span class="hljs-number">2.5</span>}</span>
+        <span class="hljs-subst">${x}</span> <span class="hljs-subst">${y}</span>
+        `</span>,
+        <span class="hljs-attr">shadowBlur</span>: <span class="hljs-number">50</span>,
+        <span class="hljs-attr">shadowColor</span>: color,
+        <span class="hljs-attr">fillOpacity</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">fill</span>: <span class="hljs-string">`l(90) 0:<span class="hljs-subst">${color}</span> 0.2:<span class="hljs-subst">${color}</span> 1:#fff`</span>
+      }
+    });
+    petal.<span class="hljs-title function_">rotateAtPoint</span>(x, y, angleUnit * index);
+  }
+}
+
+<span class="hljs-comment">/**
+ * 创建花蕊
+ * <span class="hljs-doctag">@param</span> group 元素容器
+ * <span class="hljs-doctag">@param</span> cfg 每个 item 的 cfg 配置信息
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createStamen</span>(<span class="hljs-params">group, cfg</span>) {
+  <span class="hljs-keyword">const</span> { points, color } = cfg;
+  <span class="hljs-keyword">const</span> { x, y } = points[<span class="hljs-number">0</span>];
+  group.<span class="hljs-title function_">addShape</span>(<span class="hljs-string">'circle'</span>, {
+    <span class="hljs-attr">attrs</span>: {
+      <span class="hljs-attr">r</span>: <span class="hljs-number">2</span>,
+      x,
+      y,
+      <span class="hljs-attr">stroke</span>: color,
+      <span class="hljs-attr">fillOpacity</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">shadowColor</span>: <span class="hljs-string">'#eee'</span>,
+      <span class="hljs-attr">shadowBlur</span>: <span class="hljs-number">5</span>,
+      <span class="hljs-attr">fill</span>: color,
+      <span class="hljs-attr">lineWidth</span>: <span class="hljs-number">0</span>,
+    }
+  });
+}
+</code></pre>
+<p>继续添加映射与隐喻：花茎与叶子。剩下的代码思路是差不多的，详见(<a href="https://link.juejin.cn?target=https%3A%2F%2Fcodesandbox.io%2Fs%2Fjolly-mopsa-739hf%3Ffile%3D%2Fsrc%2Findex.js" target="_blank" rel="nofollow noopener noreferrer" title="https://codesandbox.io/s/jolly-mopsa-739hf?file=/src/index.js" ref="nofollow noopener noreferrer">CodeSandBox</a>)：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><strong>数据属性</strong></th><th><strong>视觉标记 mark</strong></th><th><strong>视觉通道 channel</strong></th><th><strong>隐喻</strong></th></tr></thead><tbody><tr><td>born</td><td>花蕊</td><td>position</td><td>所在时间轴位置反应出生的时间</td></tr><tr><td>age</td><td>花蕊 (point)、花茎</td><td>position、length</td><td>花蕊高度、花茎长度比喻寿命长短</td></tr><tr><td>points</td><td>花瓣</td><td>/</td><td>一个花瓣比喻一个观点，花瓣越多，产出的观点越多</td></tr><tr><td>country</td><td>花瓣</td><td>color</td><td>不同的花瓣颜色=不同种类，比喻不同的国家</td></tr><tr><td>words</td><td>叶子</td><td>/</td><td>一片叶子比喻一个关键词，表示叶子与花瓣不可分的关系</td></tr><tr><td>weight</td><td>叶子</td><td>size</td><td>关键词权重比喻叶子的养分</td></tr></tbody></table>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp82bec5b753ef4c6fad4eeda11880564c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image">
+接下来，增加 tooltip 以查看细节：
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp5ec4ebb1b96944d3bff1f16d70581472~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>回看该 channel 的设计如何结合视觉编码理论基础：</p>
+<ul>
+<li>从channel 准确性角度来说，针对数值型维度，使用了排名 1 的同比例尺的位置通道；针对分类型维度，“国家”属性使用空间区域映射可能是更合适的，由于散点图限制，结合隐喻使用了排名 2 的色相通道。</li>
+<li>由于映射通道较多，需要关注通道的可分离性，因此使用了最合适的位置 + 颜色的组合。</li>
+<li>size 通道会影响 color 通道的效果。例如看不清颜色或者容易忽略花瓣的数量，尤其是颜色较多的情况下。所以在此之前，撤回了对花瓣的大小通道映射。</li>
+</ul>
+<p>数据洞察：</p>
+<ul>
+<li>各国哲学家分阶段出现：国家从最初的雅典、希腊，转变成意大利，再到英法德。</li>
+<li>交互探索：寿命最短的是耶稣，仅34岁；</li>
+<li>交互探索：笛卡尔、康德、祁克果、马克思贡献的观点最多；观点内容包含了关于上帝、人类、物质的话题。</li>
+<li>权重最大的关键词“事物”来自亚里士多德。</li>
+</ul>
+<h2 data-id="heading-5">小结</h2>
+<p>这一章和大家一起用“朴素”和“炫酷”的方式完成了：“<strong>揭露中世纪是一个压抑的时代</strong>”这一个任务，这里主要涉及的是<strong>表格数据</strong>的可视化方法。下一章我们将去看看“哲学家之间在讨论啥‘八卦’”，去看看文本可视化的其中一种方法。</p>
+<blockquote>
+<p>参考：Munzner, Tamara. <em>Visualization analysis and design</em>. CRC press, 2014.</p>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

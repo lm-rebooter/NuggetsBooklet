@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>本章我们将以地理视角看哲学家，学会使用地理可视化完成 “苏菲的世界中，哲学中心如何变化？” 这个任务。</p>
+<h2 data-id="heading-0">任务分析</h2>
+<p>我们要分析哲学家的地理位置分布，首先需要找到与“地理”相关的信息，这里刚好有哲学家的所在国家名，我们以哲学家的所在国家作为地理数据，就可以分析“哲学家所在国家分布情况”，然后我们可以利用哲学家的出生日期来分析“哲学中心如何变化”。</p>
+<p>大致需要以下几步完成任务</p>
+<ul>
+<li>拾取全世界各个国家的地理数据</li>
+<li>将国家名与拾取到的国家地理进行关联</li>
+<li>使用地理数据可视化库 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> &amp; <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> 将数据给可视化出来</li>
+<li>获取数据洞察</li>
+</ul>
+<p>下面按照这几个步骤，实现一个哲学家所在国的区域分布图与哲学中心变化图，并从中获得数据洞察。</p>
+<h2 data-id="heading-1">可视分析</h2>
+<h3 data-id="heading-2">获取数据</h3>
+<p>我们要分析的数据”<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fchallenge-2021%2Fblob%2Fmain%2Fdata%2Fphilosophers.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/challenge-2021/blob/main/data/philosophers.json" ref="nofollow noopener noreferrer">哲学家的所在国家</a>”，数据格式如下：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">name</th><th>points</th><th>lifespan</th><th>country</th></tr></thead><tbody><tr><td align="left">泰利斯</td><td>"水是万物之源。"</td><td>[-624, -546]</td><td>希腊</td></tr><tr><td align="left">安纳克西曼德</td><td>"形成万物的物质不可能是一定是这些已经被创造出来的物质。"</td><td>[-610, -546]</td><td>希腊</td></tr><tr><td align="left">亚里士多德</td><td>"现实生活中最高层次的事物不是那些我们用理性来探索的事物，而是我们用感官察觉的事物。","事物是由本身的形式与质料和谐一致的事物所构成的，质料总是致力于实现一种内在的可能性。"</td><td>[-384, -322]</td><td>雅典</td></tr><tr><td align="left">苏格拉底</td><td>"我只知道一件事情，就是我一无所知。", "明辨是非的能力就存在于人的理性中，而不存在于社会中。"</td><td>[-470, -399]</td><td>雅典</td></tr><tr><td align="left">普罗汀</td><td>"宇宙间万事万物都是一体的，因为上帝存在于万事万物之中。"</td><td>[-270, -205]</td><td>意大利</td></tr></tbody></table>
+<p>接下来拾取全世界各个<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fchallenge-2021%2Fblob%2Fgeo-map%2Fdata%2Fcountrys.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/challenge-2021/blob/geo-map/data/countrys.json" ref="nofollow noopener noreferrer">国家的地理数据</a>，这里使用地理数据共享开源组织 <a href="https://link.juejin.cn?target=https%3A%2F%2Fdownload.geofabrik.de%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://download.geofabrik.de/" ref="nofollow noopener noreferrer">openstreetmap</a> 的数据，为了方便使用采用 GeoJson 格式的地理数据，数据格式如下：</p>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"FeatureCollection"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"features"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Feature"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"geometry"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Polygon"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"coordinates"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">// ... ]</span>
+      <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"properties"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"希腊"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"centroid"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-number">22.989178297364294</span><span class="hljs-punctuation">,</span><span class="hljs-number">39.04355317366236</span><span class="hljs-punctuation">]</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Feature"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"geometry"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Polygon"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"coordinates"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">// ... ]</span>
+      <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"properties"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"意大利"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"centroid"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-number">12.075174042231398</span><span class="hljs-punctuation">,</span><span class="hljs-number">42.78877076169903</span><span class="hljs-punctuation">]</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h3 data-id="heading-3">Sparrow 绘制气泡地图</h3>
+<p>有了数据之后，我们首先尝试用 Sparrow 去绘制一个气泡地图。如果在书中出现了该国家的哲学家，那么这个国家会有一个气泡，出现的哲学家数量越多，这个地方的气泡越大。</p>
+<p>同样 Sparrow 本身不具备计算地图路径的能力，所以这个地方我们借助 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-geo" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-geo" ref="nofollow noopener noreferrer">d3-geo</a> 去完成我们的可视化。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd6c35274a9d04dcea366b3483346a6a1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js">(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">//@see https://observablehq.com/@d3/world-airports?collection=@d3/d3-geo</span>
+
+  <span class="hljs-comment">// 获取数据</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">URLS</span> = [
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/a51018d2-69ef-4e6b-8095-5d4f5815166e.json"</span>,
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/d345d2d7-a35d-4d27-af92-4982b3e6b213.json"</span>,
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/1070dc04-329e-4655-95b0-f1dc094206b1.json"</span>,
+  ];
+  <span class="hljs-keyword">const</span> [world, people, country] = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(
+    <span class="hljs-variable constant_">URLS</span>.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">async</span> (url) =&gt; {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(url);
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+    })
+  );
+
+  <span class="hljs-keyword">const</span> projection = d3.<span class="hljs-title function_">geoNaturalEarth1</span>();
+
+  <span class="hljs-comment">// 确定视图大小</span>
+  <span class="hljs-keyword">const</span> outline = { <span class="hljs-attr">type</span>: <span class="hljs-string">"Sphere"</span> };
+  <span class="hljs-keyword">const</span> width = <span class="hljs-number">800</span>;
+  <span class="hljs-keyword">const</span> height = (<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> [[x0, y0], [x1, y1]] = d3
+      .<span class="hljs-title function_">geoPath</span>(projection.<span class="hljs-title function_">fitWidth</span>(width, outline))
+      .<span class="hljs-title function_">bounds</span>(outline);
+    <span class="hljs-keyword">const</span> dy = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(y1 - y0),
+      l = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(x1 - x0), dy);
+    projection.<span class="hljs-title function_">scale</span>((projection.<span class="hljs-title function_">scale</span>() * (l - <span class="hljs-number">1</span>)) / l).<span class="hljs-title function_">precision</span>(<span class="hljs-number">0.2</span>);
+    <span class="hljs-keyword">return</span> dy;
+  })();
+
+  <span class="hljs-comment">// compute paths data</span>
+  <span class="hljs-keyword">const</span> path = d3.<span class="hljs-title function_">geoPath</span>(projection);
+  <span class="hljs-keyword">const</span> land = topojson.<span class="hljs-title function_">feature</span>(world, world.<span class="hljs-property">objects</span>.<span class="hljs-property">land</span>);
+  <span class="hljs-keyword">const</span> graticule = d3.<span class="hljs-title function_">geoGraticule10</span>();
+  <span class="hljs-keyword">const</span> paths = [
+    { <span class="hljs-attr">d</span>: <span class="hljs-title function_">path</span>(land), <span class="hljs-attr">fill</span>: <span class="hljs-string">"#ddd"</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"none"</span> },
+    { <span class="hljs-attr">d</span>: <span class="hljs-title function_">path</span>(graticule), <span class="hljs-attr">fill</span>: <span class="hljs-string">"none"</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#ddd"</span> },
+    { <span class="hljs-attr">d</span>: <span class="hljs-title function_">path</span>(outline), <span class="hljs-attr">fill</span>: <span class="hljs-string">"none"</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"black"</span> },
+  ];
+
+  <span class="hljs-comment">// 计算气泡数据</span>
+  <span class="hljs-keyword">const</span> countryCentroid = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>(
+    country.<span class="hljs-property">features</span>
+      .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">properties</span>.<span class="hljs-property">name</span>)
+      .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> [d.<span class="hljs-property">properties</span>.<span class="hljs-property">name</span>, d.<span class="hljs-property">properties</span>.<span class="hljs-property">centroid</span>])
+  );
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">countryName</span> = (<span class="hljs-params">d</span>) =&gt; (d === <span class="hljs-string">"雅典"</span> ? <span class="hljs-string">"希腊"</span> : d);
+  <span class="hljs-keyword">const</span> countries = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(
+    d3.<span class="hljs-title function_">group</span>(people, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">country</span>),
+    <span class="hljs-function">(<span class="hljs-params">[country, people]</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> [x, y] = <span class="hljs-title function_">projection</span>(countryCentroid.<span class="hljs-title function_">get</span>(<span class="hljs-title function_">countryName</span>(country)));
+      <span class="hljs-keyword">return</span> {
+        country,
+        <span class="hljs-attr">count</span>: people.<span class="hljs-property">length</span>,
+        x,
+        y,
+      };
+    }
+  );
+
+  <span class="hljs-comment">// 绘制</span>
+  <span class="hljs-keyword">return</span> sp.<span class="hljs-title function_">plot</span>({
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"layer"</span>,
+    width,
+    height,
+    <span class="hljs-attr">children</span>: [
+      {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"path"</span>,
+        <span class="hljs-attr">data</span>: paths,
+        <span class="hljs-attr">scales</span>: {
+          <span class="hljs-attr">color</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"identity"</span> },
+        },
+        <span class="hljs-attr">guides</span>: { <span class="hljs-attr">color</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> } },
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">d</span>: <span class="hljs-string">"d"</span>,
+          <span class="hljs-attr">fill</span>: <span class="hljs-string">"fill"</span>,
+          <span class="hljs-attr">stroke</span>: <span class="hljs-string">"stroke"</span>,
+        },
+      },
+      {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"point"</span>,
+        <span class="hljs-attr">guides</span>: { <span class="hljs-attr">x</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> }, <span class="hljs-attr">y</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> } },
+        <span class="hljs-attr">scales</span>: {
+          <span class="hljs-attr">y</span>: { <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>], <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, height] },
+          <span class="hljs-attr">x</span>: { <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, width] },
+          <span class="hljs-attr">r</span>: { <span class="hljs-attr">range</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">6</span>] },
+        },
+        <span class="hljs-attr">paddingLeft</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">paddingTop</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">paddingBottom</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">paddingRight</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">data</span>: countries,
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">x</span>: <span class="hljs-string">"x"</span>,
+          <span class="hljs-attr">y</span>: <span class="hljs-string">"y"</span>,
+          <span class="hljs-attr">r</span>: <span class="hljs-string">"count"</span>,
+          <span class="hljs-attr">fill</span>: <span class="hljs-string">"steelblue"</span>,
+          <span class="hljs-attr">stroke</span>: <span class="hljs-string">"steelblue"</span>,
+        },
+      },
+    ],
+  });
+})();
+</code></pre>
+<p>虽然 Sparrow 已经把一个简单的地图绘制完成了，但是可以发现过程还是比较繁琐的，为了解决这个问题，我们来看看 AntV 的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fl7.antv.vision%2Fzh%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://l7.antv.vision/zh/" ref="nofollow noopener noreferrer">L7</a> 是如何绘制地图的。</p>
+<h3 data-id="heading-4">L7 绘制地图</h3>
+<p>L7 同样需要把地理数据给关联上，通过国家名称字段将我们拾取的地理数据关联，最后将数据处为理常用的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgeojson.org%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://geojson.org/" ref="nofollow noopener noreferrer">GeoJson</a> 格式，需要注意的是，数据中的“雅典”是“希腊”的首都。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> <span class="hljs-title class_">MappingName</span> = { 雅典: <span class="hljs-string">"希腊"</span> };
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">joinData</span> = (<span class="hljs-params">philosophers, geoData</span>) =&gt; {
+  <span class="hljs-keyword">const</span> philosopherCountryMap = philosophers.<span class="hljs-title function_">reduce</span>(
+    <span class="hljs-function">(<span class="hljs-params">countryMap, philosopher</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> { country } = philosopher;
+      <span class="hljs-keyword">const</span> mappingCountry = <span class="hljs-title class_">MappingName</span>[country] || country;
+      <span class="hljs-keyword">if</span> (countryMap[mappingCountry]) {
+        countryMap[mappingCountry].<span class="hljs-title function_">push</span>(philosopher);
+      } <span class="hljs-keyword">else</span> {
+        countryMap[mappingCountry] = [philosopher];
+      }
+      <span class="hljs-keyword">return</span> countryMap;
+    },
+    {}
+  );
+  <span class="hljs-keyword">const</span> features = geoData.<span class="hljs-property">features</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">feature</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> countryName = feature.<span class="hljs-property">properties</span>.<span class="hljs-property">name</span>;
+    <span class="hljs-keyword">const</span> philosophers = philosopherCountryMap[countryName] || [];
+    <span class="hljs-keyword">const</span> philosopherSum = philosophers.<span class="hljs-property">length</span>;
+    <span class="hljs-keyword">const</span> currentFeature = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">assign</span>({}, feature, {
+      <span class="hljs-attr">properties</span>: {
+        ...feature.<span class="hljs-property">properties</span>,
+        philosophers,
+        philosopherSum,
+      },
+    });
+
+    <span class="hljs-keyword">return</span> currentFeature;
+  });
+  <span class="hljs-keyword">const</span> geoPhilosophers = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">assign</span>({}, geoData, { features });
+
+  <span class="hljs-keyword">return</span> geoPhilosophers;
+};
+</code></pre>
+<p>我们有了数据，就可以开始利用数据做可视分析了。根据数据中各个国家的哲学家数量，我们先来实现一个<strong>气泡图</strong>，气泡的地理位置采用国家的行政中心，
+气泡大小与各个国家的哲学家数量正相关，这里可视化库我们使用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> 。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Scene</span>, <span class="hljs-title class_">Mapbox</span>, <span class="hljs-title class_">PointLayer</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">"@antv/l7"</span>;
+<span class="hljs-keyword">import</span> countrys <span class="hljs-keyword">from</span> <span class="hljs-string">"./countrys.json"</span>;
+<span class="hljs-keyword">import</span> philosophers <span class="hljs-keyword">from</span> <span class="hljs-string">"./philosophers.json"</span>;
+
+<span class="hljs-comment">// 1. 创建场景，并创建 Mapbox 作为地图的底图</span>
+<span class="hljs-keyword">const</span> scene = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Scene</span>({
+  <span class="hljs-attr">id</span>: container,
+  <span class="hljs-attr">map</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Mapbox</span>({
+    <span class="hljs-attr">style</span>: <span class="hljs-string">"light"</span>,
+    <span class="hljs-attr">pitch</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">center</span>: [<span class="hljs-number">43.3573729</span>, <span class="hljs-number">9.5221543</span>],
+  }),
+});
+
+<span class="hljs-comment">// 2. 生成地理数据</span>
+<span class="hljs-keyword">const</span> geoPhilosophers = <span class="hljs-title function_">joinData</span>(philosophers, countrys);
+<span class="hljs-keyword">const</span> geoPositions = geoPhilosophers.<span class="hljs-property">features</span>
+  .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">{ properties }</span>) =&gt;</span> properties)
+  .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">{ philosopherSum }</span>) =&gt;</span> philosopherSum);
+
+<span class="hljs-comment">// 3. 创建气泡图层，并将气泡大小映射到数据字段上</span>
+<span class="hljs-keyword">const</span> pointLayer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PointLayer</span>({
+  <span class="hljs-attr">autoFit</span>: <span class="hljs-literal">true</span>,
+})
+  .<span class="hljs-title function_">source</span>(geoPositions, {
+    <span class="hljs-attr">parser</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"json"</span>, <span class="hljs-attr">coordinates</span>: <span class="hljs-string">"centroid"</span> },
+  })
+  .<span class="hljs-title function_">shape</span>(<span class="hljs-string">"circle"</span>)
+  .<span class="hljs-title function_">size</span>(<span class="hljs-string">"philosopherSum"</span>, [<span class="hljs-number">20</span>, <span class="hljs-number">60</span>])
+  .<span class="hljs-title function_">color</span>(<span class="hljs-string">"#204CCF"</span>)
+  .<span class="hljs-title function_">style</span>({ <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.6</span> });
+
+<span class="hljs-comment">// 4. 创建文本标注图层</span>
+<span class="hljs-keyword">const</span> labelLayer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PointLayer</span>({})
+  .<span class="hljs-title function_">source</span>(geoPositions, {
+    <span class="hljs-attr">parser</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"json"</span>, <span class="hljs-attr">coordinates</span>: <span class="hljs-string">"centroid"</span> },
+  })
+  .<span class="hljs-title function_">shape</span>(<span class="hljs-string">"name"</span>, <span class="hljs-string">"text"</span>)
+  .<span class="hljs-title function_">size</span>(<span class="hljs-number">10</span>)
+  .<span class="hljs-title function_">color</span>(<span class="hljs-string">"#000"</span>)
+  .<span class="hljs-title function_">style</span>({ <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.8</span>, <span class="hljs-attr">fontSize</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#fff"</span>, <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2</span> });
+
+<span class="hljs-comment">// 5. 将图层挂载到场景上</span>
+scene.<span class="hljs-title function_">addLayer</span>(pointLayer);
+scene.<span class="hljs-title function_">addLayer</span>(labelLayer);
+</code></pre>
+<p>绘制出来的效果见下图。从图中可以看出，利用气泡的方式只能看国家点的分布，接下来我们来做国家区域分布的图，利用区域的颜色映射哲学家的数量，这里使用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> 来完成一个<strong>区域分布图</strong>，关于 L7 与 L7Plot 的关系见后文“延伸”部分。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Area</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">"@antv/l7plot"</span>;
+<span class="hljs-keyword">import</span> countrys <span class="hljs-keyword">from</span> <span class="hljs-string">"./countrys.json"</span>;
+<span class="hljs-keyword">import</span> philosophers <span class="hljs-keyword">from</span> <span class="hljs-string">"./philosophers.json"</span>;
+
+<span class="hljs-comment">// 1. 生成地理数据</span>
+<span class="hljs-keyword">const</span> geoPhilosophers = <span class="hljs-title function_">joinData</span>(philosophers, countrys);
+
+<span class="hljs-comment">// 2. 创建图表</span>
+<span class="hljs-keyword">const</span> areaMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Area</span>(container, {
+  <span class="hljs-attr">map</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"mapbox"</span>,
+    <span class="hljs-attr">style</span>: <span class="hljs-string">"light"</span>,
+    <span class="hljs-attr">pitch</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">center</span>: [<span class="hljs-number">12.075174042231398</span>, <span class="hljs-number">42.78877076169903</span>],
+  },
+  <span class="hljs-attr">source</span>: {
+    <span class="hljs-attr">data</span>: geoPhilosophers,
+    <span class="hljs-attr">parser</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"geojson"</span> },
+  },
+  <span class="hljs-attr">autoFit</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">color</span>: {
+    <span class="hljs-attr">field</span>: <span class="hljs-string">"philosopherSum"</span>,
+    <span class="hljs-attr">value</span>: [<span class="hljs-string">"#B8E1FF"</span>, <span class="hljs-string">"#7DAAFF"</span>, <span class="hljs-string">"#3D76DD"</span>, <span class="hljs-string">"#0047A5"</span>],
+    <span class="hljs-attr">scale</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"quantize"</span> },
+  },
+  <span class="hljs-attr">style</span>: {
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.8</span>,
+    <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#F2F7F7"</span>,
+    <span class="hljs-attr">lineType</span>: <span class="hljs-string">"dash"</span>,
+    <span class="hljs-attr">lineDash</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">10</span>],
+    <span class="hljs-attr">lineWidth</span>: <span class="hljs-number">0.6</span>,
+    <span class="hljs-attr">lineOpacity</span>: <span class="hljs-number">0.8</span>,
+  },
+  <span class="hljs-attr">label</span>: {
+    <span class="hljs-attr">field</span>: <span class="hljs-string">"name"</span>,
+    <span class="hljs-attr">style</span>: { <span class="hljs-attr">fill</span>: <span class="hljs-string">"#000"</span>, <span class="hljs-attr">fontSize</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#fff"</span>, <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2</span> },
+  },
+  <span class="hljs-attr">tooltip</span>: { <span class="hljs-attr">items</span>: [<span class="hljs-string">"name"</span>, <span class="hljs-string">"adcode"</span>] },
+  <span class="hljs-attr">zoom</span>: { <span class="hljs-attr">position</span>: <span class="hljs-string">"bottomright"</span> },
+  <span class="hljs-attr">legend</span>: { <span class="hljs-attr">position</span>: <span class="hljs-string">"bottomleft"</span> },
+});
+</code></pre>
+<p>绘制出来的效果见下图。接下来我们以哲学家的出生日期为时间线，对相同生平区间的哲学家进行分组，来做一个哲学区域变化图，以时间递增顺序渲染哲学区域。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Area</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">"@antv/l7plot"</span>;
+<span class="hljs-keyword">import</span> countrys <span class="hljs-keyword">from</span> <span class="hljs-string">"./countrys.json"</span>;
+<span class="hljs-keyword">import</span> philosophers <span class="hljs-keyword">from</span> <span class="hljs-string">"./philosophers.json"</span>;
+
+<span class="hljs-comment">// 1. 以时间顺序对相同生平区间的哲学家进行分组</span>
+<span class="hljs-keyword">const</span> philosopherGroups = philosophers.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">groups, philosopher</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (groups.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> [[philosopher]];
+  <span class="hljs-keyword">const</span> lastGroup = groups[groups.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>];
+  <span class="hljs-keyword">const</span> lastPhilosopherLifeEndTime =
+    lastGroup[lastGroup.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>].<span class="hljs-property">lifespan</span>[<span class="hljs-number">1</span>];
+  <span class="hljs-keyword">const</span> currentPhilosopherLifeStartTime = philosopher.<span class="hljs-property">lifespan</span>[<span class="hljs-number">0</span>];
+  <span class="hljs-keyword">if</span> (lastPhilosopherLifeEndTime &gt;= currentPhilosopherLifeStartTime) {
+    lastGroup.<span class="hljs-title function_">push</span>(philosopher);
+  } <span class="hljs-keyword">else</span> {
+    groups.<span class="hljs-title function_">push</span>([philosopher]);
+  }
+  <span class="hljs-keyword">return</span> groups;
+}, []);
+
+<span class="hljs-comment">// 2. 创建图表</span>
+<span class="hljs-keyword">const</span> areaMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Area</span>(container, {
+  <span class="hljs-attr">map</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"mapbox"</span>,
+    <span class="hljs-attr">style</span>: <span class="hljs-string">"light"</span>,
+    <span class="hljs-attr">center</span>: [<span class="hljs-number">20.3573729</span>, <span class="hljs-number">40.5221543</span>],
+    <span class="hljs-attr">zoom</span>: <span class="hljs-number">3</span>,
+    <span class="hljs-attr">pitch</span>: <span class="hljs-number">0</span>,
+  },
+  <span class="hljs-attr">source</span>: {
+    <span class="hljs-attr">data</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"FeatureCollection"</span>, <span class="hljs-attr">features</span>: [] },
+    <span class="hljs-attr">parser</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"geojson"</span> },
+  },
+  <span class="hljs-attr">autoFit</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">color</span>: {
+    <span class="hljs-attr">field</span>: <span class="hljs-string">"philosopherSum"</span>,
+    <span class="hljs-attr">value</span>: [<span class="hljs-string">"#B8E1FF"</span>, <span class="hljs-string">"#7DAAFF"</span>, <span class="hljs-string">"#3D76DD"</span>, <span class="hljs-string">"#0047A5"</span>],
+    <span class="hljs-attr">scale</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"quantize"</span> },
+  },
+  <span class="hljs-attr">style</span>: {
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.8</span>,
+    <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#F2F7F7"</span>,
+    <span class="hljs-attr">lineType</span>: <span class="hljs-string">"dash"</span>,
+    <span class="hljs-attr">lineDash</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">10</span>],
+    <span class="hljs-attr">lineWidth</span>: <span class="hljs-number">0.6</span>,
+    <span class="hljs-attr">lineOpacity</span>: <span class="hljs-number">0.8</span>,
+  },
+  <span class="hljs-attr">label</span>: {
+    <span class="hljs-attr">field</span>: <span class="hljs-string">"name"</span>,
+    <span class="hljs-attr">style</span>: { <span class="hljs-attr">fill</span>: <span class="hljs-string">"#000"</span>, <span class="hljs-attr">fontSize</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#fff"</span>, <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2</span> },
+  },
+  <span class="hljs-attr">state</span>: { <span class="hljs-attr">active</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">select</span>: <span class="hljs-literal">false</span> },
+  <span class="hljs-attr">tooltip</span>: {
+    <span class="hljs-attr">items</span>: [
+      { <span class="hljs-attr">field</span>: <span class="hljs-string">"name"</span> },
+      { <span class="hljs-attr">field</span>: <span class="hljs-string">"philosopherSum"</span> },
+      {
+        <span class="hljs-attr">field</span>: <span class="hljs-string">"philosophers"</span>,
+        <span class="hljs-attr">customValue</span>: <span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span>
+          value
+            .<span class="hljs-title function_">map</span>(
+              <span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span>
+                <span class="hljs-string">`name: <span class="hljs-subst">${item.name}</span>, lifespan: <span class="hljs-subst">${item.lifespan.join(<span class="hljs-string">"~"</span>)}</span>`</span>
+            )
+            .<span class="hljs-title function_">join</span>(<span class="hljs-string">";"</span>),
+      },
+    ],
+  },
+  <span class="hljs-attr">zoom</span>: { <span class="hljs-attr">position</span>: <span class="hljs-string">"bottomright"</span> },
+  <span class="hljs-attr">legend</span>: { <span class="hljs-attr">position</span>: <span class="hljs-string">"bottomleft"</span> },
+});
+
+<span class="hljs-comment">// 3. 按时间递增顺序渲染更新区域变化图</span>
+<span class="hljs-keyword">let</span> currentGroupIndex = <span class="hljs-number">0</span>;
+chinaMap.<span class="hljs-title function_">on</span>(<span class="hljs-string">"loaded"</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> geoPhilosophers = <span class="hljs-title function_">joinData</span>(
+    philosopherGroups[currentGroupIndex],
+    countrys
+  );
+  chinaMap.<span class="hljs-title function_">changeData</span>(geoPhilosophers);
+});
+chinaMap.<span class="hljs-title function_">on</span>(<span class="hljs-string">"change-data"</span>, <span class="hljs-function">() =&gt;</span> {
+  currentGroupIndex =
+    currentGroupIndex === philosopherGroups.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>
+      ? <span class="hljs-number">0</span>
+      : ++currentGroupIndex;
+  <span class="hljs-keyword">const</span> geoPhilosophers = <span class="hljs-title function_">joinData</span>(
+    philosopherGroups[currentGroupIndex],
+    countrys
+  );
+  <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+    chinaMap.<span class="hljs-title function_">changeData</span>(geoPhilosophers);
+  }, <span class="hljs-number">1500</span>);
+});
+</code></pre>
+<p>最后绘制出来的效果如下图所示，代码地址 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world%2Ftree%2Fmain%2Fexample%2F19" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world/tree/main/example/19" ref="nofollow noopener noreferrer">visualize-sophie-world</a>。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="center">各个国家的哲学家数量气泡图</th><th align="center">各个国家的哲学家数量区域分布</th><th>以时间顺序哲学区域分布变化</th></tr></thead><tbody><tr><td align="center"><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3b7318d155e440efbab5e9d741e3096a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></td><td align="center"><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpdd02f15fe13b45688c58230e226a52eb~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></td><td><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp242be57afb4a4656853dd1151ab57ca3~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></td></tr></tbody></table>
+<h3 data-id="heading-5">数据洞察</h3>
+<p>从中我们可以获取一些有效信息和洞察：</p>
+<ul>
+<li>哲学家主要集中在欧洲这些国家</li>
+<li>哲学家最多的国家，希腊哲学家最多，意大利次之</li>
+<li>地中海沿岸国家，哲学家比较集中</li>
+<li>随着时间的变化，哲学中心从地中海北部迁移至北海</li>
+</ul>
+<h2 data-id="heading-6">延伸</h2>
+<h3 data-id="heading-7">地理数据可视化库</h3>
+<blockquote>
+<p>开源地理数据可视化库及相关工具类</p>
+</blockquote>
+<p><strong>2/2.5D</strong></p>
+<ul>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-geo" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-geo" ref="nofollow noopener noreferrer">d3-geo</a> <code>图表类</code></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsgratzl%2Fchartjs-chart-geo" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sgratzl/chartjs-chart-geo" ref="nofollow noopener noreferrer">Chart.js Geo</a> <code>图表类</code></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvega%2Fvega" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vega/vega" ref="nofollow noopener noreferrer">vega</a> <code>图表类</code></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fapache%2Fecharts" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/apache/echarts" ref="nofollow noopener noreferrer">ECharts</a> <code>图表类</code></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FLeaflet%2FLeaflet" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/Leaflet/Leaflet" ref="nofollow noopener noreferrer">Leaflet</a></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fopenlayers%2Fopenlayers" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/openlayers/openlayers" ref="nofollow noopener noreferrer">OpenLayers</a></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fhuiyan-fe%2Fmapv" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/huiyan-fe/mapv" ref="nofollow noopener noreferrer">Mapv</a></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a></p>
+</li>
+<li>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> <code>图表类</code></p>
+</li>
+</ul>
+<p><strong>3D</strong></p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmapbox%2Fmapbox-gl-js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/mapbox/mapbox-gl-js" ref="nofollow noopener noreferrer">Mapbox GL JS</a></li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FCesiumGS%2Fcesium" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/CesiumGS/cesium" ref="nofollow noopener noreferrer">Cesium</a></li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvisgl%2Fdeck.gl" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/visgl/deck.gl" ref="nofollow noopener noreferrer">Deck.gl</a></li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmaptalks%2Fmaptalks.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/maptalks/maptalks.js" ref="nofollow noopener noreferrer">maptalks.js</a></li>
+</ul>
+<h3 data-id="heading-8">L7、L7Plot 关系</h3>
+<p><strong>L7</strong></p>
+<p>基于 WebGL 的地理空间数据可视化引擎，以图形符号学为理论基础，将抽象复杂的空间数据转化成 2D、3D 符号，通过颜色、大小、体积、纹理等视觉变量实现丰富的可视化表达。在 API 使用语法上跟 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FG2" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/G2" ref="nofollow noopener noreferrer">G2</a> 一样基于图形语法。 与 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FG2" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/G2" ref="nofollow noopener noreferrer">G2</a> 区别： <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> 专注于地理空间数据可视分析，<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FG2" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/G2" ref="nofollow noopener noreferrer">G2</a> 专注于统计图表。它的取名中的 L 代表 Location，7 代表世界七大洲。</p>
+<p><strong>L7Plot</strong></p>
+<p><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> 基于 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> 实现的<strong>开箱即用</strong>地理空间数据可视化图表库，与 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> 区别：</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7" ref="nofollow noopener noreferrer">L7</a> 基于图形符号学为理论，以图形语法 API 方式使用，概念较多，实现简单的地理可视化业务需要不少代码量。</li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> 专注于专注于地理可视化图表；以声明配置式的方式，降低用户使用成本；以常见地理图表分类的方式，降低用户选择成本；内部集成全国行政区域数据，降低用户使用地理数据心智。</li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> L7Plot 专注于地理数据可视化展示，不会涉及数据编辑能力。</li>
+</ul>
+<h2 data-id="heading-9">小结</h2>
+<p>这一章我们完成了：“苏菲的世界中，哲学中心如何变化？”这一个任务。</p>
+<p>到此为止，我们所有的开发和分析任务就都结束了，那么下一章将是我们的最后一章：<strong>看看通过本小册子我们学到了什么，还有什么可以深入学习的东西。</strong></p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

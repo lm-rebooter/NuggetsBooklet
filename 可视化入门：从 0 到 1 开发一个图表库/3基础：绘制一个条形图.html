@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>通过上一章节的学习，我们认识了“<strong>可视化苏菲世界</strong>”这个分析任务，学习了一个数据分析的模型，并且基于该模型提出了很多想要讨论的问题，甚至已经有了简单的设计手段。</p>
+<p>但是在一个完整的数据分析的流程中，我们还处于<strong>设计</strong>阶段 <strong>，</strong> 也就是还停留在理论阶段。因此，这一章节我们将进入<strong>实现</strong>阶段，选择一个问题进行讨论，完成可视化图表的选择，再在浏览器里把它用 Canvas2D 和 SVG 绘制出来，让你更完整和深入地理解数据可视化。</p>
+<p>学习是一个循序渐进的过程，所以我们先从一个比较简单的问题入手，来掌握整个<strong>实现</strong>的流程。基于简单的标准，我们选择的问题是：“哲学家、哲学问题和流派的数量关系是怎样的？”，所以我们去统计了“苏菲的世界”<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world%23%25E6%2595%25B0%25E6%258D%25AE" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world#%E6%95%B0%E6%8D%AE" ref="nofollow noopener noreferrer">数据集</a>中哲学家、哲学问题和流派的数量，得到的结果如下：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><strong>name</strong></th><th><strong>value</strong></th></tr></thead><tbody><tr><td>questions</td><td>17</td></tr><tr><td>schools</td><td>25</td></tr><tr><td>philosophers</td><td>35</td></tr></tbody></table>
+<p>想要体现这三者的数量关系，按照通用的数据分析流程，我们需要经过方案设计、数据处理、数据渲染这几个步骤。接下来，我们分别来说。</p>
+<h2 data-id="heading-0">设计方案</h2>
+<p>上一章节提到的数据分析的模型主要有三部分，我们就用这三个部分的理论来分析一下“哲学家，哲学问题和流派的数量关系是怎样的？”这个问题，从而得出的我们的设计方案。</p>
+<ul>
+<li><strong>认识数据</strong>：这个数据集是表格，每一条数据代表一个实体，每一个实体有明显两个属性：name 是分类属性，value 是一个数值属性。当然也有一个隐藏属性，就是它们在表格里面的索引属性：比 questions 的索引属性是 0， schools 的索引属性是 1，philosophers 的索引属性是 2，索引属性明显是分类属性。</li>
+<li><strong>确定任务</strong>：因为我们不知道它们的关系到底是咋样的，所以这是一个发现任务，对象是哲学家、哲学问题和流派的数量的特征。</li>
+<li><strong>设计方案</strong>：我们可以根据数据属性和任务的种类，去选择合适的可视化图表。一般来说，了解分类数据和数值属性的特征，最好的选择就是条形图。因为条水平方向的位置是分类属性，所以可以将同为分类属性的索引属性映射过去；因为同为数值属性，所以可以把 value 属性映射为条的高度；最后因为相同的道理，可以把 name 属性映射为条的颜色。</li>
+</ul>
+<p>提出设计方案之后，在正式开始写代码之前，因为小册子篇幅的限制，我们先来做几个约定，让我们在有限的篇幅内可以给大家讲解更多有价值的东西。</p>
+<h2 data-id="heading-1">开发约定</h2>
+<p>这里我们先介绍两个开发约定：</p>
+<p><strong>第一，在介绍新代码块的时候，不会显式地说新建或者修改文件或者文件夹。</strong> 文章中的代码块中的顶部会有包含该代码块文件的地址，这个地址是相对项目根目录的。如果不存在对应的文件夹和文件，就自行新建对应的文件夹或者文件。否则，对该文件夹或者文件进行修改即可。</p>
+<p>比如我要加入以下的代码，因为目前项目中没有 <code>hello</code> 这个文件夹和 <code>index.js</code> 这个文件，所以需要新建它们，然后再增加以下的 <code>foo</code> 函数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/hello/index.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'foo'</span>;
+}
+</code></pre>
+<p>第二，<strong>讲解内容很多会以注释的实行在代码中展现，不会单独说明</strong>。这样将需要实现的功能和对应的代码关联起来，一方面可以更加清楚功能的具体代码实现，另一方面也知道这段代码主要解决什么问题。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// index.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'foo'</span>; <span class="hljs-comment">// 让调用者知道这是一个 foo 函数</span>
+}
+</code></pre>
+<p>当然最后都会把完整且可以运行的代码存储的 Github 仓库分享给大家，大家可以将代码 Clone 下来学习一下。</p>
+<p>说了这么多废话，那么接下里我们正式进入开发环节。</p>
+<h2 data-id="heading-2">数据处理</h2>
+<p>我们首先进入数据处理阶段，这个阶段的核心任务或者难点就是“如何把原始数据转换成可以直接绘制的数据？”，包括 “转换过程分为哪几个阶段？，我们接下来一点点来看。</p>
+<p>首先加入如下代码，用来声明我们要可视化的数据和画布的维度信息。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/canvas/index.js</span>
+
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"questions"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"schools"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">25</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"philosophers"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">35</span> },
+];
+
+<span class="hljs-keyword">const</span> chartWidth = <span class="hljs-number">480</span>; <span class="hljs-comment">// 条形图的宽度</span>
+<span class="hljs-keyword">const</span> chartHeight = <span class="hljs-number">300</span>; <span class="hljs-comment">// 条形图的高度</span>
+<span class="hljs-keyword">const</span> margin = <span class="hljs-number">15</span>; <span class="hljs-comment">// 条形图的外边距</span>
+
+<span class="hljs-keyword">const</span> containerWidth = chartWidth + margin * <span class="hljs-number">2</span>; <span class="hljs-comment">// 容器的宽度</span>
+<span class="hljs-keyword">const</span> containerHeight = chartHeight + margin * <span class="hljs-number">2</span>; <span class="hljs-comment">// 容器的高度</span>
+</code></pre>
+<p>接下来我们把需要编码的属性对应的值提取出来。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/canvas/index.js</span>
+
+<span class="hljs-keyword">const</span> names = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(data, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">name</span>);
+<span class="hljs-keyword">const</span> values = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(data, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">value</span>);
+<span class="hljs-keyword">const</span> indices = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(data, <span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span> i);
+</code></pre>
+<h3 data-id="heading-3">布局</h3>
+<p>这之后我们需要对每一个条进行布局，这个地方就是计算出每一个条的左下顶点的坐标。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/canvas/index.js</span>
+
+<span class="hljs-comment">// 计算每一个条左下顶点的横坐标</span>
+<span class="hljs-comment">// 位置和在数组里面的 index 有关</span>
+<span class="hljs-keyword">const</span> step = chartWidth / names.<span class="hljs-property">length</span>;
+<span class="hljs-keyword">const</span> barWidth = step * <span class="hljs-number">0.8</span>;
+<span class="hljs-keyword">const</span> xs = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(indices, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> i * step);
+
+<span class="hljs-comment">// 计算每一个条左下顶点的纵坐标</span>
+<span class="hljs-comment">// 因为所有条底部都是对齐的，所以就是图表的高度</span>
+<span class="hljs-keyword">const</span> y = chartHeight;
+</code></pre>
+<h3 data-id="heading-4">映射</h3>
+<p>布局完成之后就来到了映射过程。这里我们需要把数据的 value 属性映射为条的高度，需要把数据的 name 属性映射为条的颜色。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/canvas/index.js</span>
+
+<span class="hljs-comment">// 获得每一个条的高度</span>
+<span class="hljs-comment">// 条的高度应该和 value 线性相关的</span>
+<span class="hljs-keyword">const</span> vmax = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...values);
+<span class="hljs-keyword">const</span> barHeights = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(values, <span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> chartHeight * (v / vmax));
+
+<span class="hljs-comment">// 获得每一个条的颜色</span>
+<span class="hljs-keyword">const</span> nameColor = {
+  <span class="hljs-attr">questions</span>: <span class="hljs-string">"#5B8FF9"</span>,
+  <span class="hljs-attr">philosophers</span>: <span class="hljs-string">"#61DDAA"</span>,
+  <span class="hljs-attr">schools</span>: <span class="hljs-string">"#65789B"</span>,
+};
+
+<span class="hljs-keyword">const</span> colors = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(names, <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> nameColor[name]);
+</code></pre>
+<h2 data-id="heading-5">数据渲染</h2>
+<p>目前为止我们的数据已经处理完成了，接下来就进入到了数据渲染阶段。数据渲染阶段的核心任务就是是处理后的数据渲染到屏幕上了。</p>
+<p>这个阶段需要考虑：选择什么作为承载我们可视化结果的容器，同时选择什么样的绘制技术来渲染这些数据。往往面对不同的可视化需求，不同量级的数据，我们需要选择不同的渲染技术，渲染技术的选择和学习也是其中一个难点。</p>
+<p>毫无疑问，作为前端这个领域，承载我们可视化的结果容器就是现代浏览器。在现代浏览器中可以完成可视化的绘制技术至少有4个：HTML、Canvas2D、SVG、WebGL。HTML 的绘制不够灵活，WebGL 主要针对三维场景的可视化（虽然也可以进行二维可视化，我们之后会了解到），所有主流的 2D 可视化的绘制技术主要有两种： Canvas2D 和 SVG。</p>
+<p>Canvas2D 和 SVG 的使用方式不同，针对的场景也不同，接下来我们就分别说说。</p>
+<h3 data-id="heading-6">Canvas2D</h3>
+<p>首先，我们来看看 Canvas2D。Canvas2D 是一种指令式的绘图系统，我们调用一些绘图指令，就可以在画布上绘制对应的视觉元素。我们接下来通过绘制一个矩形和 hello world 来看看 Canvas2D 的使用方式。</p>
+<p>首先新建一个名叫 canvas-demo 的文件夹，输入以下内容：</p>
+<p>（1）在 HTML 文件中声明一个画布。</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/canvas-demo/draw/index.html --&gt;</span>
+
+<span class="hljs-comment">&lt;!-- 声明一个画布，之后的可视化主要在这里发生 --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p>（2）获得绘制上下文并且设置维度信息。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/canvas-demo/draw/index.js</span>
+
+<span class="hljs-comment">// 获得 canvas 容器元素</span>
+<span class="hljs-keyword">const</span> canvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">"canvas"</span>);
+
+<span class="hljs-comment">// 设置 canvas 的样式宽高</span>
+<span class="hljs-comment">// 样式宽高决定了 canvas 在画布上呈现的大小</span>
+canvas.<span class="hljs-property">style</span>.<span class="hljs-property">width</span> = <span class="hljs-number">400</span> + <span class="hljs-string">"px"</span>;
+canvas.<span class="hljs-property">style</span>.<span class="hljs-property">height</span> = <span class="hljs-number">200</span> + <span class="hljs-string">"px"</span>;
+
+<span class="hljs-comment">// 设置 canvas 画布宽高</span>
+<span class="hljs-comment">// 这个宽高是可以绘制区域的大小</span>
+<span class="hljs-comment">// 样式宽高是默认等于画布宽高的</span>
+canvas.<span class="hljs-property">width</span> = <span class="hljs-number">400</span>;
+canvas.<span class="hljs-property">height</span> = <span class="hljs-number">200</span>;
+
+<span class="hljs-comment">// 获得绘制的上下文</span>
+<span class="hljs-comment">// 之后的 API 都是通过调用 context</span>
+<span class="hljs-keyword">const</span> context = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">"2d"</span>);
+</code></pre>
+<p>（3）绘制视觉元素</p>
+<p>这里需要注意的 Canvas2D 的坐标系和我们课本里介绍的坐标系有点不同：它的原点是在左上角，x 轴是从左到右的，y 轴是从上到下的，大家可以参考下面的这张图。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp9b90635f20024320891f476b8e501c42~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/canvas-demo/draw/index.js</span>
+
+<span class="hljs-comment">// 绘制一个矩形</span>
+context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"red"</span>; <span class="hljs-comment">// 设置填充颜色</span>
+context.<span class="hljs-property">strokeStyle</span> = <span class="hljs-string">"yellow"</span>; <span class="hljs-comment">// 设置边框的颜色</span>
+context.<span class="hljs-property">lineWidth</span> = <span class="hljs-number">10</span>; <span class="hljs-comment">// 设置边框的宽度</span>
+context.<span class="hljs-title function_">strokeRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>); <span class="hljs-comment">// 绘制边框</span>
+context.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>, <span class="hljs-number">95</span>, <span class="hljs-number">95</span>); <span class="hljs-comment">// 绘制填充颜色</span>
+
+<span class="hljs-comment">// 绘制一段文字</span>
+context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"black"</span>; <span class="hljs-comment">// 设置文字的颜色</span>
+context.<span class="hljs-property">font</span> = <span class="hljs-string">"25px PingFangSC-Regular, sans-serif"</span>; <span class="hljs-comment">// 设置文字的大小和字体</span>
+context.<span class="hljs-title function_">fillText</span>(<span class="hljs-string">"hello world"</span>, <span class="hljs-number">150</span>, <span class="hljs-number">100</span>); <span class="hljs-comment">// 绘制文字</span>
+</code></pre>
+<p>最后的绘制效果如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp347615eb86084988abd46a8192cdd4d7~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>当然 Canvas2D 的能力肯定不止绘制矩形和文字，更多的基本图形：圆形、线段和路径这些我们之后会涉及，但绘制方式都大同小异。首先，我们设置一些绘制的样式，然后调用绘制命令来绘制拥有这些样式的视觉元素。所以其实 Canvas 的 API 主要分为两类，一类是设置状态的 API： <code>context.fillStyle = 'red'</code> ，另一类是绘制的 API：<code>context.fillRect(0, 0, 10, 10)</code> 。</p>
+<p>下面再介绍一下 Canvas2D 坐标变换能力，我们可以对其进行平移、缩放和旋转等坐标系变换操作，具体的使用方式和效果参考下面这个例子：</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/canvas-demo/transform/index.html --&gt;</span>
+
+<span class="hljs-comment">&lt;!-- 声明一个画布，之后的可视化主要在这里发生 --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/canvas-demo/transform/index.js</span>
+
+<span class="hljs-comment">/*
+ * 这里需要补上获得绘制上下文并且设置维度信息的内容。
+ */</span>
+context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"red"</span>;
+context.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>);
+
+<span class="hljs-comment">// 进行一系列坐标变换</span>
+context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"blue"</span>;
+context.<span class="hljs-title function_">translate</span>(<span class="hljs-number">50</span>, <span class="hljs-number">50</span>);
+context.<span class="hljs-title function_">rotate</span>(-<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> / <span class="hljs-number">6</span>);
+context.<span class="hljs-title function_">scale</span>(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>);
+context.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>);
+</code></pre>
+<p>最后得到的绘制效果如下图：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp19e8edca922a4ebeb1ed8c08618cde21~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>知道了 Canvas2D 的基本用法，接下来我们就可以把上面处理好的数据渲染出来了。</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/barchart/canvas/index.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"container-canvas"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/canvas/index.js</span>
+
+<span class="hljs-keyword">const</span> canvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">"container-canvas"</span>);
+canvas.<span class="hljs-property">style</span>.<span class="hljs-property">width</span> = containerWidth + <span class="hljs-string">"px"</span>;
+canvas.<span class="hljs-property">style</span>.<span class="hljs-property">height</span> = containerHeight + <span class="hljs-string">"px"</span>;
+
+<span class="hljs-comment">// 下面把画布宽高设置为样式宽高的两倍主要是为了解决模糊问题</span>
+<span class="hljs-comment">// 这个地方就不详细展开了，感兴趣的可以自行查阅</span>
+canvas.<span class="hljs-property">width</span> = containerWidth * <span class="hljs-number">2</span>;
+canvas.<span class="hljs-property">height</span> = containerHeight * <span class="hljs-number">2</span>;
+
+<span class="hljs-keyword">const</span> context = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">"2d"</span>);
+context.<span class="hljs-title function_">scale</span>(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">// 抵消将画布宽高设置为样式宽高两倍的影响</span>
+
+context.<span class="hljs-title function_">translate</span>(margin, margin); <span class="hljs-comment">// 将坐标原点移动到绘制图表的区域</span>
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> index <span class="hljs-keyword">of</span> indices) {
+  <span class="hljs-comment">// 将需要绘制的属性取出来</span>
+  <span class="hljs-keyword">const</span> color = colors[index];
+  <span class="hljs-keyword">const</span> x = xs[index];
+  <span class="hljs-keyword">const</span> barHeight = barHeights[index];
+  <span class="hljs-keyword">const</span> value = values[index];
+  <span class="hljs-comment">// 绘制条</span>
+  context.<span class="hljs-property">fillStyle</span> = color;
+  context.<span class="hljs-title function_">fillRect</span>(x, y - barHeight, barWidth, barHeight);
+
+  <span class="hljs-comment">// 绘制值</span>
+  context.<span class="hljs-property">textAlign</span> = <span class="hljs-string">"center"</span>;
+  context.<span class="hljs-property">textBaseline</span> = <span class="hljs-string">"middle"</span>;
+  context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"white"</span>;
+  context.<span class="hljs-property">font</span> = <span class="hljs-string">"25px PingFangSC-Regular, sans-serif"</span>;
+  context.<span class="hljs-title function_">fillText</span>(value, x + barWidth / <span class="hljs-number">2</span>, y - barHeight / <span class="hljs-number">2</span>);
+}
+</code></pre>
+<p>最后的绘制结果如图：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc2cd4888df7b41a0ad4f6e6787aec0f3~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-7">SVG</h3>
+<p>接下来，我们再看看第二种绘图方式：SVG（Scalable Vector Graphics），可缩放矢量图，它是浏览器支持的一种基于 XML 语法的图像格式。相对于 Canvas2D 这种指令式的绘图系统来讲，SVG 是一种声明式的绘图系统，它的使用方式和普通的 DOM 元素非常像，所以使用起来比较简单。下面我们通过绘制和上面相同的内容来看看 SVG 的使用方法，新建一个名叫 svg-demo 的文件夹。</p>
+<p>（1）基础图形的绘制</p>
+<p>SVG 的坐标系和上面提到的 Canvas2D 所用的坐标系是一样的。</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/svg-demo/draw/index.html --&gt;</span>
+
+<span class="hljs-comment">&lt;!-- width，height 可以简单理解为样式宽高 --&gt;</span>
+<span class="hljs-comment">&lt;!-- viewBox 可以简单理解为画布宽高 --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">svg</span>
+  <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.w3.org/2000/svg"</span>
+  <span class="hljs-attr">version</span>=<span class="hljs-string">"1.1"</span>
+  <span class="hljs-attr">width</span>=<span class="hljs-string">"400"</span>
+  <span class="hljs-attr">height</span>=<span class="hljs-string">"200"</span>
+  <span class="hljs-attr">viewBox</span>=<span class="hljs-string">"0, 0, 400, 200"</span>
+&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">rect</span>
+    <span class="hljs-attr">height</span>=<span class="hljs-string">"95"</span>
+    <span class="hljs-attr">width</span>=<span class="hljs-string">"95"</span>
+    <span class="hljs-attr">x</span>=<span class="hljs-string">"5"</span>
+    <span class="hljs-attr">y</span>=<span class="hljs-string">"5"</span>
+    <span class="hljs-attr">stroke</span>=<span class="hljs-string">"yellow"</span>
+    <span class="hljs-attr">stroke-width</span>=<span class="hljs-string">"10"</span>
+    <span class="hljs-attr">fill</span>=<span class="hljs-string">"red"</span>
+  /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">text</span>
+    <span class="hljs-attr">fill</span>=<span class="hljs-string">"black"</span>
+    <span class="hljs-attr">font-family</span>=<span class="hljs-string">"PingFangSC-Regular, sans-serif"</span>
+    <span class="hljs-attr">font-size</span>=<span class="hljs-string">"25"</span>
+    <span class="hljs-attr">x</span>=<span class="hljs-string">"150"</span>
+    <span class="hljs-attr">y</span>=<span class="hljs-string">"100"</span>
+  &gt;</span>
+    hello world
+  <span class="hljs-tag">&lt;/<span class="hljs-name">text</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+</code></pre>
+<p>下面是绘制的效果：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpbe4ee428ab3c40bb89a779f4a7a795d1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>可以发现通过 SVG 绘制出来的效果和 Canvas2D 绘制出来的效果几乎一摸一样（除了边框的粗细以外）。但是绘制的方式却完全不同，在 SVG 中我们只用在 <code>&lt;svg&gt;&lt;/svg&gt;</code> 插入对应的 SVG 元素，然后设置它们的属性就好了，这和 DOM 的使用方式非常类似。当然除了上面展示的 <code>&lt;rect /&gt;</code> 和 <code>&lt;text /&gt;</code> 标签，还有绘制其他图形的标签，比如 <code>&lt;circle /&gt;</code>， <code>&lt;path /&gt;</code>， <code>&lt;line /&gt;</code> 这些，我们后面会介绍。</p>
+<p>（2）坐标变换</p>
+<p>在 SVG 实现坐标变换的其中一种方式是使用 <code>&lt;g /&gt;</code> 标签，给它设置 transform 属性，它将对它的所有子元素进行相应的变换。</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/svg-demo/transform/index.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">svg</span>
+  <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.w3.org/2000/svg"</span>
+  <span class="hljs-attr">version</span>=<span class="hljs-string">"1.1"</span>
+  <span class="hljs-attr">width</span>=<span class="hljs-string">"400"</span>
+  <span class="hljs-attr">height</span>=<span class="hljs-string">"200"</span>
+  <span class="hljs-attr">viewBox</span>=<span class="hljs-string">"0, 0, 400, 200"</span>
+&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">rect</span> <span class="hljs-attr">height</span>=<span class="hljs-string">"50"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"50"</span> <span class="hljs-attr">x</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">y</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">fill</span>=<span class="hljs-string">"red"</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">g</span> <span class="hljs-attr">transform</span>=<span class="hljs-string">"translate(50, 50) rotate(-30) scale(2, 3) "</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">rect</span> <span class="hljs-attr">height</span>=<span class="hljs-string">"50"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"50"</span> <span class="hljs-attr">x</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">y</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">fill</span>=<span class="hljs-string">"blue"</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">g</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+</code></pre>
+<p>上看的代码同样可以获得如 Canvas2D 绘制的效果：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp38a7537f0657400f85353f2b11011150~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在了解了 SVG 的基本使用方式之后，就可以通过 SVG 来渲染我们处理好的数据了。首先，我们把 Canvas 2D 绘制相关的内容注释掉。</p>
+<pre><code class="hljs language-html" lang="html"><span class="hljs-comment">&lt;!-- ch03/barchart/svg/index.html --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"container-svg"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// ch03/barchart/svg/index.js</span>
+
+<span class="hljs-comment">/*
+ * 这里要补上数据处理的内容
+ */</span>
+
+<span class="hljs-comment">// 直接使用 document.createElement 是不行的</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createSVGElement</span>(<span class="hljs-params">type</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElementNS</span>(<span class="hljs-string">"http://www.w3.org/2000/svg"</span>, type);
+}
+
+<span class="hljs-keyword">const</span> svg = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">"container-svg"</span>);
+<span class="hljs-comment">// 设置 svg 的坐标原点和大小</span>
+svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"width"</span>, containerWidth);
+svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"height"</span>, containerHeight);
+svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"viewBox"</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, containerWidth, containerHeight]);
+
+<span class="hljs-comment">// 创建一个 g 元素用于平移</span>
+<span class="hljs-keyword">const</span> g = <span class="hljs-title function_">createSVGElement</span>(<span class="hljs-string">"g"</span>);
+g.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"transform"</span>, <span class="hljs-string">`translate(<span class="hljs-subst">${margin}</span>, <span class="hljs-subst">${margin}</span>)`</span>);
+svg.<span class="hljs-title function_">appendChild</span>(g);
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> index <span class="hljs-keyword">of</span> indices) {
+  <span class="hljs-comment">// 取得对应的属性</span>
+  <span class="hljs-keyword">const</span> color = colors[index];
+  <span class="hljs-keyword">const</span> x = xs[index];
+  <span class="hljs-keyword">const</span> barHeight = barHeights[index];
+  <span class="hljs-keyword">const</span> value = values[index];
+
+  <span class="hljs-comment">// 绘制条</span>
+  <span class="hljs-keyword">const</span> rect = <span class="hljs-title function_">createSVGElement</span>(<span class="hljs-string">"rect"</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"x"</span>, x);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"y"</span>, y - barHeight);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"fill"</span>, color);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"width"</span>, barWidth);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"height"</span>, barHeight);
+  g.<span class="hljs-title function_">appendChild</span>(rect);
+
+  <span class="hljs-comment">// 绘制值</span>
+  <span class="hljs-keyword">const</span> text = <span class="hljs-title function_">createSVGElement</span>(<span class="hljs-string">"text"</span>);
+  text.<span class="hljs-property">textContent</span> = value;
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"text-anchor"</span>, <span class="hljs-string">"middle"</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"fill"</span>, <span class="hljs-string">"white"</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"font-family"</span>, <span class="hljs-string">"PingFangSC-Regular, sans-serif"</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'font-size'</span>, <span class="hljs-number">25</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"alignment-baseline"</span>, <span class="hljs-string">"middle"</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"x"</span>, x + barWidth / <span class="hljs-number">2</span>);
+  text.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">"y"</span>, y - barHeight / <span class="hljs-number">2</span>);
+
+  g.<span class="hljs-title function_">appendChild</span>(text);
+}
+</code></pre>
+<p>最后绘制的结果如下图：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe424af2cea7e40f182a47070992e2021~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-8">SVG VS Canvas2D</h3>
+<p>就这样，不知不觉，我们就用 SVG 和 Canvas2D 从 0 到 1 绘制了一个简单的条形图，而且效果几乎一模一样。那么，它们分别有什么特点，以及分别适合什么样的绘制场景呢？</p>
+<p>SVG 的优点是方便交互，因为它也有 DOM 结构，可以方便地监听事件。但是性能方面却有所影响：如果我们要绘制的图形非常复杂，这些元素节点的数量就会非常多。而节点数量多，就会大大增加 DOM 树渲染和重绘所需要的时间。</p>
+<p>相比来说，Canvas 交互实现就不太容易，因为对每个图形的拾取（判断鼠标点位置在哪个图形上）需要开发者自己实现（很多渲染引擎会解决这个问题，我们后面会看到），但是它的绘制性能却相对较优。</p>
+<p>所以当数据量不大且侧重交互的情况，用 SVG 比较合适；当数据量较大的时候用 Canvas 比较合适。</p>
+<h2 data-id="heading-9">回答问题</h2>
+<p>总结了一下我们的绘制技术，但是我们不能忘记我们绘制图表的初衷：回答问题。虽然目前我们绘制的条形图很简单，连坐标轴，图例这些都没有，但是已经足够解决我们的问题了：哲学家，哲学问题和流派的数量关系是怎样的？</p>
+<p>可以发现在《苏菲的世界》这本书中提到的流派的数量比哲学问题多，哲学家又比流派的数量多，说明大多数的哲学问题都有多个流派尝试解答，大多数流派都有多个哲学家。虽然这个结论很简单，或者说整个分析任务都很简单，但是“麻雀虽小，五脏俱全”，已经足够我们一窥数据分析的大部分东西了。</p>
+<h2 data-id="heading-10">小结</h2>
+<p>这一章我们学习了 Canvas 和 SVG 两种 Web 绘图技术，同时也简单了解一下绘制条形图的流程，最后解决了前面提出的一个问题。但是可以发现这样用可视化分析数据的效率还是很低的，如果我们在解答后面的问题的时候，还需要这样写这么多代码，那不知道要分析道猴年马月去了。</p>
+<p>大家不要着急，你们存在的顾虑前人早就考虑到啦。下一节我们就从理论上先介绍一种加快我们制作图表的语法：可视化语法，然后在从不同层级上看看世界上目前有哪些优秀的图表制作工具，它们又是怎样简化我们的绘制流程的！</p>
+<p>想看完整代码，点<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world%2Ftree%2Fmain%2Fcode%2Fch03" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world/tree/main/code/ch03" ref="nofollow noopener noreferrer">这里</a>。</p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

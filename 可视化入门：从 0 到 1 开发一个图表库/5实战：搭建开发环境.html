@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>现在我们就正式进入了我们的实战，也是小册子的核心部分：从 0 到 1 开发一个图表库。前一章对我们要开发的东西 Sparrow已经有了一个简单的介绍，这里就不多说了。</p>
+<p>在正式开发之前，我们先来搭建开发环境：一个合理的开发环境，会大大提高我们写代码的效率，规范性和健壮程度。</p>
+<p>我们将会从初始化环境开始，然后从<strong>检查（Lint）</strong> 、<strong>测试（Test）</strong> 、<strong>构建（Build）</strong> 、<strong>版本管理（Version Control）</strong> 和 <strong>持续化集成（Continuous integration）</strong> 这几方面来搭建我们的开发环境。</p>
+<p>那么首先我们来初始化我们的环境。</p>
+<h2 data-id="heading-0">初始化环境</h2>
+<p>首先在任意位置新建一个名叫 sparrow 的文件夹，然后安装下面对应版本的 <a href="https://link.juejin.cn?target=http%3A%2F%2Fnodejs.cn%2F" target="_blank" rel="nofollow noopener noreferrer" title="http://nodejs.cn/" ref="nofollow noopener noreferrer">node</a> 和 <a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.npmjs.com%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://www.npmjs.com/" ref="nofollow noopener noreferrer">npm</a>：</p>
+<ul>
+<li>node: 14.17.6</li>
+</ul>
+
+<ul>
+<li>npm: 6.14.15</li>
+</ul>
+<p>接下来运行 <code>npm init -y</code> 来初始化环境，这之后 sparrow 文件夹里会出现一个 <code>package.json</code> 文件。又了它之后，我们就来搭建我们的开发环境！</p>
+<blockquote>
+<p>代码编辑器推荐使用 VSCode</p>
+</blockquote>
+<h2 data-id="heading-1">代码检查（Lint）</h2>
+<p>首先我们来看看代码检查，代码检查是一种静态的分析，常用于寻找有问题的模式或者代码，能帮助我们规范代码和加少出错的可能性。这里我们将使用 <strong><a href="https://link.juejin.cn?target=http%3A%2F%2Feslint.cn%2Fdocs%2Fuser-guide%2Fgetting-started" target="_blank" rel="nofollow noopener noreferrer" title="http://eslint.cn/docs/user-guide/getting-started" ref="nofollow noopener noreferrer">ESlint</a></strong> 来作为代码检查的工具。</p>
+<pre><code class="hljs language-css" lang="css">$ npm install eslint <span class="hljs-attr">--save-dev</span>
+</code></pre>
+<p>我们可以通过下面的命令来初始化 ESlint 的配置，它会问你一些问题，根据你的选择去生成对应的配置文件。</p>
+<pre><code class="hljs language-csharp" lang="csharp">$ npx eslint --<span class="hljs-keyword">init</span>
+</code></pre>
+<p>这里把问题和答案都记录下来了。</p>
+<ul>
+<li>How would you like to use ESLint? &gt; <em>To check syntax, find problems, and enforce code style</em></li>
+</ul>
+
+<ul>
+<li>What type of modules does your project use? &gt; <em>JavaScript modules (import/export)</em></li>
+</ul>
+
+<ul>
+<li>Which framework does your project use? &gt; <em>None of these</em></li>
+</ul>
+
+<ul>
+<li>Does your project use TypeScript? &gt; <em>NO</em></li>
+</ul>
+
+<ul>
+<li>Where does your code run? &gt; <em>Browser, Node</em></li>
+</ul>
+
+<ul>
+<li>How would you like to define a style for your project &gt; <em>Use a popular style guide</em></li>
+</ul>
+
+<ul>
+<li>Which style guide do you want to follow? &gt; <em>Airbnb: <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fairbnb%2Fjavascript" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/airbnb/javascript" ref="nofollow noopener noreferrer">github.com/airbnb/java…</a></em></li>
+</ul>
+
+<ul>
+<li>What format do you want your config file to be in? &gt; <em>JavaScript</em></li>
+</ul>
+
+<ul>
+<li>Would you like to install them now with npm? &gt; <em>Yes</em></li>
+</ul>
+<p>最后对生成的配置文件进行简单修改后如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+  <span class="hljs-attr">env</span>: {
+    <span class="hljs-attr">browser</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">es2021</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">node</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-comment">// 这里增加一行，用于支持后面的测试环境</span>
+    <span class="hljs-attr">jest</span>: <span class="hljs-literal">true</span>,
+  },
+  <span class="hljs-attr">extends</span>: [<span class="hljs-string">"airbnb-base"</span>],
+  <span class="hljs-attr">parserOptions</span>: {
+    <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">13</span>,
+    <span class="hljs-attr">sourceType</span>: <span class="hljs-string">"module"</span>,
+  },
+  <span class="hljs-attr">rules</span>: {
+    <span class="hljs-comment">// 这里添加一行规则把这条规则隐藏</span>
+    <span class="hljs-string">"import/prefer-default-export"</span>: <span class="hljs-number">0</span>,
+  },
+};
+</code></pre>
+<p>因为我们需要使用 airbnb 的规则集合，所以需要额外安装下面的包：</p>
+<pre><code class="hljs language-arduino" lang="arduino">$ npm install eslint-plugin-<span class="hljs-keyword">import</span> eslint-config-airbnb-base@latest --save-dev
+</code></pre>
+<p>为了验证 eslint 已经正确使用了，我们在项目的根目录下增加：<code>src/index.js</code> 和 <code>src/drawRedRect.js</code>，并且输入以下的代码：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/index.js</span>
+
+<span class="hljs-keyword">export</span> { drawRedRect } <span class="hljs-keyword">from</span> <span class="hljs-string">'./drawRedRect'</span>;
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/drawRedRect.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">drawRedRect</span>(<span class="hljs-params">svg</span>) {
+  <span class="hljs-keyword">var</span> rect = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElementNS</span>(<span class="hljs-string">'http://www.w3.org/2000/svg'</span>, <span class="hljs-string">'rect'</span>)
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'x'</span>, <span class="hljs-number">0</span>)
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'y'</span>, <span class="hljs-number">0</span>)
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'red'</span>)
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'width'</span>, <span class="hljs-number">100</span>)
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'height'</span>, <span class="hljs-number">100</span>)
+  svg.<span class="hljs-title function_">appendChild</span>(rect)
+}
+</code></pre>
+<p>在控制台输入命令：<code>npx eslint src/drawRedRect.js</code> 会去检测 <code>src/drawRedRect.js</code> 文件存在的规则问题，如果加上 <code>--fix</code> 选项会修复在<a href="https://link.juejin.cn?target=https%3A%2F%2Feslint.bootcss.com%2Fdocs%2Frules%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://eslint.bootcss.com/docs/rules/" ref="nofollow noopener noreferrer">规则列表</a>有黄色 🔧 标记的规则。这里我们输入 <code>npx eslint src/drawRedRect.js --fix</code>，这个时候打开 <code>src/drawRedRect</code>，会发现 <code>var</code> 被修复成了 <code>const</code>，并且每一条语句末尾都被添加上了 <code>;</code>。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/drawRedRect.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">drawRedRect</span>(<span class="hljs-params">svg</span>) {
+  <span class="hljs-keyword">const</span> rect = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElementNS</span>(<span class="hljs-string">'http://www.w3.org/2000/svg'</span>, <span class="hljs-string">'rect'</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'x'</span>, <span class="hljs-number">0</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'y'</span>, <span class="hljs-number">0</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'red'</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'width'</span>, <span class="hljs-number">100</span>);
+  rect.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'height'</span>, <span class="hljs-number">100</span>);
+  svg.<span class="hljs-title function_">appendChild</span>(rect);
+}
+</code></pre>
+<p>这之后我们给 <code>package.json</code> 增加 <code>lint</code> 命令如下：</p>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"scripts"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"lint"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"eslint --fix"</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>为了更好的开发体验，如果使用 VSCode 话可以安装 eslint 插件（直接在应用商店搜索即可）。一方面插件会直接在文件中把问题高亮出来，另一方面我们可以通过命令来直接修复问题：<code>cmd + p</code> + <code>&gt; ESlint: Fix all auto-fixable Problems</code>。更多 <a href="https://link.juejin.cn?target=http%3A%2F%2Feslint.cn%2Fdocs%2Fuser-guide%2Fgetting-started" target="_blank" rel="nofollow noopener noreferrer" title="http://eslint.cn/docs/user-guide/getting-started" ref="nofollow noopener noreferrer">ESlint</a> 相关的东西可以去官网学习。</p>
+<h2 data-id="heading-2">代码测试（Test）</h2>
+<p>代码检测之后就是代码测试了，优秀的单元测试能保证我们的项目在迭代的过程中不出问题，这里我们将使用 <strong><a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.jestjs.cn%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://www.jestjs.cn/" ref="nofollow noopener noreferrer">Jest</a></strong> 和 <strong><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fhustcc%2Fjest-electron" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/hustcc/jest-electron" ref="nofollow noopener noreferrer">Jest Electron</a></strong> 来搭建我们的测试环境。</p>
+<p>Jest 是一个流行的 JavaScript 的测试框架，一般都运行在 node 或者模拟出来的浏览器环境，但是因为我们开发的是一个图表库，真实的浏览器环境会更加易于我们调试，所以我们需要 Jest Electron。我们用如下命令安装，这里需要注意的是一定要安装下面版本的 Jest，否者会出问题。</p>
+<pre><code class="hljs language-css" lang="css">$ npm <span class="hljs-selector-tag">i</span> jest<span class="hljs-keyword">@26</span>.0.1 jest-electron --save-dev
+</code></pre>
+<p>然后增加一个名叫 <code>jest.config.js</code> 并且增加内容如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+  <span class="hljs-attr">testMatch</span>: [<span class="hljs-string">'**/__tests__/**/*.spec.js'</span>], <span class="hljs-comment">// 只测试后缀为 .spec.js 的文件</span>
+  <span class="hljs-attr">runner</span>: <span class="hljs-string">'jest-electron/runner'</span>, <span class="hljs-comment">// 指定测试的 runner</span>
+  <span class="hljs-attr">testEnvironment</span>: <span class="hljs-string">'jest-electron/environment'</span>, <span class="hljs-comment">//  制定测试的环境</span>
+};
+</code></pre>
+<p>在真正开始测试之前我们还需要将代码编译成可以在 node 环境下面可以运行的代码，这个时候我们就需要 <strong><a href="https://link.juejin.cn?target=https%3A%2F%2Fbabel.docschina.org%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://babel.docschina.org/" ref="nofollow noopener noreferrer">Babel</a></strong> 了。Babel 是一个 JavaScript 编译器，主要用于在当前和旧的浏览器或环境中，将 ECMAScript 2015+ 代码转换为 JavaScript 向后兼容版本的代码。</p>
+<pre><code class="hljs language-ruby" lang="ruby"><span class="hljs-variable">$ </span>npm install --save-dev <span class="hljs-variable">@babel</span>/core <span class="hljs-variable">@babel</span>/cli <span class="hljs-variable">@babel</span>/preset-env
+</code></pre>
+<p>然后增加一个名叫 <code>.babelrc</code> 的文件并且输入以下内容：</p>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"presets"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">[</span>
+      <span class="hljs-string">"@babel/preset-env"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"useBuiltIns"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"entry"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"corejs"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"3.6.4"</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"exclude"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"node_modules/**"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>这个时候我们在根目录下增加 <code>__tests__</code> 文件夹，并且增加 <code>index.spec.js</code> 和 <code>utils.js</code> 文件:</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// __tests__/index.spec.js</span>
+
+<span class="hljs-keyword">import</span> { drawRedRect } <span class="hljs-keyword">from</span> <span class="hljs-string">'../src'</span>;
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">'test'</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">'drawRedRect()'</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> svg = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElementNS</span>(<span class="hljs-string">'http://www.w3.org/2000/svg'</span>, <span class="hljs-string">'svg'</span>);
+    svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'width'</span>, <span class="hljs-number">400</span>);
+    svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'height'</span>, <span class="hljs-number">400</span>);
+    svg.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">'viewBox'</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">400</span>, <span class="hljs-number">400</span>]);
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(svg);
+    
+    <span class="hljs-title function_">drawRedRect</span>(svg);
+    <span class="hljs-title function_">expect</span>(svg.<span class="hljs-title function_">getElementsByTagName</span>(<span class="hljs-string">'rect'</span>).<span class="hljs-property">length</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+  });
+
+});
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// __tests__/utils.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createDiv</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> div = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">'div'</span>);
+  <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(div);
+  <span class="hljs-keyword">return</span> div;
+}
+</code></pre>
+<p>如果一切顺利的话我们运行：<code>npx jest</code> 和普通的测试测试没有太多的区别，但是 <code>DEBUG_MODE=1 npx jest</code> 会额外打开一个基于 Electron 真实的浏览器，并且输出如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp037eed6c95114c4d83f61b6dc736b4f1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>为了兼容 Windows 和 Mac 系统，我们需要额外安装一个 cross-env 这个库。</p>
+<pre><code class="hljs language-bash" lang="bash">$ npm install --save-dev cross-env
+</code></pre>
+<p>这样需要打开 Electron 测试的时候输入：<code>cross-env DEBUG_MODE=1 npx jest</code>。</p>
+<p>这个过程中 Jest 会首先读取 <code>.babelrc</code> 的内容，用 Babel 将代码编译之后再测试。之后我们给 <code>package.json</code> 增加 <code>test</code> 和 <code>test-live</code> 命令如下：</p>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"scripts"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"test"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"jest --coverage"</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"test-live"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"cross-env DEBUG_MODE=1 jest --coverage"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h2 data-id="heading-3">代码构建（Build）</h2>
+<p>因为我们最后是完成一个库并且发布在 npm 上供大家使用，所以我们需要对我们的代码进行构建，这个时候我们需要对编译好的代码进行打包: 将小块代码编译成大块复杂的代码，然后在不同的环境下运行。这个地方我们选择 <a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.rollupjs.com%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://www.rollupjs.com/" ref="nofollow noopener noreferrer">Rollup</a> 来作为我们的打包器。</p>
+<p>在打包之前我们需要 Rollup 用 Babel 对代码进行编译，所以我们还需要安装 <code>rollup-plugin-babel</code> 这个插件。</p>
+<pre><code class="hljs language-css" lang="css">$ npm install <span class="hljs-attr">--save-dev</span> rollup rollup-plugin-babel
+</code></pre>
+<p>另一方面我们还需要 <code>rollup-plugin-node-resolve</code> 这个插件来保证打包过程能正确加载文件。</p>
+<pre><code class="hljs language-css" lang="css">$ npm install <span class="hljs-attr">--save-dev</span> rollup-plugin-node-resolve
+</code></pre>
+<p>安装完成之后我们新建 <code>rollup.config.js</code> 文件，输入以下的内容：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> babel <span class="hljs-keyword">from</span> <span class="hljs-string">'rollup-plugin-babel'</span>;
+<span class="hljs-keyword">import</span> resolve <span class="hljs-keyword">from</span> <span class="hljs-string">'rollup-plugin-node-resolve'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">input</span>: <span class="hljs-string">'src/index.js'</span>, <span class="hljs-comment">// 打包入口</span>
+  <span class="hljs-attr">output</span>: [
+    {
+      <span class="hljs-attr">file</span>: <span class="hljs-string">'lib/sparrow.js'</span>, <span class="hljs-comment">// 对于 Nodejs，打包成 commonjs</span>
+      <span class="hljs-attr">format</span>: <span class="hljs-string">'cjs'</span>,
+    },
+    {
+      <span class="hljs-attr">file</span>: <span class="hljs-string">'esm/sparrow.js'</span>, <span class="hljs-comment">// 对于浏览器，打包成 ES module</span>
+      <span class="hljs-attr">format</span>: <span class="hljs-string">'es'</span>,
+    },
+    {
+      <span class="hljs-attr">file</span>: <span class="hljs-string">'dist/sparrow.min.js'</span>,
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'sp'</span>,
+      <span class="hljs-attr">format</span>: <span class="hljs-string">'umd'</span>, <span class="hljs-comment">// 对于 Nodejs 和浏览器，打包成混合模式</span>
+    },
+  ],
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-title function_">resolve</span>(),
+    <span class="hljs-title function_">babel</span>(), <span class="hljs-comment">// 使用 babel 插件</span>
+  ],
+};
+</code></pre>
+<p>这个时候我们运行 <code>npx rollup --config</code> 就可以发现目录中多了三个 <code>dist</code>、<code>esm</code> 和 <code>lib</code> 文件夹就是我们的打包结果。当然这里我们还需要安装一个小工具 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fisaacs%2Frimraf" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/isaacs/rimraf" ref="nofollow noopener noreferrer">rimraf</a>，在每次打包之前把以往的打包代码删除。</p>
+<pre><code class="hljs language-css" lang="css">$ npm <span class="hljs-selector-tag">i</span> rimraf <span class="hljs-attr">--save-dev</span>
+</code></pre>
+<p>使用方法也很简单：<code>npx rimraf -rf ./dist ./lib ./esm</code> 就可以把之前生成的文件删除了。之后我们给 <code>package.json</code> 增加 <code>build</code> 命令如下：</p>
+<pre><code class="hljs language-js" lang="js">{
+  <span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"build"</span>: <span class="hljs-string">"rimraf -rf ./dist ./lib ./esm &amp;&amp; rollup --config"</span>
+  }
+}
+</code></pre>
+<h2 data-id="heading-4">版本管理（VC）</h2>
+<p>接下来看看我们的版本管理工具，这里当然使用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgit-scm.com%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://git-scm.com/" ref="nofollow noopener noreferrer">Git</a>。我们首先运行 <code>git init</code>，然后添加一个如下的 <code>.gitignore</code> 文件来指定不加入版本管理的文件。</p>
+<pre><code class="hljs language-lua" lang="lua"># Logs
+logs
+*.<span class="hljs-built_in">log</span>
+npm-<span class="hljs-built_in">debug</span>.<span class="hljs-built_in">log</span>*
+yarn-<span class="hljs-built_in">debug</span>.<span class="hljs-built_in">log</span>*
+yarn-<span class="hljs-built_in">error</span>.<span class="hljs-built_in">log</span>*
+
+# Sys
+.DS_Store
+
+# Node
+node_modules/
+
+# Build
+dist
+lib
+esm
+
+# Test
+coverage
+</code></pre>
+<p>往往在使用 Git 提交（Commit）代码之前，我们希望先对新加入暂存区代码进行一下检查，并且规范提交信息（Commit Message），这个时候我们需要三个工具：</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Ftypicode.github.io%2Fhusky%2F%23%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://typicode.github.io/husky/#/" ref="nofollow noopener noreferrer">husky</a>： husky 能让你创建勾子（Hook），这些钩子会在指定时候执行。</li>
+</ul>
+
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fcommitlint.js.org%2F%23%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://commitlint.js.org/#/" ref="nofollow noopener noreferrer">commitlint</a>：commitlint 会按照一定的规则对你的提交信息进行检查。</li>
+</ul>
+
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fokonet%2Flint-staged" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/okonet/lint-staged" ref="nofollow noopener noreferrer">lint-staged</a>：lint-staged 只会对你的新加入暂存区的文件进行指定的操作。</li>
+</ul>
+<p>我们首先安装 husky：</p>
+<pre><code class="hljs language-csharp" lang="csharp">$ npx husky-<span class="hljs-keyword">init</span> &amp;&amp; npm install
+</code></pre>
+<p>然后初始化两个钩子：pre-commit（在提交前执行后面的命令）和 commit-msg（在提交的时候执行后面的命令）：</p>
+<pre><code class="hljs language-shell" lang="shell"><span class="hljs-meta prompt_">$ </span><span class="bash">npx husky add .husky/pre-commit <span class="hljs-string">'npx lint-staged'</span></span>
+</code></pre>
+<pre><code class="hljs language-shell" lang="shell"><span class="hljs-meta prompt_">$ </span><span class="bash">npx husky add .husky/commit-msg <span class="hljs-string">'npx --no-install commitlint --edit "$1"'</span></span>
+</code></pre>
+<p>然后我们来安装上面提到的 lint-staged，并且修改 <code>package.json</code> 如下：</p>
+<pre><code class="hljs language-ruby" lang="ruby"><span class="hljs-variable">$ </span>npx mrm<span class="hljs-variable">@2</span> lint-staged --save-dev
+</code></pre>
+<pre><code class="hljs language-js" lang="js">{
+  <span class="hljs-string">"lint-staged"</span>: {
+    <span class="hljs-string">"*.js"</span>: [<span class="hljs-string">"eslint --fix"</span>] <span class="hljs-comment">// 在提交前用 eslint 修复所有 js 文件</span>
+  }
+}
+</code></pre>
+<p>最后安装 commitlint 并且生成配置文件：</p>
+<pre><code class="hljs language-bash" lang="bash"><span class="hljs-comment"># Mac 等系统</span>
+$ npm install --save-dev @commitlint/{cli,config-conventional}
+
+<span class="hljs-comment"># Windows 系统</span>
+$ npm install --save-dev @commitlint/config-conventional @commitlint/cli
+</code></pre>
+<pre><code class="hljs language-ini" lang="ini">$ echo "<span class="hljs-attr">module.exports</span> = { extends: [<span class="hljs-string">'@commitlint/config-conventional'</span>] }<span class="hljs-comment">;" &gt; commitlint.config.js</span>
+</code></pre>
+<p>上面我们使用的 <code>config-conventional</code> 这个规则，具体可以参考<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fconventional-changelog%2Fcommitlint%2Ftree%2Fmaster%2F%40commitlint%2Fconfig-conventional" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/conventional-changelog/commitlint/tree/master/@commitlint/config-conventional" ref="nofollow noopener noreferrer">这里</a>。</p>
+<p>这之后我们来提交第一次提交代码：<code>git add . &amp;&amp; git commit -m "chore: init local env"</code>，一切正常的话控制台输出图如下：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd28a7a789ec6474081578caacfc8b41a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-5">持续化集成（CI）</h2>
+<p>最后来到我们的持续化集成（CI）：频繁地（一天多次）将代码集成到主干。持续集成的目的，就是让产品可以快速迭代，同时还能保持高质量。它的核心措施是，代码集成到主干之前，必须通过自动化测试。只要有一个测试用例失败，就不能集成。更多 CI 的概念可以参考阮一峰老师的<a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.ruanyifeng.com%2Fblog%2F2015%2F09%2Fcontinuous-integration.html" target="_blank" rel="nofollow noopener noreferrer" title="https://www.ruanyifeng.com/blog/2015/09/continuous-integration.html" ref="nofollow noopener noreferrer">这篇文章</a>。</p>
+<p>所以我希望每次我们 push 代码，或者提交 PR（Pull Request）的时候都对代码进行检测（Lint），测试（Test）和构建（Build）。如果任何一个不成功就显示失败。</p>
+<p>首先我们需要 <a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fnpm-run-all" target="_blank" rel="nofollow noopener noreferrer" title="https://www.npmjs.com/package/npm-run-all" ref="nofollow noopener noreferrer">npm-run-all</a> 来顺序或者并行执行多个 npm 脚本命令：</p>
+<pre><code class="hljs language-css" lang="css">$ npm install npm-run-<span class="hljs-attribute">all</span> <span class="hljs-attr">--save-dev</span>
+</code></pre>
+<p>然后在 <code>package.json</code> 里面添加对应的 CI 命令，<code>run-s</code> 是指顺序执行：</p>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">{</span>
+   <span class="hljs-attr">"scripts"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"ci"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"run-s lint test build"</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>然后我们使用 Github Action 来完成持续化集成。Action（动作）是指持续化集成的操作，比如上面提到的测试、构建和检测等等。Github 需要配置文件来知道 CI 的流程。</p>
+<p>我们在项目的根目录新建一个 <code>.github</code> 的文件夹，然后在里面新建一个名叫 <code>workflows</code> 的文件夹，最后新建一个 <code>ci.yml</code> 的文件并且输入以下的内容。</p>
+<pre><code class="hljs language-yaml" lang="yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">ci</span>
+
+<span class="hljs-attr">on:</span> [<span class="hljs-string">push</span>, <span class="hljs-string">pull_request</span>]
+
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">build:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">macOS-latest</span>
+    
+    <span class="hljs-attr">steps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Checkout</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v2.3.4</span>
+        
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Node.js</span> <span class="hljs-string">environment</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v2.1.5</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">node-version:</span> <span class="hljs-string">"12"</span>
+          
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Cache</span> <span class="hljs-string">node</span> <span class="hljs-string">modules</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/cache@v2</span>
+        <span class="hljs-attr">env:</span>
+          <span class="hljs-attr">cache-name:</span> <span class="hljs-string">cache-node-modules</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">path:</span> <span class="hljs-string">./node_modules</span>
+          <span class="hljs-attr">key:</span> <span class="hljs-string">${{</span> <span class="hljs-string">runner.os</span> <span class="hljs-string">}}-build-cache-node-modules-${{</span> <span class="hljs-string">hashFiles('**/package.json')</span> <span class="hljs-string">}}</span>
+          <span class="hljs-attr">restore-keys:</span> <span class="hljs-string">|
+            cache-node-modules-
+</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Run</span> <span class="hljs-string">ci</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">|
+          npm install
+          npm run ci
+</span></code></pre>
+<p>上面有几个地方很关键：首先是 <code>on: [push, pull_request]</code>，说明是在 push 和 pull_request 的时候会触发当前的这个工作流（Workflow）：持续集成一次运行的过程。然后每一个工作流包含多个步骤（Step），我们重点关注最后一个步骤：<code>Run ci</code>。可以发现这个步骤主要由两个动作构成：<code>npm install</code> 用来安装依赖，<code>npm run ci</code> 来真正执行我们的 CI 流程。</p>
+<p>这个时候我们在 Github 上新建一个名叫 Sparrow 的仓库，并且和本地这个仓库关联起来。接下来提交代码并且推到远程仓库：</p>
+<p><code>git commit -m "chore: add ci" &amp;&amp; git push</code></p>
+<p>这个时候就会自动触发 CI 了：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp6e04b1468a6149cd8ef7123a1513fe56~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>CI 结束之后如下就说明没有问题了！</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfe3d455546274b1d99a9d98d52668b95~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>Github Action 的深入学习同样可以参考阮一峰老师的<a href="https://link.juejin.cn?target=http%3A%2F%2Fwww.ruanyifeng.com%2Fblog%2F2019%2F09%2Fgetting-started-with-github-actions.html" target="_blank" rel="nofollow noopener noreferrer" title="http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html" ref="nofollow noopener noreferrer">另一篇文章</a>。</p>
+<h2 data-id="heading-6">总结</h2>
+<p>目前为止我们的开发环境就搭建完成了，此刻的代码可以在这个<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fchore%2Fenv" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/chore/env" ref="nofollow noopener noreferrer">分支</a>查看。总结一下一个比较完整的开发环境可以让我们有以下能力：</p>
+<ul>
+<li>代码检测：来保证代码的风格正确</li>
+<li>代码测试：保证代码的功能正确</li>
+<li>代码构建：保证我们的代码可以在不同环境里面运行</li>
+<li>版本管理：保证协同开发的统一性</li>
+<li>持续化集：成保证代码高质量快速迭代</li>
+</ul>
+<p>下一章我们将开发用于 Sparrow 的数据渲染模块：渲染器（Renderer）。</p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

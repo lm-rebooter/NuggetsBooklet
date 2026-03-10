@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上一章介绍了辅助组件（Guide）相关的知识，聊了坐标轴、图例的本质和绘制方法，这一章我们将简单了解一下统计函数（Statistic），看一看它是如何改变几何图形的位置的。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp45199749306c4a08ac2a15ac5a137957~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>我们首先还是会从统计理论开始，然后实现几个比较常见的统计函数。接下来就让我们开始吧。</p>
+<h2 data-id="heading-0">统计理论（Statistic）</h2>
+<p>在图形语法这本书中将统计定义为修改几何元素位置的函数，包括了以下这些函数。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc814d7303b804e2b9954ea93df53dc04~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这本书里除了统计可以修改几何元素的位置，几何元素的调整（Modifier）也是可以的，比如如下的这些。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp33b35615a5fc44cd8fa8d1e7bacd984c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>因为它们拥有相同的功能，所以在这里我们都有统计函数去实现它们，并且在这里都把它们称为统计函数。接下来我们将实现以下的统计函数：</p>
+<ul>
+<li>堆叠（StackY）</li>
+<li>对称（SymmetryY）</li>
+<li>归一化（NormalizeY）</li>
+<li>分箱（BinX）</li>
+</ul>
+<p>修改几何元素的位置就意味着修改或者产生位置通道的值，也就是在前面几何图形那章里面提到的 x、x1、y、y1 这些通道的值。这也是为什么上面的统计函数的名字是由 X 和 Y 结尾：X 说明该函数修改了该几何图形 x 通道的值，Y 说明该函数修改了该几何图形 x 通道的值。</p>
+<p>具体的实现我们将在接下来的部分看到。正式开始写代码之前需要说明一点的是：<strong>目前代码中各个模块下的 <code>utils.js</code> 文件的内容都统一放到了 <code>src/utils</code> 这个文件夹下。</strong></p>
+<h2 data-id="heading-1">堆叠（StackY）</h2>
+<p>首先我们来看看堆叠（StackY），堆叠这个统计函数常常用于堆叠条形图和堆叠面积图。下面我们先来看一个简单的例子。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> rainfall = [
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">18.9</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">28.8</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">39.3</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">81.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">47</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">20.3</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">24</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.6</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">12.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">23.2</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">34.5</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">99.7</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">52.6</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.5</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">37.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">42.4</span> },
+];
+</code></pre>
+<p>当我们用条形图可视化上面的数据的时候，会得到下面的结果。这里有个奇怪的现象：条的数量和数据数量不一致！这是因为在同一月份的数量对应的条重合在一起了！</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp18baba1a86dd485aa0a92e3f2f1df7e2~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>为了解决上面的问题，其中一种方法就是通过堆叠函数把在相同月份的条堆叠起来，得到下面的效果。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe2b80a9ba7ad4aedb5f8496a4b4a0ca2~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>接下来我们就从数据层面来了解一下堆叠函数的原理。这里还是说一下，统计函数处理的数据不是我们的原始表格数据，而是一个和每个通道绑定的对象，参考下面的例子。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 原始数据</span>
+<span class="hljs-keyword">const</span> raw = [
+  { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">1</span> },
+  { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">2</span> },
+  { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">3</span> }
+];
+
+<span class="hljs-comment">// 和每个通道绑定的对象</span>
+<span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">index</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  <span class="hljs-attr">values</span>: {
+    <span class="hljs-attr">x</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+    <span class="hljs-attr">y</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  },
+};
+</code></pre>
+<p>了解了统计函数的输入之后我们就来看看堆叠函数的使用方式。可以发现它把 x 属性相同的数据的 y 属性的值堆叠起来，修改了 y 的值，并且产生了一个新的 y1 通道的值。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createStackY } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/statistic'</span>;
+
+<span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">index</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  <span class="hljs-attr">values</span>: {
+    <span class="hljs-attr">x</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+    <span class="hljs-attr">y</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  },
+};
+<span class="hljs-keyword">const</span> stack = <span class="hljs-title function_">createStackY</span>();
+<span class="hljs-title function_">stack</span>(data);
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   index: [0, 1, 2],</span>
+<span class="hljs-comment">//   values: {</span>
+<span class="hljs-comment">//     x: [0, 0, 0],</span>
+<span class="hljs-comment">//     y1: [0, 1, 3],</span>
+<span class="hljs-comment">//     y: [1, 3, 6],</span>
+<span class="hljs-comment">//   },</span>
+<span class="hljs-comment">// }</span>
+</code></pre>
+<p>接下来我们就来看看具体的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/statistc/stack.js</span>
+
+<span class="hljs-keyword">import</span> { group } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createStackY</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">{ index, values }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> { <span class="hljs-attr">x</span>: X, <span class="hljs-attr">y</span>: Y } = values;
+    
+    <span class="hljs-comment">// 根据 x 通道值分组</span>
+    <span class="hljs-keyword">const</span> series = X ? <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title function_">group</span>(index, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> X[i]).<span class="hljs-title function_">values</span>()) : [index];
+    
+    <span class="hljs-comment">// 生成两个新的通道的值</span>
+    <span class="hljs-keyword">const</span> newY = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(index.<span class="hljs-property">length</span>);
+    <span class="hljs-keyword">const</span> newY1 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(index.<span class="hljs-property">length</span>);
+    
+    <span class="hljs-comment">// 对每个分组的 y 进行累加</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> I <span class="hljs-keyword">of</span> series) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> py = <span class="hljs-number">0</span>, i = <span class="hljs-number">0</span>; i &lt; I.<span class="hljs-property">length</span>; py = newY[I[i]], i += <span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">const</span> index = I[i];
+        newY1[index] = py;
+        newY[index] = py + Y[index];
+      }
+    }
+    
+    <span class="hljs-keyword">return</span> {
+      index,
+      <span class="hljs-comment">// 返回修改后的 y 通道的值，并且新增一个 y1 通道</span>
+      <span class="hljs-attr">values</span>: { ...values, <span class="hljs-attr">y</span>: newY, <span class="hljs-attr">y1</span>: newY1 },
+    };
+  };
+}
+</code></pre>
+<h2 data-id="heading-2">归一化（NormalizeY）</h2>
+<p>了解了堆叠这个统计函数之后，我们再来看看归一化这个统计函数。该函数常用于百分比条形图：比如在上面的堆叠条形图的基础上使用归一化统计函数，就会得到下面的例子。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4208f5c788f646119155883f51511667~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>看完了例子，我们来看看使用方法。其实不难发现，归一化其实就是把 y 通道的值都变成了 <code>[0, 1]</code> 这个范围之内。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createNormalizeY } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/statistic'</span>;
+<span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">index</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  <span class="hljs-attr">values</span>: {
+    <span class="hljs-attr">x</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+    <span class="hljs-attr">y1</span>: [<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>],
+    <span class="hljs-attr">y</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>],
+  },
+};
+<span class="hljs-keyword">const</span> normalizeY = <span class="hljs-title function_">createNormalizeY</span>();
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   index: [0, 1, 2],</span>
+<span class="hljs-comment">//   values: {</span>
+<span class="hljs-comment">//     x: [0, 1, 2],</span>
+<span class="hljs-comment">//     y1: [0.2, 0.4, 0.6],</span>
+<span class="hljs-comment">//     y: [1, 1, 1],</span>
+<span class="hljs-comment">//   },</span>
+<span class="hljs-comment">// }</span>
+</code></pre>
+<p>接下来我们就来看看具体的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/statistc/normalize.js</span>
+
+<span class="hljs-keyword">import</span> { group } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createNormalizeY</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">{ index, values }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> {<span class="hljs-attr">x</span>: X } = values;
+    
+    <span class="hljs-comment">// 按照 x 通道分组</span>
+    <span class="hljs-keyword">const</span> series = X ? <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title function_">group</span>(index, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> X[i]).<span class="hljs-title function_">values</span>()) : [index];
+    
+    <span class="hljs-comment">// 生成定义了的 y 方向的通道值</span>
+    <span class="hljs-keyword">const</span> newValues = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(
+      [<span class="hljs-string">'y1'</span>, <span class="hljs-string">'y'</span>]
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> values[key])
+        .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> [key, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(index.<span class="hljs-property">length</span>)]),
+    );
+    
+    <span class="hljs-comment">// 处理每一个分组</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> I <span class="hljs-keyword">of</span> series) {
+      <span class="hljs-comment">// 找到该分组最大的 y</span>
+      <span class="hljs-keyword">const</span> Y = I.<span class="hljs-title function_">flatMap</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(newValues).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> values[key][i]));
+      <span class="hljs-keyword">const</span> n = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...Y);
+      
+      <span class="hljs-comment">// 归一化每一条数据的每一个 y 方向通道的值</span>
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> i <span class="hljs-keyword">of</span> I) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(newValues)) {
+          newValues[key][i] = values[key][i] / n;
+        }
+      }
+    }
+    
+    <span class="hljs-keyword">return</span> {
+      index,
+      <span class="hljs-attr">values</span>: {
+        ...values,
+        ...newValues,
+      },
+    };
+  };
+}
+</code></pre>
+<h2 data-id="heading-3">对称（SymmetryY）</h2>
+<p>这之后我们来看看对称（SymmetryY），对称这个统计函数常常用于漏斗图和河流图。下面我们先来看一个简单的例子。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> countries = [
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1750'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">163</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1800'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">203</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1850'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">276</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1900'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">628</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1950'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">547</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1999'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">729</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Europe'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'2050'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">408</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1750'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">200</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1800'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">200</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1850'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">200</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1900'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">460</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1950'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">230</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1999'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">300</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Oceania'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'2050'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">300</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1750'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">106</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1800'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">107</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1850'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">111</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1900'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1766</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1950'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">221</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1999'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">767</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Africa'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'2050'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">133</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1750'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">502</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1800'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">635</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1850'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">809</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1900'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">5268</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1950'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">4400</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'1999'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">3634</span> },
+  { <span class="hljs-attr">country</span>: <span class="hljs-string">'Asia'</span>, <span class="hljs-attr">year</span>: <span class="hljs-string">'2050'</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">947</span> },
+];
+</code></pre>
+<p>在上面数据的基础上，用区域几何图形加上堆叠统计函数我们可以得到以下的堆叠面积图。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp46e5f1e22a5b48de8e207b2d73b28fe5~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>但如果我们继续加入对称统计函数，就可以得到下面的河流图，可以发现它是关于 <code>y = 4000</code> 对称的！</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpefa80dde41f84af2b6525ad6b79916a8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>接下来我们就从数据层面了解一下它的使用方式。可以发现对称其实是改变了 y 和 y1 这两个通道值。在根据 x 通道分组的基础上，让每个组 y 方向通道的平均值保持一致，并且选择最大的那一个平均值。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createSymmetryY } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/statistic'</span>;
+
+<span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">index</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  <span class="hljs-attr">values</span>: {
+    <span class="hljs-attr">x</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+    <span class="hljs-attr">y1</span>: [<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>],
+    <span class="hljs-attr">y</span>: [<span class="hljs-number">8</span>, <span class="hljs-number">8</span>, <span class="hljs-number">8</span>],
+  },
+};
+
+<span class="hljs-keyword">const</span> symmetryY = <span class="hljs-title function_">createSymmetryY</span>();
+<span class="hljs-title function_">symmetryY</span>(data);
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   index: [0, 1, 2],</span>
+<span class="hljs-comment">//   values: {</span>
+<span class="hljs-comment">//     x: [0, 1, 2],</span>
+<span class="hljs-comment">//     y1: [4, 5, 6],</span>
+<span class="hljs-comment">//     y: [10, 9, 8],</span>
+<span class="hljs-comment">//   },</span>
+<span class="hljs-comment">// }</span>
+</code></pre>
+<p>接下来我们就来看看具体的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/statistc/symmetry.js</span>
+
+<span class="hljs-keyword">import</span> { group } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createSymmetryY</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">{ index, values }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> {<span class="hljs-attr">x</span>: X} = values;
+    
+    <span class="hljs-comment">// 按照 x 方向分组</span>
+    <span class="hljs-keyword">const</span> series = X ? <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title function_">group</span>(index, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> X[i]).<span class="hljs-title function_">values</span>()) : [index];
+    <span class="hljs-keyword">const</span> newValues = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(
+      [<span class="hljs-string">'y1'</span>, <span class="hljs-string">'y'</span>]
+        .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> values[key])
+        .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> [key, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(index.<span class="hljs-property">length</span>)]),
+    );
+
+    <span class="hljs-comment">// 计算每个分组 y 方向的平均值</span>
+    <span class="hljs-keyword">const</span> M = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(series.<span class="hljs-property">length</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [i, I] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(series)) {
+      <span class="hljs-keyword">const</span> Y = I.<span class="hljs-title function_">flatMap</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(newValues).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> values[key][i]));
+      <span class="hljs-keyword">const</span> min = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(...Y);
+      <span class="hljs-keyword">const</span> max = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...Y);
+      M[i] = (min + max) / <span class="hljs-number">2</span>;
+    }
+
+    <span class="hljs-comment">// 找到最大的平均值</span>
+    <span class="hljs-keyword">const</span> maxM = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...M);
+    
+    <span class="hljs-comment">// 对 y 方向的通道进行调整</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [i, I] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(series)) {
+      <span class="hljs-keyword">const</span> offset = maxM - M[i];
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> i <span class="hljs-keyword">of</span> I) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(newValues)) {
+          newValues[key][i] = values[key][i] + offset;
+        }
+      }
+    }
+    
+    <span class="hljs-keyword">return</span> {
+      index,
+      <span class="hljs-attr">values</span>: {
+        ...values,
+        ...newValues,
+      },
+    };
+  };
+}
+</code></pre>
+<h2 data-id="heading-4">分箱（BinX）</h2>
+<p>最后我们来看看分箱（BinX），分箱这个统计函数常常用于直方图，用于看数据的分布。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> rainfall = [
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">18.9</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">28.8</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">39.3</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">81.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">47</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">20.3</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">24</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.6</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">12.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">23.2</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">34.5</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">99.7</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">52.6</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.5</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">37.4</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">42.4</span> },
+];
+</code></pre>
+<p>比如我们想看看上面数据中的 rainfall 这个属性的分布情况，就可以对该属性进行分箱，最后得到下面的直方图。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp28ebc280b4324e309902d03fe3c49982~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>参考上面的例子：分箱可以简单理解为对连续数据进行分组。对于离散数据的分组很好理解，但是对于连续数据听上去就有点奇怪了：连续的怎么分？所以我们首先需要计算一些均匀的分割值，把连续的数据范围分成一段段的，然后对每一段所包含的数据进行聚合。</p>
+<p>下面我们通过使用方式去深入了解一下它。可以发现我们将数据划分为了 <code>[0, 5, 10, 15, 20, 25, 30, 35]</code> 这些区间，每个区间的聚合方式选择了计数，并且将产生值作为了 fill 这个通道。同时根据划分的区间，修改了 x 和 y 通道，生成了 x1 通道。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createBinX } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/statistic'</span>;
+<span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">index</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">12</span>],
+  <span class="hljs-attr">values</span>: {
+    <span class="hljs-attr">x</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>, <span class="hljs-number">13</span>, <span class="hljs-number">16</span>, <span class="hljs-number">17</span>, <span class="hljs-number">18</span>, <span class="hljs-number">23</span>, <span class="hljs-number">33</span>, <span class="hljs-number">30</span>],
+    <span class="hljs-attr">y</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+  },
+};
+
+<span class="hljs-keyword">const</span> binX = <span class="hljs-title function_">createBinX</span>({ <span class="hljs-attr">channel</span>: <span class="hljs-string">'fill'</span> });
+<span class="hljs-title function_">binX</span>(data);
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   index: [0, 1, 2, 3, 4, 6],</span>
+<span class="hljs-comment">//   values: {</span>
+<span class="hljs-comment">//     x: [0, 5, 10, 15, 20, 25, 30],</span>
+<span class="hljs-comment">//     x1: [5, 10, 15, 20, 25, 30, 35],</span>
+<span class="hljs-comment">//     fill: [1, 2, 5, 3, 1, 0, 1],</span>
+<span class="hljs-comment">//     y: [1, 1, 1, 1, 1, undefined, 1],</span>
+<span class="hljs-comment">//   },</span>
+<span class="hljs-comment">// }</span>
+</code></pre>
+<p>接下来我们就来看看具体的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/statistc/bin.js</span>
+
+<span class="hljs-keyword">import</span> { bisect, ticks, identity, group, tickStep, floor, ceil, firstOf, min, max } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-comment">// 计算划分区间</span>
+<span class="hljs-comment">// 这里我们使用 linear scale 的 ticks 算法</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bin</span>(<span class="hljs-params">values, count = <span class="hljs-number">10</span>, accessor = identity</span>) {
+  <span class="hljs-comment">// 计算原始 step</span>
+  <span class="hljs-keyword">const</span> minValue = <span class="hljs-title function_">min</span>(values, accessor);
+  <span class="hljs-keyword">const</span> maxValue = <span class="hljs-title function_">max</span>(values, accessor);
+  <span class="hljs-keyword">const</span> step = <span class="hljs-title function_">tickStep</span>(minValue, maxValue, count);
+  
+  <span class="hljs-comment">// 计算 nice 之后的 step</span>
+  <span class="hljs-keyword">const</span> niceMin = <span class="hljs-title function_">floor</span>(minValue, step);
+  <span class="hljs-keyword">const</span> niceMax = <span class="hljs-title function_">ceil</span>(maxValue, step);
+  <span class="hljs-keyword">const</span> niceStep = <span class="hljs-title function_">tickStep</span>(niceMin, niceMax, count);
+  
+  <span class="hljs-comment">// 生成区间</span>
+  <span class="hljs-keyword">const</span> thresholds = <span class="hljs-title function_">ticks</span>(niceMin, niceMax, count);
+  
+  <span class="hljs-comment">// 区间包含首位两个值，并且去重</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([
+    <span class="hljs-title function_">floor</span>(niceMin, niceStep),
+    ...thresholds,
+    <span class="hljs-title function_">ceil</span>(niceMax, niceStep),
+  ]));
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createBinX</span>(<span class="hljs-params">{ count = <span class="hljs-number">10</span>, channel, aggregate = (values) =&gt; values.length } = {}</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">{ index, values }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> { [channel]: C, <span class="hljs-attr">x</span>: X, x1, ...rest } = values;
+    <span class="hljs-keyword">const</span> keys = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(rest);
+    
+    <span class="hljs-comment">// 计算区间</span>
+    <span class="hljs-keyword">const</span> thresholds = <span class="hljs-title function_">bin</span>(X, count);
+    <span class="hljs-keyword">const</span> n = thresholds.<span class="hljs-property">length</span>;
+    
+    <span class="hljs-comment">// 分组，依据是二分查找找到对应的区间</span>
+    <span class="hljs-keyword">const</span> groups = <span class="hljs-title function_">group</span>(index, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> <span class="hljs-title function_">bisect</span>(thresholds, X[i]) - <span class="hljs-number">1</span>);
+    
+    <span class="hljs-comment">// 过滤掉没有数据点的区间</span>
+    <span class="hljs-keyword">const</span> I = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(n - <span class="hljs-number">1</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span> i);
+    <span class="hljs-keyword">const</span> filtered = I.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> groups.<span class="hljs-title function_">has</span>(i));
+    
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">index</span>: filtered,
+      <span class="hljs-attr">values</span>: <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>([
+        <span class="hljs-comment">// 修改其余的原始通道</span>
+        <span class="hljs-comment">// 取该组该通道的第一个值作为新生成的值</span>
+        ...keys.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> [key, I.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> {
+          <span class="hljs-keyword">if</span> (!groups.<span class="hljs-title function_">has</span>(i)) <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+          <span class="hljs-keyword">return</span> values[key][<span class="hljs-title function_">firstOf</span>(groups.<span class="hljs-title function_">get</span>(i))];
+        })]),
+        
+        <span class="hljs-comment">// 聚合并且产生新的通道</span>
+        <span class="hljs-comment">// 这里的聚合方式为简单的计数</span>
+        [channel, I.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> {
+          <span class="hljs-keyword">if</span> (!groups.<span class="hljs-title function_">has</span>(i)) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+          <span class="hljs-keyword">return</span> <span class="hljs-title function_">aggregate</span>(groups.<span class="hljs-title function_">get</span>(i).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">index</span>) =&gt;</span> values[index]));
+        })],
+        
+        <span class="hljs-comment">// 生成 x 和 x1 通道</span>
+        [<span class="hljs-string">'x'</span>, thresholds.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, n - <span class="hljs-number">1</span>)],
+        [<span class="hljs-string">'x1'</span>, thresholds.<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>, n)],
+      ]),
+    };
+  };
+}
+</code></pre>
+<p>本章的所有统计函数就开发完成了，完整的代码可以在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2Fsrc%2Fstatistic" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/src/statistic" ref="nofollow noopener noreferrer">这里</a>浏览，同样也可以通过<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2F__tests__%2Fstatistic" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/__tests__/statistic" ref="nofollow noopener noreferrer">这里</a>的测试代码来验证代码的正确性。</p>
+<h2 data-id="heading-5">小结</h2>
+<p>这一章的内容大到这里就全部结束了。统计是一个比较难以理解的部分，在之后了解整个渲染流程之后，大家应该会更加清楚一点。</p>
+<p>相同的效果也可以通过预处理数据得到，比如使用 AntV 的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2Fdata-set" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/data-set" ref="nofollow noopener noreferrer">DataSet</a> 这个库。但是这样就不是一个统一的数据分析流程了，因为它不在 Sparrow 的可视化渲染流程之内，使用起来会比较割裂。</p>
+<p>在了解完统计之后，下一章我们将进入视图（View），看看如何一次绘制多个图表。</p>
+<blockquote>
+<p>参考资料</p>
+<ul>
+<li>The Grammar of Graphics, 2nd Edition, Leland Wilkinson</li>
+</ul>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上一章我们聊了一系列比较抽象的统计函数，了解了它们是如何改变几何图形的位置的。这一章我们来谈谈视图，了解一下什么是视图，又该如何组合它们去搭建一个拥有很多视图的界面（如下图）。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp6837b9bc56f64094917df04c7a69a7ed~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>首先我们还是从视图理论开始，然后进入实战部分，去实现几个视图组合函数，最后再进行简单的小结。那么废话不多说，我们马上进入视图的学习。</p>
+<h2 data-id="heading-0">视图理论</h2>
+<p>在可视化中，一个完整的视图至少由两个部分构成：几何元素和辅助组件（如下图。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf78bba1e26754af7b95ca341ef4f92fc~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>上面的这张图是一个单视图图表，因为它只有一个视图。而下面这张图是一个多视图图表，因为它将多个视图组合在了一起。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp9493b2ef3fdb4078bea613880a7b346e~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>对于多视图图表来说，它其实是由一棵视图树构成。视图树类似于前端开发中的 DOM 树，只不过每一个节点不是一个 DOM 而是一个视图，类似的概念还有渲染引擎中的场景图（Scene Graph）。</p>
+<p>在数据结构层面，视图树就是一个如下的嵌套对象。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> viewTree = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'layer'</span>,
+  <span class="hljs-attr">children</span>: [
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'row'</span>,
+      <span class="hljs-attr">children</span>: [{<span class="hljs-regexp">/.../</span>}, {<span class="hljs-regexp">/.../</span>}]
+    },
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'interval'</span>,
+    }
+  ]
+};
+</code></pre>
+<p>用 TypeScript 可以如下简单定义。</p>
+<pre><code class="hljs language-ts" lang="ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">ViewTree</span> = {
+  <span class="hljs-keyword">type</span>?: <span class="hljs-built_in">string</span>, <span class="hljs-comment">// 当前节点的种类</span>
+  children?: <span class="hljs-title class_">ViewTree</span>[], <span class="hljs-comment">// 包含的孩子节点</span>
+  [<span class="hljs-attr">key</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">any</span>,
+}
+</code></pre>
+<p>不同的视图节点有不同的布局方法和功能，在这里我们将实现3种视图节点：</p>
+<ul>
+<li>图层（Layer）：<code>type: 'layer'</code></li>
+<li>弹性盒子（Flex）：<code>type: 'col | row'</code></li>
+<li>分面（Facet）：<code>type: 'facet'</code></li>
+</ul>
+<p>而视图这个模块要做的就是解析这棵视图树，计算出每个视图区域的位置和大小，以及在这个区域有几个视图（视图可以重叠，之后我们会看见）。</p>
+<p>接下来我们就正式进入开发环节。</p>
+<h2 data-id="heading-1">创建视图（createViews）</h2>
+<p>视图模块就导出一个函数：<strong>createViews(tree, computes)</strong>。</p>
+<p>该函数有两个参数，第一个参数是一个描述视图树的嵌套对象，第二个参数是一个对象，该对象的每一个值是一个支持的视图计算函数。该函数返回一个数组，数组的每一个元素是一个元组。</p>
+<p>元组的第一个元素是一个如下的区域的描述：</p>
+<pre><code class="hljs language-ts" lang="ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Area</span> = {
+  <span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>, 
+  <span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span>, 
+  <span class="hljs-attr">width</span>: <span class="hljs-built_in">number</span>, 
+  <span class="hljs-attr">height</span>: <span class="hljs-built_in">number</span>, 
+  [<span class="hljs-attr">key</span>:<span class="hljs-built_in">string</span>]: <span class="hljs-built_in">any</span>
+}
+</code></pre>
+<p>元组的第二个元素是一个数组，数组的每一个元素是当前区域的视图：</p>
+<p><code>ViewTree[]</code>。</p>
+<p>接下来我们就来看代码的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/view/view.js</span>
+
+<span class="hljs-keyword">import</span> { computeFlexViews } <span class="hljs-keyword">from</span> <span class="hljs-string">'./flex'</span>;
+<span class="hljs-keyword">import</span> { computeFacetViews } <span class="hljs-keyword">from</span> <span class="hljs-string">'./facet'</span>;
+<span class="hljs-keyword">import</span> { computeLayerViews } <span class="hljs-keyword">from</span> <span class="hljs-string">'./layer'</span>;
+<span class="hljs-keyword">import</span> { descendants, group } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-comment">// 支持 4 种类型的节点</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createViews</span>(<span class="hljs-params">root, computes = {
+  layer: computeLayerViews,
+  col: computeFlexViews,
+  row: computeFlexViews,
+  facet: computeFacetViews,
+}</span>) {
+  <span class="hljs-comment">// 获得视图树的所有节点</span>
+  <span class="hljs-keyword">const</span> nodes = <span class="hljs-title function_">descendants</span>(root);
+  
+  <span class="hljs-comment">// 计算根节点视图区域大小</span>
+  <span class="hljs-keyword">const</span> { width = <span class="hljs-number">640</span>, height = <span class="hljs-number">480</span>, x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span> } = root;
+  <span class="hljs-keyword">const</span> rootView = { width, height, x, y };
+  
+  <span class="hljs-comment">// 根据节点索引视图</span>
+  <span class="hljs-keyword">const</span> nodeView = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[root, rootView]]);
+
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> node <span class="hljs-keyword">of</span> nodes) {
+    <span class="hljs-keyword">const</span> view = nodeView.<span class="hljs-title function_">get</span>(node);
+    <span class="hljs-keyword">const</span> { children = [], type } = node;
+    <span class="hljs-keyword">const</span> computeChildrenViews = computes[type];
+    <span class="hljs-keyword">if</span> (computeChildrenViews) {
+      <span class="hljs-comment">// 计算孩子节点的区域大小</span>
+      <span class="hljs-keyword">const</span> childrenViews = <span class="hljs-title function_">computeChildrenViews</span>(view, node);
+      <span class="hljs-keyword">if</span> (computeChildrenViews !== computeFacetViews) {
+      <span class="hljs-comment">// 如果不是分面节点，孩子节点和计算出来的区域一一对应</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [i, child] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(children)) {
+          nodeView.<span class="hljs-title function_">set</span>(child, childrenViews[i]);
+        }
+      } <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// 如果是分面节点，将产生一些新的孩子节点</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> child <span class="hljs-keyword">of</span> children) {
+          <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> view <span class="hljs-keyword">of</span> childrenViews) {
+            nodeView.<span class="hljs-title function_">set</span>({ ...child }, view);
+          }
+        }
+      }
+    }
+  }
+
+  <span class="hljs-comment">// 将计算好的视图根据区域去分组</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">key</span> = (<span class="hljs-params">d</span>) =&gt; <span class="hljs-string">`<span class="hljs-subst">${d.x}</span>-<span class="hljs-subst">${d.y}</span>-<span class="hljs-subst">${d.width}</span>-<span class="hljs-subst">${d.height}</span>`</span>;
+  <span class="hljs-keyword">const</span> keyViews = <span class="hljs-title function_">group</span>(<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(nodeView.<span class="hljs-title function_">entries</span>()), <span class="hljs-function">(<span class="hljs-params">[, view]</span>) =&gt;</span> <span class="hljs-title function_">key</span>(view));
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(keyViews.<span class="hljs-title function_">values</span>()).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">views</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> view = views[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">const</span> nodes = views.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d[<span class="hljs-number">0</span>]);
+    <span class="hljs-keyword">return</span> [view, nodes];
+  });
+}
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/utils/tree.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">descendants</span>(<span class="hljs-params">root</span>) {
+  <span class="hljs-keyword">const</span> nodes = [];
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">push</span> = (<span class="hljs-params">d</span>) =&gt; nodes.<span class="hljs-title function_">push</span>(d);
+  <span class="hljs-title function_">bfs</span>(root, push);
+  <span class="hljs-keyword">return</span> nodes;
+}
+
+<span class="hljs-comment">// 使用宽度优先搜索遍历这棵树</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">bfs</span>(<span class="hljs-params">root, callback</span>) {
+  <span class="hljs-keyword">const</span> discovered = [root];
+  <span class="hljs-keyword">while</span> (discovered.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">const</span> node = discovered.<span class="hljs-title function_">pop</span>();
+    <span class="hljs-title function_">callback</span>(node);
+    discovered.<span class="hljs-title function_">push</span>(...(node.<span class="hljs-property">children</span> || []));
+  }
+}
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/utils/index.js</span>
+
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'./tree'</span>;
+</code></pre>
+<h2 data-id="heading-2">图层（Layer）</h2>
+<p>图层（Layer）节点的孩子视图都是重合在一起的，该节点主要用于在一个区域中绘制多个几何元素，就比如如下的例子。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> temperatures = [
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">7</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">3.9</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">6.9</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">4.2</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">9.5</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">5.7</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">14.5</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">8.5</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">18.4</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">11.9</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">21.5</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">15.2</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">25.2</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">26.5</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">16.6</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Sep'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">23.3</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Sep'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">14.2</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Oct'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">18.3</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Oct'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">10.3</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Nov'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">13.9</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Nov'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">6.6</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Dec'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'Tokyo'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">9.6</span> },
+  { <span class="hljs-attr">month</span>: <span class="hljs-string">'Dec'</span>, <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">temperature</span>: <span class="hljs-number">4.8</span> },
+];
+</code></pre>
+<p>我们用折线图将上面的数据可视化得到如下的结果，可以发现在该图区域中有两种几何元素：线和点，它们的辅助元素可以简单理解为重合了。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe33b1b467c0e4efe84d63a9163dbbf21~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>对于如下的视图树，绘出来时如下的结果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> viewTree = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'layer'</span>,
+  <span class="hljs-attr">children</span>: [{}, {}],
+};
+
+<span class="hljs-keyword">const</span> views = <span class="hljs-title function_">createViews</span>(viewTree);
+</code></pre>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3c73acfa389c45b58881f6001d5541ef~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>它的实现非常简单，把自己的区域大小返回作为孩子节点的区域就好。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/view/layer.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">computeLayerViews</span>(<span class="hljs-params">box, node</span>) {
+  <span class="hljs-keyword">const</span> { children = [] } = node;
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(children.<span class="hljs-property">length</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> ({ ...box }));
+}
+</code></pre>
+<h2 data-id="heading-3">弹性盒子（Flex）</h2>
+<p>弹性盒子（Flex）节点的孩子视图在水平或者竖直方向都是充满父容器的，该概念来自于前端开发中的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fruanyifeng.com%2Fblog%2F2015%2F07%2Fflex-grammar.html" target="_blank" rel="nofollow noopener noreferrer" title="https://ruanyifeng.com/blog/2015/07/flex-grammar.html" ref="nofollow noopener noreferrer">Flex 布局</a>。</p>
+<p>该节点主要用于将区域划分为子区域，不同的子区域拥有不同的视图。该节点节点又分为两种类型：row 和 col。比如如果将上面例子中的容器类型从 layer 改成 row 的话就会得到如下的结果。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc77cb283fcd042fcb50c40947d8aea30~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>对于如下的视图树，绘出来有如下的结果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> viewTree = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'row'</span>, <span class="hljs-comment">// 孩子水平排列</span>
+  <span class="hljs-attr">flex</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-comment">// 指定孩子的节点区域的比例</span>
+  <span class="hljs-attr">padding</span>: <span class="hljs-number">40</span>, <span class="hljs-comment">// 孩子节点区域的间距</span>
+  <span class="hljs-attr">children</span>: [
+    {},
+    <span class="hljs-comment">// 孩子竖直排列</span>
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">'col'</span>, <span class="hljs-attr">children</span>: [{}, {}] }, 
+  ],
+};
+
+<span class="hljs-keyword">const</span> views = <span class="hljs-title function_">createViews</span>(viewTree);
+</code></pre>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp31cab5209bf549d4984b2f9e697a9ebb~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的代码实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/view/flex.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">computeFlexViews</span>(<span class="hljs-params">box, node</span>) {
+  <span class="hljs-keyword">const</span> { type, children, flex = children.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-number">1</span>), padding = <span class="hljs-number">40</span> } = node;
+  <span class="hljs-keyword">const</span> [mainStart, mainSize, crossSize, crossStart] = type === <span class="hljs-string">'col'</span>
+    ? [<span class="hljs-string">'y'</span>, <span class="hljs-string">'height'</span>, <span class="hljs-string">'width'</span>, <span class="hljs-string">'x'</span>]
+    : [<span class="hljs-string">'x'</span>, <span class="hljs-string">'width'</span>, <span class="hljs-string">'height'</span>, <span class="hljs-string">'y'</span>];
+
+  <span class="hljs-keyword">const</span> sum = flex.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">total, value</span>) =&gt;</span> total + value);
+  <span class="hljs-keyword">const</span> totalSize = box[mainSize] - padding * (children.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> sizes = flex.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> totalSize * (value / sum));
+
+  <span class="hljs-keyword">const</span> childrenViews = [];
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> next = box[mainStart], i = <span class="hljs-number">0</span>; i &lt; sizes.<span class="hljs-property">length</span>; next += sizes[i] + padding, i += <span class="hljs-number">1</span>) {
+    childrenViews.<span class="hljs-title function_">push</span>({
+      [mainStart]: next,
+      [mainSize]: sizes[i],
+      [crossStart]: box[crossStart],
+      [crossSize]: box[crossSize],
+    });
+  }
+  <span class="hljs-keyword">return</span> childrenViews;
+}
+</code></pre>
+<h2 data-id="heading-4">分面（Facet）</h2>
+<p>最后我们来看看分面（Facet）节点。分面是可视化中一个常用的手段，主要用于对数据进行分组，不同组的数据在不同的视图中展示。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> facet = [
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">18.9</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">28.8</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">39.3</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">81.4</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">47</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">20.3</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">24</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'London'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.6</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jan.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">12.4</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Feb.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">23.2</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Mar.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">34.5</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Apr.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">99.7</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'a'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'May'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">52.6</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jun.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">35.5</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Jul.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">37.4</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+  { <span class="hljs-attr">city</span>: <span class="hljs-string">'Berlin'</span>, <span class="hljs-attr">month</span>: <span class="hljs-string">'Aug.'</span>, <span class="hljs-attr">rainfall</span>: <span class="hljs-number">42.4</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'b'</span> },
+];
+</code></pre>
+<p>比如如果如上的数据 x 方向按照 type 字段分组，y 方向按照 city 字段分组就会得到如下的结果。不难发现：在左上角的条形图中只包含 <code>city === "Berlin"</code> 以及 <code>type === "a"</code> 的数据。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp086c1312ad0c4d9dbe4ec28e369e17dc~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>根据上面的案例我们可以发现，分面节点除了会计算孩子节点区域的大小，还会去过滤数据，所以它还会额外返回一个过滤数据的函数。使用方式如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">sex</span>: <span class="hljs-string">'male'</span>, <span class="hljs-attr">skin</span>: <span class="hljs-string">'white'</span> },
+  { <span class="hljs-attr">sex</span>: <span class="hljs-string">'male'</span>, <span class="hljs-attr">skin</span>: <span class="hljs-string">'black'</span> },
+  { <span class="hljs-attr">sex</span>: <span class="hljs-string">'female'</span>, <span class="hljs-attr">skin</span>: <span class="hljs-string">'white'</span> },
+  { <span class="hljs-attr">sex</span>: <span class="hljs-string">'female'</span>, <span class="hljs-attr">skin</span>: <span class="hljs-string">'yellow'</span> },
+];
+
+<span class="hljs-keyword">const</span> views = <span class="hljs-title function_">createViews</span>({
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'facet'</span>,
+  <span class="hljs-comment">// 通过 encodings 这个配置去指定 x 和 y 方向的分组</span>
+  <span class="hljs-attr">encodings</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-string">'sex'</span>, <span class="hljs-comment">// 根据 sex 属性分组</span>
+    <span class="hljs-attr">y</span>: <span class="hljs-string">'skin'</span>, <span class="hljs-comment">// 根据 skin 属性分组</span>
+  },
+  data,
+  <span class="hljs-attr">padding</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// 指定区域之间的间隔</span>
+  <span class="hljs-attr">children</span>: [{}, {}],
+});
+
+<span class="hljs-keyword">const</span> [, [view]] = views;
+<span class="hljs-keyword">const</span> { transform } = view; <span class="hljs-comment">// 获取过滤数据的函数</span>
+<span class="hljs-title function_">transform</span>(data); <span class="hljs-comment">// [{ sex: 'male', skin: 'white' }]</span>
+</code></pre>
+<p>最后绘制出来的效果如下：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp32c343ef4a4341ea8021fd168b2cf2c0~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>代码实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/view/flex.js</span>
+
+<span class="hljs-keyword">import</span> { group } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">computeFacetViews</span>(<span class="hljs-params">box, {
+  data, encodings = {}, padding = <span class="hljs-number">0</span>,
+  paddingLeft = <span class="hljs-number">45</span>, paddingRight = <span class="hljs-number">45</span>, paddingBottom = <span class="hljs-number">45</span>, paddingTop = <span class="hljs-number">60</span>,
+}</span>) {
+  <span class="hljs-keyword">const</span> { x, y } = encodings;
+  <span class="hljs-keyword">const</span> cols = x ? <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title function_">group</span>(data, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d[x]).<span class="hljs-title function_">keys</span>()) : [<span class="hljs-literal">undefined</span>];
+  <span class="hljs-keyword">const</span> rows = y ? <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title function_">group</span>(data, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d[y]).<span class="hljs-title function_">keys</span>()) : [<span class="hljs-literal">undefined</span>];
+  <span class="hljs-keyword">const</span> n = cols.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">const</span> m = rows.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">const</span> views = [];
+  <span class="hljs-keyword">const</span> width = box.<span class="hljs-property">width</span> - paddingLeft - paddingRight;
+  <span class="hljs-keyword">const</span> height = box.<span class="hljs-property">height</span> - paddingTop - paddingBottom;
+  <span class="hljs-keyword">const</span> boxWidth = (width - padding * (n - <span class="hljs-number">1</span>)) / n;
+  <span class="hljs-keyword">const</span> boxHeight = (height - padding * (m - <span class="hljs-number">1</span>)) / m;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; n; i += <span class="hljs-number">1</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> j = <span class="hljs-number">0</span>; j &lt; m; j += <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">const</span> <span class="hljs-title function_">transform</span> = (<span class="hljs-params">data</span>) =&gt; {
+        <span class="hljs-keyword">const</span> <span class="hljs-title function_">inRow</span> = (<span class="hljs-params">d</span>) =&gt; d[x] === cols[i] || cols[i] === <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">const</span> <span class="hljs-title function_">inCol</span> = (<span class="hljs-params">d</span>) =&gt; d[y] === rows[j] || rows[j] === <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">return</span> data.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> <span class="hljs-title function_">inRow</span>(d) &amp;&amp; <span class="hljs-title function_">inCol</span>(d));
+      };
+      views.<span class="hljs-title function_">push</span>({
+        <span class="hljs-attr">x</span>: paddingLeft + box.<span class="hljs-property">x</span> + padding * i + i * boxWidth,
+        <span class="hljs-attr">y</span>: paddingTop + box.<span class="hljs-property">y</span> + padding * j + j * boxHeight,
+        <span class="hljs-attr">width</span>: boxWidth,
+        <span class="hljs-attr">height</span>: boxHeight,
+        transform, <span class="hljs-comment">// 指定过滤函数</span>
+      });
+    }
+  }
+  <span class="hljs-keyword">return</span> views;
+}
+</code></pre>
+<p>本章的所有视图计算函数就开发完成了，完整的代码可以在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2Fsrc%2Fview" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/src/view" ref="nofollow noopener noreferrer">这里</a>浏览，同样也可以通过<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2F__tests__%2Fview" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/__tests__/view" ref="nofollow noopener noreferrer">这里</a>的测试代码来验证代码的正确性。</p>
+<h2 data-id="heading-5">小结</h2>
+<p>分面这一章就到这里结束了，我们通过这一章了解到了如下的几种视图组合方式：</p>
+<ul>
+<li>图层（Layer）</li>
+<li>弹性盒子（Flex）</li>
+<li>分面（Facet）</li>
+</ul>
+<p>不同的组合方式有不同的使用场景，它可以帮助我们搭建复杂的可视化图表界面，也可以提高我们的分析能力。</p>
+<p>到目前为止，我们已经把渲染引擎和低级可视化模块开发完成了。接下来是时候将它们串联起来了，看看在整个渲染流程中它们该如何使用。下一章我们将进入 Sparrow 渲染流程 Plot 模块的开发。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp723fb646abdc4a96acc3e50010abf1e8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

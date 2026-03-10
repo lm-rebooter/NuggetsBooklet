@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上一章给大家介绍了比例尺，它侧重于负责数据的映射，比如将数据映射为视觉元素的颜色、大小或者形状等属性。接下来会给大家介绍坐标系（Coordinate），它侧重于负责视觉元素的布局过程，将经过比例尺映射后的位置属性转换成画布坐标。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd95ca36382a4483596fdef144ee3dc3a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>坐标系可以说是基于图形语法的图表库的一个独有的概念，它可以很方便的让图表在不同种类之间进行转换（比如从条形图转换成玫瑰图，堆叠条形图转换成饼图等等）。但是方便使用的同时，也带了实现上和理解的成本，所以希望大家看了这篇文章之后好好体会。</p>
+<p>那么接下来我们将会从函数式编程讲起，因为 Coordinate 的开发和后续 Sparrow 的开发将依赖它。这之后再介绍坐标系理论以及实现方法，最后和前几章一样，进行简单的拓展。</p>
+<h2 data-id="heading-0">函数式编程</h2>
+<p>我们首先进入函数式编程的学习。</p>
+<p>相信大家都对面向对象编程这种编程模式（Object Oriented Programming，OOP）不陌生，毕竟很多人学习的第一门计算机编程语言可能就是 Java，而它就是一门典型的面相对象编程的语言。</p>
+<p>这里将会给大家介绍另外一种编程模式：函数式编程（Funtional Programming, FP)。在这里介绍函数式编程的目的主要有两个：</p>
+<ul>
+<li>函数式编程相对于面向对象编程会有一些优点（我们之后会看见），Sparrow 的代码的目标就是尽量拥有这些优点，让代码更加函数式。了解函数式编程可以让我们更好理解 Sparrow 的代码架构和选择。</li>
+<li>Coordinate 的实现依赖于函数式编程两个非常重要的工具。</li>
+</ul>
+<p>我们首先会从一个例子简单来认识函数式编程，然后介绍其中两个重要概念：一等公民（First Class）和纯函数（Pure Function），最后介绍上面提到的两个工具：函数合成（Compose）和函数柯里化（Curry）。</p>
+<h3 data-id="heading-1">计算海鸥数量</h3>
+<p>这里我们会用 Franklin Frisby 教授的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FMostlyAdequate%2Fmostly-adequate-guide%2Fblob%2Fmaster%2Fch01.md" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/MostlyAdequate/mostly-adequate-guide/blob/master/ch01.md" ref="nofollow noopener noreferrer">《Mostly Adequate Guide to Function Programming》</a> 中的一个例子来初识函数式编程。</p>
+<p>假如现有一个功能：计算多个海鸥群按照一定方式结合（Conjoin）和繁殖（Breed）后的海鸥总数。如果用面向对象的方式来实现该功能就如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 定义一个海鸥群</span>
+<span class="hljs-comment">// 这个群可以和别的海鸥群结合（Conjoin)和繁殖（Breed）</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Flock</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">n</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">seagulls</span> = n;
+  }
+
+  <span class="hljs-title function_">conjoin</span>(<span class="hljs-params">other</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">seagulls</span> += other.<span class="hljs-property">seagulls</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+  }
+
+  <span class="hljs-title function_">breed</span>(<span class="hljs-params">other</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">seagulls</span> *= other.<span class="hljs-property">seagulls</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>;
+  }
+}
+
+<span class="hljs-keyword">const</span> flockA = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Flock</span>(<span class="hljs-number">4</span>);
+<span class="hljs-keyword">const</span> flockB = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Flock</span>(<span class="hljs-number">2</span>);
+<span class="hljs-keyword">const</span> flockC = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Flock</span>(<span class="hljs-number">0</span>);
+<span class="hljs-keyword">const</span> result = flockA
+  .<span class="hljs-title function_">conjoin</span>(flockC)
+  .<span class="hljs-title function_">breed</span>(flockB)
+  .<span class="hljs-title function_">conjoin</span>(flockA.<span class="hljs-title function_">breed</span>(flockB))
+  .<span class="hljs-property">seagulls</span>; <span class="hljs-comment">// 32</span>
+</code></pre>
+<p>上面这段代码不仅让我们难以跟踪一直在变的内部状态（群体的海鸥数量），而且计算结果也是不正确的：最后的总数应该是16，flockA 的数量在结合和繁殖过程中被永远改变了。</p>
+<p>那么接下来我们如何用函数式编程来实现相同的功能。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// add 相当于上面的 cojoin，multiply 相当于上面的 breed</span>
+<span class="hljs-comment">// 这样命名的目的后面会讲</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add</span> = (<span class="hljs-params">x, y</span>) =&gt; x + y;
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">multiply</span> = (<span class="hljs-params">x, y</span>) =&gt; x * y;
+
+<span class="hljs-keyword">const</span> flockA = <span class="hljs-number">4</span>;
+<span class="hljs-keyword">const</span> flockB = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">const</span> flockC = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">const</span> result =
+    <span class="hljs-title function_">add</span>(<span class="hljs-title function_">multiply</span>(flockB, <span class="hljs-title function_">add</span>(flockA, flockC)), <span class="hljs-title function_">multiply</span>(flockA, flockB)); <span class="hljs-comment">// 16</span>
+</code></pre>
+<p>上面的这段代码不仅没有了难以跟踪的内部状态，也能让我们计算得到正确的结果，甚至如果大家熟悉加法交换律和乘法结合律等基本运算法则的话，上面的计算可以化简如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">multiply</span>(flockB, <span class="hljs-title function_">add</span>(flockA, flockA));
+</code></pre>
+<p>对函数式编程有了一个大概的感觉之后，接下来我们来看看函数式编程中第一个重要概念：一等公民（First Class）。</p>
+<h3 data-id="heading-2">一等公民（First Class）</h3>
+<p>一等公民（First Class）的意思是：在函数式编程中，函数是一等公民。</p>
+<p>需要注意的是，这里的“一等”和我们平常理解的高人一等的“一等”不太一样，这里是指函数和其他基本数据类型（数值，字符串等）一样，没有什么特殊的地方。我们可以把函数存储在数组中，将它作为参数或者返回值，将它赋值给变量等等。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">add</span> = (<span class="hljs-params">x, y</span>) =&gt; x + y; <span class="hljs-comment">// 将函数赋值给变量</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">multiply</span> = (<span class="hljs-params">x, y</span>) =&gt; x * y;
+<span class="hljs-keyword">const</span> operations = [add, multiply]; <span class="hljs-comment">// 存储在数组里</span>
+
+<span class="hljs-comment">// 包装函数</span>
+<span class="hljs-comment">// 这是一个高阶函数（High Order Function, HOC)</span>
+<span class="hljs-comment">// 参数和返回值都是函数</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">logify</span> = (<span class="hljs-params">fn</span>) =&gt; { <span class="hljs-comment">// 将函数作为变量</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> { <span class="hljs-comment">// 将函数作为返回值</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(...args);
+    <span class="hljs-title function_">fn</span>(...args);
+  }
+}
+</code></pre>
+<p>看上去将函数看做是一等公民非常简单，但其实也没有那么容易。比如我们希望使用上面的 <code>logify</code> 函数去包装 <code>add</code> 函数，从而在每次调用 <code>add</code> 的时候先打印参数。我们很容易给出如下的实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> logAddWithDelay = <span class="hljs-title function_">logify</span>(<span class="hljs-function">(<span class="hljs-params">x, y</span>) =&gt;</span> <span class="hljs-title function_">add</span>(x, y));
+</code></pre>
+<p>上面的实现可以满足我们的需求，但是这样会不必要地延迟执行 <code>add</code> 函数，因为 <code>(x, y) =&gt; add(x, y)</code> 又包装了一层函数。真正把函数作为一等公民的写法应该如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> logAdd = <span class="hljs-title function_">logify</span>(add);
+</code></pre>
+<p>上面这样写处理可以避免不必要的延迟执行之外，还可以方便的修改被包装的函数 <code>add</code> 的参数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 支持三个数的加法</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add</span> = (<span class="hljs-params">x, y, z</span>) =&gt; x + y + z;
+
+<span class="hljs-comment">// ❌ 和上面的写法保持不一致</span>
+<span class="hljs-keyword">const</span> logAddWithDelay = <span class="hljs-title function_">logfiy</span>(<span class="hljs-function">(<span class="hljs-params">x, y, z</span>) =&gt;</span> <span class="hljs-title function_">add</span>(x, y, z));
+
+<span class="hljs-comment">// ✅  和上面的写法保持一致</span>
+<span class="hljs-keyword">const</span> logAdd = <span class="hljs-title function_">logify</span>(add);
+</code></pre>
+<p>将函数作为一等公民的另外一个好处就是它不必和特定的数据类型关联起来，可以拥有更加通用的命名，从而更加通用。我们可以如下理解这个问题。</p>
+<p>在代码中往往会有相同的逻辑，但是拥有不同的命名，这往往会造成疑惑。比如在上面的计算海鸥的例子中，海鸥的结合本质上是一个加法，如果对应函数命名为 <code>conjoin</code> 就会将其和海鸥这个特定的概念联系起来。</p>
+<p>这样就两个坏处：一方面，不是所有人都熟悉海鸥结合这个概念，但是所有人都知道加法。另一方面，其他需要用到加法地方，也不可能直接用 <code>conjoin</code> 这个函数，需要重新实现或者赋值给新的拥有合适命名的变量，这都是不优雅的。</p>
+<p>后面我们还可以看到将函数作为一等公民的更多的作用。</p>
+<h3 data-id="heading-3">纯函数（Pure Function）</h3>
+<p>在了解了函数式编程中第一个重要概念之后，我们来看看第二个重要概念：纯函数（Pure Function）。纯函数就是当输入参数保持一致的情况下返回结果也保持一致的函数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> b = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// 不是纯函数</span>
+<span class="hljs-comment">// 参数 a 相同的情况下，返回结果依赖全局变量 b</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">impureAdd</span> = (<span class="hljs-params">a</span>) =&gt; a + b;
+
+<span class="hljs-comment">// 是纯函数</span>
+<span class="hljs-comment">// 参数 a, b 相同的下，返回的结果一定相同</span>
+<span class="hljs-keyword">const</span> pureAdd = (a, b) = a + b;
+</code></pre>
+<p>纯函数意味着函数没有副作用（Side Effect）。副作用是在函数计算过程中改变了系统的状态或者和函数外部的世界有交互，它包括但不限于下面几种。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 打印日志</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'hello world'</span>);
+
+<span class="hljs-comment">// 发起 http 请求</span>
+axios.<span class="hljs-title function_">post</span>(<span class="hljs-comment">/*...*/</span>);
+
+<span class="hljs-comment">// 查询 DOM</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'container'</span>);
+
+<span class="hljs-comment">// 访问外部或者系统变量</span>
+<span class="hljs-keyword">const</span> width = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>;
+
+<span class="hljs-comment">// 可变（mutation）</span>
+<span class="hljs-keyword">const</span> a = [<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>];
+a.<span class="hljs-title function_">sort</span>(); <span class="hljs-comment">// sort 是不纯的，因为它改变了 a 的值</span>
+a <span class="hljs-comment">// [1, 2, 3]</span>
+
+<span class="hljs-comment">//...</span>
+</code></pre>
+<p>一个纯函数拥有以下的有优点：</p>
+<ul>
+<li>便携性：一方面意味着这个函数容易理解，因为它的所有依赖都体现在参数里面。另一方面，意味着这个函数可以在任何地方运行，因为它需要的东西都是通过参数传递的。但是在面向对象编程中却不是这样，Erlang 的创建者 Joe Armstrong 说："在面向对象编程的世界里，我想要一个香蕉，却得到了一片丛林"</li>
+<li>可测试：我们只用给函数输入然后断言输出即可，不需要提供额外的状态。</li>
+<li>可并行运行：因为不会访问外部变量，所以不会访问共享的内存，从而不会出现竞争。</li>
+<li>可缓存：可以根据输入将输出缓存下来，下面是一个简单的实现。</li>
+</ul>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">memoize</span> = (<span class="hljs-params">f</span>) =&gt; {
+  <span class="hljs-keyword">const</span> cache = {};
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> key = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(args);
+    cache[key] = cache[key] || <span class="hljs-title function_">f</span>(...args);
+    <span class="hljs-keyword">return</span> cache[key];
+  };
+};
+
+<span class="hljs-keyword">const</span> squareNumber = <span class="hljs-title function_">memoize</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x * x);
+<span class="hljs-title function_">quareNumber</span>(<span class="hljs-number">3</span>); <span class="hljs-comment">// 9, </span>
+<span class="hljs-title function_">quareNumber</span>(<span class="hljs-number">3</span>); <span class="hljs-comment">// 9, 返回缓存的的 9</span>
+<span class="hljs-title function_">squareNumber</span>(<span class="hljs-number">4</span>); <span class="hljs-comment">// 16</span>
+<span class="hljs-title function_">squareNumber</span>(<span class="hljs-number">4</span>); <span class="hljs-comment">// 16, 返回缓存的的 16</span>
+</code></pre>
+<ul>
+<li>引用透明（Referentially Transparent）：一段代码可以被它的计算后的值所替换而不改变程序的行为，那么它就是引用透明的。这个特性在重构代码的过程或者帮助我们理解代码非常有用。参考下面的例子。</li>
+</ul>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">impureMultiply</span> = (<span class="hljs-params">a, b</span>) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'multiply'</span>); 
+  <span class="hljs-keyword">return</span> a * b;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">pureMultiply</span> = (<span class="hljs-params">a, b</span>) =&gt; a * b;
+
+<span class="hljs-comment">// pureMultiply 是引用透明的</span>
+<span class="hljs-comment">// 如果 a = 2, c = 3，pureMutiply(a, c) 被替换成 6 = pureMutiply(2, 3)</span>
+<span class="hljs-comment">// const pureFn = (a, b, c) =&gt; add(6 + pureMultiply(a, b));</span>
+<span class="hljs-comment">// 函数的行为没有改变，所以是引用透明的</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">pureFn</span> = (<span class="hljs-params">a, b, c</span>) =&gt; <span class="hljs-title function_">add</span>(<span class="hljs-title function_">pureMultiply</span>(a, c) + <span class="hljs-title function_">pureMultiply</span>(a, b));
+
+<span class="hljs-comment">// impureMultiply 不是引用透明的</span>
+<span class="hljs-comment">// 如果 a = 2, c = 3，impureMultiply(a, c) 被替换成 6 = pureMutiply(2, 3)</span>
+<span class="hljs-comment">// const impureFn = (a, b, c) =&gt; add(6 + impureMultiply(a, b));</span>
+<span class="hljs-comment">// 这样会打印一次 'multiply'，改变了程序行为，所以不是引用透明的</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">impureFn</span> = (<span class="hljs-params">a, b, c</span>) =&gt; <span class="hljs-title function_">add</span>(<span class="hljs-title function_">impureMultiply</span>(a, c) + <span class="hljs-title function_">impureMultiply</span>(a, b));
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 根据乘法结合律：a * b + a * c = a * (b + c) 可以对 pureFn 函数重构化简</span>
+<span class="hljs-keyword">const</span> pureFn = <span class="hljs-title function_">pureMultiply</span>(a, <span class="hljs-title function_">add</span>(b, c));
+
+<span class="hljs-comment">// 但是如果对 impureFn 函数按照相同方法化简就会有问题</span>
+<span class="hljs-comment">// 'multiply' 这样就只会被打印一次了！！！</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">impureFn</span> = (<span class="hljs-params">a, b, c</span>) =&gt; <span class="hljs-title function_">impureMultiply</span>(a, <span class="hljs-title function_">add</span>(b, c));
+</code></pre>
+<h3 data-id="heading-4">函数柯里化（Currying）</h3>
+<p>函数柯里化（Currying）的概念很简单：我们可以用少于期望数量的参数去调用一个函数，这个函数返回一个接受剩下参数的函数。</p>
+<p>我们先来看看一个简单的<code>add</code> 函数，这个函数接受一个参数并且返回一个函数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">add</span> = x =&gt; <span class="hljs-function"><span class="hljs-params">y</span> =&gt;</span> <span class="hljs-function"><span class="hljs-params">z</span> =&gt;</span> x + y + z;
+<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>)(<span class="hljs-number">3</span>) <span class="hljs-comment">// 6</span>
+</code></pre>
+<p>上面的写法太麻烦了，我们可以实现一个通用的 <code>curry</code> 方法来实现上面的效果，期望的使用方法如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> add = <span class="hljs-title function_">curry</span>(<span class="hljs-function">(<span class="hljs-params">x, y, z</span>) =&gt;</span> x + y + z);
+<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>); <span class="hljs-comment">//6</span>
+<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)(<span class="hljs-number">3</span>); <span class="hljs-comment">// 6</span>
+<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>); <span class="hljs-comment">// 6</span>
+</code></pre>
+<p>这样做的好处是我们可以固定一些参数，减少传入的参数，让我们能更灵活和简单的使用函数，也为我们接下来的函数合成（Compose）打下基础。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 将第一个参数固定为 1</span>
+<span class="hljs-keyword">const</span> add1 = <span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>);
+
+<span class="hljs-title function_">add1</span>(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>) <span class="hljs-comment">// 6 </span>
+<span class="hljs-title function_">add1</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>) <span class="hljs-comment">// 8</span>
+
+<span class="hljs-comment">// 变成一个单参数的函数</span>
+<span class="hljs-keyword">const</span> add1 = <span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+<span class="hljs-keyword">const</span> add2 = <span class="hljs-title function_">add</span>(<span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+<span class="hljs-keyword">const</span> add3 = <span class="hljs-title function_">add</span>(<span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-comment">// 复合成一个函数</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add6</span> = x =&gt; <span class="hljs-title function_">add1</span>(<span class="hljs-title function_">add2</span>(<span class="hljs-title function_">add3</span>(x)));
+
+<span class="hljs-title function_">add6</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// 7</span>
+<span class="hljs-title function_">add6</span>(<span class="hljs-number">2</span>); <span class="hljs-comment">// 8</span>
+</code></pre>
+<p>知道了 <code>curry</code> 函数的用途，那么接下来我们就来实现一个简单的版本。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">curry</span>(<span class="hljs-params">fn</span>) {
+  <span class="hljs-comment">// 获得函数参数的数量</span>
+  <span class="hljs-keyword">const</span> arity = fn.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">curried</span>(<span class="hljs-params">...args</span>) {
+    <span class="hljs-comment">// 如果当前收集到的参数数量大于需要的数量，那么执行该函数</span>
+    <span class="hljs-keyword">if</span> (args.<span class="hljs-property">length</span> &gt;= arity) <span class="hljs-keyword">return</span> <span class="hljs-title function_">fn</span>(...args);
+    <span class="hljs-comment">// 否者，将传入的参数收集起来</span>
+    <span class="hljs-comment">// 下面的写法类似于</span>
+    <span class="hljs-comment">// return (...args1) =&gt; curried(...args, ...args1);</span>
+    <span class="hljs-keyword">return</span> curried.<span class="hljs-title function_">bind</span>(<span class="hljs-literal">null</span>, ...args);
+  };
+}
+</code></pre>
+<p>最后说一下可以发现柯里化后的函数非常契合纯函数的输入一个输出一个的特点：接受一个参数，返回一个接受剩余参数的函数。</p>
+<h3 data-id="heading-5">函数复合（Compose）</h3>
+<p>在学习函数式编程的最后我们来看看另外一个有用的工具：函数复合（Compose）。</p>
+<p>当一个值要经过多个函数转换，才能变成另外一个值，就可以把这些函数合成一个函数。这样，这个值就只用通过复合后的函数转换一次，就可以获得对应结果了。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// x 依次经过 add1、add2、add3 三个函数转换之后获得结果</span>
+<span class="hljs-keyword">const</span> x = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">const</span> x2 = <span class="hljs-title function_">add1</span>(x); <span class="hljs-comment">// 2</span>
+<span class="hljs-keyword">const</span> x3 = <span class="hljs-title function_">add2</span>(x2); <span class="hljs-comment">// 4</span>
+<span class="hljs-title function_">add3</span>(x3); <span class="hljs-comment">// 7</span>
+
+<span class="hljs-comment">// 合成一个 add6 函数</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add6</span> = x =&gt; <span class="hljs-title function_">add3</span>(<span class="hljs-title function_">add2</span>(<span class="hljs-title function_">add1</span>(x)));
+<span class="hljs-title function_">add6</span>(x); <span class="hljs-comment">// 7</span>
+</code></pre>
+<p>上面的过程就是函数复合，但是复合方法过于麻烦。我们希望实现一个 <code>compose</code> 函数来自动帮助我们方便得合成函数，期望的使用方式如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 满足 Pointfreee，没有描述处理的数据</span>
+<span class="hljs-keyword">const</span> add6 = <span class="hljs-title function_">compose</span>(add1, add2, add3);
+<span class="hljs-title function_">add6</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// 7</span>
+</code></pre>
+<p>这样的写法不仅合成很方便，并且也满足了 Pointfree 这种风格：代码中不用描述数据。这样的风格可以让我们移除不必要的函数命名，也能保证函数的通用性。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 不是 Pointfree, x 就是数据</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add6</span> = x =&gt; <span class="hljs-title function_">add3</span>(<span class="hljs-title function_">add2</span>(<span class="hljs-title function_">add1</span>(x)));
+
+<span class="hljs-comment">// 不是 Pointfree, x 就是数据</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">add6</span> = x =&gt; <span class="hljs-title function_">compose</span>(add1, add2, add3)(x);
+</code></pre>
+<p>可以发现一等公民、函数柯里化和函数合成都是有助于我们写出 Pointfree 风格的代码。</p>
+<p>了解函数合成的基本概念，我们来下面这种一种简单的实现。这里的函数都是只有一个参数和一个返回值，并且复合后它们是按照从左到右的顺序执行的。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">compose</span>(<span class="hljs-params">fn, ...rest</span>) {
+  <span class="hljs-keyword">return</span> rest.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">total, cur</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">cur</span>(<span class="hljs-title function_">total</span>(x)), fn);
+}
+</code></pre>
+<p>函数式编程就给大家介绍到这里了，接下来我们来看看我们的主角：坐标系（Coordinate）。</p>
+<h2 data-id="heading-6">坐标系理论</h2>
+<p>在 《The Grammar of Graphics》 这本书里提到坐标系就是一系列点的集合，这些点是由一系列数字构成：<code>(x1, x2, ...xn)</code>。如果是在二维平面上点，这些就是：<code>(x1, x2)</code>。</p>
+<p>其实坐标系本质上也是一个函数，和比例尺的不同的是：比例尺是将数据映射为视觉元素的属性，坐标系是将视觉元素的位置属性映射为在画布上的坐标。坐标系这个函数的函数签名如下:</p>
+<pre><code class="hljs language-ts" lang="ts"><span class="hljs-comment">// 输入是一个点，这个点的两个维度都是在 [0, 1] 的范围内</span>
+<span class="hljs-comment">// 输入是一个点，这个点是可以直接绘制到画布坐标上的点</span>
+(<span class="hljs-attr">point</span>: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>]) =&gt; [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>]
+</code></pre>
+<p>具体的使用看下面的这个例子。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createLinear } <span class="hljs-keyword">from</span> <span class="hljs-string">"./scale"</span>;
+<span class="hljs-keyword">import</span> { createCoordinate, transpose, cartesian } <span class="hljs-keyword">from</span> <span class="hljs-string">'./coordinate'</span>;
+
+<span class="hljs-comment">// 我们希望绘制一个散点图来看下面数据的分布</span>
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">height</span>: <span class="hljs-number">180</span>, <span class="hljs-attr">weight</span>: <span class="hljs-number">150</span> },
+  { <span class="hljs-attr">height</span>: <span class="hljs-number">163</span>, <span class="hljs-attr">weight</span>: <span class="hljs-number">94</span> },
+  { <span class="hljs-attr">height</span>: <span class="hljs-number">173</span>, <span class="hljs-attr">weight</span>: <span class="hljs-number">130</span> }
+];
+
+<span class="hljs-comment">// 将数据的 height 映射为点的 x 属性（这里注意 range 是 [0, 1]）</span>
+<span class="hljs-keyword">const</span> scaleX = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">163</span>, <span class="hljs-number">180</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+});
+
+<span class="hljs-comment">// 将数据的 width 映射为点的 y 属性（这里注意 range 是 [0, 1]）</span>
+<span class="hljs-keyword">const</span> scaleY = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">94</span>, <span class="hljs-number">150</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+})
+
+<span class="hljs-comment">// 创建一个坐标系</span>
+<span class="hljs-keyword">const</span> coordinate = <span class="hljs-title function_">createCoordinate</span>({
+  <span class="hljs-comment">// 指定画布的起点和宽高</span>
+  <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">width</span>: <span class="hljs-number">600</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">400</span>,
+  <span class="hljs-comment">// 一系列坐标系变换</span>
+  <span class="hljs-attr">transforms</span>: [
+    <span class="hljs-title function_">transpose</span>(),
+    <span class="hljs-title function_">cartesian</span>(),
+  ]
+});
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { height, weight } <span class="hljs-keyword">of</span> data) {
+  <span class="hljs-comment">// 通过比例尺将数据的 height 和 weight 属性</span>
+  <span class="hljs-comment">// 分别映射为点的 x 和 y 属性</span>
+  <span class="hljs-keyword">const</span> attributeX = <span class="hljs-title function_">scaleX</span>(height);
+  <span class="hljs-keyword">const</span> attributeY = <span class="hljs-title function_">scaleY</span>(weight);
+  
+  <span class="hljs-comment">// 将点的 x 和 y 属性</span>
+  <span class="hljs-comment">// 映射为最后的画布坐标</span>
+  <span class="hljs-keyword">const</span> [x, y] = <span class="hljs-title function_">coordinate</span>([attributeX, attributeY]);
+  
+  <span class="hljs-comment">// 绘制点</span>
+  <span class="hljs-title function_">point</span>(x, y);
+}
+</code></pre>
+<p>就像上面的这个例子中坐标系的创建方式一样，每一个坐标系都包含两个部分：<strong>画布的位置和大小</strong>和<strong>一系列坐标系变换函数</strong>。</p>
+<p>比如上面的坐标系的画布就是一个从 <code>(0, 0)</code> 开始，宽为600，高400的矩形，如下图。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4f6ed8e137d04e9685b1594d63958d3c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211216223918.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>上面的坐标系包含两个坐标系变换：<code>transpose</code> 和 <code>cartesian</code>，现在我们不用知道他们具体含义，只用知道它们会把一个统计意义上的点，转换成画布上的点。</p>
+<p>统计意义上的点是指：点的两个维度都被归一化了，都在 <code>[0, 1]</code> 的范围之内。这样在将点在真正绘制到画布上的之前，我们不用考虑它们的绝对大小，只用关心它们相对大小等统计学特征。这些特征在变换过程中都不会丢失。</p>
+<p>不同的坐标系拥有的转换函数不同，这样得到点的位置也不同，从而让拥有相同属性的图形在不同坐标系下展现不同。比如笛卡尔坐标系下的矩形在极坐标系下却是扇形，这样就可以通过改变坐标系，把条形图转换成玫瑰图了。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc50f1eb5750e48c980951e40388ffbed~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在了解了坐标系理论之后，我们就正式开始开发我们的坐标系。</p>
+<h2 data-id="heading-7">基本变换</h2>
+<p>上面提到了坐标系的一个重要组成部分是坐标系变换，而坐标系变换又是由一些基本变换构成，接下来我们首先来实现一些需要的的基本变换。</p>
+<p>基本变换本质上是一个函数，输入是变换前点的坐标，输入是变换后点的坐标。同时该变换函数有 <code>type</code> 方法返回自己的变换类型（后面会使用到）。</p>
+<h3 data-id="heading-8">平移（Translate）</h3>
+<p>这里先用平移变换来举例。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { translate } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+
+<span class="hljs-keyword">const</span> map = <span class="hljs-title function_">translate</span>(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>);
+<span class="hljs-title function_">map</span>([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]); <span class="hljs-comment">// [10, 10]</span>
+<span class="hljs-title function_">map</span>([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]); <span class="hljs-comment">// [12, 13]</span>
+map.<span class="hljs-title function_">type</span>(); <span class="hljs-comment">// 'translate'</span>
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfdd44bb270c34fa9ba1fbe94895ce60f~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>通过平移变换的使用我们可以看出，不同的基本变换只是名字和变换函数不同，所以我们可以先抽象一个 <code>transform</code> 函数出来。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">transform</span>(<span class="hljs-params">type, transformer</span>) {
+  transformer.<span class="hljs-property">type</span> = <span class="hljs-function">() =&gt;</span> type;
+  <span class="hljs-keyword">return</span> transformer;
+}
+</code></pre>
+<p>这个基础上 <code>translate</code> 函数的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">translate</span>(<span class="hljs-params">tx = <span class="hljs-number">0</span>, ty = <span class="hljs-number">0</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'translate'</span>, <span class="hljs-function">(<span class="hljs-params">[px, py]</span>) =&gt;</span> [px + tx, py + ty]);
+}
+</code></pre>
+<h3 data-id="heading-9">缩放（Scale）</h3>
+<p>缩放变换的使用方法如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { scale } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+
+<span class="hljs-keyword">const</span> map = <span class="hljs-title function_">scale</span>(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>);
+<span class="hljs-title function_">map</span>([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]); <span class="hljs-comment">// [0, 0]</span>
+<span class="hljs-title function_">map</span>([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]); <span class="hljs-comment">// [20, 30]</span>
+map.<span class="hljs-title function_">type</span>(); <span class="hljs-comment">// 'scale'</span>
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp64443f57ac5d4f84a6d995fe6bfe60dd~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>缩放变换具体的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">scale</span>(<span class="hljs-params">sx = <span class="hljs-number">1</span>, sy = <span class="hljs-number">1</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'scale'</span>, <span class="hljs-function">(<span class="hljs-params">[px, py]</span>) =&gt;</span> [px * sx, py * sy]);
+}
+</code></pre>
+<h3 data-id="heading-10">反射（Reflect）</h3>
+<p>反射变换是一种特殊的缩放变换，它在两个维度的放缩比例都是 -1。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { reflect } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+
+<span class="hljs-keyword">const</span> map = <span class="hljs-title function_">reflect</span>();
+<span class="hljs-title function_">map</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]); <span class="hljs-comment">// [-1, -2]</span>
+<span class="hljs-title function_">map</span>([-<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]); <span class="hljs-comment">// [2, -3]</span>
+map.<span class="hljs-title function_">type</span>(); <span class="hljs-comment">// 'reflect'</span>
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpff4a5e7edc7d42218f1ec8fd9e9ed0c3~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">reflect</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'reflect'</span>, <span class="hljs-title function_">scale</span>(-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>));
+}
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp80c27b17c6a348b39b1e8f078020dd9b~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">reflectX</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'reflectX'</span>, <span class="hljs-title function_">scale</span>(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>));
+}
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp6e9ac7c681a6410e9024349f68f28c7a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">reflectY</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'reflectY'</span>, <span class="hljs-title function_">scale</span>(<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>));
+}
+</code></pre>
+<h3 data-id="heading-11">转置（Transpose）</h3>
+<p>转置变换就是交换一个点的两个维度，可以理解为按照 <code>y = x</code> 这条直线对称。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { transpose } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+
+<span class="hljs-keyword">const</span> map = <span class="hljs-title function_">transpose</span>();
+<span class="hljs-title function_">map</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]); <span class="hljs-comment">// [2, 1]</span>
+<span class="hljs-title function_">map</span>([-<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]); <span class="hljs-comment">// [3, -2]</span>
+map.<span class="hljs-title function_">type</span>(); <span class="hljs-comment">// 'transpose'</span>
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf6ee8d52ae604da494717e48439cc0b9~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">transpose</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'transpose'</span>, <span class="hljs-function">(<span class="hljs-params">[px, py]</span>) =&gt;</span> [py, px]);
+}
+</code></pre>
+<h3 data-id="heading-12">极坐标（Polar）</h3>
+<p>最后一种基础变换就是极坐标变换，它会将极坐标系下的点转换到笛卡尔坐标系。</p>
+<p>极坐标和笛卡尔坐标系的不同在于点的两个维度的意义不一样。
+笛卡尔坐标系中的点 <code>(x, y)</code> 的 <code>x</code> 和 <code>y</code> 可以简单理解点分别到纵轴和横轴的距离。</p>
+<p>而相同的点在极坐标系下就会被表示为 <code>(raduis, theta)</code>，<code>radius</code> 是到极点的距离，<code>theta</code> 是点和极点的连线和极轴的角度。两者可以相互转换。具体参考下面这张图。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp08ad138879d7417693bed5f407fa51b1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217162113.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>极坐标变换可以如下把条形图转换成玫瑰图。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe7b226eb7bb44811aee7599207eb6957~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217145857.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/transforms.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">polar</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// 这里我们把点的第一个维度作为 theta</span>
+  <span class="hljs-comment">// 第二个维度作为 radius</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">transform</span>(<span class="hljs-string">'polar'</span>, <span class="hljs-function">(<span class="hljs-params">[theta, radius]</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> x = radius * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(theta);
+    <span class="hljs-keyword">const</span> y = radius * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(theta);
+    <span class="hljs-keyword">return</span> [x, y];
+  });
+}
+</code></pre>
+<p>基本变换就这些了，但是它们还不能直接被坐标系使用，它们需要被组合，才能被坐标系直接使用，接下来我们就一起来看看坐标系变换。</p>
+<h2 data-id="heading-13">坐标系变换</h2>
+<p>坐标系变换会据画布的位置和大小，以及基本变换本身需要的参数去生成一个由基本变换构成的数组。所以所有的坐标系变换都应该接受两个参数：<code>transformOptions</code> 和 <code>canvasOptions</code>，然后返回一个数组。我们首先通过笛卡尔坐标系变换来理解这个概念。</p>
+<h3 data-id="heading-14">笛卡尔坐标系变换</h3>
+<p>Cooridante 里的笛卡尔坐标系变换是将统计学上的点线性转换成画布上的点。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3ff670e4f4f84450a0ff1feaf5206f5b~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217165953.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>它的使用方法如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { cartesian } <span class="hljs-keyword">from</span> <span class="hljs-string">'./cartesian'</span>;
+
+<span class="hljs-keyword">const</span> canvasOptions = {
+  <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">width</span>: <span class="hljs-number">600</span>,
+  <span class="hljs-attr">hieght</span>: <span class="hljs-number">400</span>,
+};
+
+<span class="hljs-comment">// cartesian 不需要 transformOptions</span>
+<span class="hljs-keyword">const</span> transforms = <span class="hljs-title function_">cartesian</span>(<span class="hljs-literal">undefined</span>, canvasOptions);
+<span class="hljs-comment">// 合成一个函数</span>
+<span class="hljs-keyword">const</span> map = <span class="hljs-title function_">compose</span>(...transforms);
+
+<span class="hljs-title function_">map</span>([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]); <span class="hljs-comment">// [0, 0]</span>
+<span class="hljs-title function_">map</span>([<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>]); <span class="hljs-comment">// [300, 200]</span>
+<span class="hljs-title function_">map</span>([<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]); <span class="hljs-comment">// [600, 400]</span>
+</code></pre>
+<p>但是这里存在一个问题 <code>transformOptions</code> 在定义坐标系的时候需要用户显示指定的，<code>canvasOptions</code> 是在执行坐标系函数的时候被传入的，两者被传入的时间不同。</p>
+<p>这个时候就需要延迟函数的执行，只有当 <code>transformOptions</code> 和 <code>canvasOptions</code> 都被传入的时候才执行该函数。这久可以用到我们前面提到的函数柯里化了。柯里化后的 <code>cartesian</code> 就可以如下使用。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> transforms = <span class="hljs-title function_">cartesian</span>()(canvasOptions);
+</code></pre>
+<p>笛卡尔坐标系变换的实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/cartesian.js</span>
+
+<span class="hljs-keyword">import</span> { curry } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+<span class="hljs-keyword">import</span> { scale, translate } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">coordinate</span>(<span class="hljs-params">transformOptions, canvasOptions</span>) {
+  <span class="hljs-keyword">const</span> {
+    x, y, width, height,
+  } = canvasOptions;
+  <span class="hljs-keyword">return</span> [
+    <span class="hljs-title function_">scale</span>(width, height),
+    <span class="hljs-title function_">translate</span>(x, y),
+  ];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> cartesian = <span class="hljs-title function_">curry</span>(coordinate);
+</code></pre>
+<p>当然这里使用的 <code>curry</code> 会和之前提到的有一点不一样：当不传入参数的时候，需要等价于传入了 <code>undefined</code> 参数。也就是在使用柯里化后的 <code>cartesian</code> 函数的时候 <code>cartesian()</code> 等价于<code>caresian(undefined)</code>。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/utils/helper.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">curry</span>(<span class="hljs-params">fn</span>) {
+  <span class="hljs-keyword">const</span> arity = fn.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">curried</span>(<span class="hljs-params">...args</span>) {
+    <span class="hljs-comment">// 如果没有传入参数就把参数列表设置为 [undefined]</span>
+    <span class="hljs-keyword">const</span> newArgs = args.<span class="hljs-property">length</span> === <span class="hljs-number">0</span> ? [<span class="hljs-literal">undefined</span>] : args;
+    <span class="hljs-keyword">if</span> (newArgs.<span class="hljs-property">length</span> &gt;= arity) <span class="hljs-keyword">return</span> <span class="hljs-title function_">fn</span>(...newArgs);
+    <span class="hljs-keyword">return</span> curried.<span class="hljs-title function_">bind</span>(<span class="hljs-literal">null</span>, ...newArgs);
+  };
+}
+</code></pre>
+<h3 data-id="heading-15">极坐标系变换</h3>
+<p>接下来我们来看看我们的第二个坐标系变换：极坐标系变换，这里的极坐标系变换和前面的极坐标变换的区别在于：</p>
+<ul>
+<li>极点不同：极点从画布左上角变成了画布中心。</li>
+<li>大小不同：坐标系构成的圆形会内切画布。</li>
+<li>范围不同：可以指定坐标系开始的角度：<code>startAngle</code> 和结束的角度 <code>endAngle</code>。也可以指定内半径 <code>innerRadius</code> 和外半径 <code>outerRadius</code> （范围都是：<code>[0, 1]</code>)。</li>
+</ul>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb314ab5aceea4c199a696d87fd965983~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217142537.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>为了达到上图中的效果，需要进行如下图的一些列变换：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd007b736c1d64c33846aa7c0d591158d~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217154039.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>代码实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/polar.js</span>
+
+<span class="hljs-keyword">import</span> {
+  translate, scale, reflectY, polar <span class="hljs-keyword">as</span> polarT,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'./transforms'</span>;
+<span class="hljs-keyword">import</span> { curry } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils/helper'</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">coordinate</span>(<span class="hljs-params">transformOptions, canvasOptions</span>) {
+  <span class="hljs-keyword">const</span> { width, height } = canvasOptions;
+  <span class="hljs-keyword">const</span> {
+    innerRadius, outerRadius, startAngle, endAngle,
+  } = transformOptions;
+  
+  <span class="hljs-comment">// 保证最后经过 cartesian 变化之后是一个圆形</span>
+  <span class="hljs-comment">// 需要根据画布宽高去调整</span>
+  <span class="hljs-keyword">const</span> aspect = width / height;
+  <span class="hljs-keyword">const</span> sx = aspect &gt; <span class="hljs-number">1</span> ? <span class="hljs-number">1</span> / aspect : <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">const</span> sy = aspect &gt; <span class="hljs-number">1</span> ? <span class="hljs-number">1</span> : aspect;
+  
+  <span class="hljs-keyword">return</span> [
+    <span class="hljs-comment">// 以画布中心沿着 y 方向翻转</span>
+    <span class="hljs-title function_">translate</span>(<span class="hljs-number">0</span>, -<span class="hljs-number">0.5</span>),
+    <span class="hljs-title function_">reflectY</span>(),
+    <span class="hljs-title function_">translate</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>),
+    
+    <span class="hljs-comment">// 调整角度和半径的范围</span>
+    <span class="hljs-title function_">scale</span>(endAngle - startAngle, outerRadius - innerRadius),
+    <span class="hljs-title function_">translate</span>(startAngle, innerRadius),
+    <span class="hljs-title function_">polarT</span>(),
+    
+    <span class="hljs-comment">// 改变大小内切画布</span>
+    <span class="hljs-title function_">scale</span>(sx, sy),
+    <span class="hljs-title function_">scale</span>(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>),
+    
+    <span class="hljs-comment">// 移动到画布中心</span>
+    <span class="hljs-title function_">translate</span>(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>),
+  ];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> polar = <span class="hljs-title function_">curry</span>(coordinate);
+</code></pre>
+<h2 data-id="heading-16">作业</h2>
+<p>出了笛卡尔和极坐标系变换，Sparrow 的 Coordinate 还支持转置坐标系变换。这个就当留给大家的作业了，期望的效果如下图。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp62608ea22a0a434dbf53bc2c2cacb097~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211217144245.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的实现可以参考<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Fblob%2Fmain%2Fsrc%2Fcoordinate%2Ftranspose.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/blob/main/src/coordinate/transpose.js" ref="nofollow noopener noreferrer">这里</a>，测试代码在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Fblob%2Fmain%2F__tests__%2Fcoordinate%2Ftranspose.spec.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/blob/main/__tests__/coordinate/transpose.spec.js" ref="nofollow noopener noreferrer">这里</a>。</p>
+<h2 data-id="heading-17">createCoordinate</h2>
+<p>在了解一些基本变换和坐标系变换之后，理解 <code>createCoordinate</code> 的实现就没有太多困难了。</p>
+<p>前面我们提到，坐标系本身是一个函数，它会将我们输入的点进行一系列坐标变换，然后得到该点在画布上的坐标。这个场景就是一个使用函数复合的典型场景：将一系列变换合成一个复合变换。具体的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/coordinate.js</span>
+
+<span class="hljs-keyword">import</span> { compose } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createCoordinate</span>(<span class="hljs-params">{
+  x, y, width, height,
+  transforms: coordinates = [],
+}</span>) {
+  <span class="hljs-comment">// coordinates 是坐标系变换函数</span>
+  <span class="hljs-comment">// 它们是已经接受了 transformOptions 的柯里化函数</span>
+  <span class="hljs-comment">// 它们还需要我们传入 canvasOptions</span>
+  <span class="hljs-comment">// 它们返回一个由基本变换构成的数组，所以在复合前需要通过 flat 把数组拍平</span>
+  <span class="hljs-comment">// [[transpose, reflect], [transpose, reflect]]</span>
+  <span class="hljs-comment">// -&gt; [transpose, reflect, transpose, reflect]</span>
+  <span class="hljs-keyword">const</span> transforms = coordinates
+    .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> <span class="hljs-title function_">coordinate</span>({
+      x, y, width, height, <span class="hljs-comment">// 传入 canvasOptions</span>
+    }))
+    .<span class="hljs-title function_">flat</span>(); <span class="hljs-comment">// 拍平</span>
+  <span class="hljs-keyword">const</span> output = <span class="hljs-title function_">compose</span>(...transforms); <span class="hljs-comment">// 复合</span>
+  
+  <span class="hljs-comment">// 某些场景需要获得坐标系的种类信息</span>
+  <span class="hljs-keyword">const</span> types = transforms.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-title function_">type</span>());
+  
+  <span class="hljs-comment">// 判断是否是极坐标系</span>
+  output.<span class="hljs-property">isPolar</span> = <span class="hljs-function">() =&gt;</span> types.<span class="hljs-title function_">indexOf</span>(<span class="hljs-string">'polar'</span>) !== -<span class="hljs-number">1</span>;
+  
+  <span class="hljs-comment">// 判断是否转置</span>
+  <span class="hljs-comment">// 只有是奇数个 'transpose' 的时候才是转置</span>
+  <span class="hljs-comment">// 这里使用了异或：a ^ b， 只有当 a 和 b 值不相同的时候才为 true，否者为 false</span>
+  output.<span class="hljs-property">isTranspose</span> = <span class="hljs-function">() =&gt;</span> types.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">is, type</span>) =&gt;</span> is ^ (type === <span class="hljs-string">'transpose'</span>), <span class="hljs-literal">false</span>);
+  
+  <span class="hljs-comment">// 获得坐标系画布的中心</span>
+  output.<span class="hljs-property">center</span> = <span class="hljs-function">() =&gt;</span> [x + width / <span class="hljs-number">2</span>, y + height / <span class="hljs-number">2</span>];
+  
+  <span class="hljs-keyword">return</span> output;
+}
+</code></pre>
+<p>Sparrow 中使用的 <code>compose</code> 的功能会和之前介绍的有一点不同：当没有参数传入的时候，会返回一个 <code>identity</code> 函数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> identity = <span class="hljs-title function_">compose</span>();
+<span class="hljs-title function_">identity</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// 1</span>
+<span class="hljs-title function_">identity</span>(<span class="hljs-number">2</span>); <span class="hljs-comment">// 2</span>
+</code></pre>
+<p>所以这里的 <code>compose</code> 的实现会和之前有些略微的不同。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/utils/helper.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">identity</span>(<span class="hljs-params">x</span>) {
+  <span class="hljs-keyword">return</span> x;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">compose</span>(<span class="hljs-params">...fns</span>) {
+  <span class="hljs-keyword">return</span> fns.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">total, cur</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">cur</span>(<span class="hljs-title function_">total</span>(x)), identity);
+}
+</code></pre>
+<p>最后不要忘记将我们需要的东西导出。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/coordinate/index.js</span>
+
+<span class="hljs-keyword">export</span> { createCoordinate } <span class="hljs-keyword">from</span> <span class="hljs-string">'./coordinate'</span>;
+<span class="hljs-keyword">export</span> { cartesian } <span class="hljs-keyword">from</span> <span class="hljs-string">'./cartesian'</span>;
+<span class="hljs-keyword">export</span> { polar } <span class="hljs-keyword">from</span> <span class="hljs-string">'./polar'</span>;
+<span class="hljs-keyword">export</span> { transpose } <span class="hljs-keyword">from</span> <span class="hljs-string">'./transpose'</span>;
+</code></pre>
+<p>完整的代码可以在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2Fsrc%2Fcoordiante" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/src/coordiante" ref="nofollow noopener noreferrer">这里</a>浏览，同样也可以通过<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2F__tests__%2Fcoordiante" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/__tests__/coordiante" ref="nofollow noopener noreferrer">这里</a>的测试代码来验证代码的正确性。</p>
+<h2 data-id="heading-18">拓展</h2>
+<p>这一篇文章的主要内容就到这里了，其主要分为两大块：函数式编程和坐标系。</p>
+<p>函数式编程只给大家介绍了其中的一些基本概念和工具，更深入的学习推荐大家去阅读这本书：<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FMostlyAdequate%2Fmostly-adequate-guide" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/MostlyAdequate/mostly-adequate-guide" ref="nofollow noopener noreferrer">《Mostly Adequate Guide to Function Programming》</a>。本篇文章中关于函数式编程的介绍几乎都来自于它的前面几节，后面会介绍范畴论和函子等比较高级的话题。同时也推荐大家去使用和阅读 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flodash%2Flodash%2Ftree%2Fnpm%2Ffp" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/lodash/lodash/tree/npm/fp" ref="nofollow noopener noreferrer">lodash/fb</a>: 一个函数式编程的工具库，更加深入理解函数式编程。</p>
+<p>至于坐标系，这里其实只给大家介绍了其中三种最基础的坐标系变换，还有更多的坐标系变换，比如平行坐标系、鱼眼等(如下图）。大家感兴趣可以去这里看<a href="https://link.juejin.cn?target=https%3A%2F%2Fobservablehq.com%2F%40pearmini%2Fantv-coord" target="_blank" rel="nofollow noopener noreferrer" title="https://observablehq.com/@pearmini/antv-coord" ref="nofollow noopener noreferrer">在线展示</a>，也可以去看 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2Fcoord" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/coord" ref="nofollow noopener noreferrer">@antv/coord</a> 的相关实现。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb00aaa25ba1a4cda9291adf60e8ae7d3~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-19">小结</h2>
+<p>最后，又到了我们的小结时间了。</p>
+<p>本篇文章我们首先通过一个计算海鸥数量的例子带大家认识了函数式编程，然后学习其中两个重要概念：一等公民和纯函数，接下来又认识了函数柯里化和函数复合这两个强有力的工具。</p>
+<p>大家也许对函数式编程相关的东西还是云里雾里的，没有关系，这里大家注意一点就好：<strong>在 Sparrow 的后续开发过程中，我们尽量使用纯函数去实现我们的功能</strong>。也就是说尽量将一个函数的不纯的部分抽离出去。至于这样做的好处，在纯函数那部分也说的比较清楚了。</p>
+<p>在介绍完函数式编程之后，就大家介绍了坐标系的基本概念和实现方法，知道了它的主要功能是对视觉元素进行布局。在学习坐标系的过程中，我们知道了它的本质其实是一个由多个基础变换复合而来的函数，用于将统计意义上的点转换成画布坐标。</p>
+<p>目前为止，结合上一章的比例尺，我们已经将编码的映射和布局过程需要用到的工具都实现了！因为都是涉及数据处理，所以这两部分会相对比较抽象。</p>
+<p>但好消息是，数据处理相关的东西暂时告一段落了。下一章我们将进入生动形象的内容：几何图形（Geometry），看看如何把我们处理好的数据绘制出来。这个过程不仅仅能加深大家对比例尺和坐标系的理解，也是将直接展示 Sparrow 能力的地方！</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp68663fd7ae66473ebc172cc73aca7c57~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<blockquote>
+<p>参考资料</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FMostlyAdequate%2Fmostly-adequate-guide" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/MostlyAdequate/mostly-adequate-guide" ref="nofollow noopener noreferrer">Mostly Adequate Guide to Function Programming, Professor Franklin Frisby</a></li>
+<li><a href="https://link.juejin.cn?target=http%3A%2F%2Fruanyifeng.com%2Fblog%2F2017%2F02%2Ffp-tutorial.html" target="_blank" rel="nofollow noopener noreferrer" title="http://ruanyifeng.com/blog/2017/02/fp-tutorial.html" ref="nofollow noopener noreferrer">函数式编程入门教程, 阮一峰</a></li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.jdon.com%2F42422" target="_blank" rel="nofollow noopener noreferrer" title="https://www.jdon.com/42422" ref="nofollow noopener noreferrer">蒯因与引用透明</a></li>
+<li>The Grammar of Graphics, 2nd Edition, Leland Wilkinson</li>
+</ul>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

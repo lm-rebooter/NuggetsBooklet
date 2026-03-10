@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上一章我们认识并且开发了一个简单的渲染引擎。我们了解到渲染引擎主要负责数据可视化中的绘制部分，而接下来的比例尺（Scale），是就负责数据处理部分了。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe93df0e7d1af400aa64f4ff03076c1b9~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>比例尺是可视化中一个很重要且有用的抽象，主要用于将数据的某一个属性映射为图形的视觉属性，比如名字属性映射图形的颜色属性，身高属性映射为图形的位置属性。</p>
+<p>在<a href="https://juejin.cn/book/7031893648145186824/section/7032095221731033125" target="_blank" title="https://juejin.cn/book/7031893648145186824/section/7032095221731033125">数据分析模型</a>那一章的最后我们提到，在设计一个可视化方案的时候，其中一个强有力的手段是“编码”，而编码就是通过比例尺完成。不同的数据需要不同的的编码方式，如何根据当前的数据选择合适的比例尺就是我们在可视化中遇见的一个常见的挑战。</p>
+<p>同时比例尺也是我们在使用一些图表库中比较难以理解、容易引起困惑的部分，比如有如下常见的问题：</p>
+<ul>
+<li>为啥最后坐标轴生成的刻度的数量和希望的不一样？</li>
+<li>nice 到底有什么用？</li>
+<li>Threshold, Quantile, Quantile 比例尺有什么区别？</li>
+</ul>
+<p>为了帮助大家更好的理解上面的这些问题，同时也为了给 Sparrow 提供数据映射的能力，我们接下来先从比例尺理论讲起，从根本上理解比例尺，然后通过实战加深对其理解，最后通过拓展去了解更多和比例尺相关的东西。</p>
+<h2 data-id="heading-0">比例尺理论</h2>
+<p>比例尺的概念其实早就藏在我们的日常生活中了，比如我们有度量长度的比例尺：把空间上的一段距离映射为一个数字，有度量重量的比例尺：把一定重量映射为一个数字。</p>
+<p><strong>而在可视化中的比例尺，就是用来度量数据属性的，将数据抽象的属性映射为一个视觉属性</strong>。这决定了我们如何理解图形的颜色、大小、形状和位置等。选择一个比例尺的时候，需要我们去思考度量的是什么以及这些度量的含义，最终这些选择将决定我们如何理解一个图形。</p>
+<p>比如我们希望用点来代表某个数据集中的每一条数据，数据中有 sex 这一个属性，对应有两个值：male 和 female。我们选择用点的颜色去度量 sex 这个数据属性，如果一条数据的 sex 属性是 male 那么对应的点是红色，否者是绿色。所以在理解每一个点的时候，如果这个点是红色，那么它对应的数据的 sex 属性就是 male，否者就是 female。</p>
+<p>如果用代码把上面的功能如下描述：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">scale</span>(<span class="hljs-params">value</span>) {
+  <span class="hljs-keyword">return</span> value === <span class="hljs-string">'male'</span> ? <span class="hljs-string">'red'</span>: <span class="hljs-string">'green'</span>;
+}
+
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">'male'</span>); <span class="hljs-comment">// 'red'</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">'female'</span>); <span class="hljs-comment">// 'green'</span>
+</code></pre>
+<p>上面的代码非常的简单，但是通用性太差，只适用于这个特例。有没有什么通用的办法呢？当然是有的。</p>
+<p>其实不难发现，<strong>比例尺本质上是一个函数</strong>，会将一个值（变量）从一个特定的范围（定义域）映射到另一个特定的范围（值域）。定义域（Domain）是由数据的属性决定，值域（Range）是由图形的视觉属性决定。根据定义域和值域的不同，我们需要选择不同的比例尺。</p>
+<p>上面的 sex 和 颜色都是分类属性，所以会使用到我们之后要介绍的 Ordinal 比例尺，具体的使用方式如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 根据 options 返回一个函数</span>
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createOrdinal</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-string">'male'</span>, <span class="hljs-string">'female'</span>], <span class="hljs-comment">// 定义域</span>
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">'red'</span>, <span class="hljs-string">'green'</span>], <span class="hljs-comment">// 值域</span>
+});
+
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">'male'</span>); <span class="hljs-comment">// 'red'</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">'female'</span>); <span class="hljs-comment">// 'green'</span>
+</code></pre>
+<p>那么接下来我们就来看看不同的比例尺，分别了解它们的定义域和值域的类型、映射规则和使用场景。</p>
+<h2 data-id="heading-1">Identity</h2>
+<p>我们首先看一个最简单的比例尺：Identity 比例尺。它的功能和它的名字一样：“恒等映射”，也就是将输入原封不动的返回。</p>
+<p>当希望数据的属性和图形的视觉属性保持一致的时候，我们就可以使用 Identity 比例尺，比如数据有一个属性是 color，而我们又希望我们图形的填充颜色和 color 保持一致，这个时候我们就可以使用 Identity 比例尺。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpadfdfe54e4a74aae8dc650b23c759bd6~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>Identity 比例尺的使用方式如下，它能保证输入和输出总是保持一致。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// Identity 是恒等映射，所以不需要指定定义域和值域</span>
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createIdentity</span>();
+
+<span class="hljs-title function_">scale</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// 1</span>
+<span class="hljs-title function_">scale</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }); <span class="hljs-comment">// { a: 1 }</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">'sparrow'</span>); <span class="hljs-comment">// 'sparrow'</span>
+</code></pre>
+<p>不难发现 Identity 比例尺可以表示为：<code>y = x</code>，而它的实现也非常的简单。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/identity.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createIdentity</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> x;
+}
+</code></pre>
+<h2 data-id="heading-2">连续比例尺</h2>
+<p>看完了最简单的比例尺，我们来看看最常用的一类比例尺：连续比例尺（Continuous）。连续比例尺主要用于数值属性的映射，它的特点是定义域和值域都是连续的，它们之间的关系可以表示为：<code>y = a * f(x) + b</code>。</p>
+<p>对于所有的连续比例尺来说，除了拥有映射功能之外，还有一个很重要的功能：<strong>生成坐标轴需要的坐标刻度</strong>。在理解可视化图表的过程中，坐标轴往往是一个很好的辅助，因为它能给我们提供更多辅助信息。</p>
+<p>在知道了连续比例尺的两个主要功能后，接下来将给大家介绍并且实现 Linear 和 Time 两个比例尺，另外一个 Log 比例尺的实现将作为大家的练习。</p>
+<h3 data-id="heading-3">Linear</h3>
+<p>(1) 线性映射</p>
+<p>Linear 比例尺是支持线性映射的比例尺，它的表达式 <code>y = a * f(x) + b</code> 中的 <code>f(x)</code> 应该为 <code>f(x) = x</code>。</p>
+<p>Linear 比例尺常常用于视觉元素的布局，比如在做散点图的时候，可以用 Linear 比例尺来完成对点的布局，比如将数据的某个数值属性映射为点的 x 坐标，将数据的另一个个数值属性映射为点的 y 坐标。
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa96087ae573046158182330f405db527~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>它期望的使用方式如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>], <span class="hljs-comment">// 输入的范围是 [0, 1]</span>
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>], <span class="hljs-comment">// 输出的范围是 [0, 10]</span>
+})
+
+<span class="hljs-title function_">scale</span>(<span class="hljs-number">0.2</span>); <span class="hljs-comment">// 2</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-number">0.5</span>); <span class="hljs-comment">// 5</span>
+</code></pre>
+<p>通过使用方式我们不难看出：<strong>输入在定义域里到两端的比例，应该和输出在值域到两端的比例相同</strong>，比如 <code>(0.2 - 0) / (1 - 0.2) </code>其实是和<code>(2 - 0) / (10 -2)</code> 一样的。</p>
+<p>基于这个发现我们首先通过计算出输入在定义域的位置（归一化），然后根据这个结果在值域计算出相应的输出（插值），具体实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/linear.js</span>
+
+<span class="hljs-keyword">import</span> { normalize } <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createLinear</span>(<span class="hljs-params">{
+  domain: [d0, d1],
+  range: [r0, r1],
+  interpolate = interpolateNumber,
+}</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> t = <span class="hljs-title function_">normalize</span>(x, d0, d1);
+    <span class="hljs-comment">// 默认是使用线性的数值插值器</span>
+    <span class="hljs-comment">// 如果是颜色可以使用颜色插入器</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">interpolate</span>(t, r0, r1);
+  };
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">interpolateNumber</span>(<span class="hljs-params">t, start, stop</span>) {
+  <span class="hljs-keyword">return</span> start * (<span class="hljs-number">1</span> - t) + stop * t;
+}
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">normalize</span>(<span class="hljs-params">value, start, stop</span>) {
+  <span class="hljs-keyword">return</span> (value - start) / (stop - start);
+}
+</code></pre>
+<p>最后将其可视化出来的结果如下图，可以发现输入 x 和输入 y 确实是线性相关的。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp7851d519a2574addb9ed561e167dc422~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>如果将上面的数值插值器（interpolateNumber）换成颜色插值器的话，就会得到以下的效果，可以发现颜色是均匀变化的。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { interpolateNumber } <span class="hljs-keyword">from</span> <span class="hljs-string">'./linear'</span>;
+
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+  <span class="hljs-attr">range</span>: [
+    [<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>], <span class="hljs-comment">// 白色</span>
+    [<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>], <span class="hljs-comment">// 浅蓝色</span>
+  ],
+  <span class="hljs-attr">interpolate</span>: interolateColor
+});
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">interolateColor</span>(<span class="hljs-params">t, start, stop</span>) {
+  <span class="hljs-keyword">const</span> r = <span class="hljs-title function_">interpolateNumber</span>(t, start[<span class="hljs-number">0</span>], stop[<span class="hljs-number">0</span>]);
+  <span class="hljs-keyword">const</span> g = <span class="hljs-title function_">interpolateNumber</span>(t, start[<span class="hljs-number">1</span>], stop[<span class="hljs-number">1</span>]);
+  <span class="hljs-keyword">const</span> b = <span class="hljs-title function_">interpolateNumber</span>(t, start[<span class="hljs-number">2</span>], stop[<span class="hljs-number">2</span>]);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`rgb(<span class="hljs-subst">${r}</span>, <span class="hljs-subst">${g}</span>, <span class="hljs-subst">${b}</span>)`</span>;
+}
+</code></pre>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp9999c22f70f64d35b980224c52d1b479~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>（2）ticks 和 nice</p>
+<p>介绍完 Linear 比例尺的映射功能，接下来我们来看看它生成坐标刻度的方法。下面我们首先来看看一个简单版本，看看它有啥问题。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// min: 定义域的最小值</span>
+<span class="hljs-comment">// max: 定义域的最大值</span>
+<span class="hljs-comment">// count: 坐标刻度的数量</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">simpleTicks</span>(<span class="hljs-params">min, max, count</span>) {
+  <span class="hljs-keyword">const</span> step = (max - min) / tickCount;
+  <span class="hljs-keyword">const</span> values = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(count);
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; count; i++) { 
+    values[i] = min + step * i;
+  }
+  <span class="hljs-keyword">return</span> values;
+}
+</code></pre>
+<p>上面的代码非常直觉，现在让我们来看看它的效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> ticks = <span class="hljs-title function_">simpleTicks</span>(<span class="hljs-number">0.1</span>, <span class="hljs-number">9.9</span>, <span class="hljs-number">6</span>);
+ticks <span class="hljs-comment">// [0.1, 1.7333333333333336, 3.366666666666667, 5, 6.633333333333334, 8.266666666666667]</span>
+</code></pre>
+<p><code>simpleTicks</code> 方法确实按照要求生成了6个刻度，但是可读性太差：全是小数，那如果我们将这些刻度格式化一下呢？</p>
+<pre><code class="hljs language-js" lang="js">ticks.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">d</span> =&gt;</span> <span class="hljs-built_in">parseFloat</span>(d.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">1</span>)));
+ticks; <span class="hljs-comment">// [0.1, 1.7, 3.4, 5, 6.6, 8.3];</span>
+</code></pre>
+<p>看上去好一点了，但是我们会发现刻度不是均匀的，也就是相邻的刻度之间的间隔不一样：<code>3.4 - 1.7 !== 1.7 - 0.1</code>。</p>
+<p>造成上面两个问题的根本原因就是我们没有选择合适的刻度间隔，也就是上面的 <code>const step = (max - min) / count;</code> 太过简单。对于 Linear 比例尺来说，合适的刻度间隔应该是是<strong>1或者2或者5乘上10的 n 次方</strong>的数，也就是说希望 <code>step = 10 ^ n * (1 | 2 | 5)</code>。</p>
+<p>获得上述刻度间隔的实现方式如下，该实现是来自于 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-array%2Fblob%2Fmain%2Fsrc%2Fticks.js%23L46" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-array/blob/main/src/ticks.js#L46" ref="nofollow noopener noreferrer">d3-array</a>。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-comment">// step0 是生成指定数量的刻度的间隔</span>
+<span class="hljs-comment">// step1 是最后生成的刻度的间隔</span>
+<span class="hljs-comment">// 我们希望 step1 满足两个条件：</span>
+<span class="hljs-comment">// 1. step1 = 10 ^ n * b (其中 b=1,2,5)</span>
+<span class="hljs-comment">// 2. step0 和 step1 的误差尽量的小</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">tickStep</span>(<span class="hljs-params">min, max, count</span>) {
+  <span class="hljs-keyword">const</span> e10 = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">50</span>); <span class="hljs-comment">// 7.07</span>
+  <span class="hljs-keyword">const</span> e5 = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">10</span>); <span class="hljs-comment">// 3.16</span>
+  <span class="hljs-keyword">const</span> e2 = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">2</span>); <span class="hljs-comment">// 1.41</span>
+
+  <span class="hljs-comment">// 获得目标间隔 step0，设 step0 = 10 ^ m</span>
+  <span class="hljs-keyword">const</span> step0 = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(max - min) / <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">0</span>, count);
+  <span class="hljs-comment">// 获得 step1 的初始值 = 10 ^ n &lt; step0，其中 n 为满足条件的最大整数</span>
+  <span class="hljs-keyword">let</span> step1 = <span class="hljs-number">10</span> ** <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">log</span>(step0) / <span class="hljs-title class_">Math</span>.<span class="hljs-property">LN10</span>);
+  <span class="hljs-comment">// 计算 step1 和 step0 的误差，error = 10 ^ m / 10 ^ n = 10 ^ (m - n)</span>
+  <span class="hljs-keyword">const</span> error = step0 / step1;
+  <span class="hljs-comment">// 根据当前的误差改变 step1 的值，从而减少误差</span>
+  <span class="hljs-comment">// 1. 当 m - n &gt;= 0.85 = log(e10) 的时候，step1 * 10</span>
+  <span class="hljs-comment">// 可以减少log(10) = 1 的误差 </span>
+  <span class="hljs-keyword">if</span> (error &gt;= e10) step1 *= <span class="hljs-number">10</span>;
+  <span class="hljs-comment">// 2. 当 0.85 &gt; m - n &gt;= 0.5 = log(e5) 的时候，step1 * 5</span>
+  <span class="hljs-comment">// 可以减少 log(5) = 0.7 的误差</span>
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error &gt;= e5) step1 *= <span class="hljs-number">5</span>;
+  <span class="hljs-comment">// 3. 当 0.5 &gt; m - n &gt;= 0.15 = log(e2) 的时候，step1 * 2</span>
+  <span class="hljs-comment">// 那么可以减少 log(2) = 0.3 的误差</span>
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error &gt;= e2) step1 *= <span class="hljs-number">2</span>;
+  <span class="hljs-comment">// 4. 当 0.15 &gt; m - n &gt; 0 的时候，step1 * 1</span>
+  <span class="hljs-keyword">return</span> step1;
+}
+</code></pre>
+<p>这里简单解释一下使用 <code>Math.sqrt(50)</code>，<code>Math.sqrt(10)</code> 以及 <code>Math.sqrt(2)</code> 作为误差标准的原因（这里只是笔者的推断，仅供参考，如果更好的解释可以在评论处指出）。</p>
+<p>通过上面的注释我们可以看出，为了让 <code>step0</code> 和 <code>step1</code> 之间误差尽量的少，就是让 <code>Math.abs(m - n)</code> 尽量为 0。因为我们希望间隔是以 <strong>1或者2或者5乘上10的 n 次方</strong>数，所以只能通过乘 2，5或者10来减少误差。</p>
+<p>乘10可以减少 log10 的误差 ，乘5可以减少 log5 的误差，乘2可以减少 log2 的误差。我们用数列 0，log2，log5 和 log10 两两之间的平均数来作为选择需要改变的误差的标准。也就是:</p>
+<ul>
+<li><code>log(e2) = (0 + log2) / 2 = log(Math.sqrt(2))</code></li>
+<li><code>log(e5) = (log2 + log5) / 2 = log(Math.sqrt(2 * 5))</code></li>
+<li><code>log(e10) = (log5 + log10) / 2 = log(Math.sqrt(5 * 10))</code></li>
+</ul>
+<p>即 <code>e2 = Math.sqrt(2)</code>, <code>e5 = Math.sqrt(10)</code> 和 <code>e10 = Math.sqrt(50)</code>。</p>
+<p>在这个 <code>tickStep</code> 的基础上我们可以获取如下的获得刻度的方法。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ticks</span>(<span class="hljs-params">min, max, count</span>) {
+  <span class="hljs-keyword">const</span> step = <span class="hljs-title function_">tickStep</span>(min, max, count);
+  <span class="hljs-comment">// 让 start 和 stop 都是 step 的整数倍</span>
+  <span class="hljs-comment">// 这样生成的 ticks 都是 step 的整数倍</span>
+  <span class="hljs-comment">// 可以让可读性更强</span>
+  <span class="hljs-keyword">const</span> start = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(min / step);
+  <span class="hljs-keyword">const</span> stop = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(max / step);
+  <span class="hljs-keyword">const</span> n = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(stop - start + <span class="hljs-number">1</span>);
+  <span class="hljs-comment">// n 不一定等于 count，所以生成的 ticks 的数量可能和指定的不一样</span>
+  <span class="hljs-keyword">const</span> values = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(n);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; n; i += <span class="hljs-number">1</span>) {
+    values[i] = <span class="hljs-title function_">round</span>((start + i) * step);
+  }
+  <span class="hljs-keyword">return</span> values;
+}
+
+<span class="hljs-comment">// 简单解决 js 的精读问题：0.1 + 0.2 !== 0.3</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">round</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(n * <span class="hljs-number">1e12</span>) / <span class="hljs-number">1e12</span>;
+}
+</code></pre>
+<p>下面来看看 <code>ticks</code> 方法获得的效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-title function_">ticks</span>(<span class="hljs-number">0.1</span>, <span class="hljs-number">9.9</span>, <span class="hljs-number">6</span>); <span class="hljs-comment">// [2, 4, 6, 8]</span>
+</code></pre>
+<p>现在发现生成的刻度不仅是均匀的，而且拥有很不错的可读性！但是美中不足的是定义域 <code>[0.1, 9.9]</code> 本身的可读性不是很强，但如果我们能根据刻度间隔去调整定义域的范围，使得最小值和最大值都是刻度间隔的整数倍，又会发生什么？这就是 <code>nice</code> 操作，具体的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">nice</span>(<span class="hljs-params">domain, interval</span>) {
+  <span class="hljs-keyword">const</span> [min, max] = domain;
+  <span class="hljs-keyword">return</span> [interval.<span class="hljs-title function_">floor</span>(min), interval.<span class="hljs-title function_">ceil</span>(max)];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ceil</span>(<span class="hljs-params">n, base</span>) {
+  <span class="hljs-keyword">return</span> base * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(n / base);
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">floor</span>(<span class="hljs-params">n, base</span>) {
+  <span class="hljs-keyword">return</span> base * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(n / base);
+}
+</code></pre>
+<p>我们可以如下使用上面新增的函数，可以发现改算法根据刻度间隔<code>2</code>去调整了定义域，使得其从<code>[0.1, 9.9]</code>变成了<code>[0, 10]</code>，从而生成了<code>[0, 2, 4, 6, 8]</code>这样可读性更强的刻度。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">let</span> d0 = <span class="hljs-number">0.1</span>;
+<span class="hljs-keyword">let</span> d1 = <span class="hljs-number">9.9</span>;
+<span class="hljs-keyword">const</span> step = <span class="hljs-title function_">tickStep</span>(d0, d1, tickCount);
+[d0, d1] = <span class="hljs-title function_">nice</span>([<span class="hljs-number">0.1</span>, <span class="hljs-number">9.9</span>], {
+  <span class="hljs-attr">floor</span>: <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">floor</span>(x, step),
+  <span class="hljs-attr">ceil</span>: <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">ceil</span>(x, step),
+});
+
+d0; <span class="hljs-comment">// 0</span>
+d1; <span class="hljs-comment">// 10</span>
+<span class="hljs-title function_">ticks</span>(d0, d1, <span class="hljs-number">6</span>); <span class="hljs-comment">// [0, 2, 4, 6, 8]</span>
+</code></pre>
+<p>因为上面的 <code>ticks</code> 以及 <code>nice</code> 和 Linear 比例尺是强相关的，所以我们把它们作为 Linear 的两个方法，最后 Linear 比例尺的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/linear.js</span>
+
+<span class="hljs-keyword">import</span> {
+  normalize, tickStep, nice, floor, ceil, ticks,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createLinear</span>(<span class="hljs-params">{
+  domain: [d0, d1],
+  range: [r0, r1],
+  interpolate = interpolateNumber,
+}</span>) {
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">scale</span> = (<span class="hljs-params">x</span>) =&gt; {
+    <span class="hljs-keyword">const</span> t = <span class="hljs-title function_">normalize</span>(x, d0, d1);
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">interpolate</span>(t, r0, r1);
+  };
+
+  scale.<span class="hljs-property">ticks</span> = <span class="hljs-function">(<span class="hljs-params">tickCount</span>) =&gt;</span> <span class="hljs-title function_">ticks</span>(d0, d1, tickCount);
+  scale.<span class="hljs-property">nice</span> = <span class="hljs-function">(<span class="hljs-params">tickCount</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> step = <span class="hljs-title function_">tickStep</span>(d0, d1, tickCount);
+    [d0, d1] = <span class="hljs-title function_">nice</span>([d0, d1], {
+      <span class="hljs-attr">floor</span>: <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">floor</span>(x, step),
+      <span class="hljs-attr">ceil</span>: <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> <span class="hljs-title function_">ceil</span>(x, step),
+    });
+  };
+
+  <span class="hljs-keyword">return</span> scale;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">interpolateNumber</span>(<span class="hljs-params">t, start, stop</span>) {
+  <span class="hljs-keyword">return</span> start * (<span class="hljs-number">1</span> - t) + stop * t;
+}
+</code></pre>
+<h3 data-id="heading-4">Time</h3>
+<p>Linear 比例尺要求定义域都是数字，但是有的时候我们希望定义域是浏览器的时间对象（Date），这个时候就需要用到 Time 比例尺了。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp75f389be0b9c484495ccbb599a1bc2e6~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>比如我们在做折线图的时候，希望把和时间相关的属性映射为折线图的 x 坐标，我们就会如下使用 Time 比例尺。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> map = <span class="hljs-title function_">createTime</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>)],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">960</span>],
+});
+
+<span class="hljs-title function_">map</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">5</span>)); <span class="hljs-comment">// 200</span>
+<span class="hljs-title function_">map</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">16</span>)); <span class="hljs-comment">// 640</span>
+<span class="hljs-title function_">map</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>)); <span class="hljs-comment">// 960</span>
+</code></pre>
+<p>根据上面的描述，其实不难看出 Time 比例尺的表达式 <code>y = a * f(x) + b</code>中的 <code>f(x)</code> 应该为 <code>f(x) = x.getTime()</code>。所以我们可以在 Linear 比例尺的基础上如下实现 Time 比例尺。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/time.js</span>
+
+<span class="hljs-keyword">import</span> { createLinear } <span class="hljs-keyword">from</span> <span class="hljs-string">'./linear'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createTime</span>(<span class="hljs-params">{ domain, ...rest }</span>) {
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">transform</span> = (<span class="hljs-params">x</span>) =&gt; x.<span class="hljs-title function_">getTime</span>();
+  <span class="hljs-keyword">const</span> transformedDomain = domain.<span class="hljs-title function_">map</span>(transform);
+  <span class="hljs-keyword">const</span> linear = <span class="hljs-title function_">createLinear</span>({ <span class="hljs-attr">domain</span>: transformedDomain, ...rest });
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">scale</span> = (<span class="hljs-params">x</span>) =&gt; <span class="hljs-title function_">linear</span>(<span class="hljs-title function_">transform</span>(x));
+
+  scale.<span class="hljs-property">nice</span> = <span class="hljs-function">(<span class="hljs-params">tickCount</span>) =&gt;</span> linear.<span class="hljs-title function_">nice</span>(tickCount);
+  scale.<span class="hljs-property">ticks</span> = <span class="hljs-function">(<span class="hljs-params">tickCount</span>) =&gt;</span> linear.<span class="hljs-title function_">ticks</span>(tickCount).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(d));
+
+  <span class="hljs-keyword">return</span> scale;
+}
+</code></pre>
+<p>这里需要注意的是 Time 比例尺和 Linear 比例尺的 <code>ticks</code> 和 <code>nice</code> 方法应该是不一样的，因为对于它们来说可读性强的刻度的含义不一样。对于 Time 比例尺来说，应该是如下的时间间隔：</p>
+<ul>
+<li>1, 5, 15 和 30秒.</li>
+<li>1, 5, 15 和 30分钟.</li>
+<li>1, 3, 6 和 12-小时.</li>
+<li>1 和 2天.</li>
+<li>1周.</li>
+<li>1 和 3月.</li>
+<li>1年.</li>
+</ul>
+<p>但是 Time 比例尺获得合适刻度间隔的算法相对更复杂的一点，所以这里就复用 Linear 比例尺的 <code>ticks</code> 算法，想了解更多的可以去里看 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale%2Fblob%2Fmain%2Fsrc%2Ftime.js%23L47" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale/blob/main/src/time.js#L47" ref="nofollow noopener noreferrer">d3-scale</a> 的源码。</p>
+<p>最后我们将 Time 比例尺可视化的效果如下，可以发现它和 Linear 比例尺一个最大的区别是 x 轴从数字变成了时间。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd4f87162f9b34afb9c565955401a3578~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-5">序数类比例尺</h2>
+<p>如果说连续比例尺负责数值属性的映射，那么序数类比例尺就负责序数属性的映射。</p>
+<p>这里解释一下序数的含义。在<a href="https://juejin.cn/book/7031893648145186824/section/7032095221731033125" target="_blank" title="https://juejin.cn/book/7031893648145186824/section/7032095221731033125">数据分析模型</a>那一章我们了解到，数据属性分为：分类和可排序属性，可排序又分为数值和序数两种类型。为了简单，我们把分类属性也算作一种特殊的序数属性（所有值的大小都是相等的）。所以这里的序数属性包含分类属性和序数属性。</p>
+<p>接下来我们来看看三个序数类比例尺：Ordinal、Band 和 Point。</p>
+<h3 data-id="heading-6">Ordinal</h3>
+<p>Ordinal 比例尺和开篇提到的一样，值域和定义域都是序数，主要用于将序数属性映射为同为序数属性的视觉属性，比如颜色，形状等。比如下面我们将水果的名字映射为颜色。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp84eec5a4a1dc43daa458ebf36ca5459a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>把上图的映射过程用代码描述如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createOrdinal</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-string">"苹果"</span>, <span class="hljs-string">"香蕉"</span>, <span class="hljs-string">"梨"</span>, <span class="hljs-string">"西瓜"</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">'red'</span>, <span class="hljs-string">'yellow'</span>, <span class="hljs-string">'green'</span>],
+});
+
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"苹果"</span>); <span class="hljs-comment">// 'red'</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"香蕉"</span>); <span class="hljs-comment">// 'yellow'</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"梨"</span>); <span class="hljs-comment">// 'green'</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"西瓜"</span>); <span class="hljs-comment">// 'red'</span>
+</code></pre>
+<p>实现的思路也很简单：首先从定义域中找到输入对应的索引，然后返回值域中对应索引的元素。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/ordinal.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createOrdinal</span>(<span class="hljs-params">{ domain, range }</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> index = domain.<span class="hljs-title function_">findIndex</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> <span class="hljs-title function_">equal</span>(d, x));
+    <span class="hljs-comment">// 取模的目的是为了应对 domain.length &gt; range.length 的情况</span>
+    <span class="hljs-keyword">return</span> range[index % range.<span class="hljs-property">length</span>];
+  };
+}
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-comment">// 通过对象序列化结果简单判断两个对象是否相等</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">equal</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(a) === <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(b);
+}
+</code></pre>
+<h3 data-id="heading-7">Band</h3>
+<p>Ordinal 比例尺要求值域必须是序数的，如果值域是数值类型的话，就需要 Band 比例尺了。Band 比例尺主要用于将离散的序数属性映射为连续的数值属性，往往用于条形图中确定某个条的位置。</p>
+<p>比如下面我们将水果的名字映射为下面每个条的位置，其中每一个条使一个 Band，它的宽度为 BandWidth，条之间的间距为 Padding，步长是 BandWidth 和 Padding 之和。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpab72ba856ece420297e57dbbdc5fea2c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>把上图的映射过程用代码描述如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> options = {
+  <span class="hljs-attr">domain</span>: [<span class="hljs-string">"苹果"</span>, <span class="hljs-string">"香蕉"</span>, <span class="hljs-string">"梨"</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">320</span>], <span class="hljs-comment">// 上图中 width 的范围</span>
+  <span class="hljs-attr">padding</span>: <span class="hljs-number">0.2</span>, <span class="hljs-comment">// 控制条之间的间距，上图中的 padding</span>
+}
+
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createBand</span>(options);
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"苹果"</span>); <span class="hljs-comment">// 20</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"香蕉"</span>); <span class="hljs-comment">// 120</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"梨"</span>); <span class="hljs-comment">// 220</span>
+</code></pre>
+<p>当然我们除了如上需要通过 Band 比例尺获得条的位置，还需要如下获得条的 BandWidth 和 Step。</p>
+<pre><code class="hljs language-js" lang="js">scale.<span class="hljs-title function_">bandWidth</span>(); <span class="hljs-comment">// 80</span>
+scale.<span class="hljs-title function_">step</span>(); <span class="hljs-comment">// 100</span>
+</code></pre>
+<p>根据上面的介绍，发现 Band 比例尺可以直接基于 Ordinal 比例尺实现，只不过我们需要将其本身的值域进行转换，转换成间距相等的几个值。具体的实现方法如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/band.js</span>
+
+<span class="hljs-keyword">import</span> { createOrdinal } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ordinal'</span>;
+<span class="hljs-keyword">import</span> { band } <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createBand</span>(<span class="hljs-params">options</span>) {
+  <span class="hljs-keyword">const</span> { bandRange, bandWidth, step } = <span class="hljs-title function_">band</span>(options);
+  <span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createOrdinal</span>({ ...options, <span class="hljs-attr">range</span>: bandRange });
+
+  scale.<span class="hljs-property">bandWidth</span> = <span class="hljs-function">() =&gt;</span> bandWidth;
+  scale.<span class="hljs-property">step</span> = <span class="hljs-function">() =&gt;</span> step;
+
+  <span class="hljs-keyword">return</span> scale;
+}
+</code></pre>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/utils.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">band</span>(<span class="hljs-params">{ domain, range, padding }</span>) {
+  <span class="hljs-keyword">const</span> [r0, r1] = range;
+  <span class="hljs-keyword">const</span> n = domain.<span class="hljs-property">length</span>;
+  <span class="hljs-keyword">const</span> step = (r1 - r0) / (n + padding);
+  <span class="hljs-keyword">const</span> bandWidth = step * (<span class="hljs-number">1</span> - padding);
+  <span class="hljs-keyword">const</span> interval = step - bandWidth;
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">x</span> = (<span class="hljs-params">_, i</span>) =&gt; r0 + interval + step * i;
+  <span class="hljs-keyword">return</span> {
+    step,
+    bandWidth,
+    <span class="hljs-attr">bandRange</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(n).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(x),
+  };
+}
+</code></pre>
+<h3 data-id="heading-8">Point</h3>
+<p>我们接下来看看最后的一种序数比例尺：Point。Point 比例尺是一种特殊的 Band 比例尺，它的 Padding 始终为 1，也就是说它的 BandWidth 始终为 0 。(具体参考下图）</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpbc257ac4098241e3a8c2ab5ae0cebfcd~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>Point 比例尺主要用于散点图，它的使用方式如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> options = {
+  <span class="hljs-attr">domain</span>: [<span class="hljs-string">"苹果"</span>, <span class="hljs-string">"香蕉"</span>, <span class="hljs-string">"梨"</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">320</span>], 
+};
+
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createBand</span>(options);
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"苹果"</span>); <span class="hljs-comment">// 80</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"香蕉"</span>); <span class="hljs-comment">// 160</span>
+<span class="hljs-title function_">scale</span>(<span class="hljs-string">"梨"</span>); <span class="hljs-comment">// 240</span>
+</code></pre>
+<p>Point 的比例尺可以基于 Ordinal 如下简单得实现。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/point.js</span>
+
+<span class="hljs-keyword">import</span> { createBand } <span class="hljs-keyword">from</span> <span class="hljs-string">'./band'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createPoint</span>(<span class="hljs-params">options</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">createBand</span>({ ...options, <span class="hljs-attr">padding</span>: <span class="hljs-number">1</span> });
+}
+</code></pre>
+<h2 data-id="heading-9">分布比例尺</h2>
+<p>最后我们来看看分布比例尺，该类比例尺很多时候可以用来探索数据的分布。我们用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fobservablehq.com%2F%40d3%2Fquantile-quantize-and-threshold-scales" target="_blank" rel="nofollow noopener noreferrer" title="https://observablehq.com/@d3/quantile-quantize-and-threshold-scales" ref="nofollow noopener noreferrer">Quantile, Quantize and Threshold scales</a> 这篇文章中的例子来认识这类比例尺。</p>
+<p>上面的文章中有一个工资的数据集合：<code>salary = [11002,29017, ...]</code>，这个数据集一共有 100 条数据，范围是：<code>[0, 300577]</code>，我们现在希望绘制一个热力图来展现这些数据的分布：每一个格子代表一个人，将工资映射为格子的颜色。</p>
+<p>首先我们可以先用如下 Linear 比例尺来看看效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">300577</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">'white'</span>, <span class="hljs-string">'red'</span>],
+  <span class="hljs-attr">interpolate</span>: interpolateColor
+})
+</code></pre>
+<p>可视化后的效果如下图，可以发现我们能获得的信息很少，因为我们很难去区别这些颜色。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd55dbf591e3c4be6b596d56a3c8577b8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>所以我们需要离散的分布比例尺，将这些工资数据分组，每一个组使用一个颜色来编码</strong>。而不同的分组方式需要使用不同的分布比例尺，我们接下来分别看看它们。</p>
+<h3 data-id="heading-10">Threshold</h3>
+<p>首先是 Threshold 比例尺，它的定义域是连续的，并且会被指定的分割值分成不同的组，它的使用方式如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createThreshold</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">10000</span>, <span class="hljs-number">100000</span>], <span class="hljs-comment">// 1000, 100000 就是两个分割值</span>
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">"white"</span>, <span class="hljs-string">"pink"</span>, <span class="hljs-string">"red"</span>],
+})
+ <span class="hljs-comment">// [0, 300577] 会被上面的分割值分成三组，然后如下映射：</span>
+ <span class="hljs-comment">// [0, 10000) -&gt; "white"</span>
+ <span class="hljs-comment">// [10000, 100000) -&gt; "pink"</span>
+ <span class="hljs-comment">// [100000, 300577) -&gt; "red"</span>
+</code></pre>
+<p>使用上面声明的 Threshold 比例尺就会得到以下的效果。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd5b0c659be8b48e59a199b5eaf77f415~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>现在我们就可以得到一些有效信息了：因为粉红色的格子最多，所以大多人的工资都在 <code>[10000, 100000)</code> 这个区间，少部分在 <code>[0, 10000)</code> 和 <code>[100000, 300577)</code> 这两个区间。</p>
+<p>根据上面的介绍，以下 Threshold 比例尺的实现也不难理解了。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/threshold.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createThreshold</span>(<span class="hljs-params">{ domain, range }</span>) {
+  <span class="hljs-keyword">const</span> n = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(domain.<span class="hljs-property">length</span>, range.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> index = domain.<span class="hljs-title function_">findIndex</span>(<span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> x &lt; v);
+    <span class="hljs-keyword">return</span> range[index === -<span class="hljs-number">1</span> ? n : index];
+  };
+}
+</code></pre>
+<h3 data-id="heading-11">Quantize</h3>
+<p>相对于 Threshold 比例尺需要我们指定分割值，Quantize 比例尺会根据数据的范围帮我们选择分割值，从而把定义域分成间隔相同的组。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 因为 range 有3个值，所以 domain 会被分成三等份，</span>
+<span class="hljs-comment">// 并且按照如下的规则映射</span>
+<span class="hljs-comment">// [0, 300577 / 3) -&gt; "white"</span>
+<span class="hljs-comment">// [300577 / 3, 300577 * (2 / 3)) -&gt; "pink"</span>
+<span class="hljs-comment">// [300577 * (2 / 3), 300577) -&gt; "red</span>
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createQuantize</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">300577</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">"white"</span>, <span class="hljs-string">"pink"</span>, <span class="hljs-string">"red"</span>],
+})
+</code></pre>
+<p>如果我们用 Quantize 比例尺可视化上面的数据，会得到如下的结果：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfd59b46e540b4d268cc75bb32b075521~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>可以发现大部分人的工资都在前三分之一（白色）这个级别，只有极少数的人在后三分之一（红色）这个级别，这体现出了工资严重的分布不公平。这也是 使用 Quantize 比例尺存在的一个问题：当数据的分布有倾斜的时候，会出现几乎所有数据都在一个组，只有一些极端值在自己组的情况。</p>
+<p>根据上面的描述，实现 Quantize 比例尺的关键就是计算得到分割值，然后在这个基础之使用 Threahold 比例尺即可，具体的实现如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/quantize.js</span>
+
+<span class="hljs-keyword">import</span> { createThreshold } <span class="hljs-keyword">from</span> <span class="hljs-string">"./threshold"</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createQuantize</span>(<span class="hljs-params">{ domain: [d0, d1], range, ...rest }</span>) {
+  <span class="hljs-keyword">const</span> n = range.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">const</span> step = (d1 - d0) / (n + <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> quantizeDomain = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(n).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span> step * (i + <span class="hljs-number">1</span>));
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">createThreshold</span>({ <span class="hljs-attr">domain</span>: quantizeDomain, range, ...rest });
+}
+</code></pre>
+<h3 data-id="heading-12">Quantile</h3>
+<p>和 Quantize 比例尺不同是，Quantile 比例尺采用了另外得到分割值的策略： 根据数据出现的频率分组。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 首先把会 salary 按照升序排序</span>
+<span class="hljs-comment">// 因为一共有100条数据，所以</span>
+<span class="hljs-comment">// 前33条数据会被映射为 "white"</span>
+<span class="hljs-comment">// 排名33到67的数据会被映射为 "pink"</span>
+<span class="hljs-comment">// 最后33条数据会映射为 "red</span>
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createQuantile</span>({
+  <span class="hljs-attr">domain</span>: salary,
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">"white"</span>, <span class="hljs-string">"pink"</span>, <span class="hljs-string">"red"</span>],
+})
+</code></pre>
+<p>用 Quantize 比例尺进行可视化上面的数据会得到以下的效果。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpae11fa51963b496081dd06418b84d39d~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>如果对上面的数据按照升序排序之后再进行可视化，就会得到如下的效果。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp0622843cf95d4624afc84e9cf8ed3106~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>可以发现，Quantile 比例尺把数据分成了每组数据的数量相同的三个组，也就是说通过上面的图我们可以真正能找到 “相对较低”、“普通”和“相对较高”这三个组对应的人。这里需要注意的是：Quantile 是根据数据在整个数据集的排名来分组的，所以会缺少数据绝对大小相关的分布信息。</p>
+<p>类似于 Quantize 比例尺，我们在实现 Quantile 比例尺的时候也需要计算对应的分割值，具体的计算方式如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/quantile.js</span>
+
+<span class="hljs-keyword">import</span> { createThreshold } <span class="hljs-keyword">from</span> <span class="hljs-string">"./threshold"</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createQuantile</span>(<span class="hljs-params">{ domain, range, ...rest }</span>) {
+  <span class="hljs-keyword">const</span> n = range.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">const</span> sortedDomain = domain.<span class="hljs-title function_">sort</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a - b);
+  <span class="hljs-keyword">const</span> step = (sortedDomain.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>) / (n + <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> quantileDomain = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Array</span>(n).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">_, index</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> i = (index + <span class="hljs-number">1</span>) * step;
+    <span class="hljs-keyword">const</span> i0 = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(i);
+    <span class="hljs-keyword">const</span> i1 = i0 + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">const</span> v0 = sortedDomain[i0];
+    <span class="hljs-keyword">const</span> v1 = sortedDomain[i1];
+    <span class="hljs-keyword">return</span> v0 * (i1 - i) + v1 * (i - i0);
+  });
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">createThreshold</span>({ <span class="hljs-attr">domain</span>: quantileDomain, range, ...rest });
+}
+</code></pre>
+<h2 data-id="heading-13">作业</h2>
+<p>最后给大家布置一个小任务，就是基于 Linear 比例尺，参考 Time 比例尺实现 Log 比例尺。除了实现 Log 比例尺的映射功能之外，也要实现它的 <code>ticks</code> 和 <code>nice</code> 方法。</p>
+<p>Log 比例尺的表达式 <code>y = a * f(x) + b</code>中的 <code>f(x)</code> 应该为 <code>f(x) = Math.log(x)</code>， 这里只需要考虑 x 大于零的情况。对于 Log 比例尺来说，可读性较强的刻度就是指定 base 的指数。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { createLog } <span class="hljs-keyword">from</span> <span class="hljs-string">'./log.js'</span>;
+
+<span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLog</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">100</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">200</span>],
+  <span class="hljs-attr">base</span>: <span class="hljs-number">2</span>
+});
+
+scale.<span class="hljs-title function_">ticks</span>(<span class="hljs-number">5</span>); <span class="hljs-comment">// [16, 32, 64]  = [2 ^ 4, 2 ^5, 2 ^6]</span>
+
+scale.<span class="hljs-title function_">nice</span>(<span class="hljs-number">5</span>); 
+sclae.<span class="hljs-title function_">ticks</span>(<span class="hljs-number">5</span>); <span class="hljs-comment">// [8, 16, 32, 64, 128];</span>
+</code></pre>
+<p>具体的实现参考<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Fblob%2Fmain%2Fsrc%2Fscale%2Flog.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/blob/main/src/scale/log.js" ref="nofollow noopener noreferrer">这里</a>，测试代码在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Fblob%2Fmain%2F__tests__%2Fscale%2Flog.spec.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/blob/main/__tests__/scale/log.spec.js" ref="nofollow noopener noreferrer">这里</a>。</p>
+<p>当我们实现了 Log 比例尺之后，我们就把常用的、Sparrow 后面会用到的比例尺都开发完成了，是不是觉得收获满满？最后把它们全部导出即可。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/scale/index.js</span>
+
+<span class="hljs-keyword">export</span> { createLinear, interpolateNumber } <span class="hljs-keyword">from</span> <span class="hljs-string">'./linear'</span>;
+<span class="hljs-keyword">export</span> { createIdentity } <span class="hljs-keyword">from</span> <span class="hljs-string">'./identity'</span>;
+<span class="hljs-keyword">export</span> { createOrdinal } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ordinal'</span>;
+<span class="hljs-keyword">export</span> { createBand } <span class="hljs-keyword">from</span> <span class="hljs-string">'./band'</span>;
+<span class="hljs-keyword">export</span> { createPoint } <span class="hljs-keyword">from</span> <span class="hljs-string">'./point'</span>;
+<span class="hljs-keyword">export</span> { createQuantile } <span class="hljs-keyword">from</span> <span class="hljs-string">'./quantile'</span>;
+<span class="hljs-keyword">export</span> { createThreshold } <span class="hljs-keyword">from</span> <span class="hljs-string">'./threshold'</span>;
+<span class="hljs-keyword">export</span> { createQuantize } <span class="hljs-keyword">from</span> <span class="hljs-string">'./quantize'</span>;
+<span class="hljs-keyword">export</span> { createTime } <span class="hljs-keyword">from</span> <span class="hljs-string">'./time'</span>;
+<span class="hljs-keyword">export</span> { createLog } <span class="hljs-keyword">from</span> <span class="hljs-string">'./log'</span>;
+</code></pre>
+<p>完整的代码可以在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2Fsrc%2Fscale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/src/scale" ref="nofollow noopener noreferrer">这里</a>浏览，同样也可以通过<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2F__tests__%2Fscale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/__tests__/scale" ref="nofollow noopener noreferrer">这里</a>的测试代码来验证代码的正确性。</p>
+<h2 data-id="heading-14">拓展</h2>
+<p>虽然在上面的开发过程中每一个比例尺最多就10几行代码，但其实真正能在实际场景下使用的比例尺远没有这么简单。这里有两点需要注意：</p>
+<p>第一个是比例尺的丰富度。数据映射的场景很多，我们介绍的比例尺只是用于最常见的几种场景，更多的数据场景会使用一些更复杂的比例尺：比如 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale%23symlog-scales" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale#symlog-scales" ref="nofollow noopener noreferrer">Symlog</a>、<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale%23sequential-scales" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale#sequential-scales" ref="nofollow noopener noreferrer">Sequential</a>，</p>
+<p>第二个是性能上的要求。因为对每一个数据都会进行数据映射，所以在大数据的情况下，效率不高的比例尺实现会带来巨大的性能损失。</p>
+<p>比如在目前 Ordinal 比例尺的实现中，找到 index 的算法的时间复杂度是 <code>O(n)</code>：和定义域的数据规模呈线性相关。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createOrdinal</span>(<span class="hljs-params">{ domain, range }</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> {
+    <span class="hljs-comment">// findIndex 的每次都会遍历一次 domain</span>
+    <span class="hljs-keyword">const</span> index = domain.<span class="hljs-title function_">findIndex</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> <span class="hljs-title function_">equal</span>(d, x));
+    <span class="hljs-keyword">return</span> range[index % range.<span class="hljs-property">length</span>];
+  };
+}
+</code></pre>
+<p>这在数据量大的情况下这是不可接受的，但是它经过如下的优化就可以变成时间复杂度为 <code>O(1)</code> 的算法。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createOrdinal</span>(<span class="hljs-params">{ domain, range }</span>) {
+  <span class="hljs-keyword">const</span> indexMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>(domain.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d, i</span>) =&gt;</span> [d, i]));
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> index = indexMap.<span class="hljs-title function_">get</span>(x); <span class="hljs-comment">// O(1)</span>
+    <span class="hljs-keyword">return</span> range[index % range.<span class="hljs-property">length</span>];
+  };
+}
+</code></pre>
+<p>这里不会深入讲解优化和实现更多比例尺的细节，感兴趣的同学可以去参考：<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale" ref="nofollow noopener noreferrer">d3-scale</a> 和 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2Fscale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/scale" ref="nofollow noopener noreferrer">@antv/scale</a> 里面的实现。</p>
+<h2 data-id="heading-15">小结</h2>
+<p>这篇文章我们先从了解比例尺理论开始，知道了比例尺的本质是一个函数，然后实现了一些常用的且在 Sparrow 后面会用到的比例尺。</p>
+<p>这里简单总结一下根据数据属性的种类选择比例尺的思路。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><strong>定义域</strong></th><th><strong>值域</strong></th><th><strong>比例尺</strong></th></tr></thead><tbody><tr><td>数值</td><td>数值</td><td>Linear、Time、Log</td></tr><tr><td>数值</td><td>序数</td><td>Band、Point</td></tr><tr><td>序数</td><td>序数</td><td>Ordinal</td></tr><tr><td>数值</td><td>序数</td><td>Threshold、Quantile、Quantize</td></tr></tbody></table>
+<p>同时我们也可以回答最开始提出的三个问题了。</p>
+<ul>
+<li>为啥最后坐标轴生成的刻度的数量和希望的不一样？- 为了保证生成刻度的可读性，需要在希望刻度数量的基础上进行调整。</li>
+<li>nice 到底有什么用？- 调整定义域的范围，从而生成可读性更强的刻度。</li>
+<li>Threshold, Quantize, Quantile 比例尺有什么区别？- 获得将定义域分组的分割值的依据不同。Threshold 是使用指定的分割值，Quantize 是根据数据的绝对大小计算分割值，Quantile 是根据数据的排名来计算分割值。</li>
+</ul>
+<p>文章的最后也提出了我们可以优化的空间，希望大家可以多去了解。在开发完比例尺模块之后，下一章将带大家认识坐标系（Coordinate）。如果说比例尺侧重于编码的映射过程，那么坐标系就侧重于编码的布局过程了。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd95ca36382a4483596fdef144ee3dc3a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<blockquote>
+<p>参考</p>
+<ul>
+<li>The Grammar of Graphics, 2nd Edition, Leland Wilkinson</li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale" ref="nofollow noopener noreferrer">d3-scale</a></li>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fobservablehq.com%2F%40d3%2Fquantile-quantize-and-threshold-scales" target="_blank" rel="nofollow noopener noreferrer" title="https://observablehq.com/@d3/quantile-quantize-and-threshold-scales" ref="nofollow noopener noreferrer">Quantile, Quantize and Threshold scales</a></li>
+</ul>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

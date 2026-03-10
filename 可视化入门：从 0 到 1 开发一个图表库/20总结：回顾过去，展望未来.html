@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>《可视化入门：从 0 到 1 开发一个图表库》到这里就快结束了，这一章我们来盘点一下我们学到了什么，还有什么地方是需要改进的。小册子一共分为4大部分：开篇、基础篇、实战篇和分析篇，我们接下来就分别来看看。</p>
+<h2 data-id="heading-0">开篇</h2>
+<p>首先在开篇我们通过下面这两张图认识了数据可视化，知道了数据可视化就是：“<strong>利用人眼的感知能力对数据进行交互的可视表达以增强认知的技术，将不可见或难以直接显示的数据转化为可感知的图形、符号、颜色、 纹理等，增强数据识别效率，传递有效信息。</strong>”</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4c6950be1078485a94bbdf8667939fa5~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd3eb0045335644b59c8a8528197f3e85~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>同时了解到人眼能提高数据分析效率的原因主要有两点：</p>
+<ul>
+<li><strong>在几种感官系统中，视觉系统获得信息是最高效的。</strong></li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfe9592d6bc62461198e3cf96a95c84af~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<ul>
+<li><strong>图片可以加速人们查找和识别信息，因为信息会和空间信息相关联。</strong></li>
+</ul>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp87ebdfa9cb1a481f8e5663025dff9e14~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这之后我们知道了不是所有的可视化都是好的，真正好的可视化具有四个特点：<strong>新颖，充实，高效和美感。</strong></p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf1caa426f7ac47a4aaba715440f1232c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>但是凡事都有例外，信息图过多的装饰能让用户提高参与感、让用户更难忘让它也渐渐进入人们的视线中。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp9d2a3b1c8a484d3a98bfbe7d48835581~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>最后我们知道了现在是一个大数据时代，分析数据获得信息和知识有助于帮助我们做决策，而数据可视化是其中一个不可替代的手段。</p>
+<p>进一步来讲，数据可视化主要有三大分支：科学可视化、信息可视化和可视分析学，而日常生活中我们接触最多就是信息可视化。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpeaa9fd0e0b5f4cb38b6c2a2def24bc20~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>信息可视化在工作中的具体场景又会有：基于统计图表的可视化、移动端可视化、图可视化和地理可视化。</p>
+<p>开篇主要让大家大体了解了一下数据可视化，接下来就进入了基础篇。</p>
+<h2 data-id="heading-1">基础篇</h2>
+<p>在基础篇首先是给大家介绍了《Visualization Analysis &amp; Design，Tamara Munzner》提到的数据分析模型：What、Why、How，并且引入了“可视化苏菲的世界”这个任务。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp93dab1c5186546a6bd4d84613079477f~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这之后给大家介绍了如何用 Canvas2d 和 SVG 绘制一个条形图，知道了它们的基本使用方法。但同时发现绘制起来过于繁琐，所以准备开发一个小工具 Sparrow 来加快这个过程。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpca62d68ad63f45f88208957a0a27b60a~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>在开发我们的小工具之前，我们先了解了社区上一些成熟的可视化工具，知道了它们的优点和缺点以及适用的场景。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfff4706e9f6f4c92baf8f726ee1b2608~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>然后确定在“可视化语法”这一层去设计我们的 Sparrow 的 API，并且它的架构如下图。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp0c79d9edbde94357aed1adc1db0bf7eb~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这部分的最后我们根据下图去搭建了 Sparrow 的开发环境。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb7f0e9257d6848debd48b226a6dfae5e~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-2">实战篇</h2>
+<p>接下来就进入了实战篇，首先我们基于 SVG 封装了一个<strong>渲染引擎</strong>，用于提高图形元素的管理能力。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa2cb1d69390c4588a72ca36606976aac~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>然后学习并且开发了<strong>比例尺</strong>，了解了数据属性是如何映射到视觉属性上的。<strong>比例尺在可视化图表中非常重要，因为它是数据和视觉元素的桥梁。</strong></p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp8bfe0184a30542d48ed3cf2fac7ec3e5~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>了解完比例尺，我们学习了<strong>函数形式编程</strong>，知道了它相对于面向对象编程的优势；然后就开发了<strong>坐标系</strong>，其主要用于将归一化的数据转换成画布坐标数据。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpacf15a94ecfe4d149943b434c8fceddf~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>经过这两章比较抽象的数据处理学习之后，我们进入了直观形象的<strong>几何图形</strong>的学习：首先简单了解了一下视觉编码理论，然后看了看几何图形是如何把处理好的数据绘制成真正的 SVG 元素的。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2cc3dd6db10145669ddcb71c04028c40~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>几何图形之后就进入了<strong>辅助组件</strong>的学习，知道了它们可以加快人们理解几何图形的速度，也知道了它们和比例尺、坐标系之间的关系。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfb4b259a27f84f39b2aea04d75b555b5~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>这之后我们学习了<strong>统计</strong>，了解了统计函数是如何改变几何图形的位置和外观的。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp0852cfa07d6449a1870cac2d6a4ef8a8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>学习完统计我们了解<strong>视图</strong>，看看其是如何绘制多视图和多几何元素的图表的。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf9726351c3774cce82962a9304cecec6~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>最后我们学习了<strong>渲染流程</strong>，把上面的模块串了起来，最后完成了 <a href="https://link.juejin.cn?target=https%3A%2F%2Fsparrow-vis.github.io%2F%23%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://sparrow-vis.github.io/#/" ref="nofollow noopener noreferrer">Sparrow</a> 的开发。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp879e056ccea346e1bca703561b752506~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">分析篇</h2>
+<p>实战篇以后我们就进入了分析篇，不忘初心得开始完成我们最开始提出的分析任务。</p>
+<p>对于我们的可视化设计，我们首先都用 Sparrow 去实现，发现总是有可以优化的空间，所以我们也介绍了 <a href="https://link.juejin.cn?target=https%3A%2F%2Fantv.vision%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://antv.vision/" ref="nofollow noopener noreferrer">AntV 技术栈</a>的去完成相同的可视化设计。这个过程也接触了 <a href="https://link.juejin.cn?target=https%3A%2F%2Fd3js.org%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://d3js.org/" ref="nofollow noopener noreferrer">D3</a> 的一些工具。</p>
+<p>而我们的可视化设计也是涉及了基于<strong>统计图表的可视化</strong>、<strong>图可视化</strong>和<strong>地图可视化。</strong> 下面是我们的一些成果。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>类型</th><th>Sparrow + D3</th><th>AntV</th></tr></thead><tbody><tr><td>表格</td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb70b52e51ea14613b4319788fe549021~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp06342994cc2349deb16e396e39f120f9~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr><tr><td>散点图</td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb9a87220bea746c5844b5e0bc8eb0bc3~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd7bfab54d2f54182898de9550a4a3cd0~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr><tr><td>词云</td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp7086a23f5f104f57ab4a1f8d4a4904a5~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2fe881b7cf9e409c86d8509746c24207~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr><tr><td>力导向图</td><td><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpc734d44cbb214dff8c6d1a51e699922b~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp96982aa38da342f48fb57976cdaaf5c1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr><tr><td>圆形树状图</td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpb309e121d642426799f58f33c1a8e3cb~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp73855aabf82c4ebeaebc48beac8cf57c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr><tr><td>地图</td><td><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp77fb0365cf6444a3afe5a5599b3df301~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td><td><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2cc8fffe86864ceb8dc81d43d366fffc~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></td></tr></tbody></table>
+<h2 data-id="heading-4">总结</h2>
+<p>总的来说，这次可视化之旅还是很有意思的，我们理论和实战结合地去认识了数据可视化。</p>
+<p>当然，最重要的是：我们收获了一个基于图形语法的可视化库，虽然它不具备动画和交互能力，但是它已经帮助我们做了最重要的事情：<strong>把数据映射为视觉元素</strong>。</p>
+<p>小册子到这里就结束了，但数据可视化的学习之旅才开始，强烈推荐大家去阅读下面的几本书和 <a href="https://link.juejin.cn?target=https%3A%2F%2Fd3js.org%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://d3js.org/" ref="nofollow noopener noreferrer">D3</a> 的官网，你将获益匪浅！</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fd3js.org%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://d3js.org/" ref="nofollow noopener noreferrer">D3</a></li>
+<li>Visualization Analysis &amp; Design，Tamara Munzner</li>
+<li>Beautiful.Visualization，Julie Steele/&nbsp;Noah Iliinsky</li>
+<li>The Grammar of Graphics, 2nd Edition, Leland Wilkinson</li>
+</ul>
+<p>同时还有一点需要说明，在宣传里提到我们团队主要负责 G2 的维护，但是细心的同学可能已经发现： <strong>Sparrow 的 API 设计、代码架构以及渲染流程和 G2 却不太一样！</strong> 这是因为 Sparrow 的设计其实是参考我们团队今年年底将要发布的 G2 5.0 版本。</p>
+<p>G2 5.0 将是一个尽量兼容 4.0 的全新版本，在解决已有问题，提高绘图能力的之外（图形语法、动画语法和交互与发放），它的目标就是<strong>优雅</strong>：优雅的图表、优雅的文档以及优雅的代码！欢迎大家关注<a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.yuque.com%2Fantv%2Fg2-docs%2Fabout-g2-5.x" target="_blank" rel="nofollow noopener noreferrer" title="https://www.yuque.com/antv/g2-docs/about-g2-5.x" ref="nofollow noopener noreferrer">这里</a>，除了了解我们的最新进展，还可以参与贡献。</p>
+<p>我们有一个缺点，缺点优秀的你们，所以到时候不见不散。</p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>上面一节和大家一起从 0 到 1 实现了一个条形图去回答了我们8个问题中第一个问题：“哲学家、哲学问题和流派的数量关系是怎样的？”。</p>
+<p>在绘制条形图的过程中，因为没有借助任何工具，所以虽然代码行数不是很多，但是也能感觉到不太方便，比如自己实现数据处理过程，调用浏览器原生的绘制 API 等。</p>
+<p>有没有办法可以简化这个流程，让我们能快更好的完成我们的可视分析任务？答案是肯定的。俗话说的好：“工欲善其事，必先利其器”，解决办法就是使用现有的工具。但是几乎所有做可视化的人会面对一个绕不开的问题：</p>
+<p><strong>“我应该使用哪一个可视化工具？”</strong></p>
+<p>要回答这个问题，那么我们就该先了解选择标准是什么？前端领域有哪些有名的可视化工具？它们又有什么特点？使用它们有什么常见的挑战？</p>
+<p>接下来我们就来一一看看。</p>
+<h2 data-id="heading-0">选择标准</h2>
+<p>选择可视化工具的时候，我们的标准不是哪个更好，而是哪个跟适合我们当前想要完成的任务。那么又该如何判断这个工具是否当前的任务呢？那我们首先得看看这些可视化工具解决的核心问题。</p>
+<p>可视化工具要想解决的核心问题是：在<strong>易用</strong>和<strong>灵活</strong>之间找到一个平衡。易用是指用户在实现一个可视化图表的时候只用付出很少的努力，灵活是指用户能用该工具实现更多自定义的效果。</p>
+<p>很容易想象得到，易用性越强的工具越不灵活，越灵活的工具越不易用。因为当你付出努力少的时候，说明很多事情工具已经自己帮你做了，而这些你是没有办法或者只有部分参与的，这无疑降低了灵活性。</p>
+<p>所以我们选择工具的时候就是看这个工具能否在易用和灵活两方面都尽量满足我们的需求。那目前前端领域的可视化工具的易用性和灵活性有如何呢？我们马上来看看。</p>
+<h2 data-id="heading-1">可视化框架概览</h2>
+<p>参考 <a href="https://link.juejin.cn?target=https%3A%2F%2Fmedium.com%2Fnightingale%2Fnavigating-the-wide-world-of-web-based-data-visualization-libraries-798ea9f536e7" target="_blank" rel="nofollow noopener noreferrer" title="https://medium.com/nightingale/navigating-the-wide-world-of-web-based-data-visualization-libraries-798ea9f536e7" ref="nofollow noopener noreferrer">Navigating the Wide World of Data Visualization Libraries</a> 这篇文章，我们把一些有名的可视化工具用下面这张图整理了一下：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfff4706e9f6f4c92baf8f726ee1b2608~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>垂直方向是按照抽象程度来分类的，越底层的工具抽象程度越低，灵活性越强，易用性越差；越高层的工具抽象程度越高，易用性越强。水平方向是按照归属来分类的，左边的工具是来自于 AntV 技术栈的工具，右边的工具是来自于社区优秀的开源工具。</p>
+<p>大概了解了社区上一些优秀的可视化工具之后，我们接下来就从渲染引擎这一层抽像开始，一层层向上看，看看它们是怎么帮助我们可视化的。</p>
+<h2 data-id="heading-2">渲染引擎</h2>
+<p>首先是渲染引擎，渲染引擎会对浏览器的原生 API 进行封装，主要目的是为了简化我们绘制图形的流程。</p>
+<p>比如我们用 Canvas2D 绘制一个矩形的方式如下，需要一行行的设置属性。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 绘制一个矩形</span>
+context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">"red"</span>; <span class="hljs-comment">// 设置填充颜色</span>
+context.<span class="hljs-property">strokeStyle</span> = <span class="hljs-string">"yellow"</span>; <span class="hljs-comment">// 设置边框的颜色</span>
+context.<span class="hljs-property">lineWidth</span> = <span class="hljs-number">10</span>; <span class="hljs-comment">// 设置边框的宽度</span>
+context.<span class="hljs-title function_">strokeRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>); <span class="hljs-comment">// 绘制边框</span>
+context.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>, <span class="hljs-number">95</span>, <span class="hljs-number">95</span>); <span class="hljs-comment">// 绘制填充颜色</span>
+</code></pre>
+<p>但是在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2Fg" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/g" ref="nofollow noopener noreferrer">@antv/g</a> 的帮助下，直接把属性通过一个 options 的形式指定就好。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> rect = <span class="hljs-keyword">new</span> G.<span class="hljs-title class_">Rect</span>({
+  <span class="hljs-attr">style</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">5</span>,
+    <span class="hljs-attr">width</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">height</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">fill</span>: <span class="hljs-string">'red'</span>,
+    <span class="hljs-attr">stroke</span>: <span class="hljs-string">'yellow'</span>
+  },
+});
+</code></pre>
+<p>但是在这一抽象层次的工具只是简化了最后的数据绘制流程，没有简化我们的数据处理流程，或者一些通用功能（坐标轴，图例这些），所以我们需要更强大的工具。</p>
+<h2 data-id="heading-3">低级可视化模块</h2>
+<p>低级可视化模块就是上面提到的更强大的工具。它们是一些和可视化相关的工具，各自都是相互独立并且负责数据处理或者数据绘制的某部分。</p>
+<p>比如在上一章我们通过以下的方式去计算每个条的 x 坐标，这样不仅需要我们自己实现计算逻辑，还看上去不直观。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> step = chartWidth / names.<span class="hljs-property">length</span>; 
+<span class="hljs-keyword">const</span> barWidth = step * <span class="hljs-number">0.8</span>; 
+<span class="hljs-keyword">const</span> xs = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(indices, <span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> i * step);
+</code></pre>
+<p>如果我们使用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-scale" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-scale" ref="nofollow noopener noreferrer">d3-scale</a> 就可以简化这个流程如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> map = d3.<span class="hljs-title function_">scaleBand</span>().<span class="hljs-title function_">domain</span>(indices).<span class="hljs-title function_">range</span>([<span class="hljs-number">0</span>, chartWidth]);
+<span class="hljs-keyword">const</span> xs = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(indices, map);
+</code></pre>
+<p>这一抽象层次的工具简化了图表绘制各个流程，但是难道每一个流程都必须人来参与吗？工具可以自己完成一部分吗？</p>
+<h2 data-id="heading-4">可视化语法</h2>
+<p>可视化语法就能大幅度减少人的参与，同时保持相对可观的灵活性。</p>
+<p>可视化语法的开山鼻祖可以说是：<strong>图形语法</strong>，目前前端有名的在可视化语法这一层级的工具 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FG2" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/G2" ref="nofollow noopener noreferrer">G2</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvega%2Fvega-lite" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vega/vega-lite" ref="nofollow noopener noreferrer">Vega-Lite</a> 等都或多或少借鉴它的思想。</p>
+<p>图形语法这个概念是在 Leland Wilkinson 的《The Grammar of Graphics》被提出的。它的核心就是用一些不同同图表都通用的概念（比例尺，坐标系等）去描述一个可视化图表。下面是书中给出的一个案例，目前大家不用深入了解，只用大概感受一下，我们在后面会深入了解。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp1d7a2ddb787c477d8fa1f6071f322ce4~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>要实现上一章的条形图就可以很简单了，下面用 G2 举例子：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Chart</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">'@antv/g2'</span>;
+
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"questions"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"schools"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">25</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"philosophers"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">35</span> },
+];
+
+<span class="hljs-keyword">const</span> chart = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Chart</span>({
+  <span class="hljs-attr">width</span>: <span class="hljs-number">480</span>,
+  <span class="hljs-attr">heihgt</span>: <span class="hljs-number">300</span>,
+  <span class="hljs-attr">container</span>: <span class="hljs-string">'container-canvas'</span>
+});
+
+chart.<span class="hljs-title function_">data</span>(data);
+
+chart
+  .<span class="hljs-title function_">interval</span>()
+  .<span class="hljs-title function_">position</span>(<span class="hljs-string">'name*value'</span>)
+  .<span class="hljs-title function_">color</span>(<span class="hljs-string">'name'</span>);
+  
+chart.<span class="hljs-title function_">render</span>();
+</code></pre>
+<p>如果我们希望再简单一点使用呢？那么就需要看看下一层级了。</p>
+<h2 data-id="heading-5">高级可视化绘制模块</h2>
+<p>高级可视化绘制模块和可视化语层级一样，都不会显式指明可视化图表的类型，但是这些模块不一定是所有图表都通用的，同时在不同的可视化工具中功能也不一样。</p>
+<p>在 <a href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">ECharts</a> 中就会通过 series 去组合形成不同的可视化图表类型。下面用是 ECharts 去绘制上一节需要的条形图的代码。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> chart = echarts.<span class="hljs-title function_">init</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">'container-canvas'</span>));
+
+<span class="hljs-keyword">const</span> option = {
+  <span class="hljs-attr">xAxis</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'category'</span>,
+    <span class="hljs-attr">data</span>: [<span class="hljs-string">'questions'</span>, <span class="hljs-string">'schools'</span>, <span class="hljs-string">'philosophers'</span>]
+  },
+  <span class="hljs-attr">yAxis</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'value'</span>
+  },
+  <span class="hljs-attr">series</span>: [
+    {
+      <span class="hljs-attr">data</span>: [<span class="hljs-number">17</span>, <span class="hljs-number">25</span>, <span class="hljs-number">35</span>],
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'bar'</span>,
+    }
+  ]
+};
+
+chart.<span class="hljs-title function_">setOptions</span>(options);
+</code></pre>
+<h2 data-id="heading-6">图表模板</h2>
+<p>图表模版这一抽象层级一个最大的改变就是需要指定我们选择的图表的类型，不用去考虑如何去组合高级可视化绘制模块。这在意味着非常的方便的同时，丧失了很多灵活性，适合对自定义要求不高的任务。</p>
+<p>下面用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fg2plot.antv.vision%2Fzh" target="_blank" rel="nofollow noopener noreferrer" title="https://g2plot.antv.vision/zh" ref="nofollow noopener noreferrer">G2Plot</a> 来实现我们上一章对条形图，发现代码确实少了很多。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Column</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">'@antv/g2plot'</span>;
+
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"questions"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"schools"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">25</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"philosophers"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">35</span> },
+];
+
+<span class="hljs-keyword">const</span> column = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Column</span>(<span class="hljs-string">'container-canvas'</span>, {
+  data,
+  <span class="hljs-attr">xField</span>: <span class="hljs-string">'name'</span>,
+  <span class="hljs-attr">yField</span>: <span class="hljs-string">'value'</span>,
+  <span class="hljs-attr">seriesField</span>: <span class="hljs-string">'name'</span>,
+});
+
+column.<span class="hljs-title function_">render</span>();
+</code></pre>
+<h2 data-id="heading-7">智能可视化</h2>
+<p>如果你在可视化的过程什么也不愿意参与或者想参与程度很低的话，那么智能化可视化便是你最好的选择。一般来说你只需要把你想要可视化的数据和可视化意图告诉它，它就可以自动可视化出来。</p>
+<p>比如 <a href="https://link.juejin.cn?target=https%3A%2F%2Fava.antv.vision%2Fzh%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://ava.antv.vision/zh/" ref="nofollow noopener noreferrer">@antv/AVA</a> 就可以非常简单的完成我们上一章提到的分析任务，我们都不需要去告诉它我们需要条形图，如下的代码就可以帮助我们把条形图做出来。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">AutoChart</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">'@antv/auto-chart'</span>;
+
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"questions"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"schools"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">25</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"philosophers"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">35</span> },
+];
+
+<span class="hljs-title function_">autoChart</span>(<span class="hljs-string">'container-canvas'</span>, data);
+</code></pre>
+<p>就这样我们在很短时间内直观感受了前端领域的不同抽象层级的可视化框架。想必大家肯定感觉好像学到了很多东西，却又好像什么都没有学到。</p>
+<p>这是因为我们只是简单了解了其中的一些基本概念，而没有深入理解。如何才能深入理解？那就是自己亲自体验一下：自己从零开一个可视化工具，看完成一个完整的可视化图表到底有哪些需要考虑的。</p>
+<h2 data-id="heading-8">Sparrow</h2>
+<p>我们接下来要开发的框架的名字叫做：Sparrow，是一个基于图形语法的可视化框架。选择开发一个在可视化语法抽象层级工具的考虑有两点：</p>
+<ul>
+<li>可视化语法是很关键的一层，有承上启下的感觉：它不仅仅将一些低层级可视化绘制模块串联起来了，也给上层的高级可视化模块提高了足够灵活和易用的基础。</li>
+<li>我们团队在迭代 G2 的过程中，发现很多 issues 提到的问题都是因为对图形语法不了解导致的的，希望能通过这个过程加深大家对图形语法的理解，可以更好的使用相关的可视化工具，也能对可视化有更加深刻的理解。</li>
+</ul>
+<p>Sparrow 翻译过来就是麻雀。俗话说的好：“麻雀虽小，五脏俱全”，这意味着我们最后完成工具代码量会很少，但是却覆盖了如下图图形语法最核心的东西。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp723fb646abdc4a96acc3e50010abf1e8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>开发完成之后，我们可以通过一个如下的 JavaScript 对象去描述我们的图表。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> { plot } <span class="hljs-keyword">from</span> <span class="hljs-string">"@sparrow-vis/sparrow"</span>;
+
+<span class="hljs-keyword">const</span> data = [
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"questions"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">17</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"schools"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">25</span> },
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">"philosophers"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">35</span> },
+];
+
+<span class="hljs-keyword">const</span> chart = <span class="hljs-title function_">plot</span>({
+  data,
+  <span class="hljs-attr">type</span>: <span class="hljs-string">"interval"</span>,
+  <span class="hljs-attr">encodings</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-string">"name"</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-string">"value"</span>,
+    <span class="hljs-attr">fill</span>: <span class="hljs-string">"name"</span>
+  }
+});
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">"container"</span>).<span class="hljs-title function_">appendChild</span>(chart);
+</code></pre>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp374e2e2ab34b43c58a0cf4285a38c203~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="20211128230231.jpg" loading="lazy" class="medium-zoom-image"></p>
+<p>开发完成之后可以大大的提高我们解决后面问题的速度。</p>
+<h2 data-id="heading-9">小结</h2>
+<p>这一章我们简单给大家展示了目前前端领域流行的可视化工具，并且大概了解了它们的使用方式。为了对它们有更深入的认识，并且能加速我们后面解决问题的速度，我们接下来准备从零开发一个基于图形语法的可视化库 Sparrow。</p>
+<p>基础篇就这样结束了，接下来让我们一起扬帆起航进入实战篇。</p>
+<blockquote>
+<p>参考资料</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fmedium.com%2Fnightingale%2Fnavigating-the-wide-world-of-web-based-data-visualization-libraries-798ea9f536e7" target="_blank" rel="nofollow noopener noreferrer" title="https://medium.com/nightingale/navigating-the-wide-world-of-web-based-data-visualization-libraries-798ea9f536e7" ref="nofollow noopener noreferrer">Navigating the Wide World of Data Visualization Libraries</a>, Krist Wongsuphasawat</li>
+<li>The Grammar of Graphics, 2nd Edition, Leland Wilkinson</li>
+</ul>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

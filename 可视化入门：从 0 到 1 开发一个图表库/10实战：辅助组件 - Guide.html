@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>在上一章几何图形（Geometry）结束以后，我们已经可以根据数据绘制出如下简单的图形元素了。虽然目前通过下面这些图我们已经能获得一些基本的信息，但是这些信息还不够明确。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa955edf23a1c4a1cb578a1a95364ca41~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>比如：在上面的第一个柱形图中蓝色的条对应柱子最矮，说明其对应的数据实体的某个属性最小，但具体是哪个数据实体的哪个属性、这个属性的值又具体是多少，这些信息我们就不知道了。</p>
+<p>所以我们除了基本的几何图形之外，还需要一些基本的辅助组件（Guide）来帮助我们理解图表，获取更多的信息，比如坐标轴（Axis），图例（Legend）和标注（Annotation）。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp82543b7a6f47417b85b7ce9de2b93118~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>那么接下来我们将从辅助组件理论讲起，然后深入了解并且实现坐标轴和图例，最后在小结部分简单介绍一下标注。</p>
+<h2 data-id="heading-0">辅助组件理论（Guide）</h2>
+<p>辅助组件理论这部分主要介绍坐标轴和图例，理解它们的核心在于理解：<strong>如果几何元素是对数据本身的可视化，那么坐标轴和图例就是对比例尺的可视化。</strong></p>
+<p>对于每一个比例尺来说，它的辅助组件是坐标轴还是图例，取决于和比例尺绑定的视觉通道。而具体的坐标轴和图例的类型取决于比例尺的种类。</p>
+<p>当一个比例尺和水平位置通道 x 或者和竖直位置通道 y 绑定的时候，那么它的辅助组件就是坐标轴。</p>
+<p>比如下图中 x 通道绑定的 Band 比例尺对应底部的坐标轴，这种坐标轴是水平坐标轴（AxisX）。 y 通道绑定的 Linear 比例尺对应是左边坐标轴，这种坐标轴就是竖直坐标轴（AxisY）。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe131da6f9e344dd385c2bced026b1995~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>如果是在极坐标系下，那么两种比例尺的展现又会有所不同。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf7f0135b47bf4134b57765c8f5cf8bda~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>当一个比例尺和颜色，形状这些非位置通道绑定的时候，它对应的辅助组件就是图例。比如下图中颜色通道绑定的 Oridnal 比例尺对应底部的图例，因为 Ordinal 是离散的比例尺，所以对应的是样品图例（LegendSwatches）。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp31f1e324c16d4ce1b60a5f308139c1e1~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>当然如果这个颜色通道对应的是连续形比例尺的话，那么这个比例尺就是坡道图例（LegendRamp）。比如下面的颜色通道用的是 Linear 比例尺，所以对应的图例就是一个坡道图例。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp5762dd0a684e44738365037b971b0793~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>简单了解了一下坐标轴和比例尺，那么接下来就进入我们的开发环节。</p>
+<h2 data-id="heading-1">坐标轴（Axis）</h2>
+<p>首先我们来看一看坐标轴的绘制。不管对应什么比例尺，一个比较完整的坐标轴会包含下面三个部分：刻度、标签和格子。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe0b7405e6b0045f4acfd9ab64295242c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>刻度</strong>是由比例尺的 ticks 方法或者定义域决定的。如果是连续比例尺（Linear，Log 和 Time 等），它们的刻度就是 ticks 方法返回的值。如果是离散比例尺（Ordianl 和 Point 等），它们的刻度就是定义域本身。</p>
+<p>比如下图中底部的坐标轴的刻度就是对应 Band 比例尺的定义域：<code>['1991', '1992', '1993', ...]</code>，而左边的坐标轴的刻度就是对应的 Linear 比例尺在 <code>[0, 13]</code> 这个范围内生成的 ticks。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe131da6f9e344dd385c2bced026b1995~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>格子</strong>是根据刻度生成，每一个刻度都会生成一条线，根据坐标系的不同，这条线可能是直线，也可能是曲线。</p>
+<p><strong>标签</strong>的位置一般由第一个或者最后一个刻度决定，它主要用于说明当前比例尺绑定的数据的对应属性。</p>
+<p>在不同的坐标系下 AxisX 和 AxisY 的展现形式不同，根据是否是极坐标（isPolar）以及是否转置坐标系（isTranspose），可以将它们分别分为四种类型：</p>
+<ul>
+<li><code>(isPolar: false, isTranspose: false)</code></li>
+<li><code>(isPolar: false, isTranspose: true)</code></li>
+<li><code>(isPolar: true, isTranspose: true)</code></li>
+<li><code>(isPolar: true, isTranspose: false)</code></li>
+</ul>
+<p>如果上面的四种类型分别用 <code>00</code>、 <code>01</code>、 <code>11</code>、 <code>10</code> 来表示，那么 axisX 在不同坐标系的展示如下。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf1f9c55dfd314fe883f2a8f28222d5e2~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>axisY 在不同坐标系的展示如下。</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp630398aa27e84a10ade6a3af58152170~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>了解了坐标轴的不同样子，接下来我们首先抽象出一个创建坐标轴的函数：<code>createAxis</code>。该函数会返回一个绘制坐标轴的函数，它根据当前的坐标系选择不同的刻度、标签和格子绘制函数，从而绘制整个坐标轴。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/axis.js</span>
+
+<span class="hljs-keyword">import</span> { identity } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-comment">// components 不同坐标系对应的绘制组件</span>
+<span class="hljs-comment">// labelOf 获取标签绘制需要的刻度</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createAxis</span>(<span class="hljs-params">components, labelOf</span>) {
+  <span class="hljs-comment">// renderer 渲染器</span>
+  <span class="hljs-comment">// scale 比例尺</span>
+  <span class="hljs-comment">// cooridante 坐标系</span>
+  <span class="hljs-comment">// domain 比例尺的定义域（对离散比例尺有用）</span>
+  <span class="hljs-comment">// label 绘制的标签内容</span>
+  <span class="hljs-comment">// tickCount 刻度数量（对连续比例尺有用）</span>
+  <span class="hljs-comment">// formatter 格式化刻度的函数</span>
+  <span class="hljs-comment">// tickLength 刻度的长度</span>
+  <span class="hljs-comment">// fontSize 刻度文本和标签的字号</span>
+  <span class="hljs-comment">// grid 是否绘制格子</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">renderer, scale, coordinate, {
+    domain, 
+    label,
+    tickCount = <span class="hljs-number">5</span>, 
+    formatter = identity,
+    tickLength = <span class="hljs-number">5</span>,
+    fontSize = <span class="hljs-number">12</span>,
+    grid = <span class="hljs-literal">false</span>,
+    tick = <span class="hljs-literal">true</span>,
+  }</span>) =&gt;</span> {
+    <span class="hljs-comment">// 获得 ticks 的值</span>
+    <span class="hljs-keyword">const</span> offset = scale.<span class="hljs-property">bandWidth</span> ? scale.<span class="hljs-title function_">bandWidth</span>() / <span class="hljs-number">2</span> : <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> values = scale.<span class="hljs-property">ticks</span> ? scale.<span class="hljs-title function_">ticks</span>(tickCount) : domain;
+
+    <span class="hljs-comment">// 处理一些绘制需要的属性</span>
+    <span class="hljs-keyword">const</span> center = coordinate.<span class="hljs-title function_">center</span>();
+    <span class="hljs-comment">// 转换成 00、01、11、10</span>
+    <span class="hljs-keyword">const</span> type = <span class="hljs-string">`<span class="hljs-subst">${+coordinate.isPolar()}</span><span class="hljs-subst">${+coordinate.isTranspose()}</span>`</span>;
+    <span class="hljs-keyword">const</span> options = { tickLength, fontSize, center };
+    
+    <span class="hljs-comment">// 根据当前坐标系种类选择对应的绘制格子、刻度和标签的方法</span>
+    <span class="hljs-keyword">const</span> { <span class="hljs-attr">grid</span>: <span class="hljs-title class_">Grid</span>, <span class="hljs-attr">ticks</span>: <span class="hljs-title class_">Ticks</span>, <span class="hljs-attr">label</span>: <span class="hljs-title class_">Label</span>, start, end } = components[type];
+    
+    <span class="hljs-comment">// 计算得到刻度真正的坐标和展示的文本</span>
+    <span class="hljs-keyword">const</span> ticks = values.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> [x, y] = <span class="hljs-title function_">coordinate</span>(<span class="hljs-title function_">start</span>(d, scale, offset));
+      <span class="hljs-keyword">const</span> text = <span class="hljs-title function_">formatter</span>(d);
+      <span class="hljs-keyword">return</span> { x, y, text };
+    });
+
+    <span class="hljs-comment">// 按需绘制格子、刻度和标签</span>
+    <span class="hljs-keyword">if</span> (grid &amp;&amp; <span class="hljs-title class_">Grid</span>) <span class="hljs-title class_">Grid</span>(renderer, ticks, <span class="hljs-title function_">end</span>(coordinate));
+    <span class="hljs-keyword">if</span> (tick &amp;&amp; <span class="hljs-title class_">Ticks</span>) <span class="hljs-title class_">Ticks</span>(renderer, ticks, options);
+    <span class="hljs-keyword">if</span> (label &amp;&amp; <span class="hljs-title class_">Label</span>) <span class="hljs-title class_">Label</span>(renderer, label, <span class="hljs-title function_">labelOf</span>(ticks), options);
+  };
+}
+</code></pre>
+<p>通过 <code>createAxis</code> 函数我们可以看见刻度、格子和标签绘制组件是如何组合使用的，那么接下来我们就分别看看它们的实现。</p>
+<h3 data-id="heading-2">刻度（Ticks）</h3>
+<p>在笛卡尔坐标系下我们主要会绘制三种刻度：<code>ticksBottom</code>、<code>ticksTop</code> 和 <code>ticksLeft</code>，它们的区别在于刻度线的方向以及刻度线和刻度文本的相对位置不同。</p>
+<p>在极坐标系下绘制刻度的重点主要有两个：</p>
+<ul>
+<li>旋转刻度使得刻度线指向圆心。</li>
+<li>旋转刻度文本使得文本不颠倒。</li>
+</ul>
+<p>具体的实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/ticks.js</span>
+
+<span class="hljs-keyword">import</span> { rotationOf, unique } <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+<span class="hljs-keyword">import</span> { degree } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ticksBottom</span>(<span class="hljs-params">renderer, ticks, { tickLength, fontSize }</span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y, text } <span class="hljs-keyword">of</span> ticks) {
+    <span class="hljs-keyword">const</span> x2 = x;
+    <span class="hljs-keyword">const</span> y2 = y + tickLength;
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, x2, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'currentColor'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'tick'</span> });
+    renderer.<span class="hljs-title function_">text</span>({ text, fontSize, x, <span class="hljs-attr">y</span>: y2, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'middle'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'1em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'text'</span> });
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ticksTop</span>(<span class="hljs-params">renderer, ticks, { tickLength, fontSize }</span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y, text } <span class="hljs-keyword">of</span> ticks) {
+    <span class="hljs-keyword">const</span> x2 = x;
+    <span class="hljs-keyword">const</span> y2 = y - tickLength;
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, x2, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'currentColor'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'tick'</span> });
+    renderer.<span class="hljs-title function_">text</span>({ text, fontSize, x, <span class="hljs-attr">y</span>: y2, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'middle'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'-0.3em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'text'</span> });
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ticksLeft</span>(<span class="hljs-params">renderer, ticks, { tickLength, fontSize }</span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y, text } <span class="hljs-keyword">of</span> ticks) {
+    <span class="hljs-keyword">const</span> x2 = x - tickLength;
+    <span class="hljs-keyword">const</span> y2 = y;
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, x2, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'currentColor'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'tick'</span> });
+    renderer.<span class="hljs-title function_">text</span>({ text, fontSize, <span class="hljs-attr">x</span>: x2, y, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'end'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'0.5em'</span>, <span class="hljs-attr">dx</span>: <span class="hljs-string">'-0.5em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'text'</span> });
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ticksCircular</span>(<span class="hljs-params">renderer, ticks, { tickLength, fontSize, center }</span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y, text } <span class="hljs-keyword">of</span> <span class="hljs-title function_">unique</span>(ticks)) {
+    <span class="hljs-comment">// 计算刻度和刻度文本的旋转角度</span>
+    <span class="hljs-keyword">const</span> { tickRotation, textRotation } = <span class="hljs-title function_">rotationOf</span>(center, [x, y]);
+    <span class="hljs-keyword">const</span> [x2, y2] = [<span class="hljs-number">0</span>, tickLength];
+    <span class="hljs-keyword">const</span> dy = textRotation === <span class="hljs-number">0</span> ? <span class="hljs-string">'1.2em'</span> : <span class="hljs-string">'-0.5em'</span>;
+
+    <span class="hljs-comment">// 旋转刻度</span>
+    renderer.<span class="hljs-title function_">save</span>();
+    renderer.<span class="hljs-title function_">translate</span>(x, y);
+    renderer.<span class="hljs-title function_">rotate</span>(<span class="hljs-title function_">degree</span>(tickRotation));
+
+    renderer.<span class="hljs-title function_">line</span>({
+      <span class="hljs-attr">x1</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y1</span>: <span class="hljs-number">0</span>, x2, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'currentColor'</span>, <span class="hljs-attr">fill</span>: <span class="hljs-string">'currentColor'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'tick'</span>,
+    });
+
+    <span class="hljs-comment">// 在旋转刻度的基础上旋转文本</span>
+    renderer.<span class="hljs-title function_">save</span>();
+    renderer.<span class="hljs-title function_">translate</span>(x2, y2);
+    renderer.<span class="hljs-title function_">rotate</span>(<span class="hljs-title function_">degree</span>(textRotation));
+
+    renderer.<span class="hljs-title function_">text</span>({
+      <span class="hljs-attr">text</span>: <span class="hljs-string">`<span class="hljs-subst">${text}</span>`</span>, <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'middle'</span>, fontSize, <span class="hljs-attr">fill</span>: <span class="hljs-string">'currentColor'</span>, dy, <span class="hljs-attr">class</span>: <span class="hljs-string">'text'</span>,
+    });
+    renderer.<span class="hljs-title function_">restore</span>();
+    renderer.<span class="hljs-title function_">restore</span>();
+  }
+}
+</code></pre>
+<h3 data-id="heading-3">标签（Label）</h3>
+<p>标签绘制函数的实现没有太大的难点，这里就不具体介绍了。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/label.js</span>
+
+<span class="hljs-comment">// 当 axis 在左边，且方向向上</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">labelLeftUp</span>(<span class="hljs-params">renderer, label, tick, { fontSize }</span>) {
+  <span class="hljs-keyword">const</span> { x, y } = tick;
+  renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: <span class="hljs-string">`↑ <span class="hljs-subst">${label}</span>`</span>, x, y, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'end'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'-1em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'label'</span> });
+}
+
+<span class="hljs-comment">// 当 axis 在左边，且方向向下</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">labelLeftDown</span>(<span class="hljs-params">renderer, label, tick, { fontSize }</span>) {
+  <span class="hljs-keyword">const</span> { x, y } = tick;
+  renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: <span class="hljs-string">`↓ <span class="hljs-subst">${label}</span>`</span>, x, y, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'end'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'2em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'label'</span> });
+}
+
+<span class="hljs-comment">// 当 axis 在底部，且方向向右</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">labelBottomRight</span>(<span class="hljs-params">renderer, label, tick, { fontSize, tickLength }</span>) {
+  <span class="hljs-keyword">const</span> { x, y } = tick;
+  <span class="hljs-keyword">const</span> ty = y + tickLength;
+  renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: <span class="hljs-string">`<span class="hljs-subst">${label}</span> →`</span>, x, <span class="hljs-attr">y</span>: ty, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'end'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'2em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'label'</span> });
+}
+
+<span class="hljs-comment">// 当 axis 在顶部，且方向向右</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">labelTopRight</span>(<span class="hljs-params">renderer, label, tick, { fontSize, tickLength }</span>) {
+  <span class="hljs-keyword">const</span> { x, y } = tick;
+  <span class="hljs-keyword">const</span> ty = y - tickLength;
+  renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: <span class="hljs-string">`<span class="hljs-subst">${label}</span> →`</span>, x, <span class="hljs-attr">y</span>: ty, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'end'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'-1.2em'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'label'</span> });
+}
+</code></pre>
+<h3 data-id="heading-4">网格（Grid）</h3>
+<p>网格线的绘制也没有太多的难点，具体的实现参考下面的代码。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/label.js</span>
+
+<span class="hljs-keyword">import</span> { dist } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-comment">// 垂直方向的线</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">gridVertical</span>(<span class="hljs-params">renderer, ticks, end</span>) {
+  <span class="hljs-keyword">const</span> [, y2] = end;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y } <span class="hljs-keyword">of</span> ticks) {
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, <span class="hljs-attr">x2</span>: x, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'#eee'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'grid'</span> });
+  }
+}
+
+<span class="hljs-comment">// 水平方向的线</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">gridHorizontal</span>(<span class="hljs-params">renderer, ticks, end</span>) {
+  <span class="hljs-keyword">const</span> [x2] = end;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y } <span class="hljs-keyword">of</span> ticks) {
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, x2, <span class="hljs-attr">y2</span>: y, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'#eee'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'grid'</span> });
+  }
+}
+
+<span class="hljs-comment">// 绘制一系列从圆心发散的直线</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">gridRay</span>(<span class="hljs-params">renderer, ticks, end</span>) {
+  <span class="hljs-keyword">const</span> [x2, y2] = end;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y } <span class="hljs-keyword">of</span> ticks) {
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: x, <span class="hljs-attr">y1</span>: y, x2, y2, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'#eee'</span>, <span class="hljs-attr">class</span>: <span class="hljs-string">'grid'</span> });
+  }
+}
+
+<span class="hljs-comment">// 绘制一系列同心圆</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">gridCircular</span>(<span class="hljs-params">renderer, ticks, end</span>) {
+  <span class="hljs-keyword">const</span> [cx, cy] = end;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { x, y } <span class="hljs-keyword">of</span> ticks) {
+    <span class="hljs-keyword">const</span> r = <span class="hljs-title function_">dist</span>(end, [x, y]);
+    renderer.<span class="hljs-title function_">circle</span>({ <span class="hljs-attr">fill</span>: <span class="hljs-string">'none'</span>, <span class="hljs-attr">stroke</span>: <span class="hljs-string">'#eee'</span>, cx, cy, r, <span class="hljs-attr">class</span>: <span class="hljs-string">'grid'</span> });
+  }
+}
+</code></pre>
+<h3 data-id="heading-5">水平坐标轴（AxisX）</h3>
+<p>水平坐标轴在不同的坐标系下需要不同的绘制组件，具体如下面代码所展示的一样。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/axisX.js</span>
+
+<span class="hljs-keyword">import</span> { createAxis } <span class="hljs-keyword">from</span> <span class="hljs-string">'./axis'</span>;
+<span class="hljs-keyword">import</span> { ticksBottom, ticksLeft, ticksCircular } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ticks'</span>;
+<span class="hljs-keyword">import</span> { gridCircular, gridHorizontal, gridRay, gridVertical } <span class="hljs-keyword">from</span> <span class="hljs-string">'./grid'</span>;
+<span class="hljs-keyword">import</span> { labelLeftDown, labelBottomRight } <span class="hljs-keyword">from</span> <span class="hljs-string">'./label'</span>;
+
+<span class="hljs-keyword">const</span> components = {
+  <span class="hljs-string">'00'</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-title function_">scale</span>(d) + offset, <span class="hljs-number">1</span>],
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> <span class="hljs-title function_">coordinate</span>([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]),
+    <span class="hljs-attr">grid</span>: gridVertical,
+    <span class="hljs-attr">ticks</span>: ticksBottom,
+    <span class="hljs-attr">label</span>: labelBottomRight,
+  },
+  <span class="hljs-string">'01'</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-title function_">scale</span>(d) + offset, <span class="hljs-number">1</span>],
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> <span class="hljs-title function_">coordinate</span>([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]),
+    <span class="hljs-attr">grid</span>: gridHorizontal,
+    <span class="hljs-attr">ticks</span>: ticksLeft,
+    <span class="hljs-attr">label</span>: labelLeftDown,
+  },
+  <span class="hljs-number">10</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-title function_">scale</span>(d) + offset, <span class="hljs-number">0</span>],
+    <span class="hljs-attr">grid</span>: gridRay,
+    <span class="hljs-attr">ticks</span>: ticksCircular,
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> coordinate.<span class="hljs-title function_">center</span>(),
+  },
+  <span class="hljs-number">11</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-title function_">scale</span>(d) + offset, <span class="hljs-number">1</span>],
+    <span class="hljs-attr">grid</span>: gridCircular,
+    <span class="hljs-attr">ticks</span>: ticksLeft,
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> coordinate.<span class="hljs-title function_">center</span>(),
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> axisX = <span class="hljs-title function_">createAxis</span>(components);
+</code></pre>
+<p>在不同的坐标系下，根据下面这个比例尺绘制水平坐标轴的效果如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+});
+</code></pre>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf1f9c55dfd314fe883f2a8f28222d5e2~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-6">竖直坐标轴（AxisY）</h3>
+<p>竖直坐标轴在不同的坐标系下同样需要不同的绘制组件，具体如下面代码所展示的一样。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/axisY.js</span>
+
+<span class="hljs-keyword">import</span> { createAxis } <span class="hljs-keyword">from</span> <span class="hljs-string">'./axis'</span>;
+<span class="hljs-keyword">import</span> { ticksTop, ticksLeft, ticksCircular } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ticks'</span>;
+<span class="hljs-keyword">import</span> { gridCircular, gridHorizontal, gridRay, gridVertical } <span class="hljs-keyword">from</span> <span class="hljs-string">'./grid'</span>;
+<span class="hljs-keyword">import</span> { labelTopRight, labelLeftUp } <span class="hljs-keyword">from</span> <span class="hljs-string">'./label'</span>;
+
+<span class="hljs-keyword">const</span> components = {
+  <span class="hljs-string">'00'</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-number">0</span>, <span class="hljs-title function_">scale</span>(d) + offset],
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> <span class="hljs-title function_">coordinate</span>([<span class="hljs-number">1</span>, <span class="hljs-number">0</span>]),
+    <span class="hljs-attr">grid</span>: gridHorizontal,
+    <span class="hljs-attr">ticks</span>: ticksLeft,
+    <span class="hljs-attr">label</span>: labelLeftUp,
+  },
+  <span class="hljs-string">'01'</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-number">0</span>, <span class="hljs-title function_">scale</span>(d) + offset],
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> <span class="hljs-title function_">coordinate</span>([<span class="hljs-number">1</span>, <span class="hljs-number">0</span>]),
+    <span class="hljs-attr">grid</span>: gridVertical,
+    <span class="hljs-attr">ticks</span>: ticksTop,
+    <span class="hljs-attr">label</span>: labelTopRight,
+  },
+  <span class="hljs-number">10</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-number">0</span>, <span class="hljs-title function_">scale</span>(d) + offset],
+    <span class="hljs-attr">grid</span>: gridCircular,
+    <span class="hljs-attr">ticks</span>: ticksLeft,
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> coordinate.<span class="hljs-title function_">center</span>(),
+  },
+  <span class="hljs-number">11</span>: {
+    <span class="hljs-attr">start</span>: <span class="hljs-function">(<span class="hljs-params">d, scale, offset</span>) =&gt;</span> [<span class="hljs-number">0</span>, <span class="hljs-title function_">scale</span>(d) + offset],
+    <span class="hljs-attr">grid</span>: gridRay,
+    <span class="hljs-attr">ticks</span>: ticksCircular,
+    <span class="hljs-attr">end</span>: <span class="hljs-function">(<span class="hljs-params">coordinate</span>) =&gt;</span> coordinate.<span class="hljs-title function_">center</span>(),
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> axisY = <span class="hljs-title function_">createAxis</span>(components);
+</code></pre>
+<p>在不同的坐标系下，根据下面这个比例尺去绘制竖直坐标轴的效果如下。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>]
+});
+</code></pre>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp630398aa27e84a10ade6a3af58152170~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-7">图例（Legend）</h2>
+<p>了解完坐标轴的绘制，接下来我们来看看图例的绘制。图例的绘制会相对简单很多，因为绘制图例不需要考虑坐标系。但是为了保证辅助组件绘制函数接口的一致性，还是会把坐标系作为参数传入。</p>
+<h3 data-id="heading-8">样品图例（LegendSwatches）</h3>
+<p>首先我们来看看样品图例，它主要针对离散比例尺，比如根据下面这个 Ordinal 比例尺来生成图例，将会得到如下图的效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createOrdinal</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">'#5B8FF9'</span>, <span class="hljs-string">'#5AD8A6'</span>, <span class="hljs-string">'#5D7092'</span>],
+});
+</code></pre>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp355b0a28f0ee480da5770e9fb2832e52~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的实现如下，涉及一些简单的位置计算和图形绘制。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/legendSwatches.js</span>
+
+<span class="hljs-keyword">import</span> { identity } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+
+<span class="hljs-comment">// marginLeft 色块和文字的距离</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">legendSwatches</span>(<span class="hljs-params">renderer, scale, coordinate, {
+  x,
+  y,
+  width = <span class="hljs-number">48</span>,
+  marginLeft = <span class="hljs-number">12</span>,
+  swatchSize = <span class="hljs-number">10</span>,
+  fontSize = <span class="hljs-number">10</span>,
+  formatter = identity,
+  domain,
+  label,
+}</span>) {
+  renderer.<span class="hljs-title function_">save</span>();
+  renderer.<span class="hljs-title function_">translate</span>(x, y);
+
+  <span class="hljs-comment">// 绘制 label</span>
+  <span class="hljs-keyword">if</span> (label) {
+    renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: label, <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">fontWeight</span>: <span class="hljs-string">'bold'</span>, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'start'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'1em'</span> });
+  }
+
+  <span class="hljs-keyword">const</span> legendY = label ? swatchSize * <span class="hljs-number">2</span> : <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [i, label] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(domain)) {
+    <span class="hljs-comment">// 绘制色块</span>
+    <span class="hljs-keyword">const</span> color = <span class="hljs-title function_">scale</span>(label);
+    <span class="hljs-keyword">const</span> legendX = width * i;
+    renderer.<span class="hljs-title function_">rect</span>({
+      <span class="hljs-attr">x</span>: legendX,
+      <span class="hljs-attr">y</span>: legendY,
+      <span class="hljs-attr">width</span>: swatchSize,
+      <span class="hljs-attr">height</span>: swatchSize,
+      <span class="hljs-attr">stroke</span>: color,
+      <span class="hljs-attr">fill</span>: color,
+    });
+    
+    <span class="hljs-comment">// 绘制文字</span>
+    <span class="hljs-keyword">const</span> textX = legendX + marginLeft + swatchSize;
+    <span class="hljs-keyword">const</span> textY = legendY + swatchSize;
+    renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: <span class="hljs-title function_">formatter</span>(label), <span class="hljs-attr">x</span>: textX, <span class="hljs-attr">y</span>: textY, <span class="hljs-attr">fill</span>: <span class="hljs-string">'currentColor'</span>, fontSize });
+  }
+  renderer.<span class="hljs-title function_">restore</span>();
+}
+</code></pre>
+<h3 data-id="heading-9">坡道图例（LegendRamp）</h3>
+<p>接下来是坡道图例，它主要针对连续比例尺，比如根据下面这个 Linear 比例尺来生成图例，将会得到如下图的效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> scale = <span class="hljs-title function_">createLinear</span>({
+  <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">100</span>],
+  <span class="hljs-attr">range</span>: [<span class="hljs-string">'#5B8FF9'</span>, <span class="hljs-string">'#5AD8A6'</span>],
+  <span class="hljs-attr">interpolate</span>: interpolateColor,
+});
+</code></pre>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp011742ec813e4aee8d66915cd10a7779~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>具体的实现如下，这里会用一条条颜色渐变的线来实现过度效果。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// src/guide/legendRamp.js</span>
+
+<span class="hljs-keyword">import</span> { createLinear } <span class="hljs-keyword">from</span> <span class="hljs-string">'../scale'</span>;
+<span class="hljs-keyword">import</span> { identity } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+<span class="hljs-keyword">import</span> { ticksBottom } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ticks'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">legendRamp</span>(<span class="hljs-params">renderer, scale, coordinate, {
+  x,
+  y,
+  width = <span class="hljs-number">120</span>,
+  height = <span class="hljs-number">10</span>,
+  domain,
+  tickCount = <span class="hljs-number">5</span>,
+  tickLength = height + <span class="hljs-number">5</span>,
+  formatter = identity,
+  fontSize = <span class="hljs-number">10</span>,
+  label,
+}</span>) {
+  renderer.<span class="hljs-title function_">save</span>();
+  renderer.<span class="hljs-title function_">translate</span>(x, y);
+
+  <span class="hljs-comment">// 绘制标签</span>
+  <span class="hljs-keyword">if</span> (label) {
+    renderer.<span class="hljs-title function_">text</span>({ <span class="hljs-attr">text</span>: label, <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">fontWeight</span>: <span class="hljs-string">'bold'</span>, fontSize, <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">'start'</span>, <span class="hljs-attr">dy</span>: <span class="hljs-string">'1em'</span> });
+  }
+
+  <span class="hljs-comment">// 用一条条紧靠的线来实现渐变效果</span>
+  <span class="hljs-comment">// 将每条线的位置 x 转换到比例尺的定义域内</span>
+  <span class="hljs-keyword">const</span> value = <span class="hljs-title function_">createLinear</span>({ <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, width], <span class="hljs-attr">range</span>: domain });
+  <span class="hljs-keyword">const</span> legendY = label ? height * <span class="hljs-number">2</span> : <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; width; i += <span class="hljs-number">1</span>) {
+    <span class="hljs-keyword">const</span> stroke = <span class="hljs-title function_">scale</span>(<span class="hljs-title function_">value</span>(i));
+    renderer.<span class="hljs-title function_">line</span>({ <span class="hljs-attr">x1</span>: i, <span class="hljs-attr">y1</span>: legendY, <span class="hljs-attr">x2</span>: i, <span class="hljs-attr">y2</span>: legendY + height, stroke });
+  }
+
+  <span class="hljs-comment">// 绘制 ticks</span>
+  <span class="hljs-keyword">const</span> position = <span class="hljs-title function_">createLinear</span>({ domain, <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, width] });
+  <span class="hljs-keyword">const</span> values = position.<span class="hljs-title function_">ticks</span>(tickCount);
+  <span class="hljs-keyword">const</span> ticks = values.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> ({
+    <span class="hljs-attr">x</span>: <span class="hljs-title function_">position</span>(d),
+    <span class="hljs-attr">y</span>: legendY,
+    <span class="hljs-attr">text</span>: <span class="hljs-title function_">formatter</span>(d),
+  }));
+  <span class="hljs-title function_">ticksBottom</span>(renderer, ticks, { fontSize, tickLength });
+
+  renderer.<span class="hljs-title function_">restore</span>();
+}
+
+</code></pre>
+<p>坐标轴和图例就开发完成了，完整的代码可以在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2Fsrc%2Fguide" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/src/guide" ref="nofollow noopener noreferrer">这里</a>浏览，同样也可以通过<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow%2Ftree%2Fmain%2F__tests__%2Fguide" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow/tree/main/__tests__/guide" ref="nofollow noopener noreferrer">这里</a>的测试代码来验证代码的正确性。</p>
+<h2 data-id="heading-10">小结</h2>
+<p>本章的主要内容就差不多这些了，这一章我们了解了辅助组件里面的坐标轴和图例，也知道了它们和比例尺之间密不可分的关系。</p>
+<p>不过辅助组件里面还有很重要的一种没有给大家详细介绍：标注（Annotation）。标注和它的名字一样，主要用于来标注一些值得注意的数据点或者数据值，比如最大值，最小值，平均值这些。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp93e8119bd28e4b3f9713ebeebcf12a69~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>标注除了上图中的文字以外，还可以是线条、图片等等。这部分的内容就不再这里深入介绍了。</p>
+<p>下一章我们将进入统计（Statistic），看看它是如何改变几何图形的位置的。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd295663040f0489491795330fd713b04~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>
