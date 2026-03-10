@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 手摸手带你入门 Canvas 
 
 ## 创建 Canvas 画布
