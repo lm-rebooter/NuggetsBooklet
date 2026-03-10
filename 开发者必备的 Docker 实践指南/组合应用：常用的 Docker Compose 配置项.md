@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 常用的 Docker Compose 配置项
 
 与 Dockerfile 一样，编写 Docker Compose 的配置文件是掌握和使用好 Docker Compose 的前提。编写 Docker Compose 配置文件，其本质就是根据我们所设计的应用架构，对不同应用容器进行配置并加以组合。在这一节中，我们就来谈谈如何编写 Docker Compose 的配置文件，了解其中常见配置项的使用方法。

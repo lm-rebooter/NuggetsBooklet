@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 搭建数据分析环境：Anaconda、Jupyter Notebook
 Anaconda 是一个针对数据分析领域的 Python 发行版本，它提供了包管理（packages）工具和虚拟环境（environment）管理， `conda` 命令可用于安装、卸载、更新包、创建不同版本的 Python 独立环境，可用于替换 `pip` 和 `virtualenv` 这两个工具。此外，Anaconda 自带了很多数据科学的依赖包以及Juypter Notebook 等工具。
 

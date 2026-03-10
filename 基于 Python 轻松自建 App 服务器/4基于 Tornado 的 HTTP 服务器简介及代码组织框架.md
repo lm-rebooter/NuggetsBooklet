@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 基于 Tornado 的 HTTP 服务器简介及代码组织框架
 
 Tornado 是一个 Python Web 框架和异步网络库，最初是在 FriendFeed 开发的。通过使用非阻塞网络I/O，Tornado 可以扩展到数以万计的开放连接，但却在创建和编写时足够的轻量级。

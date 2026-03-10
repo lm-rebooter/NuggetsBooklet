@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 搭建基于 Nginx 的代理服务器
 
 [Nginx](https://nginx.org/en/) 是俄罗斯人编写的十分轻量级的 HTTP 服务器，是一个高性能的 HTTP 和反向代理服务器。相较于 [Apache](https://httpd.apache.org/)、[lighttpd](https://www.lighttpd.net/) ，它具有占有内存少、稳定性高等优势。它最常见的用途是提供反向代理服务。

@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 搭建 Java Web 项目运行环境
 
 Java Web 泛指以 Java 程序为基础向外提供 Web 服务的技术及相关工具，狭义上来说，我们也可以说 Java Web 是由 Servlet 程序提供的 Web 服务。 对我们而言，Tomcat 无疑是最常见的 Servlet 容器，所以在这个小节里，我们来搭建一个以 Tomcat 为核心的 Web 应用运行环境。 在这个环境中，我们还要组合进 MySQL 作为数据存储，Redis 作为 KV 存储。
