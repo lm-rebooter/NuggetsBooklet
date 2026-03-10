@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # RESTful API 介绍
 
 ## 什么是 API

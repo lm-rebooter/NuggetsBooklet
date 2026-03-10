@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 用 Makefile 管理 API 项目
 
 ## 本节核心内容
