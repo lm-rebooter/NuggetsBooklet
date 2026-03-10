@@ -1,0 +1,334 @@
+## 一 前言
+
+本章节，我将继续补充一些 React 开发中细节问题的解决方案。
+
+## 二 细节
+
+### 1 React中防抖和节流
+
+**防抖**
+
+防抖和节流在 React 应用中是很常用的，防抖很适合 React 表单的场景，比如点击按钮防抖，search 输入框。举一个简单的例子。
+
+```js
+export default class Index extends React.Component{
+    constructor(props){
+        super(props)
+    }
+    handleClick= () => {
+        console.log('点击事件-表单提交-调用接口')
+    }
+    handleChange= (e) => {
+        console.log('搜索框-请求数据')
+    }
+    render(){
+        return <div>
+            <input  placeholder="搜索表单" onChange={this.handleChange}  /><br/>
+            <button onClick={ this.handleClick } > 点击 </button>
+        </div>
+    }
+}
+```
+* 如上，当点击按钮的时候，向服务端发起数据交互；输入 input 时候，同样会向服务端进行数据交互，请求搜索的数据。对于如上的情况如果不做任何优化处理的话，连续点击按钮，或者 input 输入内容的时候，就会出现这种情况。
+
+![1.gif](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/390bc5aad3454d86a8b6c0b3a2d22b1a~tplv-k3u1fbpfcp-watermark.image)
+
+
+如上，会频繁和服务端交互，很显然这种情况是不符合常理的。所以需要防抖处理。
+
+```js
+constructor(props){
+    super(props)
+    this.handleClick = debounce(this.handleClick,500)  /* 防抖 500 毫秒  */
+    this.handleChange = debounce(this.handleChange,300) /* 防抖 300 毫秒 */
+}
+```
+效果：
+
+![2.gif](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/58d282f3433b4552bdba0e6e1487acc7~tplv-k3u1fbpfcp-watermark.image)
+
+
+
+**节流**
+
+节流函数一般也用于频繁触发的事件中，比如监听滚动条滚动。
+
+```js
+export default function Index(){
+    /* useCallback 防止每次组件更新都重新绑定节流函数  */
+    const handleScroll = React.useCallback(throttle(function(){
+        /* 可以做一些操作，比如曝光上报等 */
+    },300))
+    return <div className="scrollIndex"  onScroll={handleScroll} >
+        <div className="scrollContent" >hello,world</div>
+   </div>
+}
+```
+* 如上将监听滚动函数做节流处理，300 毫秒触发一次。用 useCallback 防止每一次组件更新重新绑定节流函数。
+
+防抖节流总结：
+* 防抖函数一般用于表单搜索，点击事件等场景，目的就是为了防止短时间内多次触发事件。
+* 节流函数一般为了降低函数执行的频率，比如滚动条滚动。
+
+
+### 2 按需引入
+
+按需引入本质上是为项目瘦身，开发者在做 React 项目的时候，会用到 antd 之类的 UI 库，值得思考的一件事是，开发者如果只是用到了 antd 中的个别组件，比如 Button，就要把整个样式库引进来，打包就会发现，体积因为引入了整个样式文件大了很多。所以可以通过 `.babelrc` 实现按需引入。
+
+瘦身前体积：
+
+![pre](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/eb283e44fe0746de93d17f45fdcc1ccb~tplv-k3u1fbpfcp-watermark.image)
+
+
+.babelrc 增加对 antd 样式按需引入。
+```json
+["import", {
+    "libraryName":
+    "antd",
+    "libraryDirectory": "es",
+    "style": true
+}]
+```
+
+瘦身后体积：
+
+![after](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2f3909bdcdd24d769478d7f8929dcd3b~tplv-k3u1fbpfcp-watermark.image)
+
+
+### 3 React动画
+
+React 写动画也是一个比较棘手的问题。高频率的 setState 会给应用性能带来挑战，这种情况在 M 端更加明显，因为 M 端的渲染能力受到手机性能的影响较大。所以对 React 动画的处理要格外注意。我这里总结了三种 React 使用动画的方式，以及它们的权重。
+
+#### ① 首选：动态添加类名
+
+第一种方式是通过 transition，animation 实现动画然后写在 class 类名里面，通过动态切换类名，达到动画的目的。
+
+```js
+export default function Index(){
+    const [ isAnimation , setAnimation ] = useState(false)
+    return <div>
+        <button onClick={ ()=> setAnimation(true)  } >改变颜色</button>
+        <div className={ isAnimation ? 'current animation' : 'current'  } ></div>
+    </div>
+}
+```
+
+```css
+.current{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #ccc;
+}
+.animation{
+    animation: 1s changeColor;
+    background:yellowgreen;
+}
+@keyframes changeColor {
+    0%{background:#c00;}
+    50%{background:orange;}
+    100%{background:yellowgreen;}
+}
+```
+
+效果
+
+
+![3.gif](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4bfef6017c0844e4abea4a79b5ad8db1~tplv-k3u1fbpfcp-watermark.image)
+
+这种方式是我最优先推荐的方式，这种方式既不需要频繁 setState ，也不需要改变 DOM 。
+
+#### ② 其次：操纵原生 DOM 
+
+如果第一种方式不能满足要求的话，或者必须做一些 js 实现复杂的动画效果，那么可以获取原生 DOM ，然后单独操作 DOM 实现动画功能，这样就避免了 setState  改变带来 React Fiber 深度调和渲染的影响。
+
+```js
+export default function Index(){
+    const dom = useRef(null)
+    const changeColor = ()=>{
+        const target =  dom.current
+        target.style.background = '#c00'
+        setTimeout(()=>{
+            target.style.background = 'orange'
+            setTimeout(()=>{
+                target.style.background = 'yellowgreen'
+            },500)
+        },500)
+    }
+    return <div>
+        <button onClick={ changeColor } >改变颜色</button>
+        <div className='current' ref={ dom }  ></div>
+    </div>
+}
+```
+同样达到如上的效果
+
+#### ③ 再者：setState + css3
+
+如果 ① 和 ② 都不能满足要求，一定要使用 setState 实时改变DOM元素状态的话，那么尽量采用 css3 ， css3 开启硬件加速，使 GPU (Graphics Processing Unit) 发挥功能，从而提升性能。
+
+比如想要改变元素位置 left ，top 值，可以换一种思路通过改变 transform: translate，transform 是由 GPU 直接控制渲染的，所以不会造成浏览器的重排。
+
+```js
+export default function Index(){
+    const [ position , setPosition ] = useState({ left:0,top:0 })
+    const changePosition = ()=>{
+        let time = 0
+        let timer = setInterval(()=>{
+            if(time === 30) clearInterval(timer)
+            setPosition({ left:time * 10 , top:time * 10 })
+            time++ 
+        },30)
+    }
+    const { left , top } = position
+    return <div>
+         <button onClick={ changePosition } >改变位置</button>
+         <div className='current' style={{ transform:`translate(${ left }px,${ top }px )` }}  ></div>
+    </div>
+}
+```
+**效果**
+
+
+![4.gif](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/134a3683658d4440932b8aeccd55591d~tplv-k3u1fbpfcp-watermark.image)
+
+### 4 及时清除定时器/延时器/监听器
+
+如果在 React 项目中，用到了定时器，延时器和事件监听器，注意要在对应的生命周期，清除它们，不然可能会造成内部泄露的情况。
+
+类组件：
+```js
+export default class Index extends React.Component{
+    current = null
+    poll=()=>{} /* 轮训 */
+    handleScroll=()=>{} /* 处理滚动事件 */
+    componentDidMount(){
+       this.timer = setInterval(()=>{
+           this.poll() /* 2 秒进行一次轮训事件 */
+       },2000)
+       this.current.addEventListener('scroll',this.handleScroll)
+    }
+    componentWillUnmount(){
+       clearInterval(this.timer) /* 清除定时器 */
+       this.current.removeEventListener('scroll',this.handleScroll)
+    }
+    render(){
+        return <div ref={(node)=>this.current = node  }  >hello,let us learn React!</div>
+    }
+}
+```
+* 在 componentWillUnmount 生命周期及时清除延时器和事件监听器。
+
+函数组件：
+
+```js
+export default function Index(){
+    const dom = React.useRef(null)
+    const poll = ()=>{}
+    const handleScroll = ()=>{}
+    useEffect(()=>{
+        let timer = setInterval(()=>{
+            poll() /* 2 秒进行一次轮训事件 */
+        },2000)
+        dom.current.addEventListener('scroll',handleScroll)
+        return function(){
+            clearInterval(timer)
+            dom.current.removeEventListener('scroll',handleScroll)
+        } 
+    },[])
+    return <div ref={ dom }  >hello,let us learn React!</div>
+}
+```
+* 在 useEffect 或者 useLayoutEffect 第一个参数 create 的返回函数 destory 中，做一些清除定时器/延时器的操作。
+
+
+### 5 合理使用state
+
+React 并不像 vue 那样响应式数据流。 在 vue 中有专门的 dep 做依赖收集，可以自动收集字符串模版的依赖项，只要没有引用的 data 数据， 通过 `this.aaa = bbb` ，在 vue 中是不会更新渲染的。但是在 React 中只要触发 setState 或 useState ，如果没有渲染控制的情况下，组件就会渲染，暴露一个问题就是，如果视图更新不依赖于当前 state ，那么这次渲染也就没有意义。所以对于视图不依赖的状态，就可以考虑不放在 state 中。
+
+打个比方，比如想在滚动条滚动事件中，记录一个 scrollTop 位置，那么在这种情况下，用 state 保存 scrollTop 就没有任何意义而且浪费性能。
+
+```js
+export default class Index extends React.Component{
+    node = null
+    scrollTop = 0
+    handleScroll=()=>{
+        const {  scrollTop } = this.node 
+        this.scrollTop = scrollTop
+    }
+    render(){
+        return <div ref={(node)=> this.node = node } onScroll={this.handleScroll} ></div>
+    }
+}
+```
+上述把 scrollTop 直接绑定在 this 上，而不是通过 state 管理，这样好处是滚动条滚动不需要触发 setState ，从而避免了无用的更新。
+
+对于函数组件，因为不存在组件实例，但是函数组件有 hooks ，所以可以通过一个 useRef 实现同样的效果。
+
+```js
+export default function Index(){
+    const dom = useRef(null)
+    const scrollTop = useRef(0)
+    const handleScroll = ()=> {
+        scrollTop.current = dom.current.scrollTop
+    }
+    return   <div ref={ dom } onScroll={handleScroll} ></div>
+}
+```
+
+* 如上用 useRef ，来记录滚动条滚动时 scrollTop 的值。
+
+### 6 建议不要在 hooks 的参数中执行函数或者 new 实例
+
+有一种场景是平时比较容易忽略的，就是在 `hooks` 的参数中执行函数或者 new 实例，比如如下这样：
+
+```js
+const hook1 = useRef(fn())
+const hook2 = useRef(new Fn())
+```
+不建议这么写。为什么呢？ 
+
+* 首先函数每次 `rerender` 都会执行 hooks ，那么在执行 hooks 函数的同时，也会执行函数的参数，比如上面的代码片段中的 `fn()` 和 `new Fn()`，也就是每一次 rerender 都会执行 fn 或者是 new 一个实例。这可能不是开发者期望的，而执行函数，或创建实例也成了一种性能浪费，在一些极端情况下，可能会造成内存泄漏，比如在创建新的 dom 元素，但是没有进行有效的回收。
+
+* 在 hooks 原理章节讲到过，函数组件在**初始化**和**更新**流程中，会使用不同的 hooks 对象，还是以 `useRef` 为例子，在初始化阶段用的是 `mountRef`函数，在更新阶段用的是 `updateRef`函数，开发者眼睛看见的是 `useRef`，在 React 底层却悄悄的替换成了不同的函数。 更重要的是大部分的 hooks 参数都作为**初始化**的参数，在更新阶段压根没有用到，那么传入的参数也就没有了意义，回到上述代码片段，`fn()` 和 `new Fn()`在更新阶段根本就没有被 `useRef`接收， 无辜的成了流浪者。
+
+还是以 `useRef` 为例子，看一下它在不同阶段的真正面目。
+
+**初始化**
+```js
+function mountRef(initialValue) {
+  const hook = mountWorkInProgressHook();
+  const ref = {current: initialValue};
+  hook.memoizedState = ref;
+  return ref;
+}
+```
+* 初始化的时候用到了 initialValue ，也就是第一个参数。
+
+**更新阶段**
+
+```js
+function updateRef(initialValue) {
+  const hook = updateWorkInProgressHook();
+  return hook.memoizedState;
+}
+```
+* 在更新阶段根本没有用到 initialValue。
+
+那么回到最初的目的上来，如果开发者真的想在 hooks 中，以函数组件执行结果或者是实例对象作为参数的话，那么应该怎么处理呢。这个很简单。比如：
+
+
+```js
+const hook = useRef(null)
+if(!hook.current){
+  hook.current = new Fn()
+}
+```
+
+
+
+
+## 三 总结
+
+本章补充了前几章没有提到的优化点，实际开发中，还有很多细节，欢迎大家在留言区域补充，然后我统一添加到本章内容里。下一章将开始进入 React 原理篇。

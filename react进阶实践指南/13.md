@@ -1,0 +1,234 @@
+## 前言
+
+本章节将要介绍一下 React 对于大量数据的处理方案，对于项目中大量数据通常存在两种情况：
+* 第一种就是数据可视化，比如像热力图，地图，大量的数据点位的情况。
+* 第二种情况是长列表渲染。
+
+
+接下来将重点围绕这两点展开讨论，通过本章节，将收获 React 应用处理大量数据的解决方案。
+
+## 实践一 时间分片
+时间分片主要解决，初次加载，一次性渲染大量数据造成的卡顿现象。**浏览器执 js 速度要比渲染 DOM 速度快的多。**，时间分片，并没有本质减少浏览器的工作量，而是把一次性任务分割开来，给用户一种流畅的体验效果。就像造一个房子，如果一口气完成，那么会把人累死，所以可以设置任务，每次完成任务一部分，这样就能有效合理地解决问题。
+
+所以接下来实践一个时间分片的 demo ，一次性加载 20000 个元素块，元素块的位置和颜色是随机的。首先假设对 demo 不做任何优化处理。
+
+
+
+色块组件：
+```js
+/* 获取随机颜色 */
+function getColor(){
+    const r = Math.floor(Math.random()*255);
+    const g = Math.floor(Math.random()*255);
+    const b = Math.floor(Math.random()*255);
+    return 'rgba('+ r +','+ g +','+ b +',0.8)';
+ }
+/* 获取随机位置 */
+function getPostion(position){
+     const { width , height } = position
+     return { left: Math.ceil( Math.random() * width ) + 'px',top: Math.ceil(  Math.random() * height ) + 'px'}
+}
+/* 色块组件 */
+function Circle({ position }){
+    const style = React.useMemo(()=>{ //用useMemo缓存，计算出来的随机位置和色值。
+         return {  
+            background : getColor(),
+            ...getPostion(position)
+         }
+    },[])
+    return <div style={style} className="circle" />
+}
+```
+* 子组件接受父组件的位置范围信息。并通过 useMemo 缓存计算出来随机的颜色，位置，并绘制色块。
+
+父组件：
+```js
+class Index extends React.Component{
+    state={
+        dataList:[],                  // 数据源列表
+        renderList:[],                // 渲染列表
+        position:{ width:0,height:0 } // 位置信息
+    }
+    box = React.createRef()
+    componentDidMount(){
+        const { offsetHeight , offsetWidth } = this.box.current
+        const originList = new Array(20000).fill(1)
+        this.setState({
+            position: { height:offsetHeight,width:offsetWidth },
+            dataList:originList,
+            renderList:originList,
+        })
+    }
+    render(){
+        const { renderList, position } = this.state
+        return <div className="bigData_index" ref={this.box}  >
+            {
+                renderList.map((item,index)=><Circle  position={ position } key={index}  /> )
+            }
+        </div>
+    }
+}
+/* 控制展示Index */
+export default ()=>{
+    const [show, setShow] = useState(false)
+    const [ btnShow, setBtnShow ] = useState(true)
+    const handleClick=()=>{
+        setBtnShow(false)
+        setTimeout(()=>{ setShow(true) },[])
+    } 
+    return <div>
+        { btnShow &&  <button onClick={handleClick} >show</button> } 
+        { show && <Index />  }
+    </div>
+}
+```
+* 父组件在 componentDidMount 模拟数据交互，用ref获取真实的DOM元素容器的宽高，渲染列表。
+
+
+效果：
+
+
+![2.gif](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/185fabe653144598a892332eaa812ecd~tplv-k3u1fbpfcp-watermark.image)
+
+可以直观看到这种方式渲染的速度特别慢，而且是一次性突然出现，体验不好，所以接下来要用时间分片做性能优化。
+
+```js
+// TODO: 改造方案
+class Index extends React.Component{
+    state={
+        dataList:[],    //数据源列表
+        renderList:[],  //渲染列表
+        position:{ width:0,height:0 }, // 位置信息
+        eachRenderNum:500,  // 每次渲染数量
+    }
+    box = React.createRef() 
+    componentDidMount(){
+        const { offsetHeight , offsetWidth } = this.box.current
+        const originList = new Array(20000).fill(1)
+        const times = Math.ceil(originList.length / this.state.eachRenderNum) /* 计算需要渲染此次数*/
+        let index = 1
+        this.setState({
+            dataList:originList,
+            position: { height:offsetHeight,width:offsetWidth },
+        },()=>{
+            this.toRenderList(index,times)
+        })
+    }
+    toRenderList=(index,times)=>{
+        if(index > times) return /* 如果渲染完成，那么退出 */
+        const { renderList } = this.state
+        renderList.push(this.renderNewList(index)) /* 通过缓存element把所有渲染完成的list缓存下来，下一次更新，直接跳过渲染 */
+        this.setState({
+            renderList,
+        })
+        requestIdleCallback(()=>{ /* 用 requestIdleCallback 代替 setTimeout 浏览器空闲执行下一批渲染 */
+            this.toRenderList(++index,times)
+        })
+    }
+    renderNewList(index){  /* 得到最新的渲染列表 */
+        const { dataList , position , eachRenderNum } = this.state
+        const list = dataList.slice((index-1) * eachRenderNum , index * eachRenderNum  )
+        return <React.Fragment key={index} >
+            {  
+                list.map((item,index) => <Circle key={index} position={position}  />)
+            }
+        </React.Fragment>
+    }
+    render(){
+         return <div className="bigData_index" ref={this.box}  >
+            { this.state.renderList }
+         </div>
+    }
+}
+
+```
+* 第一步：计算时间片，首先用 eachRenderNum 代表一次渲染多少个，那么除以总数据就能得到渲染多少次。
+* 第二步：开始渲染数据，通过 `index>times` 判断渲染完成，如果没有渲染完成，那么通过 requestIdleCallback 代替 setTimeout 浏览器空闲执行下一帧渲染。
+* 第三步：通过 renderList 把已经渲染的 element 缓存起来，渲染控制章节讲过，这种方式可以直接跳过下一次的渲染。实际每一次渲染的数量仅仅为 demo 中设置的 500 个。
+
+完美达到效果（这个是 gif 形式，会出现丢帧的情况，在真实场景，体验感更好）：
+
+
+![3.gif](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/31b871920902477380879805a066f61d~tplv-k3u1fbpfcp-watermark.image)
+
+## 实践二 虚拟列表
+
+虚拟列表是一种长列表的解决方案，现在滑动加载是 M 端和 PC 端一种常见的数据请求加载场景，这种数据交互有一个问题就是，如果没经过处理，加载完成后数据展示的元素，都显示在页面上，如果伴随着数据量越来越大，会使页面中的 DOM 元素越来越多，即便是像 React 可以良好运用 diff 来复用老节点，但也不能保证大量的 diff 带来的性能开销。所以虚拟列表的出现，就是解决大量 DOM 存在，带来的性能问题。
+
+何为虚拟列表，就是在长列表滚动过程中，只有视图区域显示的是真实 DOM ，滚动过程中，不断截取视图的有效区域，让人视觉上感觉列表是在滚动。达到无限滚动的效果。
+
+
+虚拟列表划分可以分为三个区域：视图区 + 缓冲区 + 虚拟区。
+
+![1.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e0a19faafac24c3a9be8c49e7f85c259~tplv-k3u1fbpfcp-watermark.image)
+
+* 视图区：视图区就是能够直观看到的列表区，此时的元素都是真实的 DOM 元素。
+* 缓冲区：缓冲区是为了防止用户上滑或者下滑过程中，出现白屏等效果。（缓冲区和视图区为渲染真实的 DOM ）
+* 虚拟区：对于用户看不见的区域（除了缓冲区），剩下的区域，不需要渲染真实的 DOM 元素。虚拟列表就是通过这个方式来减少页面上 DOM 元素的数量。
+
+具体实现思路。
+* 通过 useRef 获取元素，缓存变量。
+* useEffect 初始化计算容器的高度。截取初始化列表长度。这里需要 div 占位，撑起滚动条。
+* 通过监听滚动容器的 onScroll 事件，根据 scrollTop 来计算渲染区域向上偏移量, 这里需要注意的是，当用户向下滑动的时候，为了渲染区域，能在可视区域内，可视区域要向上滚动；当用户向上滑动的时候，可视区域要向下滚动。
+* 通过重新计算 end 和 start 来重新渲染列表。
+
+
+```js
+function VirtualList(){
+   const [ dataList,setDataList ] = React.useState([])  /* 保存数据源 */
+   const [ position , setPosition ] = React.useState([0,0]) /* 截取缓冲区 + 视图区索引 */
+   const scroll = React.useRef(null)  /* 获取scroll元素 */
+   const box = React.useRef(null)     /* 获取元素用于容器高度 */
+   const context = React.useRef(null) /* 用于移动视图区域，形成滑动效果。 */
+   const scrollInfo = React.useRef({ 
+       height:500,     /* 容器高度 */
+       bufferCount:8,  /* 缓冲区个数 */
+       itemHeight:60,  /* 每一个item高度 */
+       renderCount:0,  /* 渲染区个数 */ 
+    }) 
+    React.useEffect(()=>{
+        const height = box.current.offsetHeight
+        const { itemHeight , bufferCount } = scrollInfo.current
+        const renderCount =  Math.ceil(height / itemHeight) + bufferCount
+        scrollInfo.current = { renderCount,height,bufferCount,itemHeight }
+        const dataList = new Array(10000).fill(1).map((item,index)=> index + 1 )
+        setDataList(dataList)
+        setPosition([0,renderCount])
+    },[])
+   const handleScroll = () => {
+       const { scrollTop } = scroll.current
+       const { itemHeight , renderCount } = scrollInfo.current
+       const currentOffset = scrollTop - (scrollTop % itemHeight) 
+       const start = Math.floor(scrollTop / itemHeight)
+       context.current.style.transform = `translate3d(0, ${currentOffset}px, 0)` /* 偏移，造成下滑效果 */
+       const end = Math.floor(scrollTop / itemHeight + renderCount + 1)
+       if(end !== position[1] || start !== position[0]  ){ /* 如果render内容发生改变，那么截取  */
+            setPosition([ start , end ])
+       }
+   } 
+   const { itemHeight , height } = scrollInfo.current
+   const [ start ,end ] = position
+   const renderList = dataList.slice(start,end) /* 渲染区间 */
+   console.log('渲染区间',position)
+   return <div className="list_box" ref={box} >
+     <div className="scroll_box" style={{ height: height + 'px'  }}  onScroll={ handleScroll } ref={scroll}  >
+        <div className="scroll_hold" style={{ height: `${dataList.length * itemHeight}px` }}  />
+        <div className="context" ref={context}> 
+            {
+               renderList.map((item,index)=> <div className="list" key={index} >  {item + '' } Item </div>)
+            }  
+        </div>
+     </div>
+   </div>
+}
+```
+**完美达到效果：**
+
+
+![4.gif](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1ea56dfce19c4b7998008d0ac099b24f~tplv-k3u1fbpfcp-watermark.image)
+
+
+# 总结
+
+对于海量的数据处理，在实际项目中，可能会更加复杂，本章节给了两个海量数据场景的处理方案，时间分片（ Time slicing ）和虚拟列表（ Virtual list ），如果真实项目中有这个场景，希望能给大家一个处理思路。纸上得来终觉浅，绝知此事须躬行。
+
