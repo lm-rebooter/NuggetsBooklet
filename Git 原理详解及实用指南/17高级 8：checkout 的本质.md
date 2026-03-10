@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 高级 8：checkout 的本质
 
 在前面的 `branch` 的部分，我说到 `checkout` 可以用来切换 `branch`：

@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 高级 7：reset 的本质——不止可以撤销提交
 
 前面讲到，在最新的 `commit` 写错时，可以用 `reset --hard` 来把 `commit` 撤销：
