@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 2.2 在 npm script 中使用变量
 
 npm 为加高效的执行 npm script 做了大量的优化，[创建并运行 npm script 命令](https://juejin.im/book/5a1212bc51882531ea64df07/section/5a1213d4f265da4335625b4a) 里面讲到的环境变量特性能让我们在 npm script 中直接调用依赖包里的可执行文件，更强大的是，npm 还提供了 `$PATH` 之外的更多的变量，比如当前正在执行的命令、包的名称和版本号、日志输出的级别等。

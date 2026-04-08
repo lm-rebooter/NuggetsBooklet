@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 基于 Matplotlib 实现数据可视化
 
 上节我们介绍了 Pandas 的基本操作，这节我们使用 Pandas 结合 Matplotlib 对数据进行可视化展示。首先我们把数据加载到 Pandas，现在假设你已经拥有了数据，如果没有数据可以下载我给你准备的[JSON文件](https://github.com/pythonzhichan/weixincrawler/blob/master/post.csv)。

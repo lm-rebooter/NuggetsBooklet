@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>本小节我们开启响应式原理的篇章，在开启这个篇章之前，我们先来了解一下 <code>Vue3</code> 中一个基于 <code>Composition API</code> 响应式应用的例子是如何编写的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    {{ state.msg }} {{ count }}</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">import</span> { reactive, ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        <span class="hljs-attr">msg</span>: <span class="hljs-string">'hello world'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      </span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">const</span> count = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      </span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">const</span> <span class="hljs-title function_">changeMsg</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        state.<span class="hljs-property">msg</span> = <span class="hljs-string">'world hello'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="19"></span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        state,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        count,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        changeMsg,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="27"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>此时我们通过 <code>reactive API</code> 或者 <code>ref API</code> 来定义响应式对象。</p>
+<p>对于 <code>reactive API</code> 而言，核心是用来定义集合类型的数据，比如：普通对象、数组和&nbsp;<code>Map</code>、<code>Set</code>。</p>
+<p>对于 <code>ref API</code> 而言，可以用来对 <code>string</code>、<code>number</code>、<code>boolean</code> 这些原始类型数据进行响应式定义。</p>
+<p>关于二者使用上的更多区别和差异，小伙伴们可以直接参见 <code>Vue 3</code> 官网上<a href="https://link.juejin.cn?target=https%3A%2F%2Fcn.vuejs.org%2Fguide%2Fessentials%2Freactivity-fundamentals.html" target="_blank" rel="nofollow noopener noreferrer" title="https://cn.vuejs.org/guide/essentials/reactivity-fundamentals.html" ref="nofollow noopener noreferrer">《响应式基础》</a>这个章节中的介绍。对于二者的核心实现原理，其实都是依托于 <code>Vue 3</code> 的响应式基础，本小节将以 <code>reactive API</code> 作为切入点，核心分析 <code>Vue 3</code> 的响应式原理。</p>
+<h2 data-id="heading-1">Reactive</h2>
+<p>找到源码中关于 <code>reactive</code> 部分的定义：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">reactive</span>(<span class="hljs-params">target: object</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 不需要对 readonly 的对象进行响应式</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isReadonly</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span> target</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">createReactiveObject</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    target,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-literal">false</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    mutableHandlers,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    mutableCollectionHandlers,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    reactiveMap</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+</code></pre>
+<p>这个函数核心也就是通过 <code>createReactiveObject</code> 把我们传入的 <code>target</code> 变成响应式的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createReactiveObject</span>(<span class="hljs-params">target, isReadonly, baseHandlers, collectionHandlers, proxyMap</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 如果目标不是对象，则直接返回</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isObject</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span> target</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 已经是一个响应式对象了，也直接返回</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    target[<span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">RAW</span>] &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    !(isReadonly &amp;&amp; target[<span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_REACTIVE</span>])</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">return</span> target</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-comment">// proxyMap 中已经存入过 target，直接返回</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">const</span> existingProxy = proxyMap.<span class="hljs-title function_">get</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">if</span> (existingProxy) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">return</span> existingProxy</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-comment">// 只有特定类型的值才能被 observe.</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-keyword">const</span> targetType = <span class="hljs-title function_">getTargetType</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-keyword">if</span> (targetType === <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">INVALID</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-keyword">return</span> target</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// 通过 proxy 来构造一个响应式对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-keyword">const</span> proxy = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Proxy</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    target,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    targetType === <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">COLLECTION</span> ? collectionHandlers : baseHandlers</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-comment">// 缓存 target proxy</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">  proxyMap.<span class="hljs-title function_">set</span>(target, proxy)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  <span class="hljs-keyword">return</span> proxy</span>
+<span class="code-block-extension-codeLine" data-line-num="31">}</span>
+</code></pre>
+<p>上述整个核心流程就是首先经过一系列判断，判断符合要求的 <code>target</code> 才能被响应式，整理的判断包括了<code>target</code> 的类型、是否是响应式的、是否已经被定义过了，以及是否是符合要求的类型这些步骤，最后执行的是 <code>new Proxy()</code> 这样的一个响应式代理 <code>API</code>。一起来看看这个 <code>API</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">  <span class="hljs-keyword">const</span> proxy = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Proxy</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="2">    target,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    targetType === <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">COLLECTION</span> ? collectionHandlers : baseHandlers</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  )</span>
+</code></pre>
+<p><code>Proxy</code> 根据 <code>targetType</code> 来确定执行的是 <code>collectionHandlers</code> 还是 <code>baseHandlers</code>。那 <code>targetType</code> 是什么时候确定的呢？可以看一下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> targetType = <span class="hljs-title function_">getTargetType</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getTargetType</span>(<span class="hljs-params">value</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">return</span> value[<span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">SKIP</span>] || !<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">isExtensible</span>(value)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    ? <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">INVALID</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    : <span class="hljs-title function_">targetTypeMap</span>(<span class="hljs-title function_">toRawType</span>(value))</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+<span class="code-block-extension-codeLine" data-line-num="8"></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">toRawType</span> = (<span class="hljs-params">value</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// toTypeString 转换成字符串的方式，比如 "[object RawType]"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">toTypeString</span>(value).<span class="hljs-title function_">slice</span>(<span class="hljs-number">8</span>, -<span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+<span class="code-block-extension-codeLine" data-line-num="13"></span>
+<span class="code-block-extension-codeLine" data-line-num="14"><span class="hljs-keyword">function</span> <span class="hljs-title function_">targetTypeMap</span>(<span class="hljs-params">rawType</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">switch</span> (rawType) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">case</span> <span class="hljs-string">'Object'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-keyword">case</span> <span class="hljs-string">'Array'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-keyword">return</span> <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">COMMON</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-keyword">case</span> <span class="hljs-string">'Map'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-keyword">case</span> <span class="hljs-string">'Set'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-keyword">case</span> <span class="hljs-string">'WeakMap'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-keyword">case</span> <span class="hljs-string">'WeakSet'</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">return</span> <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">COLLECTION</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-keyword">return</span> <span class="hljs-title class_">TargetType</span>.<span class="hljs-property">INVALID</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">}</span>
+</code></pre>
+<p>因为 <code>target</code> 传入进来的是一个 <code>Object</code>，所以 <code>toRawType(value)</code> 得到的值是 <code>Object</code>。所以这里的 <code>targetType</code> 的值等于 <code>TargetType.COMMON</code> 也就是执行了 <code>baseHandlers</code> 。而当我们的 <code>reactive(target)</code> 中的 <code>target</code> 是个 <code>WeakMap</code> 或者 <code>WeakSet</code> 时，那么执行的就是 <code>collectionHandlers</code> 了。</p>
+<p>接下来看一下 <code>baseHandlers</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">arduino</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-arduino code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-type">const</span> mutableHandlers = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  get,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  set,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  deleteProperty,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  has,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  ownKeys</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p>这里就是 <code>Proxy</code> 中的定义 <code>handler</code> 的一些属性。</p>
+<ul>
+<li>get：属性读取操作的捕捉器。</li>
+<li>set：属性设置操作的捕捉器。</li>
+<li>deleteProperty：<a href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FOperators%2Fdelete" target="_blank" rel="nofollow noopener noreferrer" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/delete" ref="nofollow noopener noreferrer">delete</a>&nbsp;操作符的捕捉器。</li>
+<li>has：<a href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FOperators%2Fin" target="_blank" rel="nofollow noopener noreferrer" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/in" ref="nofollow noopener noreferrer">in</a>&nbsp;操作符的捕捉器。</li>
+<li>ownKeys：<a href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FObject%2FgetOwnPropertyNames" target="_blank" rel="nofollow noopener noreferrer" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames" ref="nofollow noopener noreferrer">Object.getOwnPropertyNames</a>&nbsp;方法和&nbsp;<a href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FObject%2FgetOwnPropertySymbols" target="_blank" rel="nofollow noopener noreferrer" title="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertySymbols" ref="nofollow noopener noreferrer">Object.getOwnPropertySymbols</a>&nbsp;方法的捕捉器。</li>
+</ul>
+<p>而关于响应式核心的部分就在 <code>set</code> 和 <code>get</code> 中，我们一起来看一下二者的定义实现。</p>
+<h3 data-id="heading-2">1. get</h3>
+<p>其中 <code>get</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> get = <span class="hljs-comment">/*#__PURE__*/</span> <span class="hljs-title function_">createGetter</span>()</span>
+</code></pre>
+<p>可以看到核心其实通过 <code>createGetter</code> 来实现的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createGetter</span>(<span class="hljs-params">isReadonly = <span class="hljs-literal">false</span>, shallow = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">get</span>(<span class="hljs-params">target: Target, key: string | symbol, receiver: object</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// 对 ReactiveFlags 的处理部分</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (key === <span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_REACTIVE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-keyword">return</span> !isReadonly</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (key === <span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_READONLY</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">return</span> isReadonly</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (key === <span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_SHALLOW</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">return</span> shallow</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      key === <span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">RAW</span> &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      receiver ===</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        (isReadonly</span>
+<span class="code-block-extension-codeLine" data-line-num="14">          ? shallow</span>
+<span class="code-block-extension-codeLine" data-line-num="15">            ? shallowReadonlyMap</span>
+<span class="code-block-extension-codeLine" data-line-num="16">            : readonlyMap</span>
+<span class="code-block-extension-codeLine" data-line-num="17">          : shallow</span>
+<span class="code-block-extension-codeLine" data-line-num="18">          ? shallowReactiveMap</span>
+<span class="code-block-extension-codeLine" data-line-num="19">          : reactiveMap</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        ).<span class="hljs-title function_">get</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-keyword">return</span> target</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    </span>
+<span class="code-block-extension-codeLine" data-line-num="25">    <span class="hljs-keyword">const</span> targetIsArray = <span class="hljs-title function_">isArray</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-keyword">if</span> (!isReadonly) {</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      <span class="hljs-comment">// 数组的特殊方法处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-keyword">if</span> (targetIsArray &amp;&amp; <span class="hljs-title function_">hasOwn</span>(arrayInstrumentations, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">get</span>(arrayInstrumentations, key, receiver)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-comment">// 对象 hasOwnProperty 方法处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-keyword">if</span> (key === <span class="hljs-string">'hasOwnProperty'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">        <span class="hljs-keyword">return</span> hasOwnProperty</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    <span class="hljs-comment">// 取值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-keyword">const</span> res = <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">get</span>(target, key, receiver)</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    </span>
+<span class="code-block-extension-codeLine" data-line-num="39">    <span class="hljs-comment">// Symbol Key 不做依赖收集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSymbol</span>(key) ? builtInSymbols.<span class="hljs-title function_">has</span>(key) : <span class="hljs-title function_">isNonTrackableKeys</span>(key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="42">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="43">    </span>
+<span class="code-block-extension-codeLine" data-line-num="44">    <span class="hljs-comment">// 进行依赖收集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-keyword">if</span> (!isReadonly) {</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-title function_">track</span>(target, <span class="hljs-title class_">TrackOpTypes</span>.<span class="hljs-property">GET</span>, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="47">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="48">    </span>
+<span class="code-block-extension-codeLine" data-line-num="49">    <span class="hljs-comment">// 如果是浅层响应，那么直接返回，不需要递归了</span></span>
+<span class="code-block-extension-codeLine" data-line-num="50">    <span class="hljs-keyword">if</span> (shallow) {</span>
+<span class="code-block-extension-codeLine" data-line-num="51">      <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="52">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="53">    </span>
+<span class="code-block-extension-codeLine" data-line-num="54">    </span>
+<span class="code-block-extension-codeLine" data-line-num="55">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isRef</span>(res)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-comment">// 跳过数组、整数 key 的展开</span></span>
+<span class="code-block-extension-codeLine" data-line-num="57">      <span class="hljs-keyword">return</span> targetIsArray &amp;&amp; <span class="hljs-title function_">isIntegerKey</span>(key) ? res : res.<span class="hljs-property">value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="58">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="59"></span>
+<span class="code-block-extension-codeLine" data-line-num="60">    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isObject</span>(res)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="61">      <span class="hljs-comment">// 如果 isReadonly 是 true，那么直接返回 readonly(res)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="62">      <span class="hljs-comment">// 如果 res 是个对象或者数组类型，则递归执行 reactive 函数把 res 变成响应式</span></span>
+<span class="code-block-extension-codeLine" data-line-num="63">      <span class="hljs-keyword">return</span> isReadonly ? <span class="hljs-title function_">readonly</span>(res) : <span class="hljs-title function_">reactive</span>(res)</span>
+<span class="code-block-extension-codeLine" data-line-num="64">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="65"></span>
+<span class="code-block-extension-codeLine" data-line-num="66">    <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="67">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="68">}</span>
+</code></pre>
+<p>因为调用 <code>createGetter</code> 时，默认参数 <code>isReadonly = false</code>，所以这里可以先忽略 <code>isReadonly</code> 的部分。整体而言，该函数还是比较通俗易懂的，首先对 <code>key</code> 属于 <code>ReactiveFlags</code> 的部分做了特殊处理，这也是为什么在 <code>createReactiveObject</code> 函数中判断响应式对象是否存在 <code>ReactiveFlags.RAW</code> 属性，如果存在就返回这个响应式对象本身。</p>
+<p>然后当我们的 <code>target</code> 是数组，且 <code>key</code> 值存在 <code>arrayInstrumentations</code> 中时，返回 <code>arrayInstrumentations</code> 中对应的 <code>key</code> 值。再来看看 <code>arrayInstrumentations</code> 是个什么：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> arrayInstrumentations = <span class="hljs-title function_">createArrayInstrumentations</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createArrayInstrumentations</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> instrumentations = {};</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  ([<span class="hljs-string">'includes'</span>, <span class="hljs-string">'indexOf'</span>, <span class="hljs-string">'lastIndexOf'</span>]).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    instrumentations[key] = <span class="hljs-keyword">function</span> (<span class="hljs-params"><span class="hljs-variable language_">this</span>, ...args</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// toRaw 可以把响应式对象转成原始数据</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">const</span> arr = <span class="hljs-title function_">toRaw</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      </span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>, l = <span class="hljs-variable language_">this</span>.<span class="hljs-property">length</span>; i &lt; l; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        <span class="hljs-comment">// 对数组的每一项进行依赖收集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">        <span class="hljs-title function_">track</span>(arr, <span class="hljs-title class_">TrackOpTypes</span>.<span class="hljs-property">GET</span>, i + <span class="hljs-string">''</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 先尝试用参数本身，可能是响应式数据</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">const</span> res = arr[key](...args)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">if</span> (res === -<span class="hljs-number">1</span> || res === <span class="hljs-literal">false</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        <span class="hljs-comment">// 如果失败，再尝试把参数转成原始数据</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">        <span class="hljs-keyword">return</span> arr[key](...args.<span class="hljs-title function_">map</span>(toRaw))</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  })</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-comment">// instrument length-altering mutation methods to avoid length being tracked</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-comment">// which leads to infinite loops in some cases (#2137)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">  ;([<span class="hljs-string">'push'</span>, <span class="hljs-string">'pop'</span>, <span class="hljs-string">'shift'</span>, <span class="hljs-string">'unshift'</span>, <span class="hljs-string">'splice'</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    instrumentations[key] = <span class="hljs-keyword">function</span> (<span class="hljs-params"><span class="hljs-variable language_">this</span>: unknown[], ...args: unknown[]</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-title function_">pauseTracking</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="29">      <span class="hljs-keyword">const</span> res = (<span class="hljs-title function_">toRaw</span>(<span class="hljs-variable language_">this</span>) <span class="hljs-keyword">as</span> any)[key].<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>, args)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-title function_">resetTracking</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  })</span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-keyword">return</span> instrumentations</span>
+<span class="code-block-extension-codeLine" data-line-num="35">}</span>
+</code></pre>
+<p>当<code>reactive</code>函数传入数组时，<code>get</code>捕获器会先在<code>arrayInstrumentations</code>对象上查找，如果找不到，再在代理对象<code>target</code>上查找。<code>arrayInstrumentations</code>对象会重写两类函数，一类是查询类函数: <code>includes</code>、 <code>indexOf</code>、 <code>lastIndexOf</code>，代表对数组的读取操作。在这些函数中会执行<code>track</code>函数，对数组上的索引和<code>length</code>属性进行追踪。</p>
+<p>一类是修改类函数<code>push</code>、 <code>pop</code>、 <code>shift</code>、 <code>unshift</code>、 <code>splice</code>，代表对数组的修改操作，在这些函数中暂停了全局的追踪功能，防止某些情况下导致死循环。关于这里的一些说明也可以参见 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvuejs%2Fcore%2Fissues%2F2137" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vuejs/core/issues/2137" ref="nofollow noopener noreferrer">Vue issue</a>。</p>
+<p>再回过头看 <code>createGetter</code> 中，接下来的操作就是通过 <code>track(target, TrackOpTypes.GET, key)</code> 进行依赖收集，我们再来一起看一下 <code>track</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 是否应该收集依赖</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">let</span> shouldTrack = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 当前激活的 effect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">let</span> activeEffect</span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 存放所有 reactive 传入的 receiver 容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">const</span> targetMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WeakMap</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">track</span>(<span class="hljs-params">target, type, key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">if</span> (shouldTrack &amp;&amp; activeEffect) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">let</span> depsMap = targetMap.<span class="hljs-title function_">get</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (!depsMap) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      targetMap.<span class="hljs-title function_">set</span>(target, (depsMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>()))</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-keyword">let</span> dep = depsMap.<span class="hljs-title function_">get</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">if</span> (!dep) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      depsMap.<span class="hljs-title function_">set</span>(key, (dep = <span class="hljs-title function_">createDep</span>()))</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="18"></span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-title function_">trackEffects</span>(dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+<span class="code-block-extension-codeLine" data-line-num="22"></span>
+<span class="code-block-extension-codeLine" data-line-num="23"></span>
+<span class="code-block-extension-codeLine" data-line-num="24"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">trackEffects</span>(<span class="hljs-params"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">  dep,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  debuggerEventExtraInfo</span>
+<span class="code-block-extension-codeLine" data-line-num="27">) {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">  <span class="hljs-keyword">if</span> (shouldTrack) {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">    <span class="hljs-comment">// 把 activeEffect 添加到 dep 中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    dep.<span class="hljs-title function_">add</span>(activeEffect!)</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    activeEffect!.<span class="hljs-property">deps</span>.<span class="hljs-title function_">push</span>(dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="34">}</span>
+<span class="code-block-extension-codeLine" data-line-num="35"></span>
+</code></pre>
+<p>上面函数有点绕，其实核心就是在生成一个数据结构，什么样的数据结构呢？我们来画个图看看：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe1ad474b1f154b8dbc1211ce2c82aa34~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>我们创建了全局的 <code>targetMap</code> ，它的键是 <code>target</code>，值是 <code>depsMap</code>；这个 <code>depsMap</code> 的键是 <code>target</code> 的 <code>key</code>，值是 <code>dep</code> 集合，<code>dep</code> 集合中存储的是依赖的副作用函数 <code>effect</code>。</p>
+<p>另外，关于 <code>trackEffects</code> 的实现细节，我们后面的小节再详细介绍。</p>
+<blockquote>
+<p>注意到 <code>Proxy</code> 在访问对象属性时才递归执行劫持对象属性，相比 <code>Object.defineProperty</code> 在定义时就遍历把所有层级的对象设置成响应式而言，在性能上有所提升。</p>
+</blockquote>
+<h3 data-id="heading-3">2. set</h3>
+<p>上面说完了 <code>get</code> 的流程，我们了解了依赖收集后的数据结构存储在了 <code>targetMap</code> 中，接下来我们接着看 <code>set</code> 的过程：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> set = <span class="hljs-comment">/*#__PURE__*/</span> <span class="hljs-title function_">createSetter</span>()</span>
+</code></pre>
+<p>可以看到核心其实通过 <code>createSetter</code> 来实现的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSetter</span>(<span class="hljs-params">shallow = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">set</span>(<span class="hljs-params">target, key, value, receiver</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">let</span> oldValue = target[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 不是浅层响应式，这里默认是 false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (!shallow) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// 不是浅层响应式对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isShallow</span>(value) &amp;&amp; !<span class="hljs-title function_">isReadonly</span>(value)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">        oldValue = <span class="hljs-title function_">toRaw</span>(oldValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        value = <span class="hljs-title function_">toRaw</span>(value)</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// 在浅模式中，对象被设置为原始值，而不管是否是响应式</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15"></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">const</span> hadKey =</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-title function_">isArray</span>(target) &amp;&amp; <span class="hljs-title function_">isIntegerKey</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        ? <span class="hljs-title class_">Number</span>(key) &lt; target.<span class="hljs-property">length</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">        : <span class="hljs-title function_">hasOwn</span>(target, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-keyword">const</span> result = <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">set</span>(target, key, value, receiver)</span>
+<span class="code-block-extension-codeLine" data-line-num="21">     <span class="hljs-comment">// 如果目标的原型链也是一个 proxy，通过 Reflect.set 修改原型链上的属性会再次触发 setter，这种情况下就没必要触发两次 trigger 了</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-keyword">if</span> (target === <span class="hljs-title function_">toRaw</span>(receiver)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">if</span> (!hadKey) {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-title function_">trigger</span>(target, <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">ADD</span>, key, value)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">hasChanged</span>(value, oldValue)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-title function_">trigger</span>(target, <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">SET</span>, key, value, oldValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-keyword">return</span> result</span>
+<span class="code-block-extension-codeLine" data-line-num="30">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="31">}</span>
+</code></pre>
+<p>可以看到 <code>set</code> 的核心逻辑是先根据是否是浅层响应式来确定原始值和新值，这里默认不是浅层的响应式，所以会先把原始值和新值进行 <code>toRaw</code> 转换，然后通过 <code>Reflect.set</code> 设置值，最后通过 <code>trigger</code> 函数派发通知 ，并依据 <code>key</code> 是否存在于 <code>target</code> 上来确定通知类型是 <code>add</code>（新增） 还是 <code>set</code>（修改）。</p>
+<p>接下来核心就是 <code>trigger</code> 的逻辑，是如何实现触发响应的:</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">trigger</span>(<span class="hljs-params">target,type,key,newValue,oldValue,oldTarget</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> depsMap = targetMap.<span class="hljs-title function_">get</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (!depsMap) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">let</span> <span class="hljs-attr">deps</span>: (<span class="hljs-title class_">Dep</span> | <span class="hljs-literal">undefined</span>)[] = []</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">if</span> (type === <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">CLEAR</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    deps = [...depsMap.<span class="hljs-title function_">values</span>()]</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (key === <span class="hljs-string">'length'</span> &amp;&amp; <span class="hljs-title function_">isArray</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    depsMap.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">dep, key</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">if</span> (key === <span class="hljs-string">'length'</span> || key &gt;= <span class="hljs-title function_">toNumber</span>(newValue)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        deps.<span class="hljs-title function_">push</span>(dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    })</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">if</span> (key !== <span class="hljs-keyword">void</span> <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(key))</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="19"></span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-keyword">switch</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-keyword">case</span> <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">ADD</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isArray</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">          deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">ITERATE_KEY</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="24">          <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isMap</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">            deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">MAP_KEY_ITERATE_KEY</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="26">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isIntegerKey</span>(key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="28">          deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-string">'length'</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="30">        <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">case</span> <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">DELETE</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isArray</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">          deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">ITERATE_KEY</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="34">          <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isMap</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">            deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">MAP_KEY_ITERATE_KEY</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="36">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="37">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="38">        <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">      <span class="hljs-keyword">case</span> <span class="hljs-title class_">TriggerOpTypes</span>.<span class="hljs-property">SET</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="40">        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isMap</span>(target)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">          deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">ITERATE_KEY</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="42">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="43">        <span class="hljs-keyword">break</span></span>
+<span class="code-block-extension-codeLine" data-line-num="44">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="46"></span>
+<span class="code-block-extension-codeLine" data-line-num="47">  <span class="hljs-keyword">if</span> (deps.<span class="hljs-property">length</span> === <span class="hljs-number">1</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="48">    <span class="hljs-keyword">if</span> (deps[<span class="hljs-number">0</span>]) {</span>
+<span class="code-block-extension-codeLine" data-line-num="49">      <span class="hljs-title function_">triggerEffects</span>(deps[<span class="hljs-number">0</span>])</span>
+<span class="code-block-extension-codeLine" data-line-num="50">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="51">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="52">    <span class="hljs-keyword">const</span> <span class="hljs-attr">effects</span>: <span class="hljs-title class_">ReactiveEffect</span>[] = []</span>
+<span class="code-block-extension-codeLine" data-line-num="53">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> dep <span class="hljs-keyword">of</span> deps) {</span>
+<span class="code-block-extension-codeLine" data-line-num="54">      <span class="hljs-keyword">if</span> (dep) {</span>
+<span class="code-block-extension-codeLine" data-line-num="55">        effects.<span class="hljs-title function_">push</span>(...dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="56">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="57">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="58">    <span class="hljs-title function_">triggerEffects</span>(<span class="hljs-title function_">createDep</span>(effects))</span>
+<span class="code-block-extension-codeLine" data-line-num="59">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="60">}</span>
+</code></pre>
+<p>内容有点多，看起来有点头大，我们来简化一下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">trigger</span>(<span class="hljs-params">target, type, key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> dep = targetMap.<span class="hljs-title function_">get</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  dep.<span class="hljs-title function_">get</span>(key).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">effect</span> =&gt;</span> effect.<span class="hljs-title function_">run</span>())</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<p>核心其实就是通过 <code>target</code> 找到 <code>targetMap</code> 中的 <code>dep</code>，再根据 <code>key</code> 来找到所有的副作用函数 <code>effect</code> 遍历执行。副作用函数就是上面 <code>get</code> 收集起来的。</p>
+<p>这里有个有意思的地方是对数组的操作监听，我们来看一段代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>([]);</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`state: <span class="hljs-subst">${state[<span class="hljs-number">1</span>]}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">});</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-comment">// 不会触发 effect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">state.<span class="hljs-title function_">push</span>(<span class="hljs-number">0</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="9"></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-comment">// 触发 effect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">state.<span class="hljs-title function_">push</span>(<span class="hljs-number">1</span>);</span>
+</code></pre>
+<p>上面的 <code>demo</code> 中，我们第一次访问了 <code>state[1]</code>， 所以，对 <code>state[1]</code> 进行了依赖收集，而第一次的 <code>state.push(0)</code> 设置的是 <code>state</code> 的第 <code>0</code> 个元素，所以不会触发响应式更新。而第二次的 <code>push</code> 触发了对 <code>state[1]</code> 的更新。这看起来很合理，没啥问题。那么我们再来看另外一个示例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 响应式数据</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>([])</span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-comment">// 观测变化</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'state map: '</span>, state.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item))</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7">state.<span class="hljs-title function_">push</span>(<span class="hljs-number">1</span>)</span>
+</code></pre>
+<p>按照常理来说，<code>state.map</code> 由于 <code>state</code> 是个空数组，所以理论上不会对数组的每一项进行访问，所以 <code>state.push(1)</code> 理论上也不会触发 <code>effect</code>。但实际上是会的，为什么呢？我们再来看一下一个 <code>proxy</code> 的 <code>demo</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> raw = []</span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> arr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Proxy</span>(raw, {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">get</span>(<span class="hljs-params">target, key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'get'</span>, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">get</span>(target, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-title function_">set</span>(<span class="hljs-params">target, key, value</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'set'</span>, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">set</span>(target, key, value)</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">})</span>
+<span class="code-block-extension-codeLine" data-line-num="12"></span>
+<span class="code-block-extension-codeLine" data-line-num="13">arr.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> v)</span>
+</code></pre>
+<p>可以看到打印的内容如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">get map</span>
+<span class="code-block-extension-codeLine" data-line-num="2">get length</span>
+<span class="code-block-extension-codeLine" data-line-num="3">get constructor</span>
+</code></pre>
+<p>可以看到 <code>map</code> 函数的操作，会触发对数组的 <code>length</code> 访问！这就有意思了，当访问数组 <code>length</code> 的时候，我们进行了对 <code>state</code> 的依赖收集，而数组的 <code>push</code> 操作也会改变 <code>length</code> 的长度，如果我们对 <code>length</code> 做监听，那么此时便会触发 <code>effect</code>！而 <code>Vue</code> 也是这么做的，也就是这段代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-string">'length'</span>))</span>
+</code></pre>
+<p>同理，对于 <code>for in, forEach, map ... </code> 都会触发 <code>length</code> 的依赖收集，从而 <code>pop, push, shift...</code> 等等操作都会触发响应式更新！</p>
+<p>另外，除了数组，对象的 <code>Object.keys</code> , <code>for ... of ...</code> 等等对象遍历操作都会触发响应式的依赖收集，这是因为 <code>Vue</code> 在定义 <code>Proxy</code> 的时候，定义了 <code>ownKeys</code> 这个函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">ownKeys</span>(<span class="hljs-params">target</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">track</span>(target, <span class="hljs-title class_">TrackOpTypes</span>.<span class="hljs-property">ITERATE</span>, <span class="hljs-title function_">isArray</span>(target) ? <span class="hljs-string">'length'</span> : <span class="hljs-variable constant_">ITERATE_KEY</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">ownKeys</span>(target)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<p><code>ownKeys</code> 函数内部执行了 <code>track</code> 进行了对 <code>Object</code> 的 <code>ITERATE_KEY</code> 的依赖收集。而在 <code>setter</code> 的时候，则对 <code>ITERATE_KEY</code> 进行了响应式触发：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">deps.<span class="hljs-title function_">push</span>(depsMap.<span class="hljs-title function_">get</span>(<span class="hljs-variable constant_">ITERATE_KEY</span>))</span>
+</code></pre>
+<h2 data-id="heading-4">总结</h2>
+<p>至此，我们讲完了对响应式的依赖收集和触发过程，但有个概览我们没有说清楚，那就是 <code>effect</code> 到底是什么，以及是如何产生的被收集到 <code>dep</code> 当中的。下一节我们将具体介绍。</p>
+<h2 data-id="heading-5">课外知识</h2>
+<p>这里细心的小伙伴，可能会注意到在上面的源码中出现了一个有意思的标识符 <code>/*#__PURE__*/</code>。要说这个东西，那就需要说到和这玩意相关的 <code>Tree-Shaking</code> 副作用了。我们知道 <code>Tree-Shaking</code> 可以删除一些 <code>DC（dead code）</code> 代码。但是对于一些有副作用的函数代码，却是无法进行很好的识别和删除，举个例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">foo</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">obj</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  obj?.<span class="hljs-property">a</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">}</span>
+</code></pre>
+<p>上述代码中，<code>foo</code> 函数本身是没有任何意义的，仅仅是对对象 <code>obj</code> 进行了属性 <code>a</code> 的读取操作，但是 <code>Tree-Shaking</code> 是无法删除该函数的，因为上述的属性读取操作可能会产生副作用，因为 <code>obj</code> 可能是一个响应式对象，我们可能对 <code>obj</code> 定了一个 <code>getter</code> 在 <code>getter</code> 中触发了很多不可预期的操作。</p>
+<p>如果我们确认 <code>foo</code> 函数是一个不会有副作用的<strong>纯净的函数</strong>，那么这个时候 <code>/*#__PURE__*/</code> 就派上用场了，其作用就是<strong>告诉打包器，对于&nbsp;<code>foo</code>&nbsp;函数的调用不会产生副作用，你可以放心地对其进行 <code>Tree-Shaking</code></strong>。</p>
+<p>另外，值得一提的是，在 <code>Vue 3</code> 源码中，包含了大量的 <code>/*#__PURE__*/</code> 标识符，可见 <code>Vue 3</code> 对源码体积的控制是多么的用心！</p></div>
+    </body>
+    </html>

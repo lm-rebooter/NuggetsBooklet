@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>从这一章开始我们将进入分析部分，这部分我们将用 Sparrow 去可视化数据，去解决下面提出的问题：</p>
+<ol>
+<li>揭露中世纪是一个压抑的时代。（展现时代和哲学家数量的相关性和异常值）。</li>
+<li>证明哲学家谈论的都是一些永恒的问题。（展现哲学家观点的特征）。</li>
+<li>哲学家，哲学问题和流派的数量关系是怎样的？（展现哲学家，哲学问题和流派的数量的特征）。</li>
+<li>哲学问题，哲学家和流派的数量随着时间是如何变化的？（探索哲学问题，哲学家，流派的数量的趋势，以及它们和时间的依赖关系）。</li>
+<li>有多少哲学家的寿命超过了40岁，其中年龄最大和最小分别是多少？（探索哲学家寿命的分布和极值）。</li>
+<li>每个哲学家回答了哪些问题？每个问题有哪些哲学家回答了？哲学家和问题之间的关系又如何？（探索哲学家和问题——网络数据之间的拓扑结构）。</li>
+<li>每个流派有哪些哲学家？哪个流派的哲学家比较多？哪个比较少？（探索哲学家和流派——网络数据之间的拓扑结构）。</li>
+<li>哲学的中心是怎么变化的的？（哲学家聚集地点——几何数据的形状）。</li>
+</ol>
+<p>一般来说，在真正设计我们的可视化之前，我们大概看一下数据，然后再确定可视化设计。了解数据最基础的手段就是通过表格，那么这一章我们就用表格先去了解一下 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world%2Fblob%2Fmain%2Fdata%2Fphilosophers.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world/blob/main/data/philosophers.json" ref="nofollow noopener noreferrer">philosophers.json</a> 这份数据。</p>
+<h2 data-id="heading-0">Sparrow</h2>
+<p>首先我们用我们的 Sparrow 去绘制表格，这里的思路就是用 Text 几何元素去绘制。具体的代码和效果如下：</p>
+<pre><code class="hljs language-js" lang="js">(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">// 获得数据</span>
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/d345d2d7-a35d-4d27-af92-4982b3e6b213.json"</span>
+  );
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+  
+  <span class="hljs-comment">// 行头</span>
+  <span class="hljs-keyword">const</span> keys = [<span class="hljs-string">"id"</span>, <span class="hljs-string">"name"</span>, <span class="hljs-string">"country"</span>, <span class="hljs-string">"lifespan"</span>, <span class="hljs-string">"points"</span>];
+  
+  <span class="hljs-keyword">return</span> sp.<span class="hljs-title function_">plot</span>({
+    data,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"layer"</span>,
+    <span class="hljs-attr">transforms</span>: [
+      <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> data.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span> i &lt; <span class="hljs-number">10</span>),
+      <span class="hljs-comment">// 预处理数据</span>
+      <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span>
+        data.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">{ lifespan, points, ...rest }</span>) =&gt;</span> ({
+          ...rest,
+          <span class="hljs-attr">lifespan</span>: <span class="hljs-string">`[<span class="hljs-subst">${lifespan[<span class="hljs-number">0</span>]}</span>, <span class="hljs-subst">${lifespan[<span class="hljs-number">1</span>]}</span>]`</span>,
+          <span class="hljs-attr">points</span>: <span class="hljs-string">`[<span class="hljs-subst">${points
+            .slice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)
+            .map((d) =&gt; d.slice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>) + <span class="hljs-string">"..."</span>)
+            .join(<span class="hljs-string">", "</span>)}</span>]`</span>,
+        })),
+      <span class="hljs-comment">// 转换成一系列文本</span>
+      <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> ths = [<span class="hljs-string">"index"</span>, ...keys].<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> ({
+          <span class="hljs-attr">index</span>: -<span class="hljs-number">1</span>,
+          key,
+          <span class="hljs-attr">value</span>: key,
+          <span class="hljs-attr">header</span>: <span class="hljs-literal">true</span>,
+        }));
+        <span class="hljs-keyword">const</span> tds = data.<span class="hljs-title function_">flatMap</span>(<span class="hljs-function">(<span class="hljs-params">d, i</span>) =&gt;</span> {
+          <span class="hljs-keyword">const</span> cell = keys.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> ({ <span class="hljs-attr">index</span>: i, key, <span class="hljs-attr">value</span>: d[key] }));
+          <span class="hljs-keyword">return</span> [...cell, { <span class="hljs-attr">index</span>: i, <span class="hljs-attr">key</span>: <span class="hljs-string">"index"</span>, <span class="hljs-attr">value</span>: i }];
+        });
+        <span class="hljs-keyword">return</span> [...ths, ...tds].<span class="hljs-title function_">reverse</span>();
+      },
+    ],
+    <span class="hljs-attr">scales</span>: {
+      <span class="hljs-attr">y</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"band"</span>, <span class="hljs-attr">padding</span>: <span class="hljs-number">0</span> },
+      <span class="hljs-attr">x</span>: { <span class="hljs-attr">domain</span>: [<span class="hljs-string">"index"</span>, ...keys], <span class="hljs-attr">padding</span>: <span class="hljs-number">0</span> },
+      <span class="hljs-attr">fontWeight</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"identity"</span> },
+    },
+    <span class="hljs-attr">width</span>: <span class="hljs-number">900</span>,
+    <span class="hljs-attr">guides</span>: {
+      <span class="hljs-attr">x</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> },
+      <span class="hljs-attr">y</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> },
+    },
+    <span class="hljs-attr">encodings</span>: {
+      <span class="hljs-attr">y</span>: <span class="hljs-string">"index"</span>,
+      <span class="hljs-attr">x</span>: <span class="hljs-string">"key"</span>,
+    },
+    <span class="hljs-attr">children</span>: [
+      { <span class="hljs-comment">// 背景的表格</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"cell"</span>,
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">fill</span>: <span class="hljs-string">"none"</span>,
+          <span class="hljs-attr">stroke</span>: <span class="hljs-string">"#eee"</span>,
+        },
+      },
+      { <span class="hljs-comment">// 前面的文字</span>
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"text"</span>,
+        <span class="hljs-attr">paddingTop</span>: <span class="hljs-number">10</span>,
+        <span class="hljs-attr">paddingLeft</span>: <span class="hljs-number">10</span>,
+        <span class="hljs-attr">paddingBottom</span>: <span class="hljs-number">10</span>,
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">text</span>: <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> (d.<span class="hljs-property">header</span> ? d.<span class="hljs-property">value</span>.<span class="hljs-title function_">toUpperCase</span>() : d.<span class="hljs-property">value</span>),
+          <span class="hljs-attr">fontWeight</span>: <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> (d.<span class="hljs-property">header</span> ? <span class="hljs-string">"bold"</span> : <span class="hljs-string">"normal"</span>),
+        },
+        <span class="hljs-attr">styles</span>: {
+          <span class="hljs-attr">dx</span>: <span class="hljs-string">"0.5em"</span>,
+          <span class="hljs-attr">dy</span>: <span class="hljs-string">"-1em"</span>,
+        },
+      },
+    ],
+  });
+})();
+</code></pre>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp826a4322fd0349f29a7e989e986f9e55~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image">
+可以发现 Sparrow 确实也可以绘制简单的表格，但是也存在不少问题：</p>
+<ul>
+<li>容器高度不能根据行数自适应，所以只能绘制少部分数据。</li>
+<li>不具有交互功能：不能改变每个行或者列的占比。</li>
+<li>绘制交叉表会比较麻烦，只适合绘制非嵌套的数据。</li>
+</ul>
+<p>那么接下来我们就试试 AntV 的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fs2.antv.vision%2Fzh" target="_blank" rel="nofollow noopener noreferrer" title="https://s2.antv.vision/zh" ref="nofollow noopener noreferrer">S2</a>，去绘制相同的数据，并且<strong>找出哲学家观点关键词的信息洞察</strong>。</p>
+<h2 data-id="heading-1">任务分析</h2>
+<p>我们先来分析一下“找出哲学家观点关键词的信息洞察” 这个任务。</p>
+<p>这个任务需要分析哲学和问题之间的关系，分成几步：</p>
+<ul>
+<li>罗列出哲学家信息和观点，然后将观点进行分词，获得所有关键词以及出现频次，获得要分析的数据。</li>
+<li>基于原生数据进行基本数据分析，确定数据间的基本关联关系。</li>
+<li>使用表可视化分析引擎 [S2] 绘制多维分析表。</li>
+<li>为了更加直观看出哲学家思考方向的差异性，我们使用不同背景颜色表现哲学家关键词的权重占比。</li>
+<li>获取数据洞察。</li>
+</ul>
+<h2 data-id="heading-2">可视分析</h2>
+<h3 data-id="heading-3">数据处理</h3>
+<p>首先我们处理一下 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fvisualize-sophie-world%2Fblob%2Fmain%2Fdata%2Fphilosophers.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/visualize-sophie-world/blob/main/data/philosophers.json" ref="nofollow noopener noreferrer">philosophers.json</a> 这里的数据，获取所有哲学家的观点列表，以及观点中的关键字所占词频，然后使用社区开源的&nbsp;<a href="https://link.juejin.cn?target=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fnodejieba" target="_blank" rel="nofollow noopener noreferrer" title="https://www.npmjs.com/package/nodejieba" ref="nofollow noopener noreferrer">nodejieba</a>&nbsp;进行关键词抽取。</p>
+<h3 data-id="heading-4">数据分析</h3>
+<p>在进行数据分析之前，我们先来了解几个简单的基本概念：</p>
+<ul>
+<li>度量（指标）：数值本身，比如价格、数量等。</li>
+<li>维度：可以理解为分析数据的角度，比如省份、类型等。</li>
+</ul>
+<p>通过观察一条样例数据，我们可以得到「国家」、「姓名」、「出生年份」、 「逝世年份」、 「观点」、「关键词」六个维度，以及关键词 「权重」这个指标。我们可以根据「国家」将哲学家进行分组，而每个哲学家提出的观点又可以按照 「关键词」进行拆分，每个关键词用 「权重」数据去描述。这样一来我们就可以按照以下看数思路进行分析：</p>
+<ul>
+<li>查看一个国家有哪些哲学家</li>
+<li>每个哲学家的基本信息有哪些</li>
+<li>哲学家分别提出了怎样的观点</li>
+<li>每个观点对应的关键词有哪些</li>
+</ul>
+<h3 data-id="heading-5">用 S2 绘制多维分析表</h3>
+<p>在绘制多维分析表之前，我们需要了解 S2 是怎么绘制多维分析表的。S2 是数据驱动的表可视分析引擎。通过 <code>schema</code> 指定行列维度和指标的位置，结合配置项设置相关分析属性，将明细数据和行列维度关联起来。从代码层面来反应整体分为三步：</p>
+<ol>
+<li>数据准备</li>
+<li>配置项准备</li>
+<li>渲染</li>
+</ol>
+<h4 data-id="heading-6">1、数据准备</h4>
+<ul>
+<li>首先将原始数据按照「关键词」维度进行拆分，将数据打平，得到如下 S2 可以直接消费的明细数据：
+(<a href="https://link.juejin.cn?target=https%3A%2F%2Fgw.alipayobjects.com%2Fos%2Fbmw-prod%2F24cac0f7-70f0-4131-be61-df11da3ca921.json" target="_blank" rel="nofollow noopener noreferrer" title="https://gw.alipayobjects.com/os/bmw-prod/24cac0f7-70f0-4131-be61-df11da3ca921.json" ref="nofollow noopener noreferrer">全量数据</a>)</li>
+</ul>
+<pre><code class="hljs language-json" lang="json"><span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"points"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"水是万物之源。"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"泰利斯"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"country"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"希腊"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"word"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"水是"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"weight"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">11.739204307083542</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"start"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-624</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"end"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-546</span>
+   <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+   <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"points"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"水是万物之源。"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"泰利斯"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"country"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"希腊"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"word"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"万物"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"weight"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7.75434839431</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"start"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-624</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"end"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-546</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"points"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"水是万物之源。"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"泰利斯"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"country"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"希腊"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"word"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"之源"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"weight"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9.23723855786</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"start"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-624</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"end"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">-546</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  ...
+」
+</code></pre>
+<ul>
+<li>将维度按照数据分析确定的维度顺序依次放置在行维度位置，并指定「频率」为指标。</li>
+</ul>
+<pre><code class="hljs language-kotlin" lang="kotlin"><span class="hljs-keyword">const</span> s2DataConfig = { 
+  fields: { <span class="hljs-comment">// 维度指标配置项	</span>
+    rows: [<span class="hljs-string">'country'</span>, <span class="hljs-string">'name'</span>, <span class="hljs-string">'start'</span>, <span class="hljs-string">'end'</span>, <span class="hljs-string">'points'</span>, <span class="hljs-string">'word'</span>], <span class="hljs-comment">// 行头</span>
+    columns: [], <span class="hljs-comment">// 列头</span>
+    values: [<span class="hljs-string">'weight'</span>], <span class="hljs-comment">// 数值</span>
+  },
+  meta: [ <span class="hljs-comment">// 对各个维度指标进行别名、格式化配置</span>
+    {
+      field: <span class="hljs-string">'word'</span>,  <span class="hljs-comment">// 维度</span>
+      name: <span class="hljs-string">'关键词'</span>,  <span class="hljs-comment">// 别名</span>
+    },
+    {
+      field: <span class="hljs-string">'points'</span>,
+      name: <span class="hljs-string">'观点'</span>,
+    },
+    {
+      field: <span class="hljs-string">'name'</span>,
+      name: <span class="hljs-string">'姓名'</span>,
+    },
+    {
+      field: <span class="hljs-string">'country'</span>,
+      name: <span class="hljs-string">'国家'</span>,
+    },
+    {
+      field: <span class="hljs-string">'start'</span>,
+      name: <span class="hljs-string">'出生'</span>,
+      formatter: getFormatter, <span class="hljs-comment">// 格式化方法</span>
+    },
+    {
+      field: <span class="hljs-string">'end'</span>,
+      name: <span class="hljs-string">'逝世'</span>,
+      formatter: getFormatter,
+    },
+    {
+      field: <span class="hljs-string">'weight'</span>,
+      name: <span class="hljs-string">'权重'</span>,
+      formatter: (<span class="hljs-keyword">val</span>) =&gt; <span class="hljs-keyword">val</span>.toFixed(<span class="hljs-number">2</span>),
+    },
+  ],
+  <span class="hljs-keyword">data</span>, <span class="hljs-comment">// 可从 GitHub 中下载</span>
+};
+
+<span class="hljs-keyword">const</span> getFormatter = (<span class="hljs-keyword">val</span>) =&gt; {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">val</span> &lt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> `公元前${replace(<span class="hljs-keyword">val</span>, <span class="hljs-string">'-'</span>, <span class="hljs-string">''</span>)}年`;
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">return</span> `${<span class="hljs-keyword">val</span>}年`;
+  }
+};
+</code></pre>
+<h3 data-id="heading-7">2. 配置项准备</h3>
+<p>这一步除了基本表体展示交互相关的基础配置项，主要做的就是文本和单元格背景颜色通道映射的配置。
+首先准备一个色板如下：</p>
+<pre><code class="hljs language-JSON" lang="JSON">const PALETTE_COLORS = <span class="hljs-punctuation">[</span>
+  '#B8E1FF'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">9</span>AC5FF'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">7</span>DAAFF'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">5</span>B8FF9'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">3</span>D76DD'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">085</span>EC0'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">0047</span>A5'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">00318</span>A'<span class="hljs-punctuation">,</span>
+  '#<span class="hljs-number">001</span>D70'<span class="hljs-punctuation">,</span>
+<span class="hljs-punctuation">]</span>;
+</code></pre>
+<p>计算得到该组数据的最大最小值：</p>
+<pre><code class="hljs language-JSON" lang="JSON">import <span class="hljs-punctuation">{</span> max<span class="hljs-punctuation">,</span> min<span class="hljs-punctuation">}</span> from 'lodash';
+
+const weights = data.map((item) =&gt; item.weight);
+const maxWeight = max(weights);
+const minWeight = min(weights);
+const weightSpan = maxWeight - minWeight;
+</code></pre>
+<p>将数值区间和颜色区间进行关联，并将权重数值映射到对应颜色区间：</p>
+<pre><code class="hljs language-scss" lang="scss">const s2Options = {
+  <span class="hljs-attribute">width</span>: <span class="hljs-string">''</span>,
+  height: <span class="hljs-number">400</span>,
+  conditions: { <span class="hljs-comment">// 字段标记</span>
+    text: [ // 权重（weight）大于 <span class="hljs-number">20</span> 的数值展示为白色
+      {
+        field: <span class="hljs-string">'weight'</span>,
+        mapping(value) {
+          if (value &gt;= <span class="hljs-number">20</span>) { 
+            return {
+              fill: <span class="hljs-string">'#fff'</span>,
+            };
+          }
+        },
+      },
+    ],
+    <span class="hljs-attribute">background</span>: [ // 权重（weight）在不同的范围，展示不同的背景色
+      {
+        field: <span class="hljs-string">'weight'</span>,
+        mapping(value) {
+          let backgroundColor;
+          const colorIndex =
+                Math<span class="hljs-selector-class">.floor</span>(
+                  (((value - minWeight) / weightSpan) * <span class="hljs-number">100</span>) /
+                  PALETTE_COLORS<span class="hljs-selector-class">.length</span>,
+                ) - <span class="hljs-number">1</span>;
+          if (colorIndex &lt;= <span class="hljs-number">0</span>) {
+            backgroundColor = PALETTE_COLORS<span class="hljs-selector-attr">[0]</span>;
+          } else if (colorIndex &gt;= PALETTE_COLORS.length) {
+            backgroundColor = PALETTE_COLORS<span class="hljs-selector-attr">[PALETTE_COLORS.length - 1]</span>;
+          } else {
+            backgroundColor = PALETTE_COLORS<span class="hljs-selector-attr">[colorIndex]</span>;
+          }
+
+          return {
+            fill: backgroundColor,
+          };
+        },
+      },
+    ],
+  },
+  interaction: { <span class="hljs-comment">// 关闭部分交互操作</span>
+    selectedCellsSpotlight: false,
+    hoverHighlight: false,
+  },
+};
+</code></pre>
+<h3 data-id="heading-8">3. 渲染</h3>
+<p>有了前面的准备工作，绘制多维分析表就很容易了。</p>
+<pre><code class="hljs language-ini" lang="ini">ReactDOM.render(
+  &lt;SheetComponent
+    <span class="hljs-attr">dataCfg</span>={s2DataConfig}
+    <span class="hljs-attr">options</span>={s2Options}
+    <span class="hljs-attr">adaptive</span>={<span class="hljs-literal">true</span>}
+    <span class="hljs-attr">header</span>={{
+      title: '哲学家的观点',
+        extra: <span class="hljs-section">[&lt;PaletteLegend /&gt;]</span>,
+    }}
+    <span class="hljs-attr">onDataCellMouseUp</span>={<span class="hljs-literal">on</span>DataCellMouseUp}
+    /&gt;,
+
+  document.getElementById('container'),
+)<span class="hljs-comment">;</span>
+</code></pre>
+<p>最后绘制出来的效果如下图所示，也可以打开我们部署好的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fs2.antv.vision%2Fzh%2Fexamples%2Fcase%2Fcomparison%23philosophers" target="_blank" rel="nofollow noopener noreferrer" title="https://s2.antv.vision/zh/examples/case/comparison#philosophers" ref="nofollow noopener noreferrer">线上示例</a></p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp869c4c15e04649099267a00b07b42dfe~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-9">数据洞察</h2>
+<p>从中我们可以获取一些有效信息和洞察：</p>
+<ul>
+<li>每个国家有那些哲学家</li>
+<li>每个哲学家的详细信息</li>
+<li>哲学家每个关键词的权重占比</li>
+</ul>
+<h2 data-id="heading-10">拓展</h2>
+<h3 data-id="heading-11">透视表</h3>
+<p>在统计学中，透视表是矩阵格式的一种表格，显示多变量频率分布。它们提供了两个变量（或者多个）之间的相互关系的基本画面，可以帮助发现它们之间的相互作用，帮助业务进行交叉探索分析，是目前商业&nbsp;<code>BI</code>&nbsp;分析领域中使用频率最高的图表之一。</p>
+<h3 data-id="heading-12">S2</h3>
+<p><code>S2</code> 是 <code>AntV</code> 团队推出的<strong>数据表可视化引擎</strong>，是多维交叉分析领域的表格解决方案，数据驱动视图，提供底层核心库、基础组件库、业务场景库，具备自由扩展的能力，让开发者既能开箱即用，也能基于自身场景自由发挥。
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp75e16a49ce134218b6fe5c35a7e56c9b~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="官网demo示例" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-13">小结</h2>
+<p>这一章带大家用表格去展示和认识数据，表格其实也算一种古老的数据可视化方法。再一次认识数据之后，接下来我们就正式进入分析环节！</p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

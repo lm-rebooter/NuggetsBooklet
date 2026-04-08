@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 在 Windows 和 Mac 中使用 Docker
 
 对于开发来说，Windows 和 macOS 是更为常见和常用的系统，所以也很有必要了解在 Windows 和 macOS 中使用 Docker 的方法。很幸运的是，Docker 的官方对这两个系统提供了强有力的支持，我们可以很轻松的在这两个系统中运行 Docker。在这一小节中，我们就来了解一下 Docker 在 Windows 和 macOS 中安装的方式以及运行的原理。

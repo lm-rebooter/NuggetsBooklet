@@ -1,0 +1,139 @@
+<h1 class="heading">pipeline 与 channelHandler</h1>
+<blockquote>
+<p>这一小节，我们将会学习 Netty 里面一大核心组件： Pipeline 与 ChannelHandler</p>
+</blockquote>
+<p>上一小节的最后，我们提出一个问题：如何避免 <code>else</code> 泛滥？我们注意到，不管是服务端还是客户端，处理流程大致分为以下几个步骤</p>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/16545510d7b4f970?w=1240&amp;h=284&amp;f=png&amp;s=49802"><figcaption></figcaption></figure><p></p>
+<p>我们把这三类逻辑都写在一个类里面，客户端写在 <code>ClientHandler</code>，服务端写在 <code>ServerHandler</code>，如果要做功能的扩展（比如，我们要校验 magic number，或者其他特殊逻辑），只能在一个类里面去修改，
+这个类就会变得越来越臃肿。</p>
+<p>另外，我们注意到，每次发指令数据包都要手动调用编码器编码成 <code>ByteBuf</code>，对于这类场景的编码优化，我们能想到的办法自然是模块化处理，不同的逻辑放置到单独的类来处理，最后将这些逻辑串联起来，形成一个完整的逻辑处理链。</p>
+<p>Netty 中的 pipeline 和 channelHandler 正是用来解决这个问题的：它通过责任链设计模式来组织代码逻辑，并且能够支持逻辑的动态添加和删除
+，Netty 能够支持各类协议的扩展，比如 HTTP，Websocket，Redis，靠的就是 pipeline 和 channelHandler，下面，我们就来一起学习一下这部分内容。</p>
+<h2 class="heading">pipeline 与 channelHandler 的构成</h2>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f0a67bb52?w=1240&amp;h=434&amp;f=png&amp;s=40625"><figcaption></figcaption></figure><p></p>
+<p>无论是从服务端来看，还是客户端来看，在 Netty 整个框架里面，一条连接对应着一个 Channel，这条 Channel 所有的处理逻辑都在一个叫做 <code>ChannelPipeline</code> 的对象里面，<code>ChannelPipeline</code> 是一个双向链表结构，他和 Channel 之间是一对一的关系。</p>
+<p><code>ChannelPipeline</code> 里面每个节点都是一个 <code>ChannelHandlerContext</code> 对象，这个对象能够拿到和 Channel 相关的所有的上下文信息，然后这个对象包着一个重要的对象，那就是逻辑处理器 <code>ChannelHandler</code>。</p>
+<p>接下来，我们再来看一下 <code>ChannelHandler</code> 有哪些分类。</p>
+<h2 class="heading">channelHandler 的分类</h2>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f0a8f2890?w=1240&amp;h=581&amp;f=png&amp;s=84454"><figcaption></figcaption></figure><p></p>
+<p>可以看到 <code>ChannelHandler</code> 有两大子接口：</p>
+<p>第一个子接口是 <code>ChannelInboundHandler</code>，从字面意思也可以猜到，他是处理读数据的逻辑，比如，我们在一端读到一段数据，首先要解析这段数据，然后对这些数据做一系列逻辑处理，最终把响应写到对端，
+在开始组装响应之前的所有的逻辑，都可以放置在 <code>ChannelInboundHandler</code> 里处理，它的一个最重要的方法就是 <code>channelRead()</code>。读者可以将 <code>ChannelInboundHandler</code> 的逻辑处理过程与 TCP 的七层协议的解析联系起来，收到的数据一层层从物理层上升到我们的应用层。</p>
+<p>第二个子接口 <code>ChannelOutBoundHandler</code> 是处理写数据的逻辑，它是定义我们一端在组装完响应之后，把数据写到对端的逻辑，比如，我们封装好一个 response 对象，接下来我们有可能对这个 response 做一些其他的特殊逻辑，然后，再编码成 ByteBuf，最终写到对端，它里面最核心的一个方法就是 <code>write()</code>，读者可以将 <code>ChannelOutBoundHandler</code> 的逻辑处理过程与 TCP 的七层协议的封装过程联系起来，我们在应用层组装响应之后，通过层层协议的封装，直到最底层的物理层。</p>
+<p>这两个子接口分别有对应的默认实现，<code>ChannelInboundHandlerAdapter</code>，和 <code>ChanneloutBoundHandlerAdapter</code>，它们分别实现了两大接口的所有功能，默认情况下会把读写事件传播到下一个 handler。</p>
+<p>说了这么多的理论，其实还是比较抽象的，下面我们就用一个具体的 demo 来学习一下这两大 handler 的事件传播机制。</p>
+<h2 class="heading">ChannelInboundHandler 的事件传播</h2>
+<p>关于 <code>ChannelInboundHandler</code> ，我们拿 <code>channelRead()</code> 为例子，来体验一下 inbound 事件的传播。</p>
+<p>我们在服务端的 pipeline 添加三个 <code>ChannelInboundHandler</code></p>
+<blockquote>
+<p>NettyServer.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">serverBootstrap
+        .childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+            <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerA());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerB());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerC());
+            }
+        });
+</code></pre><p>每个 inBoundHandler 都继承自 <code>ChannelInboundHandlerAdapter</code>，然后实现了 <code>channelRead()</code> 方法</p>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InBoundHandlerA</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"InBoundHandlerA: "</span> + msg);
+        <span class="hljs-keyword">super</span>.channelRead(ctx, msg);
+    }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InBoundHandlerB</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"InBoundHandlerB: "</span> + msg);
+        <span class="hljs-keyword">super</span>.channelRead(ctx, msg);
+    }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InBoundHandlerC</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"InBoundHandlerC: "</span> + msg);
+        <span class="hljs-keyword">super</span>.channelRead(ctx, msg);
+    }
+}
+</code></pre><p>在 <code>channelRead()</code> 方法里面，我们打印当前 handler 的信息，然后调用父类的 <code>channelRead()</code> 方法，而这里父类的 <code>channelRead()</code> 方法会自动调用到下一个 inBoundHandler 的 <code>channelRead()</code> 方法，并且会把当前 inBoundHandler 里处理完毕的对象传递到下一个 inBoundHandler，我们例子中传递的对象都是同一个 msg。</p>
+<p>我们通过 <code>addLast()</code> 方法来为 pipeline 添加 inBoundHandler，当然，除了这个方法还有其他的方法，感兴趣的同学可以自行浏览一下 pipeline 的 api ，这里我们添加的顺序为 A -&gt; B -&gt; C，最后，我们来看一下控制台的输出</p>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f0a9ea02c?w=1240&amp;h=309&amp;f=png&amp;s=198903"><figcaption></figcaption></figure><p></p>
+<p>可以看到，inBoundHandler 的执行顺序与我们通过 <code>addLast()</code> 方法 添加的顺序保持一致，接下来，我们再来看一下 <code>outBoundHandler</code> 的事件传播。</p>
+<h2 class="heading">ChannelOutboundHandler 的事件传播</h2>
+<p>关于 <code>ChanneloutBoundHandler</code> ，我们拿 <code>write()</code> 为例子，来体验一下 outbound 事件的传播。</p>
+<p>我们继续在服务端的 pipeline 添加三个 <code>ChanneloutBoundHandler</code></p>
+<pre><code class="hljs java" lang="java">serverBootstrap
+        .childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+            <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+                <span class="hljs-comment">// inBound，处理读数据的逻辑链</span>
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerA());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerB());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> InBoundHandlerC());
+                
+                <span class="hljs-comment">// outBound，处理写数据的逻辑链</span>
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> OutBoundHandlerA());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> OutBoundHandlerB());
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> OutBoundHandlerC());
+            }
+        });
+</code></pre><p>每个 outBoundHandler 都继承自 <code>ChanneloutBoundHandlerAdapter</code>，然后实现了 <code>write()</code> 方法</p>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OutBoundHandlerA</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelOutboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">write</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"OutBoundHandlerA: "</span> + msg);
+        <span class="hljs-keyword">super</span>.write(ctx, msg, promise);
+    }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OutBoundHandlerB</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelOutboundHandlerAdapter</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">write</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"OutBoundHandlerB: "</span> + msg);
+        <span class="hljs-keyword">super</span>.write(ctx, msg, promise);
+    }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OutBoundHandlerC</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelOutboundHandlerAdapter</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">write</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)</span> <span class="hljs-keyword">throws</span> Exception </span>{
+        System.out.println(<span class="hljs-string">"OutBoundHandlerC: "</span> + msg);
+        <span class="hljs-keyword">super</span>.write(ctx, msg, promise);
+    }
+}
+
+</code></pre><p>在 <code>write()</code> 方法里面，我们打印当前 handler 的信息，然后调用父类的 <code>write()</code> 方法，而这里父类的 <code>write()</code> 方法会自动调用到下一个 outBoundHandler 的 <code>write()</code> 方法，并且会把当前 outBoundHandler 里处理完毕的对象传递到下一个 outBoundHandler。</p>
+<p>我们通过 <code>addLast()</code> 方法 添加 outBoundHandler 的顺序为 A -&gt; B -&gt; C，最后，我们来看一下控制台的输出</p>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f0c4e08f1?w=1240&amp;h=478&amp;f=png&amp;s=366252"><figcaption></figcaption></figure><p></p>
+<p>可以看到，outBoundHandler 的执行顺序与我们添加的顺序相反，最后，我们再来看一下 pipeline 的结构和执行顺序。</p>
+<blockquote>
+<p>pipeline 的结构</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f0a73d8c3?w=1240&amp;h=205&amp;f=png&amp;s=21137"><figcaption></figcaption></figure><p></p>
+<p>不管我们定义的是哪种类型的 handler, 最终它们都是以双向链表的方式连接，这里实际链表的节点是 <code>ChannelHandlerContext</code>，这里为了让结构清晰突出，可以直接把节点看作 <code>ChannelHandlerContext</code>。</p>
+<blockquote>
+<p>pipeline 的执行顺序</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/17/1654526f4f032dbb?w=1240&amp;h=577&amp;f=png&amp;s=70941"><figcaption></figcaption></figure><p></p>
+<p>虽然两种类型的 handler 在一个双向链表里，但是这两类 handler 的分工是不一样的，inBoundHandler 的事件通常只会传播到下一个 inBoundHandler，outBoundHandler 的事件通常只会传播到下一个 outBoundHandler，两者相互不受干扰。</p>
+<p>关于 pipeline 与 channelHandler 相关的事件传播就讲到这，在下一小节，我们会了解到几种特殊的 channelHandler，并且使用这几种特殊的 channelHandler 来改造我们的客户端和服务端逻辑，解决掉 <code>if else</code> 泛滥的问题，最后，我们对本小节内容做下总结。</p>
+<h2 class="heading">总结</h2>
+<ol>
+<li>通过我们前面编写客户端服务端处理逻辑，引出了 pipeline 和 channelHandler 的概念。</li>
+<li>channelHandler 分为 inBound 和 outBound 两种类型的接口，分别是处理数据读与数据写的逻辑，可与 tcp 协议栈联系起来。</li>
+<li>两种类型的 handler 均有相应的默认实现，默认会把事件传递到下一个，这里的传递事件其实说白了就是把本 handler 的处理结果传递到下一个 handler 继续处理。</li>
+<li>inBoundHandler 的执行顺序与我们实际的添加顺序相同，而 outBoundHandler 则相反。</li>
+</ol>
+<blockquote>
+<p>本小节对应的代码放置在 <a target="_blank" href="https://github.com/lightningMan/flash-netty/tree/pipeline%E4%B8%8EchannelHandler">github</a> 对应的本小节分支，大家在本地切换分支即可看到本小节完整代码。</p>
+</blockquote>
+<h2 class="heading">思考</h2>
+<ol>
+<li>参考本文的例子，如果我们往 pipeline 里面添加 handler 的顺序不变， 要在控制台打印出 inboundA -&gt; inboundC -&gt; outboundB -&gt; outboundA，该如何实现？</li>
+<li>如何在每个 handler 里面打印上一个 handler 处理结束的时间点？</li>
+</ol>
+<p>欢迎留言讨论。</p>
+<div><script language="javascript">self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',25000);</script></div>

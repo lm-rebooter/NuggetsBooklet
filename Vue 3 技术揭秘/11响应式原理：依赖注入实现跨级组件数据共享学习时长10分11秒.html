@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>通常情况下，当我们需要从父组件向子组件传递数据时，会使用&nbsp;<a href="https://link.juejin.cn?target=https%3A%2F%2Fcn.vuejs.org%2Fguide%2Fcomponents%2Fprops.html" target="_blank" rel="nofollow noopener noreferrer" title="https://cn.vuejs.org/guide/components/props.html" ref="nofollow noopener noreferrer">props</a>。对于层级不深的父子组件可以通过 <code>props</code> 透传数据，但是当父子层级过深时，数据透传将会变得非常麻烦和难以维护，引用 <code>Vue.js</code> 官网的一张图：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa31a94e4ba3f472bb2d037fc600f7201~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>而依赖注入则是为了解决 <code>prop 逐级透传</code> 的问题而诞生的，父组件 <code>provide</code> 需要共享给子组件的数据，子组件 <code>inject</code> 使用需要的父组件状态数据，而且可以保持响应式。</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4b703605556c447bbb2fcd1739a412db~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>再来看一个依赖注入的使用示例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 父组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">import</span> { provide, ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">'hello'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-title function_">provide</span>(<span class="hljs-comment">/* 注入名 */</span> <span class="hljs-string">'message'</span>, <span class="hljs-comment">/* 值 */</span> msg)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-comment">//子组件使用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">import</span> { inject } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-keyword">const</span> message = <span class="hljs-title function_">inject</span>(<span class="hljs-string">'message'</span>)</span>
+</code></pre>
+<p>那么，依赖注入的核心实现原理是怎样的呢？接下来我们就一起分析吧。</p>
+<h2 data-id="heading-1">Provide</h2>
+<p><code>Provide</code> 顾名思义，就是一个数据提供方，看看源码里面是如何提供的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">provide</span>(<span class="hljs-params">key, value</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (!currentInstance) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 获取当前组件实例上的 provides 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">let</span> provides = currentInstance.<span class="hljs-property">provides</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 获取父组件实例上的 provides 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-keyword">const</span> parentProvides =</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      currentInstance.<span class="hljs-property">parent</span> &amp;&amp; currentInstance.<span class="hljs-property">parent</span>.<span class="hljs-property">provides</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 当前组件的 providers 指向父组件的情况  </span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (parentProvides === provides) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// 继承父组件再创建一个 provides</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      provides = currentInstance.<span class="hljs-property">provides</span> = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(parentProvides)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-comment">// 生成 provides 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    provides[key] = value</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">}</span>
+</code></pre>
+<p>这里稍微回忆一下 <code>Object.create</code> 这个函数：这个方法用于创建一个新对象，使用现有的对象来作为新创建对象的原型（<code>prototype</code>）。</p>
+<p>所以 <code>provide</code> 就是通过获取当前组件实例对象上的 <code>provides</code>，然后通过 <code>Object.create</code> 把父组件的 <code>provides</code> 属性设置到当前的组件实例对象的<code>provides</code> 属性的原型对象上。最后再将需要 <code>provid</code> 的数据存储在当前的组件实例对象上的 <code>provides</code>上。</p>
+<p>这里你可能会有个疑问，当前组件上实例的 <code>provides</code> 为什么会等于父组件上的 <code>provides</code> 呢？这是因为在组件实例 <code>currentInstance</code> 创建的时候进行了初始化的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">appContext = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">provides</span>: <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(<span class="hljs-literal">null</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">const</span> instance = { </span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 依赖注入相关 </span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-attr">provides</span>: parent ? parent.<span class="hljs-property">provides</span> : <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(appContext.<span class="hljs-property">provides</span>), </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 其它属性 </span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// ... </span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">}</span>
+</code></pre>
+<p>可以看到，如果父组件定义了 <code>provide</code> 那么子组件初始的过程中都会将自己的 <code>porvide</code> 指向父组件的 <code>provide</code>。而根组件因为没有父组件，则被赋值为一个空对象。大致可以表示为：</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcp121a26eec5004650bdec9f6a08228faa~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-2">Inject</h2>
+<p><code>Inject</code>&nbsp;顾名思义，就是一个数据注入方，看看源码里面是如何实现注入的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">inject</span>(<span class="hljs-params">key, defaultValue, treatDefaultAsFactory = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 获取当前组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> instance = currentInstance || currentRenderingInstance</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (instance) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 获取父组件上的 provides 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">const</span> provides =</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      instance.<span class="hljs-property">parent</span> == <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">        ? instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">appContext</span> &amp;&amp; instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">appContext</span>.<span class="hljs-property">provides</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">        : instance.<span class="hljs-property">parent</span>.<span class="hljs-property">provides</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 如果能取到，则返回值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (provides &amp;&amp; key <span class="hljs-keyword">in</span> provides) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-keyword">return</span> provides[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">arguments</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-number">1</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 返回默认值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">return</span> treatDefaultAsFactory &amp;&amp; <span class="hljs-title function_">isFunction</span>(defaultValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-comment">// 如果默认内容是个函数的，就执行并且通过call方法把组件实例的代理对象绑定到该函数的this上</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">        ? defaultValue.<span class="hljs-title function_">call</span>(instance.<span class="hljs-property">proxy</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        : defaultValue</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    </span>
+<span class="code-block-extension-codeLine" data-line-num="20">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="21">}</span>
+</code></pre>
+<p>这里的实现就显得通俗易懂了，核心也就是从当前组件实例的父组件上取 <code>provides</code> 对象，然后再查找父组件 <code>provides</code> 上有没有对应的属性。因为父组件的 <code>provides</code> 是通过原型链的方式和父组件的父组件进行了关联，如果父组件上没有，那么会通过原型链的方式再向上取，这也实现了不管组件层级多深，总是可以找到对应的 <code>provide</code> 的提供方数据。</p>
+<h2 data-id="heading-3">总结</h2>
+<p>通过上面的分析，我们知道了依赖注入的实现原理相对还是比较简单的，比较有意思的事他巧妙地利用了原型和原型链的方式进行数据的继承和获取。</p>
+<p>在执行 <code>provide</code> 的时候，会将父组件的的 <code>provides</code> 关联成当前组件实例 <code>provides</code> 对象原型上的属性，当在 <code>inject</code> 获取数据的时候，则会根据原型链的规则进行查找，找不到的话则会返回用户自定义的默认值。</p>
+<p>最后，我们知道 <code>Vue</code> 通过了依赖注入的方式实现了跨层级组件的状态共享问题。跨层级的状态共享问题是不是听起来有点耳熟？没错，那就是 <code>vuex / pinia</code> 所做的事情。</p>
+<p>那思考一下 <code>Vue 3</code> 是否可以依托于 <code>Composition API</code> + <code>依赖注入</code> 实现一个轻量级的状态管理工具呢？</p></div>
+    </body>
+    </html>

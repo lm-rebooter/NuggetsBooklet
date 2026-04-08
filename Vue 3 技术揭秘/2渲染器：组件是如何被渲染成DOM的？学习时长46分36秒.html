@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>相对于传统的 <code>jQuery</code> 一把梭子撸到底的开发模式，组件化可以帮助我们实现 <code>视图</code> 和 <code>逻辑</code> 的复用，并且可以对每个部分进行单独的思考。对于一个大型的 <code>Vue.js</code> 应用，通常是由一个个组件组合而成：</p>
+<p><img src="p9-juejin.byteimg.comtos-cn-i-k3u1fbpfcp187720e9a0aa4c93b52f625ca796880e~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>但是我们实际访问的页面，是由 <code>DOM</code> 元素构成的，而组件的 <code>&lt;template&gt;</code> 中的内容只是一个模板字符串而已。那模板字符串是如何被渲染成 <code>DOM</code> 的呢？接下来我们将从组件入手，揭秘 <code>Vue</code> 的组件是如何被渲染成真实的 <code>DOM</code> 的。</p>
+<h2 data-id="heading-1">初始化一个 Vue 3 应用</h2>
+<p>在开始本章节之前，我们先来简单初始化一个 <code>Vue 3</code> 的应用：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">shell</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-shell code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-meta prompt_"># </span><span class="bash">安装 vue cli</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-meta prompt_">$ </span><span class="bash">yarn global add @vue/cli</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-meta prompt_"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"># <span class="bash">创建 vue3 的基础脚手架 一路回车</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-meta prompt_">$ </span><span class="bash">vue create vue3-demo</span></span>
+</code></pre>
+<p>接下来，打开项目，可以看到<code>Vue.js</code> 的入口文件 <code>main.js</code> 的内容如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createApp } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">import</span> <span class="hljs-title class_">App</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'./App.vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-title function_">createApp</span>(<span class="hljs-title class_">App</span>).<span class="hljs-title function_">mount</span>(<span class="hljs-string">'#app'</span>)</span>
+</code></pre>
+<p>这里就有一个根组件 <code>App.vue</code>。为了更加简单地介绍 <code>Vue</code> 根组件的渲染过程，我把 <code>App.vue</code> 根组件进行了一个简单的修改：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"helloWorld"</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    hello world</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="11">}</span>
+<span class="code-block-extension-codeLine" data-line-num="12"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<h2 data-id="heading-2">根组件模板编译</h2>
+<p>我们知道 <code>.vue</code> 类型的文件无法在 <code>Web</code> 端直接加载，我们通常会在 <code>webpack</code> 的编译阶段，通过 <code>vue-loader</code> 编译生成组件相关的 <code>JavaScript</code> 和 <code>CSS</code>，并把 <code>template</code> 部分编译转换成 <code>render</code> 函数添加到组件对象的属性中。</p>
+<p>上述的 <code>App.vue</code> 文件内的模板其实是会被编译工具在编译时转成一个渲染函数，大致如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = { <span class="hljs-attr">class</span>: <span class="hljs-string">"helloWorld"</span> }</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(<span class="hljs-string">"div"</span>, _hoisted_1, <span class="hljs-string">" hello world "</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p>关于 <code>&lt;template&gt;</code> 中的模板字符串是如何被编译成 <code>render</code> 函数的，以及 <code>_hoisted_1</code> 是个什么玩意，我们将在后续章节中详细介绍。</p>
+<p>现在我们只需要知道 <code>&lt;script&gt;</code> 中的对象内容最终会和编译后的模板内容一起，生成一个 <code>App</code> 对象传入 <code>createApp</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">{</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache, $props, $setup, $data, $options</span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// ... </span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<h2 data-id="heading-3">对象组件渲染成真实的 DOM</h2>
+<p>接着回到 <code>main.js</code> 的入口文件，整个初始化的过程只剩下如下部分了：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">createApp</span>(<span class="hljs-title class_">App</span>).<span class="hljs-title function_">mount</span>(<span class="hljs-string">'#app'</span>)</span>
+</code></pre>
+<p>打开源码，可以看一下 <code>createApp</code> 的过程：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-dom/src/index.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">createApp</span> = (<span class="hljs-params">...args</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> app = <span class="hljs-title function_">ensureRenderer</span>().<span class="hljs-title function_">createApp</span>(...args);</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">return</span> app;</span>
+<span class="code-block-extension-codeLine" data-line-num="6">};</span>
+</code></pre>
+<p>猜测一下，<code>ensureRenderer().createApp(...args)</code> 这个链式函数执行完成后肯定返回了 <code>mount</code> 函数，<code>ensureRenderer</code> 就是构造了一个带有 <code>createApp</code> 函数的<strong>渲染器 renderer 对象</strong> ：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-dom/src/index.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">ensureRenderer</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 如果 renderer 有值的话，那么以后都不会初始化了</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">return</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    renderer ||</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    (renderer = <span class="hljs-title function_">createRenderer</span>(rendererOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="8">}</span>
+<span class="code-block-extension-codeLine" data-line-num="9"></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-comment">// renderOptions 包含以下函数：</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11"></span>
+<span class="code-block-extension-codeLine" data-line-num="12"><span class="hljs-keyword">const</span> renderOptions = {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  createElement,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  createText,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  setText,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  setElementText,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  patchProp,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  insert,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  remove,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">}</span>
+<span class="code-block-extension-codeLine" data-line-num="21"></span>
+</code></pre>
+<p>这里返回的 <code>renderer</code> 对象，可以认为是一个跨平台的渲染器对象，针对不同的平台，会创建出不同的 <code>renderer</code> 对象，上述是创建浏览器环境的 <code>renderer</code> 对象，对于服务端渲染的场景，则会创建 <code>server render</code> 的 <code>renderer</code>:</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-dom/src/index.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">let</span> enabledHydration = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">function</span> <span class="hljs-title function_">ensureHydrationRenderer</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  renderer = enabledHydration</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    ? renderer</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    : <span class="hljs-title function_">createHydrationRenderer</span>(rendererOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  enabledHydration = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> renderer</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p>再来看一下 <code>createRenderer</code> 返回的对象：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createRenderer</span>(<span class="hljs-params">options</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 这里不介绍 hydrate 模式</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    render,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    hydrate,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-attr">createApp</span>: <span class="hljs-title function_">createAppAPI</span>(render, hydrate),</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>可以看到，<code>renderer</code> 对象上包含了 <code>createApp</code> 和 <code>render</code> 方法。再来看一下 <code>createApp</code> 方法：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/apiCreateApp.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createAppAPI</span>(<span class="hljs-params">render, hydrate</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// createApp createApp 方法接收的两个参数：根组件的对象和 prop</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createApp</span>(<span class="hljs-params">rootComponent, rootProps = <span class="hljs-literal">null</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> app = {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// ... 省略很多不需要在这里介绍的属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-attr">_component</span>: rootComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-attr">_props</span>: rootProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-title function_">mount</span>(<span class="hljs-params">rootContainer, isHydrate, isSVG</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">return</span> app</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p>直到这里，我们才真正拨开了 <code>Vue 3</code> 初始化根组件的核心方法，也就是入口文件 <code>createApp</code> 真正执行的内容就是这里的 <code>createAppAPI</code> 函数中的 <code>createApp</code> 函数，该函数接收了 <code>&lt;App /&gt;</code> 组件作为根组件 <code>rootComponent</code>，返回了一个包含 <code>mount</code> 方法的 <code>app</code> 对象。</p>
+<p>接下来再深入地看一下 <code>mount</code> 的内部实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/apiCreateApp.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-title function_">mount</span>(<span class="hljs-params">rootContainer, isHydrate, isSVG</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (!isMounted) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// ... 省略部分不重要的代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 1. 创建根组件的 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">const</span> vnode = <span class="hljs-title function_">createVNode</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      rootComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      rootProps</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    </span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// 2. 渲染根组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-title function_">render</span>(vnode, rootContainer, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    isMounted = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<h3 data-id="heading-4">1. 创建根组件的 vnode</h3>
+<p>什么是 <code>vnode</code> 节点呢？其实它和 <code>Virtual DOM</code> 是一个意思，就是将真实的 <code>DOM</code> 以普通对象形式的数据结构来表达，简化了很多 <code>DOM</code> 中内容。</p>
+<p>熟悉 <code>JS DOM</code> 编程的小伙伴都知道 <code>JS</code> 直接操作 <code>DOM</code> 往往会带来许多性能负担，所以 <code>vnode</code> 提供了对真实 <code>DOM</code> 上的一层虚拟映射，我们只需要操作这个虚拟的数据结构，那些真正费性能的活交给这些框架来操作就好了，框架会帮我们做很多性能优化的事情。这也是 <code>vnode</code> 带来的最大的优势之一。</p>
+<p>其次，因为 <code>vnode</code> 只是一种与平台无关的数据结构而已，所以理论上我们也可以将它渲染到不同平台上从而达到跨平台渲染的目的。这个也是 <code>weex</code>、<code>mpvue</code> 等跨端渲染框架的核心基础。</p>
+<p>上述例子中的 <code>template</code> 中的内容用 <code>vnode</code> 可以表示为：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> vnode = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">props</span>: { </span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-string">'class'</span>: <span class="hljs-string">'helloWorld'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-attr">children</span>: <span class="hljs-string">'helloWorld'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p>说了这么多，那么根节点是如何被创建成一个 <code>vnode</code> 的呢？核心也就在 <code>createVNode</code> 函数中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">typescript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-typescript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/vnode.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createBaseVNode</span>(<span class="hljs-params">...</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> vnode = {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">type</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    props,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-attr">key</span>: props &amp;&amp; <span class="hljs-title function_">normalizeKey</span>(props),</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    children,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-attr">component</span>: <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    shapeFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    patchFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    dynamicProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-attr">dynamicChildren</span>: <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-comment">// ... 一些其他属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-keyword">return</span> vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}</span>
+<span class="code-block-extension-codeLine" data-line-num="18"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createVNode</span>(<span class="hljs-params"><span class="hljs-keyword">type</span>, props = <span class="hljs-literal">null</span>, children = <span class="hljs-literal">null</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-keyword">if</span> (props) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 如果存在 props 则需要对 props 进行一些处理，这里先省略</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// 处理 shapeFlag 类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-keyword">const</span> shapeFlag = <span class="hljs-title function_">isString</span>(<span class="hljs-keyword">type</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    ? <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ELEMENT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">    : __FEATURE_SUSPENSE__ &amp;&amp; <span class="hljs-title function_">isSuspense</span>(<span class="hljs-keyword">type</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">    ? <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SUSPENSE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">    : <span class="hljs-title function_">isTeleport</span>(<span class="hljs-keyword">type</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    ? <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TELEPORT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">    : <span class="hljs-title function_">isObject</span>(<span class="hljs-keyword">type</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="31">    ? <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">STATEFUL_COMPONENT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">    : <span class="hljs-title function_">isFunction</span>(<span class="hljs-keyword">type</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="33">    ? <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">FUNCTIONAL_COMPONENT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">    : <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">  </span>
+<span class="code-block-extension-codeLine" data-line-num="36">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">createBaseVNode</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-keyword">type</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="39">    props,</span>
+<span class="code-block-extension-codeLine" data-line-num="40">    children,</span>
+<span class="code-block-extension-codeLine" data-line-num="41">    patchFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">    dynamicProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">    shapeFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="44">    isBlockNode,</span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="47">}</span>
+</code></pre>
+<p>当进行根组件渲染的时候，<code>createVNode</code> 的第一个入参 <code>type</code> 是我们的 <code>App</code> 对象，也就是一个 <code>Object</code>，所以得到的 <code>shapeFlag</code> 的值是 <code>STATEFUL_COMPONENT</code>，代表的是一个有状态组件对象。（这里顺便提一下，如果传入的是个函数，那么就是一个函数式组件 <code>FUNCTIONAL_COMPONENT</code>，函数式组件和有状态的对象组件都是 <code>Vue</code> 可处理的组件类型，这个会在下面渲染阶段提及。）</p>
+<p>到这里，<code>Vue</code> 完成了对根组件的 <code>Vnode</code> 对象的创建，接下来要做的就是将该组件渲染到页面中。</p>
+<h3 data-id="heading-5">2. VNode 渲染成真实的组件</h3>
+<p>回到 <code>mount</code> 函数中，接下来一步就是对 <code>vnode</code> 的渲染工作，核心代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">render</span>(vnode, rootContainer);</span>
+</code></pre>
+<p>那么这里的 <code>render</code> 函数是什么呢？通过上面的代码我们发现，其实它是在调用 <code>createAppAPI</code> 时传入进来的，而 <code>createAppAPI</code> 则是在创建 <code>renderer</code> 渲染器的时候调用的。那么，接下来看看 <code>render</code> 函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> <span class="hljs-title function_">render</span> = (<span class="hljs-params">vnode, container</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (vnode == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 如果 vnode 不存在，表示需要卸载组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (container.<span class="hljs-property">_vnode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-title function_">unmount</span>(container.<span class="hljs-property">_vnode</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-comment">// 否则进入更新流程（初始化创建也是特殊的一种更新）</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-title function_">patch</span>(container.<span class="hljs-property">_vnode</span> || <span class="hljs-literal">null</span>, vnode, container)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 缓存 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  container.<span class="hljs-property">_vnode</span> = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>很明显，对于初始化根组件的过程中，传入了一个根组件的 <code>vnode</code> 对象，所以这里会执行 <code>patch</code> 相关的动作。<code>patch</code> 本意是补丁的意思，可以理解成为更新做一些补丁的活儿，其实初始的过程也可以看作是一个全量补丁，一种特殊的更新操作。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">patch</span>(<span class="hljs-params">n1,n2,container = <span class="hljs-literal">null</span>,anchor = <span class="hljs-literal">null</span>,parentComponent = <span class="hljs-literal">null</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 对于类型不同的新老节点，直接进行卸载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (n1 &amp;&amp; !<span class="hljs-title function_">isSameVNodeType</span>(n1, n2)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    anchor = <span class="hljs-title function_">getNextHostNode</span>(n1)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title function_">unmount</span>(n1, parentComponent, parentSuspense, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    n1 = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 基于 n2 的类型来判断</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 因为 n2 是新的 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">const</span> { type, shapeFlag } = n2;</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-keyword">switch</span> (type) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Text</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="14">       <span class="hljs-comment">// 处理文本节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">break</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-comment">// 其中还有几个类型比如： static fragment comment</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-attr">default</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-comment">// 这里就基于 shapeFlag 来处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ELEMENT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        <span class="hljs-comment">// 处理普通 DOM 元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">        <span class="hljs-title function_">processElement</span>(n1, n2, container, anchor, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        <span class="hljs-comment">// 处理 component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-title function_">processComponent</span>(n1, n2, container, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-comment">// ... 处理其他元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="29">}</span>
+</code></pre>
+<p><code>patch</code> 函数主要接收的参数说明如下：</p>
+<ol>
+<li><code>n1</code> 表示老的 <code>vnode</code> 节点；</li>
+<li><code>n2</code> 表示新的 <code>vnode</code> 节点；</li>
+<li><code>container</code> 表示需要挂载的 <code>dom</code> 容器；</li>
+<li><code>anchor</code> 挂载的参考元素；</li>
+<li><code>parentComponent</code> 父组件。</li>
+</ol>
+<p>这里我们主要关注前 3 个参数，因为是初始化的过程，所以 <code>n1</code> 本次值为空，核心看 <code>n2</code> 的值，<code>n2</code> 有一个 <code>type</code> 和 <code>shapeFlag</code>。当前 <code>n2</code> 的 <code>type</code> 是 <code>App</code> 组件对象，所以逻辑会进入 <code>Switch</code> 的 <code>default</code> 中。再比较 <code>shapeFlag</code> 属性，前面提到 <code>shapeFlag</code> 的值是 <code>STATEFUL_COMPONENT</code>。</p>
+<blockquote>
+<p>这里需要注意的是 <code>ShapeFlags</code> 是一个二进制左移操作符生成的对象，其中<br>
+<code>ShapeFlags.COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT</code>，
+所以 <code>shapeFlag &amp; ShapeFlags.COMPONENT</code> 这里的值是 <code>true</code>，关于二进制左移操作符对象在 <code>Vue 3</code> 中会大量使用，后面也会详细介绍。</p>
+</blockquote>
+<p>接着也就进入了 <code>processComponent</code> 的逻辑了：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">processComponent</span>(<span class="hljs-params">n1, n2, container, parentComponent</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 如果 n1 没有值的话，那么就是 mount</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (!n1) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 初始化 component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title function_">mountComponent</span>(n2, container, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">updateComponent</span>(n1, n2, container);</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>同理，这里我们只看初始化的逻辑，所以 <code>n1</code> 此时还是个空值，那么就会进入 <code>mountComponent</code> 函数对组件进行初始挂载过程。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mountComponent</span>(<span class="hljs-params">initialVNode, container, parentComponent</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 1. 先创建一个 component instance</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> instance = (initialVNode.<span class="hljs-property">component</span> = <span class="hljs-title function_">createComponentInstance</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    initialVNode,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    parentComponent</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  ));</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 2. 初始化 instance 上的 props, slots, 执行组件的 setup 函数...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">setupComponent</span>(instance);</span>
+<span class="code-block-extension-codeLine" data-line-num="11"></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 3. 设置并运行带副作用的渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-title function_">setupRenderEffect</span>(instance, initialVNode, container);</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>该函数实现过程还是非常清晰的，思考一下，一个组件的初始化要做哪些内容呢？</p>
+<p>其实很容易想到，我们需要一个实例化的组件对象，该对象可以在 <code>Vue</code> 执行的运行时上下文中随时获取到，另外还需要对实例化后的组件中的属性做一些优化、处理、赋值等操作，最后，就是把组件实例的 <code>render</code> 函数执行一遍。</p>
+<p>上面也是 <code>mountComponent</code> 核心做的事情，我们一个个来看。</p>
+<p>第一步是组件实例化，在 <code>Vue 3</code> 中通过 <code>createComponentInstance</code> 的方法创建组件实例，返回的是一个组件实例的对象，大致包含以下属性：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/component.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> instance = {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 这里是组件对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-attr">type</span>: vnode.<span class="hljs-property">type</span>, </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 组件 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 新的组件 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-attr">next</span>: <span class="hljs-literal">null</span>, </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// props 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-attr">props</span>: {}, </span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 指向父组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  parent,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-comment">// 依赖注入相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-attr">provides</span>: parent ? parent.<span class="hljs-property">provides</span> : {},</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-comment">// 渲染上下文代理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-attr">proxy</span>: <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 标记是否被挂载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-attr">isMounted</span>: <span class="hljs-literal">false</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-comment">// attrs 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-attr">attrs</span>: {}, </span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-comment">// slots 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-attr">slots</span>: {}, </span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// context 相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-attr">ctx</span>: {},</span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-comment">// setup return 的状态数据</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">  <span class="hljs-attr">setupState</span>: {}, </span>
+<span class="code-block-extension-codeLine" data-line-num="27">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="28">};</span>
+</code></pre>
+<p>上述实例属性，相对源码而言，已经省略了很多内容了，这些属性现在看着肯定不知所云，头皮发麻。但相应的属性是 <code>vue</code> 在特定的场景和功能下才会用到的，相信你跟着本小册一起阅读后，回过头来再去看一遍这些属性，就会“顿悟”。</p>
+<p>然后是对实例化后的组件中的属性做一些优化、处理、赋值等操作，这里主要是初始化了 <code>props</code>、<code>slots</code>，并执行组件的 <code>setup</code> 函数，核心的实现和功能我们将在下一节介绍。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/component.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">setupComponent</span>(<span class="hljs-params">instance</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 1. 处理 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 取出存在 vnode 里面的 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> { props, children } = instance.<span class="hljs-property">vnode</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-title function_">initProps</span>(instance, props);</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 2. 处理 slots</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">initSlots</span>(instance, children);</span>
+<span class="code-block-extension-codeLine" data-line-num="9"></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 3. 调用 setup 并处理 setupResult</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-title function_">setupStatefulComponent</span>(instance);</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+</code></pre>
+<p>最后是把组件实例的 <code>render</code> 函数执行一遍，这里是通过 <code>setupRenderEffect</code> 来执行的。我们再看一下这个函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> <span class="hljs-title function_">setupRenderEffect</span> = (<span class="hljs-params">instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">function</span> <span class="hljs-title function_">componentUpdateFn</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">isMounted</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-comment">// 渲染子树的 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-keyword">const</span> subTree = (instance.<span class="hljs-property">subTree</span> = <span class="hljs-title function_">renderComponentRoot</span>(instance))</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 挂载子树 vnode 到 container 中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">patch</span>(<span class="hljs-literal">null</span>, subTree, container, anchor, instance, parentSuspense, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 把渲染生成的子树根 DOM 节点存储到 el 属性上</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      initialVNode.<span class="hljs-property">el</span> = subTree.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      instance.<span class="hljs-property">isMounted</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-comment">// 更新相关，后面介绍</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 创建副作用渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  instance.<span class="hljs-property">update</span> = <span class="hljs-title function_">effect</span>(componentUpdateFn, prodEffectOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p>这里我们再看一下 <code>componentUpdateFn</code> 这个函数，核心是调用了 <code>renderComponentRoot</code> 来生成 <code>subTree</code>，然后再把 <code>subTree</code> 挂载到 <code>container</code> 中。其实 <code>renderComponentRoot</code> 的核心工作就是执行 <code>instance.render</code> 方法，该方法前面我们已经说了，组件在编译时会生成组件对象，包含了 <code>render</code> 函数，该函数内部是一系列的渲染函数的执行：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { openBlock, createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = { <span class="hljs-attr">class</span>: <span class="hljs-string">"helloWorld"</span> }</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">...</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">openBlock</span>(), <span class="hljs-title function_">createElementBlock</span>(<span class="hljs-string">"div"</span>, _hoisted_1, <span class="hljs-string">" hello world "</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p>那么只需要看一下 <code>createElementBlock</code> 函数的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/vnode.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">createElementBlock</span> = (<span class="hljs-params">...</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">setupBlock</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-title function_">createBaseVNode</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      type,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      props,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      children,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      patchFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      dynamicProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      shapeFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-literal">true</span> <span class="hljs-comment">/* isBlock */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="14">};</span>
+</code></pre>
+<p>可以看到本质还是调用了 <code>createBaseVNode</code> 创新 <code>vnode</code>。所以，我们可以推导出 <code>subtree</code> 就是调用 <code>render</code> 函数而生产的 <code>vnode</code> 节点。这里需要注意的一点是，因为 <code>subtree</code> 调用的 <code>createBaseVNode</code> 创建时，传入的 <code>type = div</code> 在这里是个 <code>string</code>，所以返回的 <code>shapeFlags</code> 的值是 <code>ELEMENT</code>。</p>
+<p>渲染生成子树 <code>vnode</code> 后，接下来就是继续调用 <code>patch</code> 函数把子树 <code>vnode</code> 挂载到 <code>container</code> 中了，前面说过了 <code>patch</code> 的实现，再来简单看一下当传入的 <code>vnode</code> 的 <code>shapeFlags</code> 是个 <code>ELEMENT</code> 时，会调用 <code>processElement</code> 这个函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ELEMENT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">processElement</span>(n1, n2, container, anchor, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="3">}</span>
+</code></pre>
+<p>我们来看一下 <code>processElement</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">function</span> <span class="hljs-title function_">processElement</span>(<span class="hljs-params">n1, n2, container, anchor, parentComponent</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (!n1) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 挂载元素节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-title function_">mountElement</span>(n2, container, anchor);</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// 更新元素节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">updateElement</span>(n1, n2, container, anchor, parentComponent);</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>因为在初始化的过程中，<code>n1</code> 是 <code>null</code>，所以这里执行的是 <code>mountElement</code> 进行元素的初始化挂载。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-core/src/renderer.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> <span class="hljs-title function_">mountElement</span> = (<span class="hljs-params">vnode, container, anchor, parentComponent, parentSuspense, isSVG, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">let</span> el</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> { type, props, shapeFlag, transition, patchFlag, dirs } = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 根据 vnode 创建 DOM 节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  el = vnode.<span class="hljs-property">el</span> = <span class="hljs-title function_">hostCreateElement</span>(vnode.<span class="hljs-property">type</span>, isSVG, props &amp;&amp; props.<span class="hljs-property">is</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">if</span> (props) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-comment">// 处理 props 属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> props) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isReservedProp</span>(key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        <span class="hljs-title function_">hostPatchProp</span>(el, key, <span class="hljs-literal">null</span>, props[key], isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-comment">// 文本节点处理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">TEXT_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-title function_">hostSetElementText</span>(el, vnode.<span class="hljs-property">children</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">ARRAY_CHILDREN</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 如果节点是个数据类型，则递归子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-title function_">mountChildren</span>(vnode.<span class="hljs-property">children</span>, el)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// 把创建好的 el 元素挂载到容器中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-title function_">hostInsert</span>(el, container, anchor)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">}</span>
+</code></pre>
+<p><code>mountElemet</code> 首先是通过 <code>hostCreateElement</code> 创建了一个 <code>DOM</code> 节点，然后处理一下 <code>props</code> 属性，接着根据 <code>shapeFlag</code> 判断子节点的类型，如果节点是个文本节点，则直接创建文本节点，如果子节点是个数组，比如这种情况：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">return</span> (<span class="hljs-title function_">openBlock</span>(), <span class="hljs-title function_">createElementBlock</span>(<span class="hljs-string">"div"</span>, _hoisted_1, [</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  hoisted_2,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">createVNode</span>(_component_Hello)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">]))</span>
+</code></pre>
+<p>对于这种子节点是数组的情况时，它的 <code>shapeFlag</code> 将是一个数组类型 <code>ARRAY_CHILDREN</code>。此时会对该 <code>vnode</code> 节点的子节点调用 <code>mountChildren</code> 进行递归的 <code>patch</code> 渲染。</p>
+<p>最后，处理完所有子节点后，通过 <code>hostInsert</code> 方法把缓存在内存中的 <code>DOM el</code> 映射渲染到真实的 <code>DOM Container</code> 当中。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// packages/runtime-dom/src/nodeOps.ts</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-attr">insert</span>: (child, parent, anchor) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  parent.<span class="hljs-title function_">insertBefore</span>(child, anchor || <span class="hljs-literal">null</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4">}</span>
+</code></pre>
+<h2 data-id="heading-6">总结</h2>
+<p>到这里，我们已经完成了从入口文件开始，分析根组件如何挂载渲染到真实 <code>DOM</code> 的流程，再简单通过一张流程图回顾一下上述内容，绿色部分是初始化的过程，也是本小节的内容，灰色部分我们后面章节再做介绍。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp30a91d25745e496cb0ad763763f40896~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>然后我们再引用一下 <code>Vue</code> 官网上的一张渲染流程图：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp05fb0272c6c64b20b77b83012ac99f8c~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>现在再来看这一张图，整体流程就会清晰了很多：在组件初始化挂载阶段，模板被编译成渲染函数的形式，交由渲染器执行，渲染器执行渲染函数得到 <code>APP</code> 组件对象的子树 <code>vnode</code>，子树 <code>vnode</code> 进行递归 <code>patch</code> 后生成不同类型的 <code>DOM</code> 节点，最后把这些 <code>DOM</code> 节点挂载到页面的 <code>container</code> 当中。</p>
+<p>关于具体的编译器和更新以及响应式的部分我们会在后续章节继续介绍。本节主要介绍了挂载过程，后面的小节我们接着介绍一下更新策略。</p></div>
+    </body>
+    </html>

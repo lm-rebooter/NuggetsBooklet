@@ -1,0 +1,377 @@
+## 一 前言
+
+本章节，我们一起来设计一个自定义的弹窗组件，会包含如下知识点：
+
+* 弹窗组件设计；
+* ReactDOM.createPortal 使用；
+* 组件静态方法使用；
+* 不依赖父组件实现挂载/卸载组件。
+
+## 二 设计思路
+
+### 1 建立目标
+
+要实现的具体功能下：
+
+**编写的自定义 Modal 可以通过两种方式调用：**
+
+* 第一种通过挂载组件方式，动态设置 visible 属性。
+
+```js
+<Modal  title={'《React进阶实践指南》'}  visible={visible}  >
+    <div> hello,world </div>
+</Modal>
+```
+
+* 第二种通过 Modal 静态属性方法，控制 Modal 的显示/隐藏。
+
+```js
+ Modal.show({ /* 自定义弹窗的显示 */
+    content:<p>确定购买《React进阶指南小册》吗</p>,
+    title:'《React进阶实践指南》',
+    onOk:()=>console.log('点击确定'),
+    onCancel:()=>console.log('点击取消'),
+    onClose:()=> Modal.hidden() /* 自定义弹窗的隐藏 */
+})
+```
+如上，Modal.show 控制自定义弹窗的显示，可以通过 Modal.hidden 控制弹窗的隐藏，业务层不需要挂载组件。
+
+**其他要求：**
+
+* 自定义弹窗要有渐变的动画效果。
+
+### 2 设计思路
+
+#### 1 props的设定
+
+实现的 Modal 组件需要 props 配置项如下。
+
+|  `props` 属性    | 属性描述  |  属性类型   | 
+|  ----  | ----  |   ----   | 
+| visible  | 当前 modal 是否显示 | boolean   | 
+| onOk 回调函数  | 当点击确定按钮触发 | function   | 
+| onCancel 回调函数  | 当点击取消按钮触发 | function   | 
+| closeCb 回调函数  | 当弹窗完全关闭后触发 | function   | 
+| width | 弹窗宽度 | number   | 
+| okTest  | 确定按钮文案 | string   | 
+| cancelText  | 取消按钮文案 | string   | 
+| title  | Modal标题 | string   | 
+| footer  | 自定义底部内容 | React Element   | 
+| children  | Modal 内容（插槽模式） | React Element   | 
+| content  | Modal 内容（ props 属性模式） | React Element   | 
+
+#### 2 组件之外渲染
+
+需要把弹窗组件渲染到挂载的容器之外，这样不受到父组件的影响。这里可以通过 `ReactDOM.createPortal` API解决这个问题。
+
+Portal 提供了一种将子节点渲染到存在于父组件以外的 DOM 节点的优秀的方案。createPortal 可以把当前组件或 element 元素的子节点，渲染到组件之外的其他地方。
+
+createPortal 接受两个参数：
+
+```js
+ReactDOM.createPortal(child, container)
+```
+
+* 第一个： child 是任何可渲染的 React Element元素。 
+* 第二个： container 是一个 DOM 元素。
+
+#### 3 不依赖父组件实现挂载/卸载组件
+
+**挂载组件**
+
+一个 React 应用，可以有多个 root Fiber， 所以可以通过 ` ReactDOM.render` 来实现组件的自由挂载。
+
+**卸载组件**
+
+上面既然完成了挂载组件，下面需要在隐藏 Modal 的时候去卸载组件。 可以通过 `ReactDOM.unmountComponentAtNode` 来实现这个功能。
+
+unmountComponentAtNode 从 DOM 中卸载组件，会将其事件处理器和 state 一并清除。 如果指定容器上没有对应已挂载的组件，这个函数什么也不会做。如果组件被移除将会返回 true ，如果没有组件可被移除将会返回 false 。
+
+
+## 三 代码实现
+
+### 1 组件层面 
+
+#### Modal——分配 props ，渲染视图
+
+```js
+import Dialog from './dialog'
+
+class Modal extends React.PureComponent{
+    /* 渲染底部按钮 */
+    renderFooter=()=>{
+        const { onOk , onCancel , cancelText , okText, footer  } = this.props
+        /* 触发 onOk / onCancel 回调  */
+        if(footer && React.isValidElement(footer)) return footer
+        return <div className="model_bottom" >
+            <div className="model_btn_box" >
+                <button className="searchbtn"  onClick={(e)=>{ onOk && onOk(e) }} >{okText || '确定'}</button>
+                <button className="concellbtn" onClick={(e)=>{ onCancel && onCancel(e) }} >{cancelText || '取消'}</button>
+            </div>
+        </div>
+    }
+
+    /* 渲染顶部 */
+    renderTop=()=>{
+        const { title , onClose  } = this.props
+        return <div className="model_top" >
+            <p>{title}</p>
+            <span className="model_top_close"  onClick={()=> onClose && onClose()} >x</span>
+        </div>
+    }
+
+    /* 渲染弹窗内容 */
+    renderContent=()=>{
+        const { content , children } = this.props
+        return  React.isValidElement(content) ? content
+                : children ? children : null
+    }
+    render(){
+        const { visible, width = 500 ,closeCb , onClose  } = this.props
+        return <Dialog
+            closeCb={closeCb}
+            onClose={onClose}
+            visible={visible}
+            width={width}
+               >
+           {this.renderTop()}
+           {this.renderContent()}
+           {this.renderFooter()}
+     </Dialog>
+    }
+}
+```
+设计思路：
+* Modal 组件的设计实际很简单，就是接收上述的 props 配置，然后分配给 Top， Foot， Content 等每个部分。
+* 这里通过 Dialog 组件，来实现 Modal 的动态显示/隐藏，增加动画效果。
+* 绑定确定 onOk ，取消 onCancel ，关闭 onClose 等回调函数。
+* 通过 PureComponent 做性能优化。
+
+#### Dialog——控制显示隐藏
+
+```js
+import React , { useMemo , useEffect ,useState  } from 'react'
+import ReactDOM from 'react-dom'
+
+ /* 控制弹窗隐藏以及动画效果 */
+ const controlShow = (f1,f2,value,timer)=> {
+    f1(value)
+    return  setTimeout(()=>{
+        f2(value)
+    },timer)
+}
+export default function Dialog(props){
+    const { width , visible , closeCb , onClose  } = props
+    /* 控制 modelShow 动画效果 */
+    const [ modelShow , setModelShow ] = useState(visible)
+    const [ modelShowAync , setModelShowAync ] = useState(visible)
+    const renderChildren = useMemo(()=>{
+        /* 把元素渲染到组件之外的 document.body 上  */
+        return ReactDOM.createPortal(
+          <div style={{ display:modelShow ? 'block' : 'none'  }} >
+              <div className="model_container" style={{ opacity:modelShowAync ? 1 : 0  }}  >
+                <div className="model_wrap" >
+                    <div  style={{ width:width + 'px'}}  > {props.children} </div>
+                </div>
+              </div>
+              <div  className="model_container mast"  onClick={()=> onClose && onClose()} style={{ opacity:modelShowAync ? 0.6 : 0  }}  />
+          </div>,
+          document.body
+         )
+    },[ modelShowAync, modelShow ])
+    useEffect(()=>{
+        let timer
+        if(visible){
+            /* 打开弹窗，需要先让 */
+           timer = controlShow(setModelShow,setModelShowAync,visible,30)
+        }else{
+           timer = controlShow(setModelShowAync,setModelShow,visible,1000)
+        }
+        return function (){
+            timer && clearTimeout(timer)
+        }
+    },[ visible ])
+    /* 执行关闭弹窗后的回调函数 closeCb */
+    useEffect(()=>{
+        !modelShow && typeof closeCb  === 'function' && closeCb()
+    },[ modelShow ])
+    return renderChildren
+```
+
+设计思路：
+
+需要把元素渲染到组件之外，用 createPortal 把元素直接渲染到 `document.body` 下，为了防止函数组件每一次执行都触发 `createPortal`， 所以通过 useMemo 做性能优化。
+
+因为需要渐变的动画效果，所以需要两个变量 modelShow / modelShowAync 来控制**显示/隐藏**，modelShow 让元素显示/隐藏，modelShowAync 控制动画执行。 
+
+* 当弹窗要显示的时候，要先设置 modelShow 让组件显示，然后用 setTimeout 调度让 modelShowAync 触发执行动画。 
+* 当弹窗要隐藏的时候，需要先让动画执行，所以先控制 modelShowAync ，然后通过控制 modelShow 元素隐藏，和上述流程相反。
+* 用一个控制器 controlShow 来流畅执行更新任务。
+
+
+### 2 静态属性方法
+
+对于通过组件的静态方法来实现弹窗的显示与隐藏，流程在上述基础上，要更复杂有一些。
+
+```js
+let ModalContainer = null
+const modelSysbol = Symbol('$$__model__Container_hidden')
+
+/* 静态属性show——控制 */
+Modal.show = function(config){
+    /* 如果modal已经存在了，那么就不需要第二次show */
+   if(ModalContainer) return
+   const props = { ...config , visible: true }
+   const container = ModalContainer =  document.createElement('div')
+   /* 创建一个管理者，管理moal状态 */
+   const manager =  container[modelSysbol] = {
+       setShow:null,
+       mounted:false,
+       hidden(){
+          const { setShow } = manager
+          setShow && setShow(false)
+       },
+       destory(){
+           /* 卸载组件 */
+           ReactDOM.unmountComponentAtNode(container)
+          /* 移除节点 */
+          document.body.removeChild(container)
+          /* 置空元素 */
+          ModalContainer = null
+       }
+   }
+   const ModelApp = (props) => {
+       const [ show , setShow ] = useState(false)
+       manager.setShow = setShow
+       const { visible,...trueProps } = props
+       useEffect(()=>{
+           /* 加载完成，设置状态 */
+           manager.mounted = true
+           setShow(visible)
+        },[])
+       return <Modal  {...trueProps} closeCb={() => manager.mounted &&  manager.destory()}  visible={show}  />
+   }
+   /* 插入到body中 */
+   document.body.appendChild(container)
+   /* 渲染React元素 */
+   ReactDOM.render(<ModelApp  {...props}  />,container)
+   return manager
+}
+
+/* 静态属性——hidden控制隐藏 */
+Modal.hidden = function(){
+   if(!ModalContainer) return
+   /* 如果存在 ModalContainer 那么隐藏 ModalContainer  */
+   ModalContainer[modelSysbol] && ModalContainer[modelSysbol].hidden()
+}
+
+export default Modal
+```
+接下来，描述一下流程和细节：
+
+* 第一点：因为要通过调用 Modal 的静态属性来实现组件的显示与隐藏。所以用 `Modal.show` 来控制显示，`Modal.hidden`来控制隐藏。但是两者要建立起关联，所以通过全局`ModalContainer`属性，能够隐藏掉`Modal.show` 产生的元素与组件。
+
+* 第二点：如果调用 `Modal.show`，首先会创建一个元素容器 container ，用来挂载 Modal 组件，通过 ReactDOM.render 挂载，这里需要把 contianer 插入到 document.body 上。   
+
+* 第三点：因为 Modal 组件要动态混入 visible 属性，并且做一些初始化的工作，比如提供隐藏弹窗的方法，所以创建一个 ModelApp 容器组件包裹 Modal。
+
+* 第四点：因为要在弹窗消失的动画执行后，再统一卸载组件和元素，所以到了本模块难点，就是创建一个 modal manager 管理者，通过 `Symbol('$$__model__Container_hidden')` 把管理者和容器之间建立起关联。容器下有 hidden 只是隐藏组件，并没有销毁组件，当组件隐藏动画执行完毕，会执行 closeCb 回调函数，在回调函数中再统一卸载元素和组件。
+
+* 第五点：调用`Modal.hidden` 本质上调用的是 manager 上的 hidden 方法 ，然后执行动画，执行隐藏元素。然后再触发 destory ，用 unmountComponentAtNode 和 removeChild 做一些收尾工作。完成整个流程。
+
+创建弹窗流程图：
+
+
+![3.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b6178f43140c487892a4a42e5d6c62b2~tplv-k3u1fbpfcp-watermark.image)
+
+关闭弹窗流程图：
+
+
+![4.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8f9a9f513989494294bfb9e6209f0c62~tplv-k3u1fbpfcp-watermark.image)
+
+## 四 验证环节
+
+### 验证第一种——通过挂载组件方式
+
+```js
+/* 挂载方式调用modal */
+export default function Index() {
+    const [ visible , setVisible ] = useState(false)
+    const [ nameShow , setNameShow ] = useState(false)
+    const handleClick = () => {
+        console.log('点击')
+        setVisible(!visible)
+        setNameShow(!nameShow)
+    }
+    /* 防止 Model 的 PureComponent 失去作用 */
+    const [ handleClose ,handleOk, handleCancel ] = useMemo(()=>{
+        const Ok = () =>  console.log('点击确定按钮')
+        const Close = () => setVisible(false)
+        const Cancel = () => console.log('点击取消按钮')
+        return [ Close , Ok , Cancel  ]
+    },[])
+
+    return <div>
+        <Modal
+            onCancel={handleCancel}
+            onClose={handleClose}
+            onOk={handleOk}
+            title={'《React进阶实践指南》'}
+            visible={visible}
+            width={700}
+        >
+           <div className="feel" >
+              小册阅读感受： <input placeholder="写下你的感受" />
+              {nameShow && <p>作者： 我不是外星人</p>}
+           </div>
+        </Modal>
+        <button onClick={() => {
+            setVisible(!visible)
+            setNameShow(false)
+        }}
+        > model show </button>
+        <button onClick={handleClick} > model show ( 显示作者 ) </button>
+    </div>
+}
+```
+*  如上就是挂载的方式使用 Modal，注意 Modal 用的是 PureComponent ，父组件是函数组件在给 PureComponent 绑定方法的时候 ，要用 useMemo 或 useCallback 处理。
+
+效果：
+
+
+![1.gif](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b19d0ca825aa496e9aa4faf2b7056616~tplv-k3u1fbpfcp-watermark.image)
+
+### 验证第二种——通过静态属性方式
+
+```js
+export default function Index(){
+    const handleClick =() => {
+        Modal.show({
+            content:<p>确定购买《React进阶指南小册》吗</p>,
+            title:'《React进阶实践指南》',
+            onOk:()=>console.log('点击确定'),
+            onCancel:()=>console.log('点击取消'),
+            onClose:()=> Modal.hidden()
+        })
+    }
+    return <div>
+        <button onClick={() => handleClick()} >静态方式调用，显示modal</button>
+    </div>
+}
+```
+
+* 这种方式用起来比上一种要简单。流程我就不细说了。
+
+效果：
+
+
+![2.gif](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9a81ecfe551e4907bc551b820cd0f007~tplv-k3u1fbpfcp-watermark.image)
+
+## 五 总结
+
+本章节的知识点总结：
+
+* 自定义弹窗组件的编写——挂载组件/调用静态属性两种方式。
+* ReactDOM.createPortal 使用。
+* ReactDOM.unmountComponentAtNode 和 ReactDOM.render 实现自由挂载/卸载组件。
+* hooks 的使用与性能优化。

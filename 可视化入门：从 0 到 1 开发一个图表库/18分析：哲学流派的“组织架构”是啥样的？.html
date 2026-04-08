@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>本章我们将会使用可视化完成 “哲学家和哲学流派的关系，哪些哲学家属于同一个流派？” 这个分析任务。</p>
+<h2 data-id="heading-0">任务分析</h2>
+<p>首先我们需要拿到哲学家以及对应的哲学流派的关系数据，然后用一种可以表示包含关系的图表来进行可视化展示。</p>
+<ul>
+<li>将哲学家以及关联的哲学流派的数据关联起来，获得要分析的数据</li>
+<li>使用 CirclePacking 对数据进行可视化，通过这种图形嵌套的方式可以很好地看清数据的层次关系</li>
+<li>获取数据洞察</li>
+</ul>
+<h2 data-id="heading-1">可视分析</h2>
+<h3 data-id="heading-2">获取数据</h3>
+<p>相关数据在 Github 上（<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fchallenge-2021%2Fblob%2Fmain%2Fdata%2Fschools.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/challenge-2021/blob/main/data/schools.json" ref="nofollow noopener noreferrer">哲学流派</a>、<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fchallenge-2021%2Fblame%2Fmain%2Fdata%2Fphilosophers.json" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/challenge-2021/blame/main/data/philosophers.json" ref="nofollow noopener noreferrer">哲学家</a> 以及 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fchallenge-2021%2Fblame%2Fmain%2Fdata%2Frelations.csv" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/challenge-2021/blame/main/data/relations.csv" ref="nofollow noopener noreferrer">哲学家和哲学流派的关系数据</a>)</p>
+<h3 data-id="heading-3">用 Sparrow 绘制 CirclePacking</h3>
+<p>在绘制 CirclePacking 之前，我们需要了解 CirclePacking。</p>
+<p>CirclePacking 也称为圆形树图，是矩阵树图的变体。它的图元使用的是圆圈而不是矩形，每个分支都表示为圆，其子分支表示为其内部的圆。每个圆的区域也可用于表示额外的任意值，如数量或文件大小，数值越大，圆的区域大小越大。</p>
+<p>此外，颜色也可以用于分配类别或通过不同的色调表示另一个变量。</p>
+<p>CirclePacking 不像矩阵树图那样空间效率高，因为圈子里有很多空位。尽管如此，CirclePacking 实际上揭示了比矩阵树图更好的层次结构。</p>
+<p>和力导向图一样，Sparrow 也没有实现 CirclePacking 的布局算法，所以这里我们使用 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3-hierarchy%23pack" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3-hierarchy#pack" ref="nofollow noopener noreferrer">d3-hierarchy</a> 里面相关的布局算法。</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcp17223bb4a900450bb321d363ef65418c~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp?" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<pre><code class="hljs language-js" lang="js">(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">// 请求数据</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">URLS</span> = [
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/d345d2d7-a35d-4d27-af92-4982b3e6b213.json"</span>,
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/188bb992-7a9b-4e0e-a036-d1d0e4269738.json"</span>,
+    <span class="hljs-string">"https://gw.alipayobjects.com/os/bmw-prod/61a39597-9564-4f7e-9eb3-3bdd2280061d.json"</span>,
+  ];
+  <span class="hljs-keyword">const</span> [people, schools, relations] = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(
+    <span class="hljs-variable constant_">URLS</span>.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">async</span> (url) =&gt; {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(url);
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+    })
+  );
+
+  <span class="hljs-comment">// 将表格数据转换成层次数据</span>
+  <span class="hljs-keyword">const</span> sidPid = d3.<span class="hljs-title function_">group</span>(
+    relations.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">type</span> === <span class="hljs-string">"0"</span>),
+    <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> +d.<span class="hljs-property">from</span>
+  );
+  <span class="hljs-keyword">const</span> pidData = d3.<span class="hljs-title function_">group</span>(people, <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> +d.<span class="hljs-property">id</span>);
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">name</span> = (<span class="hljs-params">d</span>) =&gt; {
+    <span class="hljs-keyword">const</span> { name } = d.<span class="hljs-property">data</span>;
+    <span class="hljs-keyword">return</span> name.<span class="hljs-property">length</span> &gt; <span class="hljs-number">4</span> ? name.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">3</span>) + <span class="hljs-string">"..."</span> : name;
+  };
+  <span class="hljs-keyword">const</span> data = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">"哲学家"</span>,
+    <span class="hljs-attr">children</span>: schools
+      .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">{ id }</span>) =&gt;</span> sidPid.<span class="hljs-title function_">has</span>(id))
+      .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">{ name, id }</span>) =&gt;</span> ({
+        name,
+        <span class="hljs-attr">children</span>: <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(sidPid.<span class="hljs-title function_">get</span>(id)).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> {
+          <span class="hljs-keyword">const</span> [people] = pidData.<span class="hljs-title function_">get</span>(+d.<span class="hljs-property">to</span>);
+          <span class="hljs-keyword">return</span> {
+            <span class="hljs-attr">name</span>: people.<span class="hljs-property">name</span>,
+          };
+        }),
+      })),
+  };
+
+  <span class="hljs-comment">// 计算布局</span>
+  <span class="hljs-keyword">const</span> width = <span class="hljs-number">800</span>;
+  <span class="hljs-keyword">const</span> height = <span class="hljs-number">800</span>;
+  <span class="hljs-keyword">const</span> margin = <span class="hljs-number">5</span>;
+  <span class="hljs-keyword">const</span> padding = <span class="hljs-number">5</span>;
+  <span class="hljs-keyword">const</span> root = d3.<span class="hljs-title function_">hierarchy</span>(data);
+  root.<span class="hljs-title function_">count</span>();
+
+  <span class="hljs-keyword">const</span> descendants = root.<span class="hljs-title function_">descendants</span>();
+  d3
+    .<span class="hljs-title function_">pack</span>()
+    .<span class="hljs-title function_">size</span>([width - margin * <span class="hljs-number">2</span>, height - margin * <span class="hljs-number">2</span>])
+    .<span class="hljs-title function_">padding</span>(padding)(root);
+   
+  <span class="hljs-comment">// 绘制</span>
+  <span class="hljs-keyword">return</span> sp.<span class="hljs-title function_">plot</span>({
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"layer"</span>,
+    <span class="hljs-attr">data</span>: descendants,
+    width,
+    height,
+    <span class="hljs-attr">guides</span>: {
+      <span class="hljs-attr">x</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> },
+      <span class="hljs-attr">y</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> },
+      <span class="hljs-attr">color</span>: { <span class="hljs-attr">display</span>: <span class="hljs-literal">false</span> },
+    },
+    <span class="hljs-attr">scales</span>: {
+      <span class="hljs-attr">r</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">"identity"</span> },
+      <span class="hljs-attr">x</span>: { <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, width - margin * <span class="hljs-number">2</span>] },
+      <span class="hljs-attr">y</span>: { <span class="hljs-attr">domain</span>: [<span class="hljs-number">0</span>, height - margin * <span class="hljs-number">2</span>], <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>] },
+    },
+    <span class="hljs-attr">encodings</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-string">"x"</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-string">"y"</span>,
+    },
+    <span class="hljs-attr">children</span>: [
+      {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"point"</span>,
+        <span class="hljs-attr">paddingLeft</span>: margin,
+        <span class="hljs-attr">paddingRight</span>: margin,
+        <span class="hljs-attr">paddingBottom</span>: margin,
+        <span class="hljs-attr">paddingTop</span>: margin,
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">r</span>: <span class="hljs-string">"r"</span>,
+          <span class="hljs-attr">stroke</span>: <span class="hljs-string">"height"</span>,
+          <span class="hljs-attr">fill</span>: <span class="hljs-string">"height"</span>,
+        },
+      },
+      {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">"text"</span>,
+        <span class="hljs-attr">transforms</span>: [<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> data.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">height</span> === <span class="hljs-number">0</span>)],
+        <span class="hljs-attr">encodings</span>: {
+          <span class="hljs-attr">text</span>: name,
+        },
+        <span class="hljs-attr">styles</span>: {
+          <span class="hljs-attr">textAnchor</span>: <span class="hljs-string">"middle"</span>,
+          <span class="hljs-attr">dy</span>: <span class="hljs-string">"0.5em"</span>,
+        },
+      },
+    ],
+  });
+})();
+</code></pre>
+<p>Sparrow 虽然可以如上去绘制 CirclePacking，但是还是会比较麻烦，接下来我们就用 AntV 的 <a href="https://link.juejin.cn?target=https%3A%2F%2Fg2plot.antv.vision%2Fzh%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://g2plot.antv.vision/zh/" ref="nofollow noopener noreferrer">G2Plot</a> 去实现相同的效果。</p>
+<h3 data-id="heading-4">G2Plot 绘制 Circle Packing</h3>
+<p>了解之后，我们可以直接使用 G2Plot CirclePacking 来进行绘制：</p>
+<ol>
+<li>数据处理成树型结构。处理完成的数据结构大概如下：</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">const</span> data = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">"哲学家"</span>,
+  <span class="hljs-attr">children</span>: [
+    { 
+      <span class="hljs-attr">name</span>: <span class="hljs-string">"自然学派"</span>,
+      <span class="hljs-attr">children</span>: [
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"泰利斯"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"安纳克西曼德"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        <span class="hljs-comment">// ...</span>
+      ]
+    },
+    { 
+      <span class="hljs-attr">name</span>: <span class="hljs-string">"雅典的哲学"</span>,
+      <span class="hljs-attr">children</span>: [
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"普罗塔格拉斯"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"苏格拉底"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        <span class="hljs-comment">// ...</span>
+      ]
+    },
+    {
+      <span class="hljs-attr">name</span>: <span class="hljs-string">"希腊哲学"</span>,
+      <span class="hljs-attr">children</span>: [
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"第欧根尼"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        { <span class="hljs-attr">name</span>: <span class="hljs-string">"伊壁鸠鲁"</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">1</span> },
+        <span class="hljs-comment">// ...</span>
+      ]
+    },
+    <span class="hljs-comment">// ...</span>
+  ]
+}
+</code></pre>
+<ol start="2">
+<li>使用 G2Plot 绘制</li>
+</ol>
+<p>在这里，我们按照分类的大小 <code>r</code>(数据中对应的是 <code>r</code> 字段对应的数值) 来设置颜色，以增强区分度：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">// 前提，需要有一个图表容器: html`&lt;div id="container"&gt;&lt;/div&gt;`</span>
+<span class="hljs-keyword">const</span> plot = <span class="hljs-keyword">new</span> G2Plot.<span class="hljs-title class_">CirclePacking</span>(<span class="hljs-string">'container'</span>, {
+  <span class="hljs-attr">width</span>: <span class="hljs-number">600</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">600</span>,
+  <span class="hljs-attr">appendPadding</span>: <span class="hljs-number">30</span>,
+  <span class="hljs-attr">autoFit</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">padding</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">data</span>: <span class="hljs-title function_">getCirclePackingData</span>(),
+  <span class="hljs-attr">colorField</span>: <span class="hljs-string">'r'</span>,
+  <span class="hljs-attr">color</span>: <span class="hljs-string">'rgb(252, 253, 191)-rgb(231, 82, 99)-rgb(183, 55, 121)'</span>,
+  <span class="hljs-attr">pointStyle</span>: {
+    <span class="hljs-attr">stroke</span>: <span class="hljs-string">'rgb(183, 55, 121)'</span>,
+    <span class="hljs-attr">lineWidth</span>: <span class="hljs-number">0.5</span>
+  },
+  <span class="hljs-attr">legend</span>: <span class="hljs-literal">false</span>
+});
+
+plot.<span class="hljs-title function_">render</span>();
+</code></pre>
+<h3 data-id="heading-5">数据洞察</h3>
+<p>下图是绘制出来的可视化结果：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp76414317912846528fc0b19326d48afd~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>从中我们可以洞察到：</p>
+<ul>
+<li>绝大多数的哲学家倾向于“自然学派”（最大的那个圆，对应的颜色也是最深的）。</li>
+<li>而类似于“共产主义”、“存在主义”、“理性主义”和“个人主义”代表的哲学家就相对较少。</li>
+</ul>
+<h2 data-id="heading-6">延伸</h2>
+<h3 data-id="heading-7">G2Plot</h3>
+<p>G2Plot 是基于 G2 封装的开箱即用、易于配置、具有良好视觉和交互体验的通用统计图表库。它主要以图表分类学的角度去封装，既减少用户理解图形语法的成本、降低上手门槛，也基于 AntV 的可视化设计原则做了交互体验优化。</p>
+<p>G2Plot 的核心技术架构非常简单，所有的 Plot 图表都继承于一个基类，基类为所有的图表提供的了通用的 API 方法，而每个具体的可视化图表仅仅处理自己不同的配置项。所以 API 部分，所有图表基本都是一样，除了部分图表（比如：仪表盘、水波图）在 changeData API 上有细微的区别。</p>
+<p>如果想了解更多，可以去阅读 <a href="https://link.juejin.cn?target=https%3A%2F%2Fg2plot.antv.vision%2Fzh" target="_blank" rel="nofollow noopener noreferrer" title="https://g2plot.antv.vision/zh" ref="nofollow noopener noreferrer">G2Plot 官网教程</a>，官网也提供了较多的案例 demo，方便业务直接取用自己需要的图表。</p>
+<h2 data-id="heading-8">小结</h2>
+<p>这一章我们探索了：“哲学流派的“组织架构”是啥样的？”，又了解一种可视化层次数据的办法。那么下一章我们去探索：“西方哲学中心的“迁徙之旅”，同时简单了解一下地理可视化相关的东西。</p><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>

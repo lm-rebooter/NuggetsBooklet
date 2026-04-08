@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 绘制多个模型：封装绘制方法</h1>
+<p>截止到目前，我们已经熟悉了 WebGL 的开发步骤：</p>
+<ul>
+<li>初始化阶段
+<ul>
+<li>创建所有着色器程序。</li>
+<li>寻找全部 attribute 参数位置。</li>
+<li>寻找全部 uniforms 参数位置。</li>
+<li>创建缓冲区，并向缓冲区上传顶点数据。</li>
+<li>创建纹理，并上传纹理数据。</li>
+</ul>
+</li>
+<li>首次渲染阶段
+<ul>
+<li>为 uniforms 变量赋值。</li>
+<li>处理 attribute 变量
+<ul>
+<li>使用 gl.bindBuffer 重新绑定模型的 attribute 变量。</li>
+<li>使用 gl.enableVertexAttribArray 启用 attribute 变量。</li>
+<li>使用 gl.vertexAttribPointer设置 attribute变量从缓冲区中读取数据的方式。</li>
+<li>使用 gl.bufferData 将数据传送到缓冲区中。</li>
+</ul>
+</li>
+<li>使用 gl.drawArrays 执行绘制。</li>
+</ul>
+</li>
+<li>后续渲染阶段
+<ul>
+<li>对发生变化的 uniforms 变量重新赋值。</li>
+<li>每个模型的 attribute 变量。
+<ul>
+<li>使用 gl.bindBuffer 重新绑定模型的 attribute 变量。</li>
+<li>使用 gl.bufferData 重新向缓冲区上传模型的 attribute 数据。</li>
+</ul>
+</li>
+<li>使用 gl.drawArrays 执行绘制。</li>
+</ul>
+</li>
+</ul>
+<p>这就是 WebGL 的基本绘制流程，但是这些只是在绘制单个模型时的步骤。思考一下，如果我们有多个模型，会碰到哪些问题？如何进行优化？</p>
+<blockquote>
+<p>这里提到了模型的概念，3D 中的模型是由顶点<code>vertex</code>组成，顶点之间连成三角形，多个三角形就能够组成复杂的立体模型。简单模型诸如立方体、球体等，复杂模型诸如汽车、茶壶等。类比到现实世界中，模型可以理解为现实生活中看得见摸得着的物体。</p>
+</blockquote>
+<h2 data-id="heading-1">创建模型类</h2>
+<p>每个模型都有对应的顶点数据，包含顶点位置、颜色、法向量、纹理坐标等，我们将这些数据用一个顶点缓冲对象来表示，每个属性对应一个 <code>attribute</code> 变量。除了顶点数据，还需要有众多 <code>uniforms</code> 变量，uniforms 变量存储和顶点无关的属性，比如<code>模型变换矩阵</code>、模型视图投影矩阵<code>MVP</code>，（后续我们用 <code>MVP</code> 指代模型视图投影矩阵），法向量矩阵，光照等。既然模型有这么多共同的属性，那么我们把模型抽象出来。</p>
+<p>定义一个模型类，模型类自身属性有模型矩阵<code>u_ModelMatrix</code>，MVP 矩阵<code>u_Matrix</code>，以及所有的 uniforms 变量，顶点缓冲数据。</p>
+<pre><code lang="ini" class="hljs language-ini">//模型类
+function Model(bufferInfo, uniforms ){
+ <span class="hljs-attr">this.uniforms</span> = uniforms || {}<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.u_Matrix</span> = matrix.identity()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">this.bufferInfo</span> = bufferInfo || {}<span class="hljs-comment">;</span>
+ 
+ // 偏移
+ <span class="hljs-attr">this.translation</span> = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ // 旋转角度
+ <span class="hljs-attr">this.rotation</span> = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+ // 缩放
+ <span class="hljs-attr">this.scalation</span> = [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+}
+</code></pre><blockquote>
+<p>matrix.identity 方法生成一个单位矩阵。</p>
+</blockquote>
+<h3 data-id="heading-2">设置顶点对象</h3>
+<p>提供一个为模型提供顶点数据的方法，顶点数据用一个对象表示，对象的属性用着色器中属性名称来 表示，对应顶点属性。一个完整的 <code>bufferInfo</code> 包含如下内容：</p>
+<pre><code lang="yaml" class="hljs language-yaml"><span class="hljs-string">bufferInfo</span> <span class="hljs-string">=</span> {
+ <span class="hljs-string">attributes:</span>{
+ <span class="hljs-attr">a_Positions:</span> {
+ <span class="hljs-attr">buffer:</span> <span class="hljs-string">buffer</span>,
+ <span class="hljs-attr">type:</span> <span class="hljs-string">gl.FLOAT</span>,
+ <span class="hljs-attr">normalize:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">numsPerElement:</span> <span class="hljs-number">4</span>,
+ },
+ <span class="hljs-string">a_Colors:</span>{
+ <span class="hljs-string">buffer:buffer</span>,
+ <span class="hljs-attr">type:</span> <span class="hljs-string">gl.UNSIGNED_BYTE</span>,
+ <span class="hljs-attr">normalize:</span> <span class="hljs-literal">true</span>,
+ <span class="hljs-attr">numsPerElement:</span> <span class="hljs-number">4</span>
+ },
+ <span class="hljs-string">a_Normals:</span>{
+ <span class="hljs-string">buffer:buffer</span>,
+ <span class="hljs-attr">type:</span> <span class="hljs-string">gl.FLOAT</span>,
+ <span class="hljs-attr">normalize:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">numsPerElement:</span> <span class="hljs-number">3</span>
+ },
+ <span class="hljs-string">a_Texcoords:</span>{
+ <span class="hljs-string">buffer:buffer</span>,
+ <span class="hljs-attr">type:</span> <span class="hljs-string">gl.FLOAT</span>,
+ <span class="hljs-attr">normalize:</span> <span class="hljs-literal">false</span>,
+ <span class="hljs-attr">numsPerElement:</span> <span class="hljs-number">2</span>
+ }
+ },
+ <span class="hljs-string">indices:</span>[],
+ <span class="hljs-attr">elementsCount:</span> <span class="hljs-number">30</span>
+}
+</code></pre><p><code>indices</code> 代表顶点的索引数组， <code>elementsCount</code> 表示顶点的个数。buffer 代表 WebGL 创建的 buffer 对象，里面存储着对应的顶点数据。</p>
+<p>顶点数据对象除了可以在初始化时为 model 设置以外，还需要为 model 提供一个单独设置方法：</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">Model.prototype.setBufferInfo</span> = function(bufferInfo){
+ <span class="hljs-attr">this.bufferInfo</span> = bufferInfo || {}<span class="hljs-comment">;</span>
+}
+</code></pre><p>我们最初得到的顶点模型数据一般是这种格式的：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">vertexObject</span> = {
+ positions: <span class="hljs-section">[]</span>,
+ normals: <span class="hljs-section">[]</span>,
+ texcoords: <span class="hljs-section">[]</span>,
+ indices: <span class="hljs-section">[]</span>,
+ colors: <span class="hljs-section">[]</span>
+}
+</code></pre><p>这和我们上面设置的字段格式都不同，所以我们要添加一个适配器转换一下。</p>
+<h3 data-id="heading-3">设置模型状态</h3>
+<p>我们需要一些方法能够随时对模型对象的信息进行修改，比如位移，旋转角度，缩放比例等，最后还需要增加一个 preRender 预渲染方法，在绘制之前更新矩阵。</p>
+<h4 data-id="heading-4">设置模型位移。</h4>
+<p>位移的设置包含同时对三个分量设置以及对每个分量单独设置：</p>
+<ul>
+<li>translate：对模型设置 X 轴、Y 轴、Z 轴方向的偏移。</li>
+<li>translateX：对模型设置 X 轴偏移。</li>
+<li>translateY：对模型设置 Y 轴偏移。</li>
+<li>translateZ：对模型设置 Z 轴偏移。</li>
+</ul>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">translate</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">tx, ty, tz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">translateX</span>(tx);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">translateY</span>(ty);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">translateZ</span>(tz);
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">translateX</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">tx</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">translation</span>[<span class="hljs-number">0</span>] = tx || <span class="hljs-number">0</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">translateY</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">ty</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">translation</span>[<span class="hljs-number">1</span>] = ty || <span class="hljs-number">0</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">translateZ</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">tz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">translation</span>[<span class="hljs-number">2</span>] = tz || <span class="hljs-number">0</span>;
+}
+</code></pre><h4 data-id="heading-5">设置模型缩放比例。</h4>
+<p>缩放比例的设置包含同时对三个分量设置以及对每个分量单独设置：</p>
+<ul>
+<li>scale：对模型设置 X 轴、Y 轴、Z 轴上的缩放比例。</li>
+<li>scaleX：对模型设置 X 轴缩放比例。</li>
+<li>scaleY：对模型设置 Y 轴缩放比例。</li>
+<li>scaleZ：对模型设置 Z 轴缩放比例。</li>
+</ul>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">scale</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">sx, sy, sz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">scaleX</span>(sx);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">scaleY</span>(sy);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">scaleZ</span>(sz);
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">scaleX</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">sx</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">scalation</span>[<span class="hljs-number">0</span>] = sx || <span class="hljs-number">1</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">scaleY</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">sy</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">scalation</span>[<span class="hljs-number">1</span>] = sy || <span class="hljs-number">1</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">scaleZ</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">sz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">scalation</span>[<span class="hljs-number">2</span>] = sz || <span class="hljs-number">1</span>;
+}
+</code></pre><h4 data-id="heading-6">设置模型旋转角度。</h4>
+<p>模型旋转角度的设置包含同时对三个分量设置以及对每个分量单独设置：</p>
+<ul>
+<li>rotate：对模型设置 X轴、Y轴、Z 轴上的旋转角度。</li>
+<li>rotateX：对模型设置 X 轴旋转角度。</li>
+<li>rotateY：对模型设置 Y 轴旋转角度。</li>
+<li>rotateZ：对模型设置 Z 轴旋转角度。</li>
+</ul>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">rotate</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">rx, ry, rz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateX</span>(rx);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateY</span>(ry);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateZ</span>(rz);
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">rotateX</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">rx</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">rotation</span>[<span class="hljs-number">0</span>] = rx || <span class="hljs-number">0</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">rotateY</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">ry</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">rotation</span>[<span class="hljs-number">1</span>] = ry || <span class="hljs-number">0</span>;
+}
+<span class="hljs-title class_">Model</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">rotateZ</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">rz</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">rotation</span>[<span class="hljs-number">2</span>] = rz || <span class="hljs-number">0</span>;
+}
+</code></pre><h4 data-id="heading-7">预渲染。</h4>
+<p>在将模型矩阵以及模型的 MVP 矩阵传递给 GPU 之前，我们对模型矩阵以及 MVP 矩阵重新计算。</p>
+<ul>
+<li>rotate：对模型设置 X 轴、Y 轴、Z 轴上的旋转角度。</li>
+<li>rotateX：对模型设置 X 轴旋转角度。</li>
+<li>rotateY：对模型设置 Y 轴旋转角度。</li>
+<li>rotateZ：对模型设置 Z 轴旋转角度。</li>
+</ul>
+<pre><code lang="kotlin" class="hljs language-kotlin">Model.prototype.preRender = function( viewMatrix, projectionMatrix){
+ let modelMatrix = matrix.identity();
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.translation) {
+ modelMatrix = matrix.translate(
+ modelMatrix,
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">0</span>],
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">1</span>],
+ <span class="hljs-keyword">this</span>.translation[<span class="hljs-number">2</span>]
+ );
+ }
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation) {
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">0</span>] !== undefined)
+ modelMatrix = matrix.rotateX(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">0</span>]));
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">1</span>] !== undefined)
+ modelMatrix = matrix.rotateY(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">1</span>]));
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">2</span>] !== undefined)
+ modelMatrix = matrix.rotateZ(modelMatrix, degToRadians(<span class="hljs-keyword">this</span>.rotation[<span class="hljs-number">2</span>]));
+ }
+ <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.scalation) {
+ modelMatrix = matrix.scale(
+ modelMatrix,
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">0</span>],
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">1</span>],
+ <span class="hljs-keyword">this</span>.scalation[<span class="hljs-number">2</span>]
+ );
+ }
+
+ <span class="hljs-keyword">this</span>.u_ModelMatrix = modelMatrix;
+
+ <span class="hljs-comment">//重新计算 MVP 矩阵</span>
+
+ <span class="hljs-keyword">this</span>.u_Matrix = matrix.multiply(viewMatrix, <span class="hljs-keyword">this</span>.u_ModelMatrix);
+ <span class="hljs-keyword">this</span>.u_Matrix = matrix.multiply(projectionMatrix, <span class="hljs-keyword">this</span>.u_Matrix);
+}
+</code></pre><h3 data-id="heading-8">封装顶点数据的操作</h3>
+<p>最为重要的是顶点数据，它们是模型的基本组成元素，顶点数据一般包含如下几个属性：</p>
+<ul>
+<li>颜色信息</li>
+<li>位置信息</li>
+<li>法向量信息</li>
+<li>索引信息</li>
+<li>纹理坐标</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">bufferInfo</span> = {
+ colors: <span class="hljs-section">[]</span>,
+ positions: <span class="hljs-section">[]</span>,
+ normals: <span class="hljs-section">[]</span>,
+ indices: <span class="hljs-section">[]</span>,
+ texcoords: <span class="hljs-section">[]</span>
+}
+</code></pre><p>我们有了这些顶点信息，还需要通过 attribute 变量传递给 GPU，所以，我们还需要找到对应的 attribute 变量。</p>
+<p>在着色器中命名 attribute 变量时，我们通常使用 <code>a_</code> 开头，后面跟着顶点属性名称，按照这种规范命名也方便我们在 JavaScript 中对变量进行赋值。</p>
+<pre><code lang="ini" class="hljs language-ini">attribute vec4 a_Positions<span class="hljs-comment">;</span>
+attribute vec3 a_Normals<span class="hljs-comment">;</span>
+attribute vec2 a_Texcoords<span class="hljs-comment">;</span>
+attribute vec4 a_Colors<span class="hljs-comment">;</span>
+</code></pre><p>那么我们查找变量时，可以这样查找：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">attributesCount</span> = gl.getProgramParameter(program, param)<span class="hljs-comment">;</span>
+</code></pre><p>当 pname 为 gl.ACTIVE_ATTRIBUTES时，返回program绑定的顶点着色器中 attribute 变量的数量 attributesCount。</p>
+<p>有了变量数量，我们就可以对变量进行遍历了。</p>
+<pre><code lang="ini" class="hljs language-ini">for(let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i< attributesCount; i++){</span>
+ let <span class="hljs-attr">attributeInfo</span> = gl.getActiveAttrib(program, i)<span class="hljs-comment">;</span>
+}
+
+</code></pre><p>attributeInfo 对象包含 attribute 的变量名称 name，有了<code>name</code>我们就能够用 JavaScript 查找该 attribute 变量了：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">attributeIndex</span> = gl.getAttribLocation(program, attributeInfo.name)<span class="hljs-comment">;</span>
+</code></pre><p>接着是熟悉的对变量的启用、读取缓冲区方式的设置了，我们将这些操作封装到一个方法中。</p>
+<pre><code lang="lua" class="hljs language-lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createAttributeSetter</span><span class="hljs-params">(attributeIndex)</span></span>{
+ <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(bufferInfo)</span></span>{
+ gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.buffer);
+ gl.enableVertexAttribArray(attributeIndex);
+ gl.vertexAttribPointer(
+ attributeIndex,
+ bufferInfo.numsPerElement || bufferInfo.size,
+ bufferInfo.<span class="hljs-built_in">type</span> || gl.FLOAT,
+ bufferInfo.normalize || <span class="hljs-literal">false</span>,
+ bufferInfo.stride || <span class="hljs-number">0</span>,
+ bufferInfo.offset || <span class="hljs-number">0</span>
+ );
+ }
+}
+
+</code></pre><p>定义一个 attribute 变量设置对象，对每个 attribute 绑定上面实现的设置方法<code>createAttributeSetter</code>。</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">attributeSetter</span> = {}<span class="hljs-comment">;</span>
+for(let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i< attributesCount; i++){</span>
+ let <span class="hljs-attr">attributeInfo</span> = gl.getActiveAttrib(program, i)<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">attributeIndex</span> = gl.getAttribLocation(program, attributeInfo.name)<span class="hljs-comment">;</span>
+ attributeSetter<span class="hljs-section">[attributeInfo.name]</span> = createAttributeSetter(attributeIndex)<span class="hljs-comment">;</span>
+}
+return attributeSetter<span class="hljs-comment">;</span>
+</code></pre><p>以上是对着色器的各个attribute变量初始化操作，那么当我们需要对这些变量赋值时，就可以调用attribute 变量对应的 setter 函数对 attribute 进行设置了。</p>
+<h3 data-id="heading-9">封装 uniforms 变量操作。</h3>
+<p>那么，除了 attribute 变量，程序中还充斥着很多 uniforms 变量，uniforms 变量是与顶点无关的，即不管执行多少遍顶点操作， uniforms 变量始终保持不变。</p>
+<p>像 attribute 变量一样，我们仍然需要先找到所有 uniforms 变量：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">uniformsCount</span> = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)<span class="hljs-comment">;</span>
+</code></pre><p>之后，遍历所有 uniforms 变量，根据 uniforms 变量名称，生成 uniforms 赋值函数。</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">uniformsSetters</span> = {}<span class="hljs-comment">;</span>
+for(let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i< uniformsCount; i++){</span>
+ let <span class="hljs-attr">uniformInfo</span> = gl.getActiveUniform(program, i)<span class="hljs-comment">;</span>
+ if (!uniformInfo) {
+ break<span class="hljs-comment">;</span>
+ }
+ let <span class="hljs-attr">name</span> = uniformInfo.name<span class="hljs-comment">;</span>
+ if (name.substr(-3) === '<span class="hljs-section">[0]</span>') {
+ <span class="hljs-attr">name</span> = name.substr(<span class="hljs-number">0</span>, name.length - <span class="hljs-number">3</span>)<span class="hljs-comment">;</span>
+ }
+ var <span class="hljs-attr">setter</span> = createUniformSetter(program, uniformInfo)<span class="hljs-comment">;</span>
+ uniformSetters<span class="hljs-section">[name]</span> = setter<span class="hljs-comment">;</span>
+}
+</code></pre><p>uniforms 赋值函数比较繁琐一些，只因 uniforms 变量类型比较多，我们需要针对 uniforms 变量类型，编写对应的赋值函数。</p>
+<pre><code lang="yaml" class="hljs language-yaml"><span class="hljs-string">let</span> <span class="hljs-string">enums</span> <span class="hljs-string">=</span> {
+ <span class="hljs-attr">FLOAT_VEC2:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B50</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform2fv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">FLOAT_VEC3:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B51</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform3fv(location</span>, <span class="hljs-string">v);</span>
+ }
+ }
+ <span class="hljs-attr">FLOAT_VEC4:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B52</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform3fv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">INT_VEC2:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B53</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform2iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">INT_VEC3:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B54</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform3iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">INT_VEC4:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B55</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform4iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">BOOL:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B56</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform1iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">BOOL_VEC2:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B57</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform2iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">BOOL_VEC3:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B58</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform3iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">BOOL_VEC4:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B59</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform4iv(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">FLOAT_MAT2:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B5A</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniformMatrix2fv(location</span>, <span class="hljs-literal">false</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">FLOAT_MAT3:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B5B</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniformMatrix3fv(location</span>, <span class="hljs-literal">false</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">FLOAT_MAT4:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B5C</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniformMatrix4fv(location</span>, <span class="hljs-literal">false</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ <span class="hljs-attr">SAMPLER_2D:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B5E</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">texture)</span>{
+ <span class="hljs-string">gl.uniform1i(location</span>, <span class="hljs-number">0</span><span class="hljs-string">);</span>
+ <span class="hljs-string">gl.activeTexture(gl.TEXTURE0);</span>
+ <span class="hljs-string">gl.bindTexture(gl.TEXTURE_2D</span>, <span class="hljs-string">texture);</span>
+ }
+ },
+ <span class="hljs-attr">SAMPLER_CUBE:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x8B60</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">texture)</span>{
+ <span class="hljs-string">gl.uniform1i(location</span>, <span class="hljs-number">0</span><span class="hljs-string">);</span>
+ <span class="hljs-string">gl.activeTexture(gl.TEXTURE0);</span>
+ <span class="hljs-string">gl.bindTexture(gl.TEXTURE_CUBE_MAP</span>, <span class="hljs-string">texture);</span>
+ }
+ },
+ 
+ <span class="hljs-attr">INT:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x1404</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform1i(location</span>, <span class="hljs-string">v);</span>
+ }
+ },
+ 
+ <span class="hljs-attr">FLOAT:</span> {
+ <span class="hljs-attr">value:</span> <span class="hljs-number">0x1406</span>,
+ <span class="hljs-attr">setter:</span> <span class="hljs-string">function(location</span>, <span class="hljs-string">v)</span>{
+ <span class="hljs-string">gl.uniform1f(location</span>, <span class="hljs-string">v);</span>
+ }
+ }
+}<span class="hljs-string">;</span>
+</code></pre><p>enums 是所有的变量类型，但没有包含普通数组，所以我们还需要通过 uniformInfo.size 属性判断该 uniform 变量是否是数组，uniform 变量的 size 大于 1 并且该变量名称的最后三个字符是<code>[0]</code>，说明该 uniform 变量是数组类型，大家可以尝试一下。</p>
+<blockquote>
+<p>有两点需要大家注意：<br>
+1、如果 uniform 或者 attribute 变量只是在着色器中进行了定义，但没有被使用，那么它将被编译器抛弃，我们通过<code>gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)</code>这种方式获取不到该变量。<br>
+2、uniform 和 attribute 变量的数量并不是可以无限定义的，而是有一定上限，不同平台数量不同，一般 windows 平台 256 个，mac 和 linux 平台一般为 1024 个，如果定义数量超过这个上限，着色器程序会报编译错误。</p>
+</blockquote>
+<pre><code lang="ini" class="hljs language-ini">function createUniformSetter(gl, program, uniformInfo) {
+ let <span class="hljs-attr">uniformLocation</span> = gl.getUniformLocation(program, uniformInfo.name)<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">type</span> = uniformInfo.type<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">isArray</span> = uniformInfo.size > <span class="hljs-number">1</span> && uniformInfo.name.substr(-<span class="hljs-number">3</span>) === <span class="hljs-string">'[0]'</span><span class="hljs-comment">;</span>
+ 
+ if(isArray && <span class="hljs-attr">type</span> == enums.INT.value){
+ return function(v) {
+ gl.uniform1iv(location, v)<span class="hljs-comment">;</span>
+ }<span class="hljs-comment">;</span>
+ }
+ if(isArray && <span class="hljs-attr">type</span> == enums.FLOAT.value){
+ return function(v) {
+ gl.uniform1fv(location, v)<span class="hljs-comment">;</span>
+ }<span class="hljs-comment">;</span>
+ }
+ return function createSetter(v){
+ return enums<span class="hljs-section">[getKeyFromType(type)]</span>.setter(location, v)
+ }
+}
+</code></pre><p>以上就是 uniforms 变量的初始化过程，相对繁琐，但比较简单，容易理解。</p>
+<h2 data-id="heading-10">绘制多个物体</h2>
+<p>既然有了模型类、uniforms 和 attribute 变量的赋值函数，接下来我们就可以创建一个模型列表和一个渲染列表，模型列表中存放所有模型对象，渲染列表中存放着待渲染的对象。</p>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-comment">// 渲染列表</span>
+<span class="hljs-keyword">let</span> renderList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>();
+<span class="hljs-comment">// 模型列表</span>
+<span class="hljs-keyword">let</span> modelList = <span class="hljs-keyword">new</span> <span class="hljs-title function_">list</span>();
+
+<span class="hljs-comment">// 列表类</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">List</span>(<span class="hljs-params">list</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">list</span> = list || [];
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">uuid</span> = list.<span class="hljs-property">length</span>;
+}
+<span class="hljs-comment">// 添加对象</span>
+<span class="hljs-title class_">List</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">add</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">object</span>){
+ object.<span class="hljs-property">uuid</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">uuid</span>;
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">list</span>.<span class="hljs-title function_">push</span>(object);
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">uuid</span>++;
+}
+<span class="hljs-comment">// 删除对象</span>
+<span class="hljs-title class_">List</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">remove</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">object</span>){
+ <span class="hljs-variable language_">this</span>.<span class="hljs-property">list</span>.<span class="hljs-title function_">splice</span>(object.<span class="hljs-property">uuid</span>, <span class="hljs-number">1</span>);
+}
+<span class="hljs-comment">// 查找对象</span>
+<span class="hljs-title class_">List</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">get</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">index</span>){
+ <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">list</span>[index];
+}
+<span class="hljs-comment">// 遍历列表</span>
+<span class="hljs-title class_">List</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">forEach</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">callback</span>){
+ <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">list</span>.<span class="hljs-title function_">forEach</span>(callback);
+}
+</code></pre><p>模型列表和渲染列表的区别在于，渲染列表只存储和渲染相关的数据，比如着色器程序，模型的顶点缓冲数据，uniforms 数据等。</p>
+<p>一个完整的模型对象有如下内容：</p>
+<pre><code lang="rust" class="hljs language-rust"><span class="hljs-keyword">let</span> <span class="hljs-keyword"></span><span class="hljs-variable">modelObject</span>={
+ <span class="hljs-comment">// 偏移状态</span>
+ translation:[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+ <span class="hljs-comment">// 缩放状态</span>
+ scalation:[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+ <span class="hljs-comment">// 旋转状态</span>
+ rotation:[<span class="hljs-number">30</span>, <span class="hljs-number">60</span>, <span class="hljs-number">100</span>],
+ bufferInfo:{
+ <span class="hljs-comment">// 顶点属性</span>
+ attributes:{
+ <span class="hljs-comment">// 顶点坐标</span>
+ a_Position: {
+ buffer: [],
+ <span class="hljs-keyword">type</span>: gl.FLOAT,
+ normalize: <span class="hljs-literal">false</span>,
+ numsPerElement: <span class="hljs-number">4</span>
+ },
+ ...
+ },
+ <span class="hljs-comment">// 顶点索引</span>
+ indices: [],
+ <span class="hljs-comment">// 顶点数量</span>
+ elementsCount: <span class="hljs-number">30</span>
+ },
+ uniforms: {
+ <span class="hljs-comment">// MVP 矩阵</span>
+ u_Matrix: ...,
+ <span class="hljs-comment">// 模型矩阵</span>
+ u_ModelMatrix: ...,
+ <span class="hljs-comment">// 法向量矩阵</span>
+ u_NormalMatrix: ...,
+ <span class="hljs-comment">// 全局光照</span>
+ u_LightColor: ...,
+ ...
+ }
+}
+</code></pre><p>而一个渲染对象通常包含对应模型的几个属性：</p>
+<pre><code lang="yaml" class="hljs language-yaml"><span class="hljs-string">let</span> <span class="hljs-string">renderObject</span> <span class="hljs-string">=</span> {
+ <span class="hljs-string">//</span> <span class="hljs-string">模型</span>
+ <span class="hljs-attr">bufferInfo:</span> <span class="hljs-string">modelObject.bufferInfo</span>,
+ <span class="hljs-attr">program:</span> <span class="hljs-string">program</span>,
+ <span class="hljs-attr">uniforms:</span> <span class="hljs-string">modelObject.uniforms</span>,
+}
+</code></pre><p>添加一个新模型时，我们只需要初始化模型对象，添加到 objectList 中，同时往 renderList 中添加渲染对象。</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">cube</span> = createCube(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>, <span class="hljs-number">5</span>)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">cubeModel</span> = new Model(cube)<span class="hljs-comment">;</span>
+objectList.add(cubeModel)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">renderObject</span>= {
+ program: program,
+ model: cubeModel,
+ primitive: 'TRIANGLES',
+ renderType: 'drawArrays'
+}
+renderList.add(renderObject)<span class="hljs-comment">;</span>
+</code></pre><p>每次渲染时，首先遍历 objectList 中的模型对象，计算模型的 uniforms 变量，比如代表模型状态的 MVP 矩阵，模型矩阵，法向量矩阵等，以及顶点数据 bufferInfo，然后遍历 renderList 中的渲染对象，设置对应的 bufferInfo 和 uniforms 变量 ，执行绘制即可。</p>
+<pre><code lang="ini" class="hljs language-ini">objectList.forEach(function(modelObject){
+ // 计算相关 uniforms 属性。
+ modelObject.preRender()<span class="hljs-comment">;</span>
+})
+renderList.forEach(function(renderObject){
+ let <span class="hljs-attr">bufferInfo</span> = renderObject.model.bufferInfo<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">uniforms</span> = renderObject.model.uniforms<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">program</span> = renderObject.program<span class="hljs-comment">;</span>
+ // 往顶点缓冲区传递数据
+ setBufferInfos(gl, program, bufferInfo)<span class="hljs-comment">;</span>
+ // 设置 uniforms 变量。
+ setUniforms(gl, program, uniforms)<span class="hljs-comment">;</span>
+ // 绘制
+ if (<span class="hljs-attr">renderObject.renderType</span> === <span class="hljs-string">'drawElements'</span>) {
+ if (bufferInfo.indices) {
+ gl.drawElements(object.primitive, bufferInfo.indices.length, gl.UNSIGNED_SHORT, 0)<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ } else {
+ console.warn('model buffer does not support indices to draw')<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ }
+ } else {
+ gl.drawArrays(gl<span class="hljs-section">[object.primitive]</span>, 0, bufferInfo.elementsCount)<span class="hljs-comment">;</span>
+ }
+})
+</code></pre><h2 data-id="heading-11">演示</h2>
+<p>接下来我们用上面的代码演示一下绘制多个模型的场景，利用之前写好的立方体和球体生成函数，我们生成 200 个模型，随机分配颜色，请注意由于目前强制要求一个模型的顶点必须包含<code>颜色</code>、<code>坐标</code>、<code>纹理坐标</code>、<code>法向量</code>的，所以我们的模型生成函数必须要有能力生成这些属性。</p>
+<pre><code lang="scss" class="hljs language-scss">let cube = <span class="hljs-built_in">createCube</span>(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+<span class="hljs-comment">// 将带索引的立方体顶点数据转化成无索引的顶点数据</span>
+cube = <span class="hljs-built_in">transformIndicesToUnIndices</span>(cube);
+<span class="hljs-comment">// 为顶点数据添加颜色信息</span>
+<span class="hljs-built_in">createColorForVertex</span>(cube);
+let sphere = <span class="hljs-built_in">createSphere</span>(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>);
+<span class="hljs-comment">// 将带索引的球体顶点数据转化成无索引的顶点数据</span>
+sphere = <span class="hljs-built_in">transformIndicesToUnIndices</span>(sphere);
+<span class="hljs-comment">// 为顶点数据添加颜色信息</span>
+<span class="hljs-built_in">createColorForVertex</span>(sphere);
+</code></pre><p>根据上面的顶点数据生成模型缓冲对象：</p>
+<pre><code lang="ini" class="hljs language-ini">// 生成立方体的顶点缓冲对象
+let <span class="hljs-attr">cubeBufferInfo</span> = createBufferInfoFromObject(gl, cube)<span class="hljs-comment">;</span>
+// 生成球体的顶点缓冲对象
+let <span class="hljs-attr">sphereBufferInfo</span> = createBufferInfoFromObject(gl, sphere)<span class="hljs-comment">;</span>
+</code></pre><p>创建模型列表和渲染列表,这里我们选择创建 100 个模型</p>
+<pre><code lang="scss" class="hljs language-scss">let modelList = new <span class="hljs-built_in">List</span>();
+let renderList = new <span class="hljs-built_in">List</span>();
+for (var i = <span class="hljs-number">0</span>; i < <span class="hljs-number">100</span>; ++i) {
+ <span class="hljs-selector-tag">var</span> <span class="hljs-selector-tag">object</span> = new <span class="hljs-built_in">Model</span>();
+ if (i % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>) {
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.setBufferInfo</span>(bufferInfo);
+ } else {
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.setBufferInfo</span>(sphereBufferInfo);
+ }
+ <span class="hljs-comment">// 设置模型的位置</span>
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.translate</span>(rand(-<span class="hljs-number">10</span>, <span class="hljs-number">10</span>), <span class="hljs-built_in">rand</span>(-<span class="hljs-number">10</span>, <span class="hljs-number">10</span>), <span class="hljs-built_in">rand</span>(-<span class="hljs-number">10</span>, <span class="hljs-number">10</span>));
+ <span class="hljs-comment">// 设置模型的旋转角度</span>
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.rotate</span>(rand(<span class="hljs-number">0</span>, <span class="hljs-number">90</span>));
+ <span class="hljs-comment">// 预渲染</span>
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.preRender</span>(viewMatrix, projectionMatrix);
+ <span class="hljs-comment">// 设置模型的 uniforms 属性。</span>
+ <span class="hljs-selector-tag">object</span><span class="hljs-selector-class">.setUniforms</span>({
+ u_ModelMatrix: object.u_ModelMatrix,
+ u_Matrix: object.u_Matrix,
+ u_ColorFactor: new Float32Array([rand(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.75</span>), <span class="hljs-built_in">rand</span>(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.75</span>), <span class="hljs-built_in">rand</span>(<span class="hljs-number">0.25</span>, <span class="hljs-number">0.5</span>)])
+ })
+
+ objectList<span class="hljs-selector-class">.add</span>(object);
+ <span class="hljs-comment">// 根据模型对象创建渲染对象，并将渲染对象添加到渲染列表中</span>
+ renderList<span class="hljs-selector-class">.add</span>({
+ programInfo: program,
+ model: object,
+ primitive: gl.TRIANGLES,
+ renderType: 'drawArrays'
+ });
+}
+</code></pre><p>有了模型列表和渲染列表，接下来我们就可以执行渲染操作了，渲染操作是遍历渲染列表，重新设置模型的 bufferInfo 和 uniforms 属性，然后执行绘制。</p>
+<pre><code lang="ini" class="hljs language-ini">function render() {
+ if (!playing) {
+ requestAnimationFrame(render)<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ }
+ // 重新设置模型的状态
+ objectList.forEach(function (object) {
+ object.rotateX(object.rotation<span class="hljs-section">[0]</span> + rand(0.2, 0.5))<span class="hljs-comment">;</span>
+ object.rotateY(object.rotation<span class="hljs-section">[1]</span> + rand(0.2, 0.5))<span class="hljs-comment">;</span>
+ object.rotateZ(object.rotation<span class="hljs-section">[1]</span> + rand(0.2, 0.5))<span class="hljs-comment">;</span>
+ object.preRender(viewMatrix, projectionMatrix)<span class="hljs-comment">;</span>
+ object.setUniforms({
+ u_ModelMatrix: object.u_ModelMatrix,
+ u_Matrix: object.u_Matrix,
+ })
+ })
+ // 执行渲染
+ let lastProgram<span class="hljs-comment">;</span>
+ let lastBufferInfo<span class="hljs-comment">;</span>
+ renderList.forEach(function (object) {
+ let <span class="hljs-attr">programInfo</span> = object.programInfo<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">bufferInfo</span> = object.model.bufferInfo<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">uniforms</span> = object.model.uniforms<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">bindBuffers</span> = <span class="hljs-literal">false</span><span class="hljs-comment">;</span>
+ if (programInfo !== lastProgram) {
+ <span class="hljs-attr">lastProgram</span> = programInfo<span class="hljs-comment">;</span>
+ gl.useProgram(programInfo.program)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">bindBuffers</span> = <span class="hljs-literal">true</span><span class="hljs-comment">;</span>
+ }
+
+ if (bindBuffers || bufferInfo !== lastBufferInfo) {
+ <span class="hljs-attr">lastBufferInfo</span> = bufferInfo<span class="hljs-comment">;</span>
+ setBufferInfos(gl, programInfo, bufferInfo)<span class="hljs-comment">;</span>
+ }
+ setUniforms(programInfo, uniforms)<span class="hljs-comment">;</span>
+
+ // 绘制
+ if (<span class="hljs-attr">object.renderType</span> === <span class="hljs-string">'drawElements'</span>) {
+ if (bufferInfo.indices) {
+ gl.drawElements(object.primitive, bufferInfo.indices.length, gl.UNSIGNED_SHORT, 0)<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ } else {
+ console.warn('model buffer does not support indices to draw')<span class="hljs-comment">;</span>
+ return<span class="hljs-comment">;</span>
+ }
+ } else {
+ gl.drawArrays(gl<span class="hljs-section">[object.primitive]</span>, 0, bufferInfo.elementsCount)<span class="hljs-comment">;</span>
+ }
+ })<span class="hljs-comment">;</span>
+ requestAnimationFrame(render)<span class="hljs-comment">;</span>
+ }
+</code></pre><p>上面这些就是重构后的调用代码，是不是很简洁了很多？我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018116166e7faf5af2477e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-12">回顾</h2>
+<p>本节将之前的代码进行重构优化，大家可以看到一些前面用到的、没有用到的函数，比如 <code>uniforms</code> 属性赋值函数，虽然种类很多，但是很容易就能够见名知意。之前代码有用到 <code>gl.uniform1f</code> 给变量赋值单个 <code>float</code> 类型的数字，其他类似的函数也是为了给 uniform 变量赋值，只是赋值类型不同。</p>
+<p>通过对重用代码进行封装，我们能够以很少的代码绘制多个模型，并且不用再去编写繁琐的<code>buffer</code> 和 <code>uniform</code> 的赋值代码，我们把精力放在编写模型的状态逻辑上，这大大地提高了我们的开发效率。</p>
+<p>下一节我们开始学习光照效果，光照效果涉及到一些物理学知识，大家先别急着看代码，先理解下物理知识，然后多做实践，相信大家很快就能掌握。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 绘制三角形：学会使用缓冲区、了解 WebGL 中的基本图形元素</h1>
+<p>上节带领大家学习了<code>点图元</code>的绘制过程，内容涉及到着色器的语法部分以及 JavaScript 操作 WebGL 的步骤。如果大家能够按照例子多练习几遍的话，之后的学习会更容易一些。</p>
+<p>本节带大家练习绘制三角形，三角形的绘制比较简单。 因为它是 WebGL 提供给我们的基本图元之一，我们只需要给着色器提供三角形的顶点数据，调用 WebGL 的绘制命令 <code>gl.drawArrays</code> 即可。</p>
+<h2 data-id="heading-1">目标</h2>
+<p>本节通过实现利用鼠标动态绘制三角形的功能，学习使用缓冲区向 GPU 中传递数据。最终效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc46e5a511b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson2.html" title="http://ifanqi.top/webgl/pages/lesson2.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson2.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson2.html" ref="nofollow noopener noreferrer">源码地址</a>。</li>
+</ul>
+<p>通过本节学习，你将会掌握如下内容：</p>
+<ul>
+<li>三角形图元的分类。</li>
+<li>使用缓冲区传递数据。</li>
+<li>类型化数组的作用。</li>
+<li>动态绘制三角形。</li>
+</ul>
+<h2 data-id="heading-2">三角形图元的分类</h2>
+<p>WebGL 的基本图元包含点、线段、三角形，而三角形又分为三类</p>
+<ul>
+<li>基本三角形</li>
+<li>三角带</li>
+<li>三角扇</li>
+</ul>
+<p>那么，他们之间有什么区别呢？</p>
+<ul>
+<li>基本三角形（TRIANGLES）</li>
+</ul>
+<p>基本三角形是一个个独立的三角形，假如我们提供给着色器六个顶点，那么 WebGL 会绘制两个三角形，前三个顶点绘制一个，后三个顶点绘制另一个，互不相干。
+举个例子来说，假如我们有六个顶点【v1, v2, v3, v4, v5, v6】，采用基本三角形图元进行绘制，绘制完是这个样子：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc0abecae80~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>【v1, v2, v3】为一个三角形，【v4, v5, v6】 为另一个三角形。</p>
+<p><code>绘制三角形的数量 = 顶点数 / 3</code>。</p>
+<ul>
+<li>三角带（TRIANGLE_STRIP）</li>
+</ul>
+<p>同样是这六个顶点，如果采用三角带的方式绘制的话，则会绘制 【v1, v2, v3】, 【v3, v2, v4】, 【v3, v4, v5】, 【v5, v4, v6】 共计 4 个三角形，如下图所示：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201912216875b8e51710e48~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p><code>绘制三角形的数量 = 顶点数 - 2</code></p>
+<ul>
+<li>三角扇（TRIANGLE_FAN）</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc2bb044266~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，三角扇的绘制方式是以第一个顶点作为所有三角形的顶点进行绘制的。采用三角扇绘制方式所能绘制的三角形的数量和顶点个数的关系如下：</p>
+<p><code>绘制三角形的数量 = 顶点数 - 2</code></p>
+<p>本节我们主要学习基本三角形图元的绘制。</p>
+<h2 data-id="heading-3">绘制基本三角形</h2>
+<p>我们的目标是在 canvas 上点击三个位置作为三角形的三个顶点，然后绘制一个红颜色的三角形，本节还是不涉及深度信息（Z值），所以每个顶点我们只传入【x, y】坐标即可。</p>
+<p>我们从简单之处着手，首先实现一个固定顶点坐标的三角形。</p>
+<p>按照惯例，我们先准备着色器程序：</p>
+<h3 data-id="heading-4">顶点着色器</h3>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-comment">//设置浮点数据类型为中级精度</span>
+precision mediump <span class="hljs-built_in">float</span>;
+<span class="hljs-comment">//接收顶点坐标 (x, y)</span>
+attribute vec2 a_Position;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span>()</span>{
+ gl_Position = vec4(a_Position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+}
+</code></pre><h3 data-id="heading-5">片元着色器</h3>
+<pre><code lang="ini" class="hljs language-ini">//设置浮点数据类型为中级精度
+precision mediump float<span class="hljs-comment">;</span>
+//接收 JavaScript 传过来的颜色值（rgba）。
+uniform vec4 u_Color<span class="hljs-comment">;</span>
+
+void main(){
+ vec4 <span class="hljs-attr">color</span> = u_Color / vec4(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">gl_FragColor</span> = color<span class="hljs-comment">;</span>
+}
+
+</code></pre><h3 data-id="heading-6">HTML 部分</h3>
+<p>HTML 部分还是包含一个 <code>canvas</code> 标签，以及存储片元和顶点着色器源码的 <code>script</code> 标签，和之前绘制点的内容大致相同，仅着色器源码有所差异。
+为了节省篇幅，我们不贴这部分的源码了。</p>
+<h3 data-id="heading-7">JavaScript 部分</h3>
+<p>首先，定义三角形的三个顶点：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">positions</span> = [<span class="hljs-number">1</span>,<span class="hljs-number">0</span>, <span class="hljs-number">0</span>,<span class="hljs-number">1</span>, <span class="hljs-number">0</span>,<span class="hljs-number">0</span>]<span class="hljs-comment">;</span>
+</code></pre><p>给着色器传递顶点数据和上节采用的方式不同，区别在于如何将三角形的三个顶点数据传递到顶点着色器中。<br>
+按照惯例，我们还是先找到 a_Position 变量：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">a_Position</span> = gl.getAttribLocation(program, <span class="hljs-string">'a_Position'</span>)
+</code></pre><p>找到了该变量，接下来我们该怎么传递数据呢？按照上节绘制点的方式传递数据肯定不行了，因为这次我们要传递多个顶点数据。这里我们借助一个强大的工具<code>缓冲区</code>，通过缓冲区我们可以向着色器传递多个顶点数据。</p>
+<p>首先创建一个缓冲区：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">buffer</span> = gl.createBuffer()<span class="hljs-comment">;</span>
+</code></pre><p>缓冲区创建好了，我们绑定该缓冲区为 WebGL 当前缓冲区 <code>gl.ARRAY_BUFFER</code>，绑定之后，对缓冲区绑定点的的任何操作都会基于该缓冲区（即buffer） 进行。</p>
+<pre><code lang="arduino" class="hljs language-arduino">gl.<span class="hljs-built_in">bindBuffer</span>(gl.ARRAY_BUFFER, buffer);
+</code></pre><p>接下来往当前缓冲区（即上一步通过 bindBuffer 绑定的缓冲区）中写入数据。</p>
+<pre><code lang="javascript" class="hljs language-javascript">gl.<span class="hljs-title function_">bufferData</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>(positions), gl.<span class="hljs-property">STATIC_DRAW</span>);
+</code></pre><blockquote>
+<p>注意，着色器程序中的变量需要强类型数据，所以我们在往缓冲区写数据的时候，JS 的弱类型数组一定要用类型化数组转化一下。上面的 <code>new Float32Array(positions)</code>，目的就是将 JavaScript 中的弱类型数组转化为强类型数组。</p>
+</blockquote>
+<p>总结一下这一系列步骤：</p>
+<ul>
+<li>首先，创建了一个保存顶点坐标的数组，保存了三角形的顶点信息。</li>
+<li>然后我们使用<code>gl.createBuffer</code>创建了一个缓冲区，并通过<code>gl.bindBuffer(gl.ARRAY_BUFFER, buffer)</code>绑定 <code>buffer</code> 为当前缓冲区。</li>
+<li>之后我们用<code>new Float32Array(positions)</code>将顶点数组转化为更严谨的类型化数组。</li>
+<li>最后我们使用 <code>gl.bufferData</code> 将类型化后的数组复制到缓冲区中，最后一个参数 <code>gl.STATIC_DRAW</code> 提示 WebGL 我们不会频繁改变缓冲区中的数据，WebGL 会根据这个参数做一些优化处理。</li>
+</ul>
+<blockquote>
+<p>以上这些代码属于初始化过程，在渲染过程中一般不会再次调用。</p>
+</blockquote>
+<p>接下来，我们演示如何把顶点组成的模型渲染到屏幕上。</p>
+<p>我们需要告诉 WebGL 如何从之前创建的缓冲区中获取数据，并且传递给顶点着色器中的 <code>a_Position</code> 属性。 那么，首先启用对应属性 <code>a_Position</code>：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.enableVertexAttribArray(a_Position)<span class="hljs-comment">;</span>
+</code></pre><p>接下来我们需要设置从缓冲区中取数据的方式：</p>
+<pre><code lang="ini" class="hljs language-ini">//每次取两个数据
+var <span class="hljs-attr">size</span> = <span class="hljs-number">2</span><span class="hljs-comment">;</span>
+//每个数据的类型是32位浮点型
+var <span class="hljs-attr">type</span> = gl.FLOAT<span class="hljs-comment">; </span>
+//不需要归一化数据
+var <span class="hljs-attr">normalize</span> = <span class="hljs-literal">false</span><span class="hljs-comment">; </span>
+// 每次迭代运行需要移动数据数 * 每个数据所占内存 到下一个数据开始点。
+var <span class="hljs-attr">stride</span> = <span class="hljs-number">0</span><span class="hljs-comment">; </span>
+// 从缓冲起始位置开始读取 
+var <span class="hljs-attr">offset</span> = <span class="hljs-number">0</span><span class="hljs-comment">; </span>
+// 将 a_Position 变量获取数据的缓冲区指向当前绑定的 buffer。
+gl.vertexAttribPointer(
+ a_Position, size, type, normalize, stride, offset)
+</code></pre><blockquote>
+<p>需要注意的是，我们通过 <code>gl.vertexAttribPointer</code> 将属性绑定到了当前的缓冲区，即使之后我们使用 <code>bindBuffer</code> 绑定到其他缓冲区时，<code>a_Position</code> 也依然会从 <code>buffer</code> 这个缓冲区中获取数据。</p>
+</blockquote>
+<p>这个函数比较关键，它决定了目标属性(本例是 a_Position )如何从缓冲区中读取数据，在这里我解释一下：</p>
+<ul>
+<li>gl.vertexAttribPointer (target, size, type, normalize, stride, offset)。
+<ul>
+<li>target： 允许哪个属性读取当前缓冲区的数据。</li>
+<li>size：一次取几个数据赋值给 <code>target</code> 指定的目标属性。在我们的示例中，顶点着色器中 a_Position 是 vec2 类型，即每次接收两个数据，所以 <code>size</code> 设置为 2。以后我们绘制立体模型的时候，a_Position 会接收三个数据，size 相应地也会设置成 3。</li>
+<li>type：数据类型，一般而言都是浮点型。</li>
+<li>normalize：是否需要将非浮点类型数据<code>单位化</code>到【-1, 1】区间。</li>
+<li>stride：步长，即每个顶点所包含数据的字节数，默认是 0 ，0 表示一个属性的数据是连续存放的。在我们的例子中，我们的一个顶点包含两个分量，X 坐标和 Y 坐标，每个分量都是一个 Float32 类型，占 4 个字节，所以，stride = 2 * 4 = 8 个字节。但我们的例子中，缓冲区只为一个属性<code>a_Position</code>服务，缓冲区的数据是连续存放的，因此我们可以使用默认值 0 来表示。但如果我们的缓冲区为多个属性所共用，那么 stride 就不能设置为 0 了，需要进行计算。</li>
+<li>offset：在每个步长的数据里，目标属性需要偏移多少字节开始读取。在我们的例子中，buffer 只为 a_Position 一个属性服务，所以 offset 为 0 * 4 = 0。</li>
+</ul>
+</li>
+</ul>
+<p>假如我们的顶点数组为【10, 20, 30, 30, 40, 50, 60, 70】，每两个相邻数字代表一个顶点的 X 坐标和 Y 坐标。由于我们使用的是 Float32Array 浮点数组，每个数字占 4 个字节。</p>
+<img height="70%" width="70%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201896165adbb47096a00f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>上面也介绍了，stride 代表每个顶点数据所占用字节数：</p>
+<img height="60%" width="60%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201896165adbb5478cdcb9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<blockquote>
+<p>这两个图应该能让大家更容易理解 stride 的计算方式。关于 <code>gl.vertexAttribPointer</code> 的使用方式我们先告一段落，下节我们再介绍用一个缓冲区为多个属性传递数据时，stride 和 offset 该如何计算。</p>
+</blockquote>
+<p>言归正传，设置完变量和缓冲区的绑定之后，我们接下来编写绘制代码：</p>
+<pre><code lang="ini" class="hljs language-ini">//绘制图元设置为三角形
+var <span class="hljs-attr">primitiveType</span> = gl.TRIANGLES<span class="hljs-comment">;</span>
+//从顶点数组的开始位置取顶点数据
+var <span class="hljs-attr">offset</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+//因为我们要绘制三个点，所以执行三次顶点绘制操作。
+var <span class="hljs-attr">count</span> = <span class="hljs-number">3</span><span class="hljs-comment">;</span>
+gl.drawArrays(primitiveType, offset, count)<span class="hljs-comment">;</span>
+</code></pre><p>大功告成，我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc7174338aa~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>可以看出，使用 WebGL 绘制一个简单的三角形就需要很多代码。但请大家不要担心，代码固然多，但是很容易理解，而且这部分代码我们完全可以通过封装，减少调用。</p>
+</blockquote>
+<p>大家看代码注释就能明白对应的含义，而且 GLSL 的语法也能够让人见名知意。本节不对 GLSL 做过多介绍。我会在之后的中级进阶里专门开辟一个章节详细介绍 GLSL 的语法细节。</p>
+<p>一张图演示上面这个例子的数据传输过程：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8f2f0f0caff2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-8">动态绘制三角形</h2>
+<p>到目前为止，我们已经实现了在屏幕上绘制一个固定三角形的功能，接下来我们实现动态绘制三角形，大家回想一下上节动态绘制点的逻辑，动态三角形的绘制和它基本类似。</p>
+<h3 data-id="heading-9">着色器部分</h3>
+<ul>
+<li>顶点着色器增加一个变量用来接收 canvas 的尺寸，将 canvas 坐标转化为 NDC 坐标。</li>
+</ul>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//设置浮点数精度为中等精度</span>
+precision mediump <span class="hljs-attribute">float</span>;
+<span class="hljs-comment">// 接收顶点坐标 (x, y)</span>
+attribute vec2 a_Position;
+<span class="hljs-comment">// 接收 canvas 的尺寸(width, height)</span>
+attribute vec2 a_Screen_Size;
+void <span class="hljs-selector-tag">main</span>(){
+ vec2 <span class="hljs-attribute">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span>;
+ <span class="hljs-attribute">position</span> = <span class="hljs-attribute">position</span> * <span class="hljs-built_in">vec2</span>(<span class="hljs-number">1.0</span>,-<span class="hljs-number">1.0</span>);
+ gl_Position = <span class="hljs-built_in">vec4</span>(position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+}
+
+</code></pre><ul>
+<li>片元着色器部分没有改动。</li>
+</ul>
+<h3 data-id="heading-10">JavaScript 部分</h3>
+<p>在 JavaScript 代码部分，我们多了一些交互操作：</p>
+<ul>
+<li>鼠标点击 canvas，存储点击位置的坐标。</li>
+<li>每点击三次时，再执行绘制命令。因为三个顶点组成一个三角形，我们要保证当顶点个数是3的整数倍时，再执行绘制操作。</li>
+</ul>
+<p>关键代码如下：</p>
+<pre><code lang="ini" class="hljs language-ini">canvas.addEventListener('mouseup', <span class="hljs-attr">e</span> => {
+ var <span class="hljs-attr">x</span> = e.pageX<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = e.pageY<span class="hljs-comment">;</span>
+ positions.push(x, y)<span class="hljs-comment">;</span>
+ if (positions.length % <span class="hljs-attr">6</span> == <span class="hljs-number">0</span>) {
+ //向缓冲区中复制新的顶点数据。
+ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW)<span class="hljs-comment">;</span>
+ //重新渲染
+ render(gl)<span class="hljs-comment">;</span>
+ }
+})
+
+//渲染函数
+function render(gl) {
+ gl.clearColor(0, 0, 0, 1.0)<span class="hljs-comment">;</span>
+ //用上一步设置的清空画布颜色清空画布。
+ gl.clear(gl.COLOR_BUFFER_BIT)<span class="hljs-comment">;</span>
+ //绘制图元设置为三角形
+ var <span class="hljs-attr">primitiveType</span> = gl.TRIANGLES<span class="hljs-comment">;</span>
+ //从顶点数组的开始位置取顶点数据
+ var <span class="hljs-attr">drawOffset</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ //因为我们要绘制 N 个点，所以执行 N 次顶点绘制操作。
+ gl.drawArrays(primitiveType, 0, positions.length / 2)<span class="hljs-comment">;</span>
+}
+</code></pre><p>至此，我们完成了动态绘制三角形的功能，效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201895165a8dc46e5a511b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-11">回顾</h2>
+<p>回顾一下我们本节学到的内容：</p>
+<ul>
+<li>三角形图元分类
+<ul>
+<li>gl.TRIANGLES：基本三角形。</li>
+<li>gl.TRIANGLE_STRIP：三角带。</li>
+<li>gl.TRIANGLE_FAN：三角扇。</li>
+</ul>
+</li>
+<li>类型化数组的作用。
+<ul>
+<li>Float32Array：32位浮点数组。</li>
+</ul>
+</li>
+<li>使用缓冲区传递数据。
+<ul>
+<li>gl.createBuffer：创建buffer。</li>
+<li>gl.bindBuffer：绑定某个缓冲区对象为当前缓冲区。</li>
+<li>gl.bufferData：往缓冲区中复制数据。</li>
+<li>gl.enableVertexAttribArray：启用顶点属性。</li>
+<li>gl.vertexAttribPointer：设置顶点属性从缓冲区中读取数据的方式。</li>
+</ul>
+</li>
+<li>动态绘制三角形。
+<ul>
+<li>改变顶点信息，然后通过缓冲区将改变后的顶点信息传递到着色器，重新绘制三角形。</li>
+</ul>
+</li>
+</ul>
+<h2 data-id="heading-12">思考与作业</h2>
+<p>大家有没有发现一些问题：</p>
+<ul>
+<li>为什么绘制的所有三角形颜色都是一样的？</li>
+<li>能不能不同的三角形显示不同的颜色？</li>
+<li>同一个三角形能不能做成渐变色？</li>
+</ul>
+<p>仔细思考一下，动手试试看。</p>
+<p>下一节我们学习第三种基本图元：<code>线段</code>。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 冯氏光照模型：为物体增加镜面高光效果</h1>
+<p>前两个章节我们讲述了冯氏光照模型的环境光和漫反射光，本节我们学习组成冯氏光照的最后一个因素：镜面高光。</p>
+<h2 data-id="heading-1">镜面高光现象</h2>
+<p>大家小时候应该都做过这样的恶作剧，上课的时候拿一面镜子，对准某个同学，慢慢调整镜子的角度，直到反射的太阳光照在对方的脸上，然后引起该同学的极度不适。</p>
+<p>有没有想过为什么会有这种现象？</p>
+<p>有的同学答了，这是因为镜子的反射光正好进入了同学的眼睛里。</p>
+<p>说的没错，那假如我拿一件衣服来反射太阳光，能不能达到同样的效果。</p>
+<p>很多同学脱口而出：不能。</p>
+<p>是的，可是大家有没有想过为什么不能？</p>
+<p>也许大家会出于直觉回答，因为衣服不反光，镜子反光。其实也对，但不太严谨。事实上衣服也反光，只是衣服表面过于粗糙，光线被散射到了各个方向，不能集中射向一个方向，导致进入人眼的光线强度大大削弱。镜子就不同了，镜子比较光滑，光线反射方向比较统一，进入人眼的光线强度也就越多，从而产生刺眼的效果。</p>
+<p>冯氏光照模型使用<code>镜面高光分量</code>来模拟这种现象。</p>
+<h2 data-id="heading-2">镜面高光的表示与计算</h2>
+<p>与漫反射分量相同，镜面高光也是根据光线的入射方向向量和法向量来决定的，只不过镜面高光还需要依赖视线的观察方向，也就是眼睛是从什么方向观察的物体。</p>
+<p>视线方向向量与反射光向量的之间的夹角越小，夹角余弦值就会越大，那么人眼感受到的光照就会越强，反之，光照越暗。因此，我们使用夹角的余弦值表示镜面高光因子，然后再用镜面高光因子乘以光线颜色即可求出镜面高光分量：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667c881d9ddb04c~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<ul>
+<li>1、首先需要求出反射光向量<code>reflectDirection</code>和人眼视线方向向量<code>viewDirection</code>。</li>
+<li>2、归一化两个向量。</li>
+<li>3、求出两个归一化向量的点积，得到镜面高光因子。</li>
+<li>4、将上一步求出的高光因子乘以光线颜色，得到镜面高光分量。</li>
+</ul>
+<p>本节我们使用 GLSL 内置的反射向量算法<code>reflect(inVec, normal)</code>，其中 <code>inVec</code> 为入射向量，方向由光源指向入射点，<code>normal</code> 为入射点的法向量。</p>
+<h2 data-id="heading-3">如何实现镜面高光</h2>
+<p>接下来，我们开始编码实现镜面高光效果。</p>
+<h3 data-id="heading-4">计算反射光向量</h3>
+<p>反射光向量在片元着色器中实现，参照上一节漫反射分量的计算，我们已经有了光源位置<code>u_LightPosition</code>和入射点位置<code>v_Position</code>，所以可以求得入射光向量：</p>
+<pre><code lang="ini" class="hljs language-ini">//求出入射光向量
+vec3 <span class="hljs-attr">lightDirection</span> = v_Position - u_LightPosition
+</code></pre><blockquote>
+<p>切记，在使用GLSL 的reflect 函数计算反射光向量时，一定要确保入射光向量的方向是从光源位置指向入射点位置。</p>
+</blockquote>
+<p>有了入射光向量，我们还需要入射点的法向量<code>v_Normal</code>，这个值已经从顶点着色器中插值化后传到片元着色器了，所以我们可以直接拿来用：</p>
+<pre><code lang="scss" class="hljs language-scss">vec3 reflectDirection =<span class="hljs-built_in">reflect</span>(normalize(lightDirection), <span class="hljs-built_in">normalize</span>(v_Normal));
+</code></pre><p>这样就求出了反射光向量，接下来我们计算视线观察向量。</p>
+<h3 data-id="heading-5">计算视线观察向量</h3>
+<p>我们将入射点到观察者的方向向量定义为视线观察向量，为了计算这个向量，我们需要知道入射点的位置以及观察者的位置，入射点的位置我们有了，现在需要观察者的位置，我们将人眼在世界坐标系下的坐标作为观察者位置，然后将其用 <code>uniform</code> 变量的形式传递到片元着色器中。</p>
+<p>因此我们的片元着色器要增加一个 <code>uniform</code> 变量接收观察者坐标。</p>
+<pre><code lang="arduino" class="hljs language-arduino"><span class="hljs-comment">// 观察者坐标。</span>
+uniform vec3 viewPosition;
+</code></pre><p>有了观察者坐标，我们就可以计算出视线观察向量了。</p>
+<pre><code lang="ini" class="hljs language-ini">// 视线观察向量
+vec3 <span class="hljs-attr">viewDirection</span> = viewPosition - v_Position<span class="hljs-comment">;</span>
+</code></pre><h3 data-id="heading-6">计算镜面高光因子</h3>
+<p>前面求出了视线观察向量和反射光向量，接下来我们就可以计算镜面高光因子了。</p>
+<p>首先，归一化<code>视线观察向量</code>和<code>反射光向量</code></p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">viewDirection</span> = normalize(viewDirection)<span class="hljs-comment">;</span>
+<span class="hljs-attr">reflectDirection</span> = normalize(reflectDirection)<span class="hljs-comment">;</span>
+</code></pre><p>然后计算这两个向量的点积，这里要注意一点，就是如果这两个向量的点积为负数，则说明视线观察向量和反射光向量大于 90 度，是没有反射光进入眼睛的，所以我们使用 <code>max</code>函数取点积和 0 之间的最大值。</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">// 镜面高光因子</span>
+<span class="hljs-attribute">float</span> specialFactor = <span class="hljs-built_in">dot</span>(viewDirection, reflectDirection);
+<span class="hljs-comment">// 如果为负值，一律设置为 0。</span>
+specialFactor = <span class="hljs-built_in">max</span>(specialFactor, <span class="hljs-number">0.0</span>);
+</code></pre><p>完整的片元着色器程序如下：</p>
+<pre><code lang="ini" class="hljs language-ini"> precision mediump float<span class="hljs-comment">;</span>
+ varying vec4 v_Color<span class="hljs-comment">;</span>
+ uniform vec3 u_LightColor<span class="hljs-comment">;</span>
+ uniform float u_AmbientFactor<span class="hljs-comment">;</span>
+ uniform vec3 u_LightPosition<span class="hljs-comment">;</span>
+ varying vec3 v_Position<span class="hljs-comment">;</span>
+ varying vec3 v_Normal<span class="hljs-comment">;</span>
+ uniform vec3 u_ViewPosition<span class="hljs-comment">;</span>
+ void main(){
+ // 环境光分量
+ vec3 <span class="hljs-attr">ambient</span> = u_AmbientFactor * u_LightColor<span class="hljs-comment">; //环境光分量</span>
+ // 光线照射向量
+ vec3 <span class="hljs-attr">lightDirection</span> = v_Position - u_LightPosition<span class="hljs-comment">;</span>
+ // 归一化光线照射向量
+ <span class="hljs-attr">lightDirection</span>= normalize(lightDirection)<span class="hljs-comment">;</span>
+ // 漫反射因子
+ float <span class="hljs-attr">diffuseFactor</span> = dot(normalize(lightDirection), normalize(v_Normal))<span class="hljs-comment">;</span>
+ // 如果大于 90 度，则无光线进入人眼，漫反射因子设置为0。
+ <span class="hljs-attr">diffuseFactor</span> = max(diffuseFactor, <span class="hljs-number">0.0</span>)<span class="hljs-comment">;</span>
+ // 漫反射光照
+ vec3 <span class="hljs-attr">diffuseLightColor</span> =u_LightColor * diffuseFactor<span class="hljs-comment">;</span>
+ 
+ // 归一化视线观察向量
+ vec3 <span class="hljs-attr">viewDirection</span> = normalize(v_Position - u_ViewPosition)<span class="hljs-comment">;</span>
+		//反射向量
+ vec3 <span class="hljs-attr">reflectDirection</span> = reflect(-lightDirection, normalize(v_Normal))<span class="hljs-comment">;</span>
+ 
+ // 初始化镜面光照因子
+ float <span class="hljs-attr">specialFactor</span> = <span class="hljs-number">0.0</span><span class="hljs-comment">;</span>
+ // 如果有光线进入人眼。
+ if(diffuseFactor > 0.0){
+ 	<span class="hljs-attr">specialFactor</span> = dot(normalize(viewDirection), normalize(reflectDirection))<span class="hljs-comment">;</span>
+ <span class="hljs-attr">specialFactor</span> = max(specialFactor,<span class="hljs-number">0.0</span>)<span class="hljs-comment">;</span>
+ }
+ // 计算镜面光照分量
+ vec3 <span class="hljs-attr">specialLightColor</span> = u_LightColor * specialFactor * <span class="hljs-number">0.5</span><span class="hljs-comment">;</span>
+ // 计算总光照
+ vec3 <span class="hljs-attr">outColor</span> = ambient + diffuseLightColor + specialLightColor<span class="hljs-comment">;</span>
+ // 将物体自身颜色乘以总光照，即人眼看到的物体颜色。
+ <span class="hljs-attr">gl_FragColor</span> = v_Color * vec4(outColor, <span class="hljs-number">1</span>)<span class="hljs-comment">; </span>
+ }
+
+</code></pre><p>加入光照之后，我们的着色器代码就变多了，但其实并不复杂，仅仅是<code>取值</code>、<code>计算</code>、<code>赋值</code>操作而已。</p>
+<h3 data-id="heading-7">JavaScript 部分</h3>
+<p>镜面光照我们需要为着色器传递一个人眼观察位置，所以我们的JavaScript 部分需要修改：</p>
+<pre><code lang="ini" class="hljs language-ini">// 获取着色器全局变量 `u_ViewPosition`
+var <span class="hljs-attr">u_ViewPosition</span> = gl.getUniformLocation(program, <span class="hljs-string">'u_ViewPosition'</span>)<span class="hljs-comment">;</span>
+</code></pre><p>将人眼观察位置放置在 z 轴正方向 10 位置，即物体的前面。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">var</span> uniforms = {
+	eyeX: <span class="hljs-number">0</span>,
+	eyeY: <span class="hljs-number">0</span>,
+	eyeZ: <span class="hljs-number">10</span>
+};
+
+gl<span class="hljs-selector-class">.uniform3f</span>(u_ViewPosition, uniforms<span class="hljs-selector-attr">[<span class="hljs-string">'eyeX'</span>]</span>, uniforms<span class="hljs-selector-attr">[<span class="hljs-string">'eyeY'</span>]</span>, uniforms<span class="hljs-selector-attr">[<span class="hljs-string">'eyeZ'</span>]</span>);
+</code></pre><p>完整的代码大家可以参见<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">这里</a>，我们比较下加入镜面高光前后的效果。</p>
+<p>无镜面高光时：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018101816685394ede269fc~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>添加镜面高光后：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181018166853931eb2c864~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>观察上面两幅图，我们能很直观地看到添加镜面高光后，球体正中央有一个明晃晃的光圈，符合真实世界中的场景。</p>
+<h2 data-id="heading-8">反光度</h2>
+<p>但是，这个刺眼的光圈面积太大了，我们需要给它添加一个称为<code>反光度</code>(shininess)的参数约束光圈的大小，一个物体的反光度越大，反光率就越强，散射的光就越少，我们看到的高光面积就越小。</p>
+<p>我们定义一个<code>u_Shininess</code>的变量表示物体的反光度，然后用前面求得的高光因子乘以 2 的shininess次幂作为最终的高光因子。这样就可以让我们的光圈变得小一些。</p>
+<blockquote>
+<p>求幂计算可以通过GLSL 内置的公式 pow(2, shininess)求得。</p>
+</blockquote>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">specialFactor</span> = max(specialFactor, <span class="hljs-number">0.0</span>)<span class="hljs-comment">;</span>
+<span class="hljs-attr">specialFactor</span> = pow(specialFactor, u_Shininess)<span class="hljs-comment">;</span>
+</code></pre><p>一般情况下，我们设置物体的反光度为 32 就可以了，但是特殊场景下，效果可能不理想，这时候，我们就需要根据实际情况调整反光度了。</p>
+<p>我们将反光度设置成 32，看下增加反光度后的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018101716682af8af2b40a2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这会效果明显好多了，我们可以看到光圈点很小了，大家可以<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">点击此处</a>查看我做的 demo，调节反光度看下效果。</p>
+<h3 data-id="heading-9">Blinn-Phong光照模型</h3>
+<p>冯氏光照模型不仅能够很好的近似真实光照，而且性能也相当高。但是
+这种光照在某些场景下仍然有些缺陷，大家观察前面没有添加反光度时的图片，应该能发现高光光圈边缘有一圈很明显的暗灰色断痕，但大家再看一下增加反光度后的效果，却没发现这种现象。这是为什么呢？</p>
+<p>产生这个问题的原因是，在高光边缘部位，由于人眼视线向量和反射光向量夹角大于90度，那么夹角的余弦值便小于 0，按照冯氏光照模型的镜面光照算法，夹角余弦值小于 0 时， 我们的镜面高光分子系数就会用 0 来代替。所以高光边缘部位及以外的部分就没有了镜面光照分量，试想一下，如果反光度越小，镜面高光区域就越大，那高光区域边缘部位漫反射光的分量所占比重就会比较小，在高光边缘部位就会产生一种较大的亮度差，给人一种暗灰色断痕的感觉。反之，反光度越小，光圈越小，相应地，光圈周围漫反射光的分量所占比重就比较大，所以不会在高光边缘产生过大的亮度差。</p>
+<p>如下图，反射光线和视线观察向量之间的夹角γ 大于90度，所以此时镜面高光分量为 0。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810181668555808c1edac~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>其实，这种观察角度，镜面高光分量还是应该有的，只是值比较小而已。所以，出现了 Blin Phong 光照模型，这种光照模型不再利用反射向量，而是采用了<code>半程向量</code> ，半程向量是视线和反射光之间夹角的一半方向上的单位向量，利用半程向量和法向量之间的夹角余弦来表示镜面高光因子，半程向量和法向量之间的夹角越小，镜面高光分量越大，如下图所示：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181018166855f7d5303bea~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h3 data-id="heading-10">实现 Blin Phong 光照</h3>
+<p>我们在冯氏光照代码的基础上加以修改，实现 Blin 光照模型。与冯氏光照模型不同的是，我们需要半程向量，半程向量该如何求呢？</p>
+<p>按照向量的计算规则，半程向量只需要我们将视线观察向量和反射向量相加，然后将得出的结果归一化就可以求出了。</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">// 计算半程向量</span>
+vec3 halfVector = <span class="hljs-built_in">normalize</span>(reflectDirection + viewDirection);
+<span class="hljs-comment">// 计算高光因子</span>
+<span class="hljs-attribute">float</span> specialFactor = <span class="hljs-built_in">dot</span>(normalize(v_Nomral), halfVector);
+</code></pre><p>利用 GLSL 的内置函数，我们就很容易的求出来了。</p>
+<p>从冯氏光照模型进化成 Blin光照模型，我们只需要改动这么一处就可以了，是不是觉得很简单呢？</p>
+<p>算法是很简单，但是我希望大家还是能够把算法背后的原理搞清楚。这才是大家学习的目的。</p>
+<p>好了，我们比较一下反光度同时为 1 的时候，冯氏光照和 Blin 光照之间的差别。</p>
+<p>冯氏光照效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181018166853931eb2c864~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>Blin 光照效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181018166856699653738b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，采用 <code>Blin光照模型</code>后， 镜面高光区域过度的更加自然。</p>
+<h2 data-id="heading-11">回顾</h2>
+<p>至此，我们就讲完了冯氏光照模型，以及为了解决冯氏光照的缺陷而引入的 <code>Blin 光照模型</code>。</p>
+<p>本节也涉及到了许多向量矩阵之间的计算，大家多加练习，不要被这些计算搞晕了。</p>
+<p>接下来我们进入下一个环节的学习，对 GLSL 的语法进行一个总结。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

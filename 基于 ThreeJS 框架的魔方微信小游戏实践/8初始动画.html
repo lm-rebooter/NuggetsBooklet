@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">初始动画</h1>
+<h2 data-id="heading-1">前言</h2>
+<p>在这一章中你将学到以下知识点：</p>
+<ol>
+<li>实现魔方小游戏初始动画功能；</li>
+<li>Tween.js 补间动画库的用法；</li>
+<li>魔方随机转动分析及实现。</li>
+</ol>
+<h2 data-id="heading-2">概述</h2>
+<p>到目前为止你进入这个魔方小游戏看到的应该是如下画面：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812116769373ce3280d4~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>假设你作为一个用户以前没怎么接触魔方，看到这个应该是比较困惑的，进来了然后干嘛呢？</p>
+<p>因此进入小游戏后应该有一个打乱的过程而且最好能以动画的形式展现出来，比如：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181221676f5b24f4c63ab~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>示例代码在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Ftree%2Fmaster%2Flesson%2Fdemo6" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/tree/master/lesson/demo6" ref="nofollow noopener noreferrer">Threejs_rubik</a> 项目中；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201913168141a74e9f5c8d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">实现</h2>
+<p>初始动画由两部分组成；一部分是打乱动画，另一部分是位置动画；</p>
+<h3 data-id="heading-4">打乱动画</h3>
+<p>打乱动画其实就是随机转动魔方，在<code>转动魔方</code>那一章实现过转动魔方函数<code>rotateMove</code>，那打乱也就是随机执行转动魔方函数；</p>
+<p><code>rotateMove</code>函数有四个参数：</p>
+<ul>
+<li><code>cubeIndex</code>表示触摸小方块序号；</li>
+<li><code>direction</code>表示转动方向；</li>
+<li><code>callback</code>表示转动魔方回调函数；</li>
+<li><code>totalTime</code>表示转动动画时长；</li>
+</ul>
+<p>随机执行转动魔方函数也就是随机选取触摸小方块序号和转动方向；但是要注意一点，魔方转动方向共有六种，但是小方块不同面的转动方向有且只有四种，而且不完全相同；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5d4a50ea67e7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>如图<code>A点</code>的转动方向只有<code>AB</code>、<code>AC</code>、<code>AE</code>、<code>AD</code>四种；而<code>F点</code>的转动方向也只有四种分别为<code>FJ </code>、<code>FG</code>、<code>FI</code>、<code>FH</code>，它们之间并不是完全相同的；</p>
+<p>初一看起来随机选取这些元素还有略微有点复杂，有没有更简单的方式呢？</p>
+<p>答案是有的！</p>
+<p>在前人总结的魔方还原公式中，把魔方转动的情况抽象为<code>12种</code>基本转动，如图：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181221676e0da8a05d56f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image">
+<img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181221676f2bef7686480~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>以<code>U</code>魔方上层绕 Y 轴作顺时针旋转 90 度为例：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5d66d3f7266e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>触摸小方块序号为<code>0</code>，转动方向可由<code>getDirection</code>函数得到为<code>1.3</code>，代码实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第527行至第529行 */</span>
+<span class="hljs-title function_">U</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">1.3</span>, next, <span class="hljs-number">100</span>);
+}
+</code></pre>
+<p>根据相同的方法可得其它转动的代码实现如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第530行至第562行 */</span>
+<span class="hljs-title function_">R</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">2.4</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">F</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">4.1</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">D</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">6</span>, <span class="hljs-number">4.4</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">L</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">18</span>, <span class="hljs-number">1.1</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">B</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">2</span>, <span class="hljs-number">2.1</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">u</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">4.4</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">r</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">1.1</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">f</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span>, <span class="hljs-number">2.1</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">d</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">6</span>, <span class="hljs-number">1.3</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">l</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">18</span>, <span class="hljs-number">2.4</span>, next, <span class="hljs-number">100</span>);
+}
+<span class="hljs-title function_">b</span>(<span class="hljs-params">next</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateMove</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">minCubeIndex</span> + <span class="hljs-number">2</span>, <span class="hljs-number">4.1</span>, next, <span class="hljs-number">100</span>);
+}
+</code></pre>
+<p>打乱动画要稍快于正常转动动画，因此动画时长设为<code>100</code>毫秒。</p>
+<p>实现这 12 种基本转动之后，随机转动打乱魔方的问题就转换成从 12 种基本转动中随机选取转动函数序列然后按顺序依次执行的问题了；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第588行至第598行 */</span>
+<span class="hljs-title function_">randomRotate</span>(<span class="hljs-params">callback</span>) {
+    <span class="hljs-keyword">var</span> stepNum = <span class="hljs-number">21</span>;
+    <span class="hljs-keyword">var</span> stepArr = [];
+    <span class="hljs-keyword">var</span> funcArr = [<span class="hljs-string">'R'</span>, <span class="hljs-string">'U'</span>, <span class="hljs-string">'F'</span>, <span class="hljs-string">'B'</span>, <span class="hljs-string">'L'</span>, <span class="hljs-string">'D'</span>, <span class="hljs-string">'r'</span>, <span class="hljs-string">'u'</span>, <span class="hljs-string">'f'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'l'</span>, <span class="hljs-string">'d'</span>];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; stepNum; i++) {
+        <span class="hljs-keyword">var</span> num = <span class="hljs-built_in">parseInt</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * funcArr.<span class="hljs-property">length</span>);
+        stepArr.<span class="hljs-title function_">push</span>(funcArr[num]);
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">runMethodAtNo</span>(stepArr, <span class="hljs-number">0</span>, callback);
+    <span class="hljs-keyword">return</span> stepArr;
+}
+</code></pre>
+<p>随机转动首先要解决获取随机转动序列的问题；</p>
+<p><code>stepNum</code>为序列长度，定义为<code>21</code>是因为目前最少步数还原算法大概需要 20 多步；因此<code>21步</code>能<code>很大概率</code>保证打乱之后是一个比较复杂的情况，另外奇数也能一定程度确保随机转动之后不会还是起始状态；</p>
+<p><code>funcArr</code>是 12 种基本转动函数名称数组，我们要做的就是从这个数组中随机选取一个元素，放入到随机序列中；</p>
+<p>然后把得到的随机序列传入<code>runMethodAtNo</code>函数中让其按顺序执行；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第567行至第583行 */</span>
+<span class="hljs-title function_">runMethodAtNo</span>(<span class="hljs-params">arr, no, next</span>) {
+    <span class="hljs-keyword">var</span> self = <span class="hljs-variable language_">this</span>;
+    <span class="hljs-keyword">if</span> (no &gt;= arr.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">if</span> (next) {
+            <span class="hljs-variable language_">this</span>[arr[no]](next);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable language_">this</span>[arr[no]]();
+        }
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-variable language_">this</span>[arr[no]](<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+            <span class="hljs-keyword">if</span> (no &lt; arr.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>) {
+                no++
+                self.<span class="hljs-title function_">runMethodAtNo</span>(arr, no, next);
+            }
+        })
+    }
+}
+</code></pre>
+<p>在<code>runMethodAtNo</code>函数中我们使用递归的方法实现按顺序执行传入的随机序列中的基本转动函数；<code>no</code>表示待执行转动函数在序列中的序号，如果是最后一项直接执行即可，如果不是则需要在执行的时候指定回调方法，在回调方法中序号递增且再次执行<code>runMethodAtNo</code>函数。</p>
+<h3 data-id="heading-5">位置动画</h3>
+<p>在打乱的过程中魔方需要从一个位置移动到另一个位置，在移动过程中还伴随着一定的转动；</p>
+<p>在具体实现之前我们需要引入<code>Tween.js</code>，这是一个用 JavaScript 实现的补间动画库，它能帮助开发者计算出两个状态之间的中间状态，获得了中间状态，开发者只需要在屏幕每次重绘时不断更新物体的状态即可。</p>
+<p>首先需要去 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Ftweenjs%2Ftween.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/tweenjs/tween.js" ref="nofollow noopener noreferrer">tween.js的github仓库</a> 下载源代码；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181221676f315c6db4d62~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>然后在项目中新增目录以及代码文件；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181221676f302ee0a7319~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>接着在<code>main.js</code>文件中引入；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第2行 */</span>
+<span class="hljs-keyword">import</span> <span class="hljs-variable constant_">TWEEN</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'tween/tween.js'</span>
+</code></pre>
+<p>准备工作完成之后就可以开始实现位置动画了；</p>
+<p>首先定义一个变量用来标识动画结束；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第325行 */</span>
+<span class="hljs-keyword">var</span> isAnimationEnd = <span class="hljs-literal">false</span>;
+</code></pre>
+<p>然后定义动画开始前的状态和动画结束后的状态；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第327行至第331行 */</span>
+<span class="hljs-keyword">var</span> endStatus = {<span class="hljs-comment">//目标状态</span>
+    <span class="hljs-attr">rotateY</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span>,
+    <span class="hljs-attr">z</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>
+}
+</code></pre>
+<p>动画结束后的状态也就是正视角魔方创建完成之后的状态，在位置动画中有变化的属性只有三个：</p>
+<ul>
+<li><code>rotateY</code>表示绕 Y 轴旋转的角度；</li>
+<li><code>y</code>表示正视角魔方中心 Y 轴坐标；</li>
+<li><code>z</code>表示正视角魔方中心 Z 轴坐标；</li>
+</ul>
+<p>接着把正视角魔方变换到动画开始前的状态；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第333行至第335行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">rotateY</span>(-<span class="hljs-number">90</span> / <span class="hljs-number">180</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);<span class="hljs-comment">//把魔方设置为动画开始状态</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> += <span class="hljs-variable language_">this</span>.<span class="hljs-property">originHeight</span>/<span class="hljs-number">3</span>;
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> -= <span class="hljs-number">350</span>;
+</code></pre>
+<p>绕 Y 轴顺时针旋转 90 度且中心向上同时向内移动一定的距离，向上移动的距离不能为固定值否则有可能在其它尺寸的屏幕出现越界的情况；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第337行至第341行 */</span>
+<span class="hljs-keyword">var</span> startStatus = {<span class="hljs-comment">//开始状态</span>
+    <span class="hljs-attr">rotateY</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span>,
+    <span class="hljs-attr">z</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>
+}
+</code></pre>
+<p>把正视角魔方变换到动画开始前的状态之后就可以记录其此时的状态了。</p>
+<p>Tween 的使用方法很简单；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第343行至第352行 */</span>
+<span class="hljs-keyword">var</span> tween = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-title class_">Tween</span>(startStatus)
+                .<span class="hljs-title function_">to</span>(endStatus, <span class="hljs-number">2000</span>)
+                .<span class="hljs-title function_">easing</span>(<span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-property">Easing</span>.<span class="hljs-property">Quadratic</span>.<span class="hljs-property">In</span>)
+                .<span class="hljs-title function_">onUpdate</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+                    self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = startStatus.<span class="hljs-property">rotateY</span>;
+                    self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> = startStatus.<span class="hljs-property">y</span>
+                    self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> = startStatus.<span class="hljs-property">z</span>
+                }).<span class="hljs-title function_">onComplete</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+                    isAnimationEnd = <span class="hljs-literal">true</span>;
+                });
+</code></pre>
+<p>熟悉 JQuery 的童鞋应该对这种链式写法很熟悉；</p>
+<p>在创建时指定开始状态，然后在<code>to</code>方法中指定结束状态以及补间动画时长，而<code>easing</code>方法可以用来指定运动函数和 CSS 的 transition-timing-function 属性类似；</p>
+<p>另外还需要设置<code>onUpdate</code>和<code>onComplete</code>回调函数，每次状态的更新都会触发<code>onUpdate</code>监听，在回调函数中实时更新魔方状态即可；结束时会触发<code>onComplete</code>监听，此时需要改变改变标识变量。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第354行至第359行 */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">animate</span>(<span class="hljs-params">time</span>) {
+    <span class="hljs-keyword">if</span> (!isAnimationEnd){
+        <span class="hljs-title function_">requestAnimationFrame</span>(animate);
+        <span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-title function_">update</span>();
+    }
+}
+    
+<span class="hljs-comment">/* main.js 第361行至第364行 */</span>
+<span class="hljs-built_in">setTimeout</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+    tween.<span class="hljs-title function_">start</span>();
+    <span class="hljs-title function_">requestAnimationFrame</span>(animate);
+},<span class="hljs-number">500</span>)
+</code></pre>
+<p>补间动画创建并设置完成之后还需要执行<code>start</code>函数才能开始，而且在<code>requestAnimationFrame</code>函数中还需要执行<code>TWEEN.update</code>；</p>
+<p><code>500毫秒延迟</code>是为了让位置动画比打乱动画慢开始。</p>
+<h3 data-id="heading-6">调用</h3>
+<p>至此完整的初始动画如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第323行至第370行 */</span>
+<span class="hljs-title function_">enterAnimation</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> self = <span class="hljs-variable language_">this</span>;
+    <span class="hljs-keyword">var</span> isAnimationEnd = <span class="hljs-literal">false</span>;
+
+    <span class="hljs-keyword">var</span> endStatus = {<span class="hljs-comment">//目标状态</span>
+        <span class="hljs-attr">rotateY</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span>,
+        <span class="hljs-attr">y</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span>,
+        <span class="hljs-attr">z</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>
+    }
+
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-title function_">rotateY</span>(-<span class="hljs-number">90</span> / <span class="hljs-number">180</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);<span class="hljs-comment">//把魔方设置为动画开始状态</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> += <span class="hljs-variable language_">this</span>.<span class="hljs-property">originHeight</span>/<span class="hljs-number">3</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> -= <span class="hljs-number">350</span>;
+
+    <span class="hljs-keyword">var</span> startStatus = {<span class="hljs-comment">//开始状态</span>
+        <span class="hljs-attr">rotateY</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span>,
+        <span class="hljs-attr">y</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span>,
+        <span class="hljs-attr">z</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>
+    }
+
+    <span class="hljs-keyword">var</span> tween = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-title class_">Tween</span>(startStatus)
+                    .<span class="hljs-title function_">to</span>(endStatus, <span class="hljs-number">2000</span>)
+                    .<span class="hljs-title function_">easing</span>(<span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-property">Easing</span>.<span class="hljs-property">Quadratic</span>.<span class="hljs-property">In</span>)
+                    .<span class="hljs-title function_">onUpdate</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+                        self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = startStatus.<span class="hljs-property">rotateY</span>;
+                        self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> = startStatus.<span class="hljs-property">y</span>
+                        self.<span class="hljs-property">frontRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> = startStatus.<span class="hljs-property">z</span>
+                    }).<span class="hljs-title function_">onComplete</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+                        isAnimationEnd = <span class="hljs-literal">true</span>;
+                    });
+
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">animate</span>(<span class="hljs-params">time</span>) {
+        <span class="hljs-keyword">if</span> (!isAnimationEnd){
+            <span class="hljs-title function_">requestAnimationFrame</span>(animate);
+            <span class="hljs-variable constant_">TWEEN</span>.<span class="hljs-title function_">update</span>();
+        }
+    }
+
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+        tween.<span class="hljs-title function_">start</span>();
+        <span class="hljs-title function_">requestAnimationFrame</span>(animate);
+    },<span class="hljs-number">500</span>)
+    
+    <span class="hljs-keyword">var</span> stepArr = <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>.<span class="hljs-title function_">randomRotate</span>();
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>.<span class="hljs-title function_">runMethodAtNo</span>(stepArr, <span class="hljs-number">0</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        self.<span class="hljs-title function_">initEvent</span>();<span class="hljs-comment">//进场动画结束之后才能进行手动操作</span>
+    });
+}
+</code></pre>
+<p>在<code>initObject</code>函数中创建完 UI 以及魔方元素后就可以运行动画了；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第101行 */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">enterAnimation</span>();
+</code></pre>
+<p>最后要注意的一个地方在于为了保证初始动画不被其它操作所干扰，需要把事件初始化函数<code>initEvent</code>在游戏主逻辑对象的构建函数中执行改为在初始动画结束回调中执行。</p>
+<h2 data-id="heading-7">总结</h2>
+<p>复杂的问题可以拆分成多个简单的子问题处理，动画的实现也是如此；另外 12 种基本转动函数的实现并不是唯一的主要取决坐标系的选取。</p></div>
+    </body>
+    </html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>在开启本小节之前，我们先看一个有意思的示例，组件上有一个动态文本节点 <code>{{ msg }}</code>，但是却有 <code>2</code> 处定义了 <code>msg</code> 响应式数据；另外有一个按钮，点击后会修改响应式数据。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ msg }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"changeMsg"</span>&gt;</span>点击试试<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">data</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        <span class="hljs-attr">msg</span>: <span class="hljs-string">'msg from data'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">const</span> msg = <span class="hljs-title function_">ref</span>(<span class="hljs-string">'msg from setup'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        msg</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    <span class="hljs-attr">methods</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-title function_">changeMsg</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        <span class="hljs-variable language_">this</span>.<span class="hljs-property">msg</span> = <span class="hljs-string">'change'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="25"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>思考一下：</p>
+<ol>
+<li>界面显示的内容是什么？</li>
+<li>点击按钮后，修改的是哪部分的数据？是 <code>data</code> 中定义的，还是 <code>setup</code> 中的呢？</li>
+</ol>
+<p>先别急着找答案，相信你阅读完这一节，一定会得到答案。</p>
+<p>上一节，我们知道了根组件在初始化渲染的过程中，会执行 <code>mountComponent</code> 的函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mountComponent</span>(<span class="hljs-params">initialVNode, container, parentComponent</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 1. 先创建一个 component instance</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> instance = (initialVNode.<span class="hljs-property">component</span> = <span class="hljs-title function_">createComponentInstance</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    initialVNode,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    parentComponent</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  ));</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  </span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 2. 初始化组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-title function_">setupComponent</span>(instance);</span>
+<span class="code-block-extension-codeLine" data-line-num="10"></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 3. 设置并运行带副作用的渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-title function_">setupRenderEffect</span>(instance, initialVNode, container);</span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+</code></pre>
+<p>上文，我们简单介绍了关于 <code>setupComponent</code> 函数的作用是为了对实例化后的组件中的属性做一些优化、处理、赋值等操作。本小节我们将重点介绍 <code>setupComponent</code> 的内部实现和作用。</p>
+<h2 data-id="heading-1">初始化组件实例</h2>
+<p>我们再来回顾一下 <code>setupComponent</code> 在源码中的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">setupComponent</span>(<span class="hljs-params">instance, isSSR = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> { props, children } = instance.<span class="hljs-property">vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  </span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 判断组件是否是有状态的组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> isStateful = <span class="hljs-title function_">isStatefulComponent</span>(instance)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  </span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 初始化 props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-title function_">initProps</span>(instance, props, isStateful, isSSR)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  </span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 初始化 slots</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-title function_">initSlots</span>(instance, children)</span>
+<span class="code-block-extension-codeLine" data-line-num="12"></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  <span class="hljs-comment">// 如果是有状态组件，那么去设置有状态组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">const</span> setupResult = isStateful</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    ? <span class="hljs-title function_">setupStatefulComponent</span>(instance, isSSR)</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    : <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    </span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-keyword">return</span> setupResult</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p><code>setupComponent</code> 方法做了什么？</p>
+<ol>
+<li>通过 <code>isStatefulComponent(instance)</code> 判断是否是有状态的组件；</li>
+<li><code>initProps</code> 初始化 <code>props</code>；</li>
+<li><code>initSlots</code> 初始化 <code>slots</code>；</li>
+<li>根据组件是否是有状态的，来决定是否需要执行 <code>setupStatefulComponent</code> 函数。</li>
+</ol>
+<p>其中， <code>isStatefulComponent</code> 判断是否是有状态的组件的函数如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isStatefulComponent</span>(<span class="hljs-params">instance</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">return</span> instance.<span class="hljs-property">vnode</span>.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">STATEFUL_COMPONENT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">}</span>
+</code></pre>
+<p>前面我们已经说过了，<code>ShapeFlags</code> 在遇到组件类型的 <code>type = Object</code> 时，<code>vnode</code> 的<code>shapeFlags = ShapeFlags.STATEFUL_COMPONENT</code>。所以这里会执行 <code>setupStatefulComponent</code> 函数。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setupStatefulComponent</span>(<span class="hljs-params">instance, isSSR</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 定义 Component 变量</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Component</span> = instance.<span class="hljs-property">type</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 1. 创建渲染代理的属性访问缓存</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  instance.<span class="hljs-property">accessCache</span> = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(<span class="hljs-literal">null</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 2. 创建渲染上下文代理, proxy 对象其实是代理了 instance.ctx 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  instance.<span class="hljs-property">proxy</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Proxy</span>(instance.<span class="hljs-property">ctx</span>, <span class="hljs-title class_">PublicInstanceProxyHandlers</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 3. 执行 setup 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">const</span> { setup } = <span class="hljs-title class_">Component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-keyword">if</span> (setup) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-comment">// 如果 setup 函数带参数，则创建一个 setupContext</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-keyword">const</span> setupContext = (instance.<span class="hljs-property">setupContext</span> =</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      setup.<span class="hljs-property">length</span> &gt; <span class="hljs-number">1</span> ? <span class="hljs-title function_">createSetupContext</span>(instance) : <span class="hljs-literal">null</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-comment">// 执行 setup 函数，获取结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">const</span> setupResult = <span class="hljs-title function_">callWithErrorHandling</span>(setup, instance, <span class="hljs-number">0</span>, [instance.<span class="hljs-property">props</span>, setupContext])</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-comment">// 处理 setup 执行结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    <span class="hljs-title function_">handleSetupResult</span>(instance, setupResult)</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 4. 完成组件实例设置</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-title function_">finishComponentSetup</span>(instance, isSSR)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">}</span>
+</code></pre>
+<p><code>setupStatefulComponent</code> 字面意思就是设置有状态组件，那么什么是有状态组件呢？简单而言，就是对于有状态组件，<code>Vue</code> 内部会保留组件状态数据。相对于有状态组件而言，<code>Vue</code> 还存在一种函数组件 <code>FUNCTIONAL_COMPONENT</code>，一起看个示例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { ref } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> () =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">let</span> num = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> <span class="hljs-title function_">plusNum</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    num.<span class="hljs-property">value</span> ++;</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  };</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{plusNum}</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">        { num.value }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p>这个函数点击按钮时，<code>num</code> 的值并不会按照我们预期那样值会一直递增，因为它是一个函数组件，函数组件内部是没有状态保持的，所以 <code>num</code> 数据更新时，组件会重新渲染，<code>num</code> 的值永远不变一直是 <code>0</code>。</p>
+<p>所以在这个时候，为了能符合我们预期的结果，我们需要将其设置成有状态的组件。我们可以通过 <code>defineComponent</code> 函数包装一下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { ref, defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineComponent</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">let</span> num = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> <span class="hljs-title function_">plusNum</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    num.<span class="hljs-property">value</span> ++;</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  };</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{plusNum}</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">        { num.value }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="16">});</span>
+</code></pre>
+<p><code>defineComponent</code> 返回的是个对象类型的 <code>type</code>，所以就变成了有状态组件。</p>
+<p>好了，搞清楚什么是有状态组件后，我们接着回到 <code>setupStatefulComponent</code> 实现中，来一步步地分析其核心实现的原理。</p>
+<h2 data-id="heading-2">创建渲染上下文代理</h2>
+<p>首先我们看 <code>1-2</code> 两个步骤，关于第一点：为什么要创建渲染代理的属性访问缓存呢？这里先卖个关子，先看第二步：创建渲染上下文代理，这里为什么要对 <code>instance.ctx</code> 做代理呢？如果熟悉 <code>Vue 2</code> 的小伙伴应该了解对于 <code>Vue 2</code> 的 <code>Options API</code> 的写法如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ num }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-title function_">data</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-attr">num</span>: <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-title function_">mounted</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num</span> = <span class="hljs-number">2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+<span class="code-block-extension-codeLine" data-line-num="13"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p><code>Vue 2.x</code> 是如何实现访问 <code>this.num</code> 获取到 <code>num</code> 的值，而不是通过 <code>this._data.num</code> 来获取 <code>num</code> 的值呢？其实 <code>Vue 2.x</code> 版本中，为 <code>_data</code> 设置了一层代理：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">_proxy</span>(options.<span class="hljs-property">data</span>);</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">function</span> <span class="hljs-title function_">_proxy</span> (data) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">const</span> that = <span class="hljs-variable language_">this</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(data).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(that, key, {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-attr">configurable</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">proxyGetter</span> () {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        <span class="hljs-keyword">return</span> that.<span class="hljs-property">_data</span>[key];</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      },</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">proxySetter</span> (val) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        that.<span class="hljs-property">_data</span>[key] = val;</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    })</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  });</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}</span>
+</code></pre>
+<p>本质就是通过&nbsp;<code>Object.defineProperty</code>&nbsp;使在访问&nbsp;<code>this</code>&nbsp;上的某属性时从&nbsp;<code>this._data</code>&nbsp;中读取（写入）。</p>
+<p>而 <code>Vue 3</code> 也在这里做了类似的事情，<code>Vue 3</code> 内部有很多状态属性，存储在不同的对象上，比如 <code>setupState</code>、<code>ctx</code>、<code>data</code>、<code>props</code>。这样用户取数据就会考虑具体从哪个对象中获取，这无疑增加了用户的使用负担，所以对 <code>instance.ctx</code> 进行代理，然后根据属性优先级关系依次完成从特定对象上获取值。</p>
+<h3 data-id="heading-3">get</h3>
+<p>了解了代理的功能后，我们来具体看一下是如何实现代理功能的，也就是 <code>proxy</code> 的 <code>PublicInstanceProxyHandlers</code> 它的实现。先看一下 <code>get</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">PublicInstanceProxyHandlers</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">get</span>(<span class="hljs-params">{ _: instance }, key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">const</span> { ctx, setupState, data, props, accessCache, type, appContext } = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">let</span> normalizedProps</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (key[<span class="hljs-number">0</span>] !== <span class="hljs-string">'$'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// 从缓存中获取当前 key 存在于哪个属性中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">const</span> n = accessCache![key]</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">if</span> (n !== <span class="hljs-literal">undefined</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        <span class="hljs-keyword">switch</span> (n) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">          <span class="hljs-keyword">case</span> <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">SETUP</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="11">            <span class="hljs-keyword">return</span> setupState[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="12">          <span class="hljs-keyword">case</span> <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">DATA</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="13">            <span class="hljs-keyword">return</span> data[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="14">          <span class="hljs-keyword">case</span> <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">CONTEXT</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="15">            <span class="hljs-keyword">return</span> ctx[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="16">          <span class="hljs-keyword">case</span> <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">PROPS</span>:</span>
+<span class="code-block-extension-codeLine" data-line-num="17">            <span class="hljs-keyword">return</span> props![key]</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (setupState !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(setupState, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        <span class="hljs-comment">// 从 setupState 中取</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">        accessCache![key] = <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">SETUP</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-keyword">return</span> setupState[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (data !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(data, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-comment">// 从 data 中取</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">        accessCache![key] = <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">DATA</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-keyword">return</span> data[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        (normalizedProps = instance.<span class="hljs-property">propsOptions</span>[<span class="hljs-number">0</span>]) &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-title function_">hasOwn</span>(normalizedProps, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="31">        <span class="hljs-comment">// 从 props 中取</span></span>
+<span class="code-block-extension-codeLine" data-line-num="32">        accessCache![key] = <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">PROPS</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">        <span class="hljs-keyword">return</span> props![key]</span>
+<span class="code-block-extension-codeLine" data-line-num="34">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ctx !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(ctx, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        <span class="hljs-comment">// 从 ctx 中取</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">        accessCache![key] = <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">CONTEXT</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">        <span class="hljs-keyword">return</span> ctx[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="38">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!__FEATURE_OPTIONS_API__ || shouldCacheAccess) {</span>
+<span class="code-block-extension-codeLine" data-line-num="39">        <span class="hljs-comment">// 都取不到</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">        accessCache![key] = <span class="hljs-title class_">AccessTypes</span>.<span class="hljs-property">OTHER</span></span>
+<span class="code-block-extension-codeLine" data-line-num="41">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="42">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="43"></span>
+<span class="code-block-extension-codeLine" data-line-num="44">    <span class="hljs-keyword">const</span> publicGetter = publicPropertiesMap[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-keyword">let</span> cssModule, globalProperties</span>
+<span class="code-block-extension-codeLine" data-line-num="46">    <span class="hljs-keyword">if</span> (publicGetter) {</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-comment">// 以 $ 保留字开头的相关函数和方法</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="49">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="50">      <span class="hljs-comment">// css module</span></span>
+<span class="code-block-extension-codeLine" data-line-num="51">    (cssModule = type.<span class="hljs-property">__cssModules</span>) &amp;&amp; (cssModule = cssModule[key])</span>
+<span class="code-block-extension-codeLine" data-line-num="52">    ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ctx !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(ctx, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="56">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="57">      <span class="hljs-comment">// 全局属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="58">      ((globalProperties = appContext.<span class="hljs-property">config</span>.<span class="hljs-property">globalProperties</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="59">      <span class="hljs-title function_">hasOwn</span>(globalProperties, key))</span>
+<span class="code-block-extension-codeLine" data-line-num="60">    ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="61">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="62">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (__DEV__) {</span>
+<span class="code-block-extension-codeLine" data-line-num="63">      <span class="hljs-comment">// 一些告警</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="65">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="66">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="67">}</span>
+</code></pre>
+<p>这里，可以回答我们的第一步 <code>创建渲染代理的属性访问缓存</code> 这个步骤的问题了。如果我们知道 <code>key</code> 存在于哪个对象上，那么就可以直接通过对象取值的操作获取属性上的值了。如果我们不知道用户访问的 <code>key</code> 存在于哪个属性上，那只能通过 <code>hasOwn</code> 的方法先判断存在于哪个属性上，再通过对象取值的操作获取属性值，这无疑是多操作了一步，而且这个判断是比较耗费性能的。如果遇到大量渲染取值的操作，那么这块就是个性能瓶颈，所以这里用了 <code>accessCache</code> 来标记缓存 <code>key</code> 存在于哪个属性上。这其实也<strong>相当于用一部分空间换时间的优化</strong>。</p>
+<p>接下来，函数首先判断 <code>key[0] !== '$'</code> 的情况（<code>$</code> 开头的一般是 <code>Vue</code>  组件实例上的内置属性），在 <code>Vue 3</code> 源码中，会依次从 <code>setupState、data、props、ctx</code> 这几类数据中取状态值。</p>
+<p>这里的定义顺序，决定了后续取值的优先级顺序：<code>setupState</code> &gt;<code>data</code> &gt;<code>props</code> &gt; <code>ctx</code>。</p>
+<p>如果 <code>key</code> 是以 <code>$</code> 开头，则首先会判断是否是存在于组件实例上的内置属性：</p>
+<img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpbf3570bbda1d431fb70e248be0dc75f6~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" width="60%" loading="lazy" class="medium-zoom-image">
+<p>整体的获取顺序依次是：<code>publicGetter</code> &gt; <code>cssModule</code> &gt; <code>ctx</code>。最后，如果都取不到，那么在开发环境就会给一些告警提示。</p>
+<h3 data-id="heading-4">set</h3>
+<p>接着继续看一下设置对象属性的代理函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">PublicInstanceProxyHandlers</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">set</span>(<span class="hljs-params">{ _: instance }, key, value</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">const</span> { data, setupState, ctx } = instance</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (setupState !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(setupState, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-comment">// 设置 setupState</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">      setupState[key] = value</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (data !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(data, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 设置 data</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      data[key] = value</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">hasOwn</span>(instance.<span class="hljs-property">props</span>, key)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// 不能给 props 赋值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    <span class="hljs-keyword">if</span> (key[<span class="hljs-number">0</span>] === <span class="hljs-string">'$'</span> &amp;&amp; key.<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>) <span class="hljs-keyword">in</span> instance) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      <span class="hljs-comment">// 不能给组件实例上的内置属性赋值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      <span class="hljs-comment">// 用户自定义数据赋值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">      ctx[key] = value</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">}</span>
+</code></pre>
+<p>可以看到这里也是和前面 <code>get</code> 函数类似的通过调用顺序来实现对 <code>set</code> 函数不同属性设置优先级的，可以直观地看到优先级关系为：<code>setupState</code> &gt; <code>data</code> &gt; <code>props</code>。同时这里也有说明：就是如果直接对 <code>props</code> 或者组件实例上的内置属性赋值，则会告警。</p>
+<h3 data-id="heading-5">has</h3>
+<p>最后，再看一个 <code>proxy</code> 属性 <code>has</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">PublicInstanceProxyHandlers</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-title function_">has</span>(<span class="hljs-params">{_: { data, setupState, accessCache, ctx, appContext, propsOptions }}, key</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">let</span> normalizedProps</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">return</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      !!accessCache![key] ||</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      (data !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(data, key)) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      (setupState !== <span class="hljs-variable constant_">EMPTY_OBJ</span> &amp;&amp; <span class="hljs-title function_">hasOwn</span>(setupState, key)) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      ((normalizedProps = propsOptions[<span class="hljs-number">0</span>]) &amp;&amp; <span class="hljs-title function_">hasOwn</span>(normalizedProps, key)) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-title function_">hasOwn</span>(ctx, key) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-title function_">hasOwn</span>(publicPropertiesMap, key) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-title function_">hasOwn</span>(appContext.<span class="hljs-property">config</span>.<span class="hljs-property">globalProperties</span>, key)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="14">}</span>
+</code></pre>
+<p>这个函数则是依次判断 <code>key</code> 是否存在于 <code>accessCache</code> &gt; <code>data</code> &gt; <code>setupState</code> &gt; <code>prop</code> &gt; <code>ctx</code> &gt; <code>publicPropertiesMap</code> &gt; <code>globalProperties</code>，然后返回结果。</p>
+<p><code>has</code> 在业务代码的使用定义如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  created () {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// 这里会触发 has 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">'msg'</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">}</span>
+</code></pre>
+<p>至此，我们就搞清楚了创建上下文代理的过程。</p>
+<h2 data-id="heading-6">调用执行 setup 函数</h2>
+<p>一个简单的包含 <code>CompositionAPI</code> 的 <code>Vue 3 demo</code> 如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ msg }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-attr">props</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-attr">msg</span>: <span class="hljs-title class_">String</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    setup (props, setupContext) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-comment">// todo</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="13"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p>这里的 <code>setup</code> 函数，正是在这里被调用执行的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 获取 setup 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> { setup } = <span class="hljs-title class_">Component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 存在 setup 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">if</span> (setup) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 根据 setup 函数的入参长度，判断是否需要创建 setupContext 对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> setupContext = (instance.<span class="hljs-property">setupContext</span> =</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    setup.<span class="hljs-property">length</span> &gt; <span class="hljs-number">1</span> ? <span class="hljs-title function_">createSetupContext</span>(instance) : <span class="hljs-literal">null</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 调用 setup</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">const</span> setupResult = <span class="hljs-title function_">callWithErrorHandling</span>(setup, instance, <span class="hljs-number">0</span>, [instance.<span class="hljs-property">props</span>, setupContext])</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">// 处理 setup 执行结果</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-title function_">handleSetupResult</span>(instance, setupResult)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">}</span>
+</code></pre>
+<h3 data-id="heading-7">createSetupContext</h3>
+<p>因为 <code>setupContext</code> 是 <code>setup</code> 中的第二个参数，所以会判断 <code>setup</code> 函数参数的长度，如果大于 <code>1</code>，则会通过 <code>createSetupContext</code> 函数创建 <code>setupContext</code> 上下文。</p>
+<p>该上下文创建如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSetupContext</span> (instance) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">return</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">get</span> <span class="hljs-title function_">attrs</span>() {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      <span class="hljs-keyword">return</span> attrs || (attrs = <span class="hljs-title function_">createAttrsProxy</span>(instance))</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-attr">slots</span>: instance.<span class="hljs-property">slots</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-attr">emit</span>: instance.<span class="hljs-property">emit</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    expose</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>可以看到，<code>setupContext</code> 中包含了 <code>attrs、slots、emit、expose</code> 这些属性。这些属性分别代表着：组件的属性、插槽、派发事件的方法 <code>emit</code>、以及所有想从当前组件实例导出的内容 <code>expose</code>。</p>
+<p>这里有个小的知识点，就是可以通过函数的 <code>length</code> 属性来判断函数参数的个数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3">foo.<span class="hljs-property">length</span> <span class="hljs-comment">// 0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">a</span>) {};</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7">bar.<span class="hljs-property">length</span> <span class="hljs-comment">// 1</span></span>
+</code></pre>
+<h3 data-id="heading-8">callWithErrorHandling</h3>
+<p>第二步，通过 <code>callWithErrorHandling</code> 函数来间接执行 <code>setup</code> 函数，其实就是执行了以下代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> setupResult = setup &amp;&amp; <span class="hljs-title function_">setup</span>(<span class="hljs-title function_">shallowReadonly</span>(instance.<span class="hljs-property">props</span>), setupContext); </span>
+</code></pre>
+<p>只不过增加了对执行过程中 <code>handleError</code> 的捕获。</p>
+<p>在后续章节的阅读中，你会发现 <code>Vue 3</code> 很多函数的调用都是通过 <code>callWithErrorHandling</code> 来包裹的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">callWithErrorHandling</span>(<span class="hljs-params">fn, instance, type, args = []</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">try</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    res = args ? <span class="hljs-title function_">fn</span>(...args) : <span class="hljs-title function_">fn</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  } <span class="hljs-keyword">catch</span> (err) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-title function_">handleError</span>(err, instance, type)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">return</span> res</span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p>这样的好处一方面可以由 <code>Vue</code> 内部统一 <code>try...catch</code> 处理用户代码运行可能出现的错误。另一方面这些错误也可以交由用户统一注册的 <code>errorHandler</code> 进行处理，比如上报给监控系统。</p>
+<h3 data-id="heading-9">handleSetupResult</h3>
+<p>最后执行 <code>handleSetupResult</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">handleSetupResult</span>(<span class="hljs-params">instance, setupResult</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isFunction</span>(setupResult)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// setup 返回渲染函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    instance.<span class="hljs-property">render</span> = setupResult</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isObject</span>(setupResult)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-comment">// proxyRefs 的作用就是把 setupResult 对象做一层代理</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">    instance.<span class="hljs-property">setupState</span> = <span class="hljs-title function_">proxyRefs</span>(setupResult);</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-title function_">finishComponentSetup</span>(instance)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">}</span>
+</code></pre>
+<p><code>setup</code> 返回值不一样的话，会有不同的处理，如果 <code>setupResult</code> 是个函数，那么会把该函数绑定到 <code>render</code> 上。比如：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">&lt;script&gt;</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">import</span> { createVnode } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-attr">props</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-attr">msg</span>: <span class="hljs-title class_">String</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    },</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    setup (props, { emit }) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">ctx</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        <span class="hljs-keyword">return</span> [</span>
+<span class="code-block-extension-codeLine" data-line-num="10">          <span class="hljs-title function_">createVnode</span>(<span class="hljs-string">'p'</span>, <span class="hljs-literal">null</span>, ctx.<span class="hljs-property">msg</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        ]</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">&lt;/script&gt;</span>
+</code></pre>
+<p>当 <code>setupResult</code> 是一个对象的时候，我们为 <code>setupResult</code> 对象通过 <code>proxyRefs</code> 作了一层代理，方便用户直接访问 <code>ref</code> 类型的值。比如，在模板中访问 <code>setupResult</code> 中的数据，就可以省略 <code>.value</code> 的取值，而由代理来默认取 <code>.value</code> 的值。</p>
+<blockquote>
+<p>注意，这里 <code>instance.setupState = proxyRefs(setupResult);</code> 之前的 Vue 源码的写法是 <code>instance.setupState = reactive(setupResult);</code> ，至于为什么改成上面的，Vue 作者也有相关说明：<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvuejs%2Fcore%2Fpull%2F1682" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vuejs/core/pull/1682" ref="nofollow noopener noreferrer">Template auto ref unwrapping for&nbsp;<code>setup()</code>&nbsp;return object is now applied only to the root level refs.</a></p>
+</blockquote>
+<h2 data-id="heading-10">完成组件实例设置</h2>
+<p>最后，到了 <code>finishComponentSetup</code> 这个函数了：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">finishComponentSetup</span>(<span class="hljs-params">instance</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// type 是个组件对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Component</span> = instance.<span class="hljs-property">type</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">if</span> (!instance.<span class="hljs-property">render</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-comment">// 如果组件没有 render 函数，那么就需要把 template 编译成 render 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    <span class="hljs-keyword">if</span> (compile &amp;&amp; !<span class="hljs-title class_">Component</span>.<span class="hljs-property">render</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Component</span>.<span class="hljs-property">template</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        <span class="hljs-comment">// 这里就是 runtime 模块和 compile 模块结合点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">        <span class="hljs-comment">// 运行时编译</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">        <span class="hljs-title class_">Component</span>.<span class="hljs-property">render</span> = <span class="hljs-title function_">compile</span>(<span class="hljs-title class_">Component</span>.<span class="hljs-property">template</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        <span class="hljs-attr">isCustomElement</span>: instance.<span class="hljs-property">appContext</span>.<span class="hljs-property">config</span>.<span class="hljs-property">isCustomElement</span> || <span class="hljs-variable constant_">NO</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      })</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="16"></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    instance.<span class="hljs-property">render</span> = <span class="hljs-title class_">Component</span>.<span class="hljs-property">render</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-keyword">if</span> (__FEATURE_OPTIONS_API__ &amp;&amp; !(__COMPAT__ &amp;&amp; skipOptions)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 兼容选项式组件的调用逻辑</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="22">}</span>
+</code></pre>
+<p>这里主要做的就是根据 <code>instance</code> 上有没有 <code>render</code> 函数来判断是否需要进行运行时渲染，运行时渲染指的是在浏览器运行的过程中，动态编译 <code>&lt;template&gt;</code> 标签内的内容，产出渲染函数。对于编译时渲染，则是有渲染函数的，因为模板中的内容会被 <code>webpack</code> 中 <code>vue-loader</code> 这样的插件进行编译。</p>
+<p>另外需要注意的，这里有个 <code>__FEATURE_OPTIONS_API__</code> 变量用来标记是否是兼容 <code>选项式 API</code> 调用，如果我们只使用 <code>Composition Api</code> 那么就可以通过 <code>webpack</code> 静态变量注入的方式关闭此特性。然后交由 <code>Tree-Shacking</code> 删除无用的代码，从而减少引用代码包的体积。</p>
+<h1 data-id="heading-11">总结</h1>
+<p>有了上面的一些介绍，我们再来回答一下开篇中提到的问题：</p>
+<ol>
+<li>初始化渲染的时候，会从实例上获取状态 <code>msg</code> 的值，获取的优先级是：<code>setupState</code> &gt;<code>data</code> &gt;<code>props</code> &gt; <code>ctx</code>。<code>setupState</code> 就是 <code>setup</code> 函数执行后返回的状态值，所以这里渲染的是：<code>msg from setup</code>。</li>
+<li>点击按钮的时候，会更新实例上的状态，更新的优先级是：<code>setupState</code>&nbsp;&gt;&nbsp;<code>data</code>。所以会更新 <code>setup</code> 中的状态数据 <code>msg</code>。</li>
+</ol></div>
+    </body>
+    </html>

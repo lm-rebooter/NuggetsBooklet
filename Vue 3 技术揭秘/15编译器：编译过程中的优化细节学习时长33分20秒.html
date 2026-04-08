@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">前言</h1>
+<p>在开启本篇章之前，我们先来思考一个问题，假设有以下模板：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>hello world<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ msg }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>&gt;</span>
+</code></pre>
+<p>其中一个 <code>p</code> 标签的节点是一个静态的节点，第二个 <code>p</code> 标签的节点是一个动态的节点，如果当 <code>msg</code> 的值发生了变化，那么理论上肉眼可见最优的更新方案应该是只做第二个动态节点的 <code>diff</code>，而无需进行第一个 <code>p</code> 标签节点的 <code>diff</code>。</p>
+<p>如果熟悉 <code>Vue 2.x</code> 的小伙伴可能会知道，在 <code>Vue 2.x</code> 版本中在编译过程中有一个叫做 <code>optimize</code> 的阶段，会进行标记静态根节点的操作，被标记为静态根节点的节点，一方面会生成一个 <code>staticRenderFns</code>，首次渲染会以这个静态根节点 <code>vnode</code> 进行缓存，后续渲染会直接取缓存中的，从而避免重复渲染；另一方面生成的 <code>vnode</code> 会带有 <code>isStatic = true</code> 的属性，将会在 <code>diff</code> 过程中被跳过。但 <code>Vue 2.x</code> 对静态节点进行缓存就是一种空间换时间的优化策略，为了避免过度优化，在 <code>Vue 2.x</code> 中，识别静态根节点是需要满足：</p>
+<ol>
+<li>子节点是静态节点；</li>
+<li>子节点不是只有一个静态文本节点的节点。</li>
+</ol>
+<p>所以，上面的示例第一个 <code>p</code> 标签在 <code>Vue 2.x</code> 中不会被判定位静态根节点，也就无法进行优化。</p>
+<blockquote>
+<p>关于 <code>Vue 2.x</code> 如何做的编译时优化，这里只是简单进行了介绍，想了解更多的小伙伴可以参考这里：<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmuwoo%2Fblogs%2Fblob%2Fmaster%2Fsrc%2FVue%2F8.md" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/muwoo/blogs/blob/master/src/Vue/8.md" ref="nofollow noopener noreferrer">入口开始，解读 Vue2 源码（七）—— $mount 内部实现 --- compile optimize标记节点</a>。</p>
+</blockquote>
+<p>那么 <code>Vue 3</code> 呢？还是和 <code>Vue 2</code> 一样吗？答案显然是否定的，首先我们前面介绍了对于静态的节点，<code>Vue 3</code> 首先会进行静态提升，也就是相当于缓存了静态节点的 <code>vnode</code>，那 <code>diff</code> 过程呢？会跳过吗？本小节我们来一探究竟。</p>
+<h2 data-id="heading-1">PatchFlags</h2>
+<h3 data-id="heading-2">是什么？</h3>
+<p>首先，我们需要认识一个 <code>PatchFlags</code> 这个属性，它是一个枚举类型，里面是一些二进制操作的值，用来标记在节点的 <code>patch</code> 类型。具体的枚举内容如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> enum <span class="hljs-title class_">PatchFlags</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 动态文本的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-variable constant_">TEXT</span> = <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 动态 class 的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-variable constant_">CLASS</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  </span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// 动态 style 的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-variable constant_">STYLE</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">2</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  </span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 动态 props 的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-variable constant_">PROPS</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">3</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  </span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-comment">// 动态 props 和有 key 值绑定的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-variable constant_">FULL_PROPS</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">4</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  </span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 有事件绑定的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-variable constant_">HYDRATE_EVENTS</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">5</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  </span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-comment">// children 顺序确定的 fragment</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-variable constant_">STABLE_FRAGMENT</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">6</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  </span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-comment">// children 中有带有 key 的节点的 fragment</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  <span class="hljs-variable constant_">KEYED_FRAGMENT</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">7</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">  </span>
+<span class="code-block-extension-codeLine" data-line-num="26">  <span class="hljs-comment">// 没有 key 的 children 的 fragment</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">  <span class="hljs-variable constant_">UNKEYED_FRAGMENT</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">8</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="28">  </span>
+<span class="code-block-extension-codeLine" data-line-num="29">  <span class="hljs-comment">// 带有 ref、指令的元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">  <span class="hljs-variable constant_">NEED_PATCH</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">9</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="31">  </span>
+<span class="code-block-extension-codeLine" data-line-num="32">  <span class="hljs-comment">// 动态的插槽</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-variable constant_">DYNAMIC_SLOTS</span> = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">10</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="34">  </span>
+<span class="code-block-extension-codeLine" data-line-num="35">  <span class="hljs-comment">// 静态节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">  <span class="hljs-variable constant_">HOISTED</span> = -<span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="37">  </span>
+<span class="code-block-extension-codeLine" data-line-num="38">  <span class="hljs-comment">// 不是 render 函数生成的元素，如 renderSlot</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">  <span class="hljs-variable constant_">BAIL</span> = -<span class="hljs-number">2</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="40">}</span>
+</code></pre>
+<p>这些二进制的值是通过左移操作符 <code>&lt;&lt;</code> 生成的，关于左移操作符，我们在<a href="https://juejin.cn/book/7146465352120008743/section/7147530994017370127" target="_blank" title="https://juejin.cn/book/7146465352120008743/section/7147530994017370127">《响应式原理：副作用函数探秘》</a>篇章中已经介绍过了，在这里也是一种二进制操作的体现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-variable constant_">TEXT</span> = <span class="hljs-number">0000000001</span>; </span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-variable constant_">CLASS</span> = <span class="hljs-number">0000000010</span>; </span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-variable constant_">STYLE</span> = <span class="hljs-number">0000000100</span>;</span>
+</code></pre>
+<p>这里通过二进制来表示 <code>PatchFlags</code> 可以方便我们做很多属性的判断，比如 <code>TEXT | STYLE</code> 来得到 <code>0000000101</code>，表示 <code>patchFlag</code> 既有 <code>TEXT</code> 属性也有 <code>STYLE</code> 属性，当需要进行判断有没有 <code>STYLE</code> 属性时，只需要 <code>FLAG &amp; STYLE &gt; 0</code>就行。</p>
+<h3 data-id="heading-3">什么时候生成的？</h3>
+<p>在搞清楚 <code>patchFlags</code> 的一些定义和使用基础后，那它是什么时候被赋值到 <code>vnode</code> 节点上的呢？前言中的模板字符串在 <code>compiler</code> 阶段会被转成一个 <code>render</code> 函数的字符串代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { createElementVNode <span class="hljs-keyword">as</span> _createElementVNode, toDisplayString <span class="hljs-keyword">as</span> _toDisplayString, <span class="hljs-title class_">Fragment</span> <span class="hljs-keyword">as</span> _Fragment, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> _hoisted_1 = <span class="hljs-comment">/*#__PURE__*/</span><span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"hello world"</span>, -<span class="hljs-number">1</span> <span class="hljs-comment">/* HOISTED */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(_Fragment, <span class="hljs-literal">null</span>, [</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    _hoisted_1,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-title function_">_createElementVNode</span>(<span class="hljs-string">"p"</span>, <span class="hljs-literal">null</span>, <span class="hljs-title function_">_toDisplayString</span>(msg), <span class="hljs-number">1</span> <span class="hljs-comment">/* TEXT */</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  ], <span class="hljs-number">64</span> <span class="hljs-comment">/* STABLE_FRAGMENT */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>这里可以看出，<code>render</code> 函数内是通过 <code>createElementVNode</code> 方法来创建 <code>vnode</code> 的，该函数的第四个参数就代表着 <code>patchFlag</code>。对于我们上面的示例，其中 <code>&lt;p&gt;hello world&lt;/p&gt;</code> 是 <code>hoisted</code>，对应的 <code>patchFlag = -1</code>，<code>&lt;p&gt;{{ msg }}&lt;/p&gt;</code> 是动态文字节点，对应的 <code>patchFlag = 1</code>。</p>
+<h3 data-id="heading-4">有什么用？</h3>
+<p>接下来看看其实际使用案例，还是拿之前的 <code>patchElement</code> 函数来说：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchElement</span> = (<span class="hljs-params">n1, n2, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> { patchFlag, dynamicChildren, dirs } = n2</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 如果 patchFlag 不存在，那么就设置成 FULL_PROPS，意味着要全量 props 比对</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  patchFlag |= n1.<span class="hljs-property">patchFlag</span> &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">FULL_PROPS</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> oldProps = n1.<span class="hljs-property">props</span> || <span class="hljs-variable constant_">EMPTY_OBJ</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-keyword">const</span> newProps = n2.<span class="hljs-property">props</span> || <span class="hljs-variable constant_">EMPTY_OBJ</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">const</span> areChildrenSVG = isSVG &amp;&amp; n2.<span class="hljs-property">type</span> !== <span class="hljs-string">'foreignObject'</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">if</span> (dynamicChildren) {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-title function_">patchBlockChildren</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      n1.<span class="hljs-property">dynamicChildren</span>!,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      dynamicChildren,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      el,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      areChildrenSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">      slotScopeIds</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!optimized) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// full diff</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-title function_">patchChildren</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      n1,</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      el,</span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-literal">null</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="28">      areChildrenSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="29">      slotScopeIds,</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="32">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="33"></span>
+<span class="code-block-extension-codeLine" data-line-num="34">  <span class="hljs-keyword">if</span> (patchFlag &gt; <span class="hljs-number">0</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">FULL_PROPS</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      <span class="hljs-comment">// 如果元素的 props 中含有动态的 key，则需要全量比较</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">      <span class="hljs-title function_">patchProps</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="38">        el,</span>
+<span class="code-block-extension-codeLine" data-line-num="39">        n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="40">        oldProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="41">        newProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="42">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="43">        parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="44">        isSVG</span>
+<span class="code-block-extension-codeLine" data-line-num="45">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="46">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-comment">// class</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">      <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">CLASS</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="49">        <span class="hljs-keyword">if</span> (oldProps.<span class="hljs-property">class</span> !== newProps.<span class="hljs-property">class</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="50">          <span class="hljs-title function_">hostPatchProp</span>(el, <span class="hljs-string">'class'</span>, <span class="hljs-literal">null</span>, newProps.<span class="hljs-property">class</span>, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="51">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="52">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-comment">// style</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">      <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">STYLE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="55">        <span class="hljs-title function_">hostPatchProp</span>(el, <span class="hljs-string">'style'</span>, oldProps.<span class="hljs-property">style</span>, newProps.<span class="hljs-property">style</span>, isSVG)</span>
+<span class="code-block-extension-codeLine" data-line-num="56">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="57"></span>
+<span class="code-block-extension-codeLine" data-line-num="58">      <span class="hljs-comment">// props</span></span>
+<span class="code-block-extension-codeLine" data-line-num="59">      <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">PROPS</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="60">        <span class="hljs-keyword">const</span> propsToUpdate = n2.<span class="hljs-property">dynamicProps</span>!</span>
+<span class="code-block-extension-codeLine" data-line-num="61">        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; propsToUpdate.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="62">          <span class="hljs-keyword">const</span> key = propsToUpdate[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="63">          <span class="hljs-keyword">const</span> prev = oldProps[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="64">          <span class="hljs-keyword">const</span> next = newProps[key]</span>
+<span class="code-block-extension-codeLine" data-line-num="65">          <span class="hljs-comment">// #1471 force patch value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="66">          <span class="hljs-keyword">if</span> (next !== prev || key === <span class="hljs-string">'value'</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="67">            <span class="hljs-title function_">hostPatchProp</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="68">              el,</span>
+<span class="code-block-extension-codeLine" data-line-num="69">              key,</span>
+<span class="code-block-extension-codeLine" data-line-num="70">              prev,</span>
+<span class="code-block-extension-codeLine" data-line-num="71">              next,</span>
+<span class="code-block-extension-codeLine" data-line-num="72">              isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="73">              n1.<span class="hljs-property">children</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">VNode</span>[],</span>
+<span class="code-block-extension-codeLine" data-line-num="74">              parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="75">              parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="76">              unmountChildren</span>
+<span class="code-block-extension-codeLine" data-line-num="77">            )</span>
+<span class="code-block-extension-codeLine" data-line-num="78">          }</span>
+<span class="code-block-extension-codeLine" data-line-num="79">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="80">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="81">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="82"></span>
+<span class="code-block-extension-codeLine" data-line-num="83">    <span class="hljs-comment">// text</span></span>
+<span class="code-block-extension-codeLine" data-line-num="84">    <span class="hljs-keyword">if</span> (patchFlag &amp; <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">TEXT</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="85">      <span class="hljs-keyword">if</span> (n1.<span class="hljs-property">children</span> !== n2.<span class="hljs-property">children</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="86">        <span class="hljs-title function_">hostSetElementText</span>(el, n2.<span class="hljs-property">children</span> <span class="hljs-keyword">as</span> string)</span>
+<span class="code-block-extension-codeLine" data-line-num="87">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="88">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="89">  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!optimized &amp;&amp; dynamicChildren == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="90">    <span class="hljs-title function_">patchProps</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="91">      el,</span>
+<span class="code-block-extension-codeLine" data-line-num="92">      n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="93">      oldProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="94">      newProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="95">      parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="96">      parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="97">      isSVG</span>
+<span class="code-block-extension-codeLine" data-line-num="98">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="99">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="100">  </span>
+<span class="code-block-extension-codeLine" data-line-num="101">}</span>
+</code></pre>
+<p>这里涉及到两个比较重点的事儿，一个是和 <code>dynamicChildren</code> 相关，另一个是和动态 <code>props</code> 相关。我们先看和动态 <code>props</code> 相关的内容。</p>
+<p>之前的章节我们跳过了对 <code>PatchFlags</code> 内容的理解，到了这里，我们通过代码可以知道 <code>Vue</code> 在更新子节点时，首先也是利用 <code>patchFlag</code> 的能力，对子节点进行分类做出不同的处理，比如针对以下例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:class</span>=<span class="hljs-string">"classNames"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">'test'</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">    hello world</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>得到的编译结果：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">import</span> { normalizeClass <span class="hljs-keyword">as</span> _normalizeClass, openBlock <span class="hljs-keyword">as</span> _openBlock, createElementBlock <span class="hljs-keyword">as</span> _createElementBlock } <span class="hljs-keyword">from</span> <span class="hljs-string">"vue"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">_ctx, _cache</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">return</span> (<span class="hljs-title function_">_openBlock</span>(), <span class="hljs-title function_">_createElementBlock</span>(<span class="hljs-string">"div"</span>, {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-attr">class</span>: <span class="hljs-title function_">_normalizeClass</span>(classNames),</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-attr">id</span>: <span class="hljs-string">"test"</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  }, <span class="hljs-string">" hello world "</span>, <span class="hljs-number">2</span> <span class="hljs-comment">/* CLASS */</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="8">}</span>
+</code></pre>
+<p>此时 <code>patchFlag &amp; PatchFlags.CLASS &gt; 0</code> 则在 <code>diff</code> 过程中，需要进行 <code>class</code> 属性的 <code>diff</code>， 从而减少了对 <code>id</code> 属性的不必要 <code>diff</code>，提升了 <code>props diff</code> 过程中的性能。</p>
+<h2 data-id="heading-5">dynamicChildren</h2>
+<p>另外，我们注意到，在编译后的 <code>render</code> 函数中会有一个 <code>_openBlock()</code> 函数的执行，我们来一起看一下其实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">javascript</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-javascript code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> blockStack = []</span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> currentBlock = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">openBlock</span>(<span class="hljs-params">disableTracking = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  blockStack.<span class="hljs-title function_">push</span>((currentBlock = disableTracking ? <span class="hljs-literal">null</span> : []))</span>
+<span class="code-block-extension-codeLine" data-line-num="6">}</span>
+</code></pre>
+<p><code>openBlock</code> 实现比较通俗易懂，就是向 <code>blockStack</code> 中 <code>push</code> <code>currentBlock</code>。其中 <code>currentBlock</code> 是一个数组，用于存储动态节点。<code>blockStack</code> 则是存储 <code>currentBlock</code> 的一个 <code>Block tree</code>。</p>
+<p>然后我们接着看 <code>createElementBlock</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createElementBlock</span>(<span class="hljs-params">type, props, children, patchFlag, dynamicProps, shapeFlag</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">return</span> <span class="hljs-title function_">setupBlock</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-title function_">createBaseVNode</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      type,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      props,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      children,</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      patchFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      dynamicProps,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      shapeFlag,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-literal">true</span> <span class="hljs-comment">/* isBlock */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    )</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">}</span>
+<span class="code-block-extension-codeLine" data-line-num="14"></span>
+<span class="code-block-extension-codeLine" data-line-num="15"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createBaseVNode</span>(<span class="hljs-params">type, props = <span class="hljs-literal">null</span>, children = <span class="hljs-literal">null</span>, patchFlag = <span class="hljs-number">0</span>, dynamicProps = <span class="hljs-literal">null</span>, shapeFlag = type === Fragment ? <span class="hljs-number">0</span> : ShapeFlags.ELEMENT, isBlockNode = <span class="hljs-literal">false</span>, needFullChildrenNormalization = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  <span class="hljs-comment">// 添加动态 vnode 节点到 currentBlock 中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    isBlockTreeEnabled &gt; <span class="hljs-number">0</span> &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    !isBlockNode &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    currentBlock &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="22">    (vnode.<span class="hljs-property">patchFlag</span> &gt; <span class="hljs-number">0</span> || shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT</span>) &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    vnode.<span class="hljs-property">patchFlag</span> !== <span class="hljs-title class_">PatchFlags</span>.<span class="hljs-property">HYDRATE_EVENTS</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    currentBlock.<span class="hljs-title function_">push</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="26">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="27">  </span>
+<span class="code-block-extension-codeLine" data-line-num="28">  <span class="hljs-keyword">return</span> vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="29">}</span>
+<span class="code-block-extension-codeLine" data-line-num="30"></span>
+<span class="code-block-extension-codeLine" data-line-num="31"></span>
+<span class="code-block-extension-codeLine" data-line-num="32"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setupBlock</span>(<span class="hljs-params">vnode</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  <span class="hljs-comment">// 在 vnode 上保留当前 Block 收集的动态子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">  vnode.<span class="hljs-property">dynamicChildren</span> =</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    isBlockTreeEnabled &gt; <span class="hljs-number">0</span> ? currentBlock || (<span class="hljs-variable constant_">EMPTY_ARR</span>) : <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">  <span class="hljs-comment">// 当前 Block 恢复到父 Block</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">  <span class="hljs-title function_">closeBlock</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="38">  <span class="hljs-comment">// 节点本身作为父 Block 收集的子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">  <span class="hljs-keyword">if</span> (isBlockTreeEnabled &gt; <span class="hljs-number">0</span> &amp;&amp; currentBlock) {</span>
+<span class="code-block-extension-codeLine" data-line-num="40">    currentBlock.<span class="hljs-title function_">push</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="41">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="42">  <span class="hljs-keyword">return</span> vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="43">}</span>
+</code></pre>
+<p><code>createElementBlock</code> 内部首先通过 <code>createBaseVNode</code> 创建 <code>vnode</code> 节点，在创建的过程中，会根据 <code>patchFlag</code> 的值进行判断是否是动态节点，如果发现 <code>vnode</code> 是一个动态节点，那么会被添加到 <code>currentBlock</code> 当中，然后在执行 <code>setupBlock</code> 函数的时候，将 <code>currentBlock</code> 赋值给 <code>vnode.dynamicChildren</code> 属性。</p>
+<p>我们前面看 <code>patchElement</code> 的时候，有注意到函数体内部会进行是否有 <code>dynamicChildren</code> 属性进行不同的逻辑执行，前面的章节，我们只介绍了 <code>patchChildren</code> 完整的子节点 <code>diff</code> 算法，当 <code>dynamicChildren</code> 存在时，这里只会进行 <code>patchBlockChildren</code> 的动态节点 <code>diff</code>：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">patchBlockChildren</span> = (<span class="hljs-params">oldChildren, newChildren, fallbackContainer, parentComponent, parentSuspense, isSVG</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; newChildren.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">const</span> oldVNode = oldChildren[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">const</span> newVNode = newChildren[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-comment">// 确定待更新节点的容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">const</span> container =</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 对于 Fragment，我们需要提供正确的父容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      oldVNode.<span class="hljs-property">type</span> === <span class="hljs-title class_">Fragment</span> ||</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 在不同节点的情况下，将有一个替换节点，我们也需要正确的父容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      !<span class="hljs-title function_">isSameVNodeType</span>(oldVNode, newVNode) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-comment">// 组件的情况，我们也需要提供一个父容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">      oldVNode.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-number">6</span> <span class="hljs-comment">/* COMPONENT */</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">        ? <span class="hljs-title function_">hostParentNode</span>(oldVNode.<span class="hljs-property">el</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        :</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        <span class="hljs-comment">// 在其他情况下，父容器实际上并没有被使用，所以这里只传递 Block 元素即可</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">        fallbackContainer</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    <span class="hljs-title function_">patch</span>(oldVNode, newVNode, container, <span class="hljs-literal">null</span>, parentComponent, parentSuspense, isSVG, <span class="hljs-literal">true</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p><code>patchBlockChildren</code> 的实现很简单，遍历新的动态子节点数组，拿到对应的新旧动态子节点，并执行 <code>patch</code> 更新子节点即可。</p>
+<p>这样一来，更新的复杂度就变成和动态节点的数量正相关，而不与模板大小正相关。这也是 <code>Vue 3</code> 做的一个重要的编译时优化的一部分。</p>
+<h2 data-id="heading-6">总结</h2>
+<p>有了上面的一些介绍，我们还是回到前言的例子中：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">xml</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-xml code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>hello world<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{{ msg }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>转成 <code>vnode</code> 后的结果大致为：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> vnode = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">type</span>: <span class="hljs-title class_">Symbol</span>(<span class="hljs-title class_">Fragment</span>),</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">children</span>: [</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    { <span class="hljs-attr">type</span>: <span class="hljs-string">'p'</span>, <span class="hljs-attr">children</span>: <span class="hljs-string">'hello world'</span> },</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    { <span class="hljs-attr">type</span>: <span class="hljs-string">'p'</span>, <span class="hljs-attr">children</span>: ctx.<span class="hljs-property">msg</span>, <span class="hljs-attr">patchFlag</span>: <span class="hljs-number">1</span> <span class="hljs-comment">/* 动态的 text */</span> },</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  ],</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-attr">dynamicChildren</span>: [</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    { <span class="hljs-attr">type</span>: <span class="hljs-string">'p'</span>, <span class="hljs-attr">children</span>: ctx.<span class="hljs-property">msg</span>, <span class="hljs-attr">patchFlag</span>: <span class="hljs-number">1</span> <span class="hljs-comment">/* 动态的 text */</span> },</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  ]</span>
+<span class="code-block-extension-codeLine" data-line-num="10">}</span>
+</code></pre>
+<p>此时组件内存在了一个静态的节点 <code>&lt;p&gt;hello world&lt;/p&gt;</code>，在传统的 <code>diff</code> 算法里，还是需要对该静态节点进行不必要的 <code>diff</code>。所以 <code>Vue3</code> 先通过 <code>patchFlag</code> 来标记动态节点 <code>&lt;p&gt;{{ msg }}&lt;/p&gt;</code>， 然后配合 <code>dynamicChildren</code> 将动态节点进行收集，从而完成在 <code>diff</code> 阶段只做<strong>靶向更新</strong>的目的。</p></div>
+    </body>
+    </html>

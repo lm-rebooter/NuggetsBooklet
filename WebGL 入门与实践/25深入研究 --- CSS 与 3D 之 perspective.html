@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- CSS 与 3D 之 perspective</h1>
+<p>上节我们讲述了 CSS 中的变换方式以及对它们原理的深入理解。本节我们介绍一下 3D 变换的投影方式<code>perspective</code>相关属性，并通过<code>照片墙</code>和<code>图片盒</code>的实现学习它们的深入使用方法。</p>
+<p>本节要介绍的主要属性有如下几个：</p>
+<ul>
+<li>transform-style：子元素变换的表现形式。</li>
+<li>perspective：视距。</li>
+<li>perspective-origin： 视点位置。</li>
+<li>backface-visibility：背面是否可见。</li>
+</ul>
+<p>本节教大家掌握这几个属性，之后用 CSS 就能够很轻松地做出有创意的 3D 效果了。</p>
+<h2 data-id="heading-1">transform-style</h2>
+<p>该属性是用来设置子元素变换的展示形式，默认是 2D 平面展示，当我们需要让子元素的渲染有 3D 效果时，那么我们要将当前元素的 transform-style 属性设置为 preserve-3d。</p>
+<p>我们用一张图片做示例：</p>
+<pre><code lang="ini" class="hljs language-ini"><div <span class="hljs-attr">class</span>=<span class="hljs-string">"image-wrapper"</span>>
+ <img <span class="hljs-attr">src</span>=<span class="hljs-string">"xxx"</span> />
+</div>
+</code></pre><pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.image-wrapper</span>{
+ <span class="hljs-attribute">text-align</span>: center;
+ <span class="hljs-attribute">font-size</span>: <span class="hljs-number">0</span>;
+ <span class="hljs-attribute">margin-top</span>: <span class="hljs-number">200px</span>;
+}
+
+<span class="hljs-selector-class">.image-wrapper</span> <span class="hljs-selector-tag">img</span>{
+ <span class="hljs-attribute">width</span>: <span class="hljs-number">150px</span>;
+ <span class="hljs-attribute">height</span>: <span class="hljs-number">110px</span>;
+}
+</code></pre><p>我们不对图片施加变换，图片是正常状态：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018127167884e85db72163~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>记住图片默认时的样子。</p>
+<p>此时，我们对图片施加变换，让图片绕 X 轴旋转 60 度。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.image-wrapper</span> <span class="hljs-selector-tag">img</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">60deg</span>);
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018127167885037d697934~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，图片因为旋转，展示到屏幕上已经变形了，正常情况下，绕 X 轴旋转，图片的上半部分应该转到屏幕内侧，下半部分转到屏幕外侧。</p>
+<p>我们看一下，是不是这样子的。</p>
+<p>我们让图片的父容器也绕 X 轴旋转，这样就能看出图片到底是不是真的有了 3D 效果。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">0deg</span>);
+ <span class="hljs-attribute">animation</span>: rotate <span class="hljs-number">3s</span> linear;
+}
+<span class="hljs-keyword">@keyframes</span> rotate{
+ <span class="hljs-number">0%</span>{
+ rotateX(<span class="hljs-number">0deg</span>);
+ }
+ <span class="hljs-number">50%</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">120deg</span>);
+ }
+ <span class="hljs-number">100%</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">0deg</span>);
+ }
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678d28a3c32c952~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，图片并没有呈现出立体效果。</p>
+<p>那如何让图片呈现立体效果呢？</p>
+<p>transform-style 要闪亮登场了。</p>
+<p>我们将 transform-style 设置为 preserve-3d 即可。</p>
+<p>另一个问题是，为哪个元素设置 transform-style 属性呢？</p>
+<h3 data-id="heading-2">舞台</h3>
+<p>WebGL 中有舞台和场景的概念， CSS 中也有类似概念。</p>
+<p>我们需要一个舞台，然后为舞台设置展示方式。</p>
+<p>上面的示例，大家觉得哪个元素是舞台呢？</p>
+<p>很简单，图片的祖先容器都可以当做图片的舞台，我们将一个祖先容器设定为舞台，祖先容器的子元素就是舞台上的元素。</p>
+<p>因此，既然我们想让元素呈现立体效果，我们就要在元素所在的舞台上设置 transform-style 属性，对于图片来说，图片的任何一个祖先元素都可以作为舞台，我们将图片的父容器作为舞台，为它设置舞台元素的呈现效果。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">transform-style</span>: preserve-<span class="hljs-number">3</span>d;
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678d2b82976fbad~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>很明显，图片呈现出了 3D效果。</p>
+<p>通过这两幅动图，我相信大家已经明白 transform-style 的作用了。</p>
+<p>我们总结一下：</p>
+<p>transform-style用来设置容器中子元素的呈现方式
+。</p>
+<ul>
+<li>当设置为 preserve-3d 时，子元素进行 3D 变换会呈现出 3D 立体效果。</li>
+<li>当不设置或者设置为 <code>flat</code> 时，子元素不管采用 2D 变换还是 3D 变换，总是呈现出平面效果。</li>
+</ul>
+<h2 data-id="heading-3">观察点位置</h2>
+<p>如何改变观察点位置呢？</p>
+<p>这就涉及到两个新属性 <code>perspective</code>和<code>perspective-origin</code>，这两个属性用来设置观察点的坐标，并让投影产生透视效果，透视效果最明显的现象就是近大远小。</p>
+<p>perspective 用来设置观察点在 Z 轴方向的位置，默认时观察点在元素中心，即 z = 0 位置，我们可以调整它到元素中心的距离。</p>
+<p>设置这个属性会产生两个效果：</p>
+<ul>
+<li>改变了观察点距离元素的 Z 轴距离.</li>
+<li>使得子元素的 3D 变换产生透视效果。</li>
+</ul>
+<h3 data-id="heading-4">舞台</h3>
+<p>我们想换个角度看图片，那观察点需要设置在哪个元素上呢？</p>
+<p>perspective 这个属性也是在舞台上设置的。</p>
+<p>我们为舞台设置 perspective属性。</p>
+<blockquote>
+<p>请注意，perspective 默认值是 0，此时不产生透视效果。只有不为 0 时才会形成透视效果。</p>
+</blockquote>
+<p>那么，观察点距离元素中心的远近对视觉呈现有什么影响呢？</p>
+<p>千言万语抵不过一幅图。</p>
+<p>我们通过一张动图感受一下，在这个动画里，我将观察点的 Z 轴坐标从 1 像素匀速改变到 100 像素，再从 100 像素移近到 1 像素，另外为了区别舞台和舞台元素在 Z 轴上的不同，我将舞台的背景颜色改为透明度为 70% 的红色。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">300px</span>;
+ <span class="hljs-attribute">animation</span>: camera <span class="hljs-number">3s</span> linear;
+ <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, .<span class="hljs-number">7</span>);
+}
+<span class="hljs-keyword">@keyframes</span> camera {
+ <span class="hljs-number">0%</span> {
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">1px</span>;
+ }
+ <span class="hljs-number">50%</span> {
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">100px</span>;
+ }
+ <span class="hljs-number">100%</span> {
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">1px</span>;
+ }
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678970a14c4eb7f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>因为图片大小是 150 ，高度是 110px，当绕 X 轴旋转 60 度后，图片底边在 Z 轴的坐标为：</p>
+<p><img alt="z = 110 \div 2 * \frac{\sqrt{3}}{2} \approx 49" src="https://juejin.cn/equation?tex=z%20%3D%20110%20%5Cdiv%202%20*%20%5Cfrac%7B%5Csqrt%7B3%7D%7D%7B2%7D%20%5Capprox%2049" loading="lazy" class="medium-zoom-image"></p>
+<p>所以，我们的观察点的 Z 轴坐标至少要大于这个值，才能看到图片的全貌。</p>
+<p>距离越近，就越看不到图片在观察点后面的部分。</p>
+<p>我们将 perspective （观察点的 Z 轴坐标）移动到 100px 处。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678cc5fc18c3c15~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>此时，图片有了近大远小的透视效果，这就是 perspective 的作用。</p>
+<p>从感官上我们是能感受到它好像有了 3D 的感觉，但是还是看不出它在 Z 轴上的状态。</p>
+<p>改变 perspective 只是改变了在 Z 轴的位置，也就是拉远或者拉近镜头，但是并没有将镜头移到图片上方去观察。</p>
+<h3 data-id="heading-5">观察点在 X、Y 轴的位置</h3>
+<p>让观察点沿着左、右、上、下方向进行移动的话，该如何做呢？</p>
+<p>这就是 perspective-origin 所扮演的重要角色。</p>
+<p>它负责设置观察点在 X、Y 轴的偏移，即屏幕的左右、上下方向。</p>
+<p>我们看下他的用法：</p>
+<p>perspective-origin，接收两个参数，一个代表 X 轴偏移，一个代表 Y 轴偏移。</p>
+<p>请谨记：该属性的默认值是 （50%，50%），在舞台 DOM 的中心位置。</p>
+<p>回到上面的话题，移动镜头到图片上方，也就是设置观察点在舞台上的 Y 轴坐标，我们将镜头往上移动一定高度，从舞台上方观察图片。</p>
+<p>还是用动图来演示这个过程。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">200px</span>;
+ <span class="hljs-attribute">animation</span>: camera <span class="hljs-number">3s</span> linear infinite;
+}
+<span class="hljs-keyword">@keyframes</span>{
+ <span class="hljs-number">0%</span>{
+ <span class="hljs-attribute">perspective-origin</span>: <span class="hljs-number">50%</span> <span class="hljs-number">50%</span>;
+ }
+ <span class="hljs-number">50%</span>{
+ <span class="hljs-attribute">perspective-origin</span>: <span class="hljs-number">50%</span> -<span class="hljs-number">200%</span>;
+ }
+ <span class="hljs-number">100%</span>{
+ <span class="hljs-attribute">perspective-origin</span>: <span class="hljs-number">50%</span> <span class="hljs-number">50%</span>;
+ }
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678d97bfccd73ed~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>上面就是我们将镜头慢慢移动到上方时，对舞台元素的观察过程。</p>
+<p>注意，图片本身并没有动，我们移动的只是镜头，虽然你会有一种镜头没动，图片在动的感觉。</p>
+<p>通过这几幅动图，我相信大家对这几个属性有了更深刻的认识，接下来，我们介绍如何利用这几个属性实现照片墙和图片盒。</p>
+<h2 data-id="heading-6">照片墙</h2>
+<p>在上一节，我介绍了照片墙的原理，简单来说，就是图片先旋转一定度数，之后沿着 Z 轴方向移动一定距离。</p>
+<p>在动手写代码之前，我们要想清楚两个问题：</p>
+<ul>
+<li>每张图片绕 Y 轴旋转的角度。</li>
+<li>沿 Z 轴方向至少移动多少像素。</li>
+</ul>
+<p>我想，只要你想清楚了这四个问题，代码就信手拈来了。</p>
+<h3 data-id="heading-7">每张图片绕 Y 轴旋转的角度。</h3>
+<p>我们准备 12 张图片，并将每张图片设置成宽 150px，高 110px 。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">img</span>{
+ <span class="hljs-attribute">width</span>: <span class="hljs-number">150px</span>;
+ <span class="hljs-attribute">height</span>: <span class="hljs-number">110px</span>;
+}
+</code></pre><p>那么，每张图片旋转的角度是 360 / 12 = 30度。</p>
+<h3 data-id="heading-8">沿 Z 轴方向最少移动距离</h3>
+<p>为了让图片能够不交叉，我们需要沿图片 Z 轴平移一定距离，那么，这个距离是多少呢？</p>
+<p>当然我们可以一点点地区尝试，但是我想我还是教给大家一个严谨的思路比较好。</p>
+<p>大家看下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181281678e79b9936cde6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>根据下图，我们能够知道，图片在 Z 轴平移的最小距离是 <img alt="\vec{OB}" src="https://juejin.cn/equation?tex=%5Cvec%7BOB%7D" loading="lazy" class="medium-zoom-image">，那么如何求得 <img alt="\vec{OB}" src="https://juejin.cn/equation?tex=%5Cvec%7BOB%7D" loading="lazy" class="medium-zoom-image"> 的长度呢？</p>
+<p>由最简单的三角公式可以得出：</p>
+<p><img alt="OB = BC \times \sqrt3 = （BD + DC）\times \sqrt3" src="https://juejin.cn/equation?tex=OB%20%3D%20%20BC%20%5Ctimes%20%5Csqrt3%20%3D%20%EF%BC%88BD%20%2B%20DC%EF%BC%89%5Ctimes%20%5Csqrt3" loading="lazy" class="medium-zoom-image"></p>
+<p>仍然根据三角公式可以知道：</p>
+<p><img alt="BD = AD \div 2 = 150 \div 2 = 75" src="https://juejin.cn/equation?tex=BD%20%3D%20AD%20%5Cdiv%202%20%3D%20150%20%5Cdiv%202%20%3D%2075" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="DC = DE \div \frac{\sqrt3}{ 2} = 75 \times 2 \div \sqrt3 \approx 89" src="https://juejin.cn/equation?tex=DC%20%3D%20DE%20%5Cdiv%20%5Cfrac%7B%5Csqrt3%7D%7B%202%7D%20%3D%2075%20%5Ctimes%202%20%5Cdiv%20%5Csqrt3%20%5Capprox%2089" loading="lazy" class="medium-zoom-image"></p>
+<p>所以：</p>
+<p><img alt="OB = (BD + DC) \times \sqrt3 \approx 280" src="https://juejin.cn/equation?tex=OB%20%3D%20(BD%20%2B%20DC)%20%5Ctimes%20%5Csqrt3%20%5Capprox%20280" loading="lazy" class="medium-zoom-image"></p>
+<p>也就是说，我们至少要让图片沿着 Z 轴移动 280 像素，才能让各个图片正好衔接。</p>
+<p>口说无凭，看看效果吧。</p>
+<pre><code lang="javascript" class="hljs language-javascript"><span class="hljs-title class_">Array</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">forEach</span>.<span class="hljs-title function_">call</span>(?(<span class="hljs-string">'img'</span>), <span class="hljs-function">(<span class="hljs-params">item, i</span>) =></span> {
+ item.<span class="hljs-property">style</span>.<span class="hljs-property">transform</span> = <span class="hljs-string">'rotateY('</span> + i * <span class="hljs-number">30</span> + <span class="hljs-string">'deg) translateZ(280px)'</span>;
+});
+</code></pre><p>仍然用一幅动图来演示，我们将观察点移动到舞台上方：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181291678e93e5f22b564~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，当我们让图片沿Z 轴移动 282 像素之后，各个图片的边缘正好能够对齐，和我们推导的结果一致。</p>
+<p>将舞台绕 X 轴旋转 90 度，以自下而上的角度观察照片墙是如何从默认位置沿着 Z 轴移动到指定位置：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">90deg</span>);
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181291678e9a7e142deb5~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>从不同角度观看我们的舞台，展现效果也会不同。</p>
+<h3 data-id="heading-9">背面是否可见</h3>
+<p>照片墙这个效果，大家应该能看到处于背面的元素还是能够可见的，这与实际有所差异，如果大家不想背面元素可见，我们可以设置 backface-visibility 属性来实现：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">backface-visibility</span>: hidden;
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181291679202ab61c6b7d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>大家可以看到，设置完背面不可见属性之后，位于后面的图片此时已经看不到了。</p>
+<p>以上就是图片墙的主要原理，可见，了解一些图形学知识对于我们做 3D 动效有莫大的帮助。</p>
+<p>接下来，我们看一下另一个效果<code>图片盒子</code>的分析实现过程。</p>
+<h2 data-id="heading-10">图片盒</h2>
+<p>图片盒是一个包含 6 个面的立方体，每个面其实就是一个 DOM 元素。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812916791e7ad7c1ff01~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>上图就是一个图片盒子的例子，我们接下来的目标就是利用 CSS 的 3D 属性实现这样一个效果。</p>
+<p>写代码之前还是先思考一下，不考虑动效，我们如何实现这样一个立方体。</p>
+<p>其实很简单，主要思考清楚六个面的状态就可以了。</p>
+<ul>
+<li>首先我们需要六个 DOM 元素，此时六个元素在同一位置。</li>
+<li>处理前后两个平面在 Z 轴方向的差别。</li>
+<li>对上下两个平面施加绕 X 轴旋转90度的效果，然后处理 Y 轴方向的差别。</li>
+<li>对左右两个平面施加绕 Y 轴旋转90度的效果，然后处理 X 轴方向的差别。</li>
+</ul>
+<p>想清楚这几个步骤，代码就很简单了。</p>
+<p>为了让图片展示 3D 效果，我们需要为图片父容器设置 transform-style 属性：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.img-wrapper</span>{
+ <span class="hljs-attribute">transform-style</span>: preserve-<span class="hljs-number">3</span>d;
+ <span class="hljs-attribute">position</span>: relative;
+}
+</code></pre><p>接下来，我们为图片元素设置宽高，并对六张图片采用绝对定位，使他们重合。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-tag">img</span>{
+ <span class="hljs-attribute">width</span>: <span class="hljs-number">150px</span>;
+ <span class="hljs-attribute">height</span>: <span class="hljs-number">110px</span>;
+ <span class="hljs-attribute">position</span>: absolute;
+}
+</code></pre><p>然后，开始处理各个面的状态，对于图片盒子的前后两个面，我们只需要改变它们的 Z 轴坐标就可以了，那么 Z 轴坐标设置多少呢？</p>
+<p>聪明的同学已经想到了， Z 轴坐标是图片高度的一半。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.front</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateZ</span>(<span class="hljs-number">55px</span>);
+}
+<span class="hljs-selector-class">.back</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateZ</span>(-<span class="hljs-number">55px</span>);
+}
+</code></pre><p>前后平面处理完了，接下来处理上下两个面，上下两个面要绕 X 轴翻转 90 度，然后沿着 Y 轴分别向上下两个方向移动图片高度的一半距离。</p>
+<pre><code lang="css" class="hljs language-css"> <span class="hljs-selector-class">.top</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">55px</span>) <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">90deg</span>);
+ }
+ <span class="hljs-selector-class">.back</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateZ</span>(-<span class="hljs-number">55px</span>) <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">180deg</span>) ;
+ }
+</code></pre><p>最后，处理左右两个平面，左右两个平面需要绕 Y 轴旋转 90 度，然后沿着 X 轴进行平移，分别向左、向右平移图片宽度的一半。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.left</span>{
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateX</span>(-<span class="hljs-number">75px</span>) <span class="hljs-built_in">rotateY</span>(<span class="hljs-number">90deg</span>);
+}
+<span class="hljs-selector-class">.right</span> {
+ <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateX</span>(<span class="hljs-number">75px</span>) <span class="hljs-built_in">rotateY</span>(-<span class="hljs-number">90deg</span>);
+}
+</code></pre><p>这样，就完成了一个图片盒子，很简单吧？</p>
+<h2 data-id="heading-11">回顾</h2>
+<p>本节主要讲述了如何设置观察点在三维层面的坐标，并结合上节的变换属性实现照片墙和图片盒子的特效，主要目的不是教会大家做这些效果，而是教大家思考 3D 特效的分析过程。通过这两个例子，我想大家认识到了 css 的强大。即使不使用 WebGL ，我们依然可以用 DOM 元素结合 CSS 实现 3D 效果。</p>
+<p>下一节，我们详细阐述一下数学库在 CSS 3D 属性中的高级应用。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">结束了吗？一切才刚刚开始。</h1>
+<p>至此，我们对 WebGL 的学习就告一段落了，坦白的说，我们还有一些 WebGL 细节没有在本小册呈现。但我相信，拥有了3D 数学的相关功底，你已经不再惧怕那些函数式 API 了，毕竟你连那么复杂的数学公式的推导过程都已经经历了。</p>
+<p>当你看到本节时，我假设你已经掌握了以下内容：</p>
+<ul>
+<li>WebGL 的开发要素。</li>
+<li>光照、颜色相关知识。</li>
+<li>GLSL 语言。</li>
+<li>3D 数学算法实现。</li>
+</ul>
+<p>此时你再去看一些 3D 框架，会对其中的概念有一见如故的感觉。不仅如此，我相信你会更容易地读懂它的源码。</p>
+<h2 data-id="heading-1">下一步如何走</h2>
+<p>有的读者会问了，学完这些技术，下一步我该怎么走呢？我不能只是为了学习而学习吧。</p>
+<p>首先，我必须要表扬你，你是有思想的同学。</p>
+<p>学以致用是我们学习的目的。如果只学不用，那岂不是浪费我们宝贵的青春。</p>
+<h3 data-id="heading-2">如果你并不专职 WebGL 领域</h3>
+<p>如果不打算转向 WebGL 领域，那么建议你使用数学库配合 CSS3 中的 3D 属性，为自己的页面增加一些令人耳目一新的 3D 效果，比如 3D 照片墙， WebVR 等。</p>
+<h4 data-id="heading-3">使用 CSS 技术实现 3D 效果</h4>
+<p>如果你不想使用 webgl 技术，那你仍然可以使用 css3 中的 <code>transform</code> 和 <code>perspective</code> 等 3D 属性来实现三维效果。</p>
+<p>还记得吗？transform 属性是用来对 dom 进行变换的。它接收两类值，分别是 matrix 和 matrix3d，其中 matrix 代表 2D 变换，是一个 3 阶矩阵，我们需要为其传入 9 个数字。
+matrix3d 代表 3D 变换，是一个 4 阶矩阵，我们需要为其传入 16 个数字。</p>
+<p>在中级进阶阶段，我们学习了变换矩阵的推导公式。大家只需利用这些推导算法，计算出变换矩阵，然后将其转化成 matrix 或者 matrix3d 所接收的字符串格式，赋值给 transform 即可。</p>
+<blockquote>
+<p>但请注意， matrix中包含 6 个数字，而非 3 阶矩阵中的 9 个数字。</p>
+</blockquote>
+<h4 data-id="heading-4">css 中的摄像机</h4>
+<p>perspective 属性用来设置摄像机和屏幕之间的远近，通常是在 Z 轴
+上的距离，关于摄像机的原理，我们也在坐标系变换章节中也进行了详细的讲解，相信大家不会再惧怕这个概念了。</p>
+<p>我们可以对父容器的 perspective 设置视距，transform-style:preserve-3d 设置成 3D 显示效果。</p>
+<h3 data-id="heading-5">如果你打算踏入 WebGL 编程领域</h3>
+<p>如果你真的打算专职 WebGL 编程领域，建议你按照下面的步骤进行深入学习。</p>
+<ul>
+<li>深入了解 OpenGL 的底层知识。</li>
+<li>熟练掌握 ThreeJS、Babylon 等框架提供的 API，如果有多余精力，再去深入学习它们的底层实现，相信你会有更多收获。</li>
+<li>学会使用框架提供的模型拾取、碰撞检测等交互相关的关键技术。</li>
+<li>做实际项目，只有在实战中才能大幅提升自己的技术。</li>
+</ul>
+<h4 data-id="heading-6">3D 小游戏</h4>
+<p>每一个前端同学的心里都有过做一款属于自己的游戏的想法，只是苦于自己能力有限，只能望洋兴叹。</p>
+<p>但是现在的你，是有能力实现一些 3D 小游戏了，只要有了创意，就去试试吧。</p>
+<h2 data-id="heading-7">一些学习网站</h2>
+<p>另外，提供一些 3D 资源，供大家学习：</p>
+<ul>
+<li>框架：
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js" title="https://github.com/mrdoob/three.js" ref="nofollow noopener noreferrer">ThreeJS</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fwww.babylonjs.com%2F" title="https://www.babylonjs.com/" ref="nofollow noopener noreferrer">BabylonJs</a></li>
+</ul>
+</li>
+<li>技术网站
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fwww.shuxuele.com%2Falgebra%2Fmatrix-inverse-minors-cofactors-adjugate.html" title="https://www.shuxuele.com/algebra/matrix-inverse-minors-cofactors-adjugate.html" ref="nofollow noopener noreferrer">数学乐</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fwww.khronos.org%2Fregistry%2Fwebgl%2Fspecs%2Flatest%2F2.0%2F" title="https://www.khronos.org/registry/webgl/specs/latest/2.0/" ref="nofollow noopener noreferrer">WebGL 规范</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fwww.khronos.org%2Ffiles%2Fopengles_shading_language.pdf" title="https://www.khronos.org/files/opengles_shading_language.pdf" ref="nofollow noopener noreferrer">OpenGL ES 规范</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fwgld.org%2Fd%2Fwebgl%2F" title="https://wgld.org/d/webgl/" ref="nofollow noopener noreferrer">一个很好的日文 WebGL 学习网站</a></li>
+</ul>
+</li>
+</ul>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

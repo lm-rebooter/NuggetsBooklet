@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p><code>Vue</code> 内置了 <code>KeepAlive</code> 组件，帮助我们实现缓存多个组件实例切换时，完成对卸载组件实例的缓存，从而使得组件实例在来会切换时不会被重复创建，又是一个空间换时间的典型例子。在介绍源码之前，我们先来了解一下 <code>KeppAlive</code> 使用的基础示例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">KeepAlive</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-tag">&lt;<span class="hljs-name">component</span> <span class="hljs-attr">:is</span>=<span class="hljs-string">"activeComponent"</span> /&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">KeepAlive</span>&gt;</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</code></pre>
+<p>当动态组件在随着 <code>activeComponent</code> 变化时，如果没有 <code>KeepAlive</code> 做缓存，那么组件在来回切换时就会进行重复的实例化，这里就是通过 <code>KeepAlive</code> 实现了对不活跃组件的缓存。</p>
+<p>这里需要思考几个问题：</p>
+<ol>
+<li>组件是如何被缓存的，以及是如何被重新激活的？</li>
+<li>既然缓存可以提高组件渲染的性能，那么是不是缓存的越多越好呢？</li>
+<li>如果不是越多越好，那么如何合理的丢弃多余的缓存呢？</li>
+</ol>
+<p>接下来我们通过对源码的分析，一步步找到答案。先找到定义 <code>KeppAlive</code> 组件的地方，然后看一下其大致内容：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title class_">KeepAliveImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 组件名称</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">name</span>: <span class="hljs-string">`KeepAlive`</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 区别于其他组件的标记</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-attr">__isKeepAlive</span>: <span class="hljs-literal">true</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 组件的 props 定义</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-attr">props</span>: {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-attr">include</span>: [<span class="hljs-title class_">String</span>, <span class="hljs-title class_">RegExp</span>, <span class="hljs-title class_">Array</span>],</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-attr">exclude</span>: [<span class="hljs-title class_">String</span>, <span class="hljs-title class_">RegExp</span>, <span class="hljs-title class_">Array</span>],</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-attr">max</span>: [<span class="hljs-title class_">String</span>, <span class="hljs-title class_">Number</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-title function_">setup</span>(<span class="hljs-params">props, {slots}</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">    <span class="hljs-comment">// setup 返回一个函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+</code></pre>
+<p>可以看到，<code>KeepAlive</code> 组件中，通过 <code>__isKeepAlive</code> 属性来完成对这个内置组件的特殊标记，这样外部可以通过 <code>isKeepAlive</code> 函数来做区分：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">isKeepAlive</span> = vnode =&gt; vnode.<span class="hljs-property">type</span>.<span class="hljs-property">__isKeepAlive</span></span>
+</code></pre>
+<p>紧接着定义了 <code>KeepAlive</code> 的一些 <code>props</code>：</p>
+<ol>
+<li><code>include</code> 表示包含哪些组件可被缓存</li>
+<li><code>exclude</code> 表示排除那些组件</li>
+<li><code>max</code> 则表示最大的缓存数</li>
+</ol>
+<p>后面我们将可以详细的看到这些 <code>props</code> 是如何被发挥作用的。</p>
+<p>最后实现了一个 <code>setup</code> 函数，该函数返回了一个函数，我们前面提到 <code>setup</code> 返回函数的话，那么这个函数将会被当做节点 <code>render</code> 函数。了解了 <code>KeepAlive</code> 的整体骨架后，我们先来看看这个 <code>render</code> 函数具体做了哪些事情。</p>
+<h2 data-id="heading-1">KeepAlive 的 render 函数</h2>
+<p>先来看看 <code>render</code> 函数的源码实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title class_">KeepAliveImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">setup</span>(<span class="hljs-params">props, { slot }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// 记录需要被缓存的 key</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      pendingCacheKey = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 获取子节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-keyword">const</span> children = slots.<span class="hljs-title function_">default</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">const</span> rawVNode = children[<span class="hljs-number">0</span>]</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-keyword">if</span> (children.<span class="hljs-property">length</span> &gt; <span class="hljs-number">1</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        <span class="hljs-comment">// 子节点数量大于 1 个，不会进行缓存，直接返回</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">        current = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">        <span class="hljs-keyword">return</span> children</span>
+<span class="code-block-extension-codeLine" data-line-num="16">      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        !<span class="hljs-title function_">isVNode</span>(rawVNode) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        (!(rawVNode.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">STATEFUL_COMPONENT</span>) &amp;&amp;</span>
+<span class="code-block-extension-codeLine" data-line-num="19">          !(rawVNode.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SUSPENSE</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        current = <span class="hljs-literal">null</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">        <span class="hljs-keyword">return</span> rawVNode</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">      <span class="hljs-comment">// suspense 特殊处理，正常节点就是返回节点 vnode</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">      <span class="hljs-keyword">let</span> vnode = <span class="hljs-title function_">getInnerChild</span>(rawVNode)</span>
+<span class="code-block-extension-codeLine" data-line-num="26">      <span class="hljs-keyword">const</span> comp = vnode.<span class="hljs-property">type</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">    </span>
+<span class="code-block-extension-codeLine" data-line-num="28">      <span class="hljs-comment">// 获取 Component.name 值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">      <span class="hljs-keyword">const</span> name = <span class="hljs-title function_">getComponentName</span>(<span class="hljs-title function_">isAsyncWrapper</span>(vnode) ? vnode.<span class="hljs-property">type</span>.<span class="hljs-property">__asyncResolved</span> || {} : comp)</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-comment">// 获取 props 中的属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-keyword">const</span> { include, exclude, max } = props</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-comment">// 如果组件 name 不在 include 中或者存在于 exclude 中，则直接返回</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      <span class="hljs-keyword">if</span> (</span>
+<span class="code-block-extension-codeLine" data-line-num="34">        (include &amp;&amp; (!name || !<span class="hljs-title function_">matches</span>(include, name))) ||</span>
+<span class="code-block-extension-codeLine" data-line-num="35">        (exclude &amp;&amp; name &amp;&amp; <span class="hljs-title function_">matches</span>(exclude, name))</span>
+<span class="code-block-extension-codeLine" data-line-num="36">      ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="37">        current = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="38">        <span class="hljs-keyword">return</span> rawVNode</span>
+<span class="code-block-extension-codeLine" data-line-num="39">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="40">      </span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-comment">// 缓存相关，定义缓存 key</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">      <span class="hljs-keyword">const</span> key = vnode.<span class="hljs-property">key</span> == <span class="hljs-literal">null</span> ? comp : vnode.<span class="hljs-property">key</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">      <span class="hljs-comment">// 从缓存中取值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="44">      <span class="hljs-keyword">const</span> cachedVNode = cache.<span class="hljs-title function_">get</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="45">    </span>
+<span class="code-block-extension-codeLine" data-line-num="46">      <span class="hljs-comment">// clone vnode，因为需要重用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-keyword">if</span> (vnode.<span class="hljs-property">el</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="48">        vnode = <span class="hljs-title function_">cloneVNode</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="49">        <span class="hljs-keyword">if</span> (rawVNode.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">SUSPENSE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="50">          rawVNode.<span class="hljs-property">ssContent</span> = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="51">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="52">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="53">      <span class="hljs-comment">// 给 pendingCacheKey 赋值，将在 beforeMount/beforeUpdate 中被使用</span></span>
+<span class="code-block-extension-codeLine" data-line-num="54">      pendingCacheKey = key</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      <span class="hljs-comment">// 如果存在缓存的 vnode 元素</span></span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-keyword">if</span> (cachedVNode) {</span>
+<span class="code-block-extension-codeLine" data-line-num="57">        <span class="hljs-comment">// 复制挂载状态</span></span>
+<span class="code-block-extension-codeLine" data-line-num="58">        <span class="hljs-comment">// 复制 DOM</span></span>
+<span class="code-block-extension-codeLine" data-line-num="59">        vnode.<span class="hljs-property">el</span> = cachedVNode.<span class="hljs-property">el</span></span>
+<span class="code-block-extension-codeLine" data-line-num="60">        <span class="hljs-comment">// 复制 component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="61">        vnode.<span class="hljs-property">component</span> = cachedVNode.<span class="hljs-property">component</span></span>
+<span class="code-block-extension-codeLine" data-line-num="62">        </span>
+<span class="code-block-extension-codeLine" data-line-num="63">        <span class="hljs-comment">// 增加 shapeFlag 类型 COMPONENT_KEPT_ALIVE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">        vnode.<span class="hljs-property">shapeFlag</span> |= <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT_KEPT_ALIVE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="65">        <span class="hljs-comment">// 把缓存的 key 移动到到队首</span></span>
+<span class="code-block-extension-codeLine" data-line-num="66">        keys.<span class="hljs-title function_">delete</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="67">        keys.<span class="hljs-title function_">add</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="68">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="69">        <span class="hljs-comment">// 如果缓存不存在，则添加缓存</span></span>
+<span class="code-block-extension-codeLine" data-line-num="70">        keys.<span class="hljs-title function_">add</span>(key)</span>
+<span class="code-block-extension-codeLine" data-line-num="71">        <span class="hljs-comment">// 如果超出了最大的限制，则移除最早被缓存的值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="72">        <span class="hljs-keyword">if</span> (max &amp;&amp; keys.<span class="hljs-property">size</span> &gt; <span class="hljs-built_in">parseInt</span>(max <span class="hljs-keyword">as</span> string, <span class="hljs-number">10</span>)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="73">          <span class="hljs-title function_">pruneCacheEntry</span>(keys.<span class="hljs-title function_">values</span>().<span class="hljs-title function_">next</span>().<span class="hljs-property">value</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="74">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="75">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="76">      <span class="hljs-comment">// 增加 shapeFlag 类型 COMPONENT_SHOULD_KEEP_ALIVE，避免被卸载</span></span>
+<span class="code-block-extension-codeLine" data-line-num="77">      vnode.<span class="hljs-property">shapeFlag</span> |= <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT_SHOULD_KEEP_ALIVE</span></span>
+<span class="code-block-extension-codeLine" data-line-num="78">    </span>
+<span class="code-block-extension-codeLine" data-line-num="79">      current = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="80">      <span class="hljs-comment">// 返回 vnode 节点</span></span>
+<span class="code-block-extension-codeLine" data-line-num="81">      <span class="hljs-keyword">return</span> <span class="hljs-title function_">isSuspense</span>(rawVNode.<span class="hljs-property">type</span>) ? rawVNode : vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="82">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="83">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="84">}</span>
+</code></pre>
+<p>可以看到返回的这个 <code>render</code> 函数执行的结果就是返回被 <code>KeepAlive</code> 包裹的子节点的 <code>vnode</code> 只不过在返回子节点的过程中做了很多处理而已，如果子节点数量大于一个，那么将不会被 <code>keepAlive</code>，直接返回子节点的 <code>vnode</code>，如果组件 <code>name</code> 不在用户定义的 <code>include</code> 中或者存在于 <code>exclude</code> 中，也会直接返回子节点的 <code>vnode</code>。</p>
+<h3 data-id="heading-2">缓存设计</h3>
+<p>接着来看后续的缓存步骤，首先定义了一个 <code>pendingCacheKey</code> 变量，用来作为 <code>cache</code> 的缓存 <code>key</code>。对于初始化的 <code>KeepAlive</code> 组件的时候，此时还没有缓存，那么只会讲 <code>key</code> 添加到 <code>keys</code> 这样一个 <code>Set</code> 的数据结构中，在组件 <code>onMounted</code> 和 <code>onUpdated</code> 钩子中进行缓存组件的 <code>vnode</code> 收集，因为这个时候收集到的 <code>vnode</code> 节点是稳定不会变的缓存。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">cacheSubtree</span> = (<span class="hljs-params"></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (pendingCacheKey != <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// 以 pendingCacheKey 作为key 进行缓存收集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    cache.<span class="hljs-title function_">set</span>(pendingCacheKey, <span class="hljs-title function_">getInnerChild</span>(instance.<span class="hljs-property">subTree</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">}</span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-title function_">onMounted</span>(cacheSubtree)</span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-title function_">onUpdated</span>(cacheSubtree)</span>
+</code></pre>
+<p>另外，注意到 <code>props</code> 中还有一个 <code>max</code> 变量用来标记最大的缓存数量，这个缓存策略就是类似于 <a href="https://link.juejin.cn?target=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FCache_replacement_policies%23Least_recently_used_(LRU)" target="_blank" rel="nofollow noopener noreferrer" title="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)" ref="nofollow noopener noreferrer">LRU 缓存</a> 的方式实现的。在缓存重新被激活时，之前缓存的 <code>key</code> 会被重新添加到队首，标记为最近的一次缓存，如果缓存的实例数量即将超过指定的那个最大数量，则最久没有被访问的缓存实例将被销毁，以便为新的实例腾出空间。</p>
+<p>最后，当缓存的节点被重新激活时，则会将缓存中的节点的 <code>el</code> 属性赋值给新的 <code>vnode</code> 节点，从而减少了再进行 <code>patch</code> 生成 <code>DOM</code> 的过程，这里也说明了 <code>KeepAlive</code> 核心目的就是缓存 <code>DOM</code> 元素。</p>
+<h2 data-id="heading-3">激活态设计</h2>
+<p>上述源码中，当组件被添加到 <code>KeepAlive</code> 缓存池中时，也会为 <code>vnode</code> 节点的 <code>shapeFlag</code> 添加两额外的两个属性，分别是 <code>COMPONENT_KEPT_ALIVE</code> 和 <code>COMPONENT_SHOULD_KEEP_ALIVE</code>。我们先说 <code>COMPONENT_KEPT_ALIVE</code> 这个属性，当一个节点被标记为 <code>COMPONENT_KEPT_ALIVE</code> 时，会在 <code>processComponent</code> 时进行特殊处理：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">processComponent</span> = (<span class="hljs-params">...</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (n1 == <span class="hljs-literal">null</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-comment">// 处理 KeepAlive 组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">if</span> (n2.<span class="hljs-property">shapeFlag</span> &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT_KEPT_ALIVE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-comment">// 执行 activate 钩子</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">      ;(parentComponent!.<span class="hljs-property">ctx</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">KeepAliveContext</span>).<span class="hljs-title function_">activate</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="7">        n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="8">        container,</span>
+<span class="code-block-extension-codeLine" data-line-num="9">        anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">      <span class="hljs-title function_">mountComponent</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        n2,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        container,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        parentComponent,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="20">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="21">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="22">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="23">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="24">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">  <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-comment">// 更新组件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">}</span>
+</code></pre>
+<p>可以看到，在 <code>processComponent</code> 阶段如果是 <code>keepAlive</code> 的组件，在挂载过程中，不会执行执行 <code>mountComponent</code> 的逻辑，因为已经缓存好了，所以只需要再次调用 <code>activate</code> 激活就好了。接下来看看这个激活函数做了哪些事儿：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title class_">KeepAliveImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">setup</span>(<span class="hljs-params">props, { slot }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    sharedContext.<span class="hljs-property">activate</span> = <span class="hljs-function">(<span class="hljs-params">vnode, container, anchor, isSVG, optimized</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">      <span class="hljs-comment">// 获取组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-keyword">const</span> instance = vnode.<span class="hljs-property">component</span>!</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-comment">// 将缓存的组件挂载到容器中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-title function_">move</span>(vnode, container, anchor, <span class="hljs-title class_">MoveType</span>.<span class="hljs-property">ENTER</span>, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-comment">// 如果 props 有变动，还是需要对 props 进行 patch</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-title function_">patch</span>(</span>
+<span class="code-block-extension-codeLine" data-line-num="11">        instance.<span class="hljs-property">vnode</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="12">        vnode,</span>
+<span class="code-block-extension-codeLine" data-line-num="13">        container,</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        anchor,</span>
+<span class="code-block-extension-codeLine" data-line-num="15">        instance,</span>
+<span class="code-block-extension-codeLine" data-line-num="16">        parentSuspense,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        isSVG,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        vnode.<span class="hljs-property">slotScopeIds</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">        optimized</span>
+<span class="code-block-extension-codeLine" data-line-num="20">      )</span>
+<span class="code-block-extension-codeLine" data-line-num="21">      <span class="hljs-comment">// 执行组件的钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">      <span class="hljs-title function_">queuePostRenderEffect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        instance.<span class="hljs-property">isDeactivated</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-comment">// 执行 onActivated 钩子</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">        <span class="hljs-keyword">if</span> (instance.<span class="hljs-property">a</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="26">          <span class="hljs-title function_">invokeArrayFns</span>(instance.<span class="hljs-property">a</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">        <span class="hljs-comment">// 执行 onVnodeMounted 钩子</span></span>
+<span class="code-block-extension-codeLine" data-line-num="29">        <span class="hljs-keyword">const</span> vnodeHook = vnode.<span class="hljs-property">props</span> &amp;&amp; vnode.<span class="hljs-property">props</span>.<span class="hljs-property">onVnodeMounted</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">        <span class="hljs-keyword">if</span> (vnodeHook) {</span>
+<span class="code-block-extension-codeLine" data-line-num="31">          <span class="hljs-title function_">invokeVNodeHook</span>(vnodeHook, instance.<span class="hljs-property">parent</span>, vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="32">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="33">      }, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="34">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="35">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="37">}    </span>
+</code></pre>
+<p>可以直观的看到 <code>activate</code> 激活函数，核心就是通过 <code>move</code> 方法，将缓存中的 <code>vnode</code> 节点直接挂载到容器中，同时为了防止 <code>props</code> 变化导致组件变化，也会执行 <code>patch</code> 方法来更新组件，注意此时的 <code>patch</code> 函数的调用是会传入新老子节点的，所以只会进行 <code>diff</code> 而不会进行重新创建。</p>
+<p>当这一切都执行完成后，最后再通过 <code>queuePostRenderEffect</code> 函数，将用户定义的 <code>onActivated</code> 钩子放到状态更新流程后执行。</p>
+<h2 data-id="heading-4">卸载态设计</h2>
+<p>接下来我们再看另一个标记态：<code>COMPONENT_SHOULD_KEEP_ALIVE</code>，我们看一下组件的卸载函数 <code>unmount</code> 的设计：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title function_">unmount</span> = (<span class="hljs-params">vnode, parentComponent, parentSuspense, doRemove = <span class="hljs-literal">false</span></span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">const</span> { shapeFlag  } = vnode</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">if</span> (shapeFlag &amp; <span class="hljs-title class_">ShapeFlags</span>.<span class="hljs-property">COMPONENT_SHOULD_KEEP_ALIVE</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    ;(parentComponent!.<span class="hljs-property">ctx</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">KeepAliveContext</span>).<span class="hljs-title function_">deactivate</span>(vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">    <span class="hljs-keyword">return</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">}</span>
+</code></pre>
+<p>可以看到，如果 <code>shapeFlag</code> 上存在 <code>COMPONENT_SHOULD_KEEP_ALIVE</code> 属性的话，那么将会执行 <code>ctx.deactivate</code> 方法，我们再来看一下 <code>deactivate</code> 函数的定义：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> <span class="hljs-title class_">KeepAliveImpl</span> = {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-title function_">setup</span>(<span class="hljs-params">props, { slot }</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 创建一个隐藏容器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">const</span> storageContainer = <span class="hljs-title function_">createElement</span>(<span class="hljs-string">'div'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7">    sharedContext.<span class="hljs-property">deactivate</span> = <span class="hljs-function">(<span class="hljs-params">vnode: VNode</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      <span class="hljs-comment">// 获取组件实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">      <span class="hljs-keyword">const</span> instance = vnode.<span class="hljs-property">component</span>!</span>
+<span class="code-block-extension-codeLine" data-line-num="10">      <span class="hljs-comment">// 将组件移动到隐藏容器中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-title function_">move</span>(vnode, storageContainer, <span class="hljs-literal">null</span>, <span class="hljs-title class_">MoveType</span>.<span class="hljs-property">LEAVE</span>, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-comment">// 执行组件的钩子函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-title function_">queuePostRenderEffect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        <span class="hljs-comment">// 执行组件的 onDeactivated 钩子</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">        <span class="hljs-keyword">if</span> (instance.<span class="hljs-property">da</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">          <span class="hljs-title function_">invokeArrayFns</span>(instance.<span class="hljs-property">da</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="17">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="18">        <span class="hljs-comment">// 执行 onVnodeUnmounted</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">        <span class="hljs-keyword">const</span> vnodeHook = vnode.<span class="hljs-property">props</span> &amp;&amp; vnode.<span class="hljs-property">props</span>.<span class="hljs-property">onVnodeUnmounted</span></span>
+<span class="code-block-extension-codeLine" data-line-num="20">        <span class="hljs-keyword">if</span> (vnodeHook) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">          <span class="hljs-title function_">invokeVNodeHook</span>(vnodeHook, instance.<span class="hljs-property">parent</span>, vnode)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="23">        instance.<span class="hljs-property">isDeactivated</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="24">      }, parentSuspense)</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">} </span>
+</code></pre>
+<p>卸载态函数 <code>deactivate</code> 核心工作就是将页面中的 <code>DOM</code> 移动到一个隐藏不可见的容器 <code>storageContainer</code> 当中，这样页面中的元素就被移除了。当这一切都执行完成后，最后再通过 <code>queuePostRenderEffect</code> 函数，将用户定义的 <code>onDeactivated</code> 钩子放到状态更新流程后执行。</p>
+<h2 data-id="heading-5">总结</h2>
+<p>现在我们尝试着再回答文中开篇提到的三个问题：</p>
+<ol>
+<li>组件是通过类似于 <code>LRU</code> 的缓存机制来缓存的，并为缓存的组件 <code>vnode</code> 的 <code>shapeFlag</code> 属性打上 <code>COMPONENT_KEPT_ALIVE</code> 属性，当组件在 <code>processComponent</code> 挂载时，如果存在 <code>COMPONENT_KEPT_ALIVE</code> 属性，则会执行激活函数，激活函数内执行具体的缓存节点挂载逻辑。</li>
+<li>缓存不是越多越好，因为所有的缓存节点都会被存在 <code>cache</code> 中，如果过多，则会增加内存负担。</li>
+<li>丢弃的方式就是在缓存重新被激活时，之前缓存的 <code>key</code> 会被重新添加到队首，标记为最近的一次缓存，如果缓存的实例数量即将超过指定的那个最大数量，则最久没有被访问的缓存实例将被丢弃。</li>
+</ol></div>
+    </body>
+    </html>

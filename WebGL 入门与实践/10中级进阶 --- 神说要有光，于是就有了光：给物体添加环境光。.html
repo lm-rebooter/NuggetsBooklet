@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 神说要有光，于是就有了光：如何用计算机表示光照。</h1>
+<p>之前的章节我们学习了一个自由转动的立方体，本节我们讲解如何给物体增加光照效果，有了光照，物体之间才会有层次感，才会显得更真实。</p>
+<h2 data-id="heading-1">什么是颜色</h2>
+<p>现实生活中，当我们看一个物体的时候，很容易地能分辨出它的颜色。但大家有没有想过，颜色到底是什么？</p>
+<p>其实颜色并不是客观存在的东西，只是一个视觉效果，决定这个视觉效果的关键因素是有三个：光、物体、视觉系统。</p>
+<p>大家都知道，在有光线存在的时候，我们能够看到物体，准确分辨它们的颜色。但是到了晚上伸手不见五指的时候，这时候已经没了光线，我们是看不到任何东西的。</p>
+<p>光是什么呢？光是一种电磁波，电磁波中的一部分能够被人眼所感知，这部分被称为可见光。</p>
+<p>当光线照射到物体上时，物体能够吸收可见光的一部分，并反射不能吸收的那部分，反射出来的这部分可见光会刺激人眼，经过视神经传到大脑，形成对物体的色彩信息，这就是我们所说的<code>颜色</code>。</p>
+<p>所以颜色的形成离不开这三个因素。</p>
+<p>比如，当白色的太阳光照射在一个红色的物体上时，该物体吸收红色以外的光线，反射剩余的光线（红色光），所以我们看到了红色的物体。</p>
+<p>假如我们有一盏蓝色的灯（r:0, g:0, b:1），照射在一个红色的物体（r:1, g:0, b:0）上，该物体吸收红色以外的光线，反射剩余的光线（r:0, g:0, b:0），黑色，所以我们看到的是一个黑色的物体。</p>
+<p>简单一句话就是，人眼看到的物体是什么颜色，就代表这个物体反射该颜色。</p>
+<h2 data-id="heading-2">颜色在计算机中的表示</h2>
+<p>那么，在计算机中，我们表示物体的颜色时，其实就是设置该物体能够反射的可见光。比如我们为一个物体指定蓝色，本质就是让该物体吸收除了蓝色以外的光线，只反射蓝色光线，这样我们看到的物体就是蓝色的。</p>
+<p>我们前面的例子，都是只设置了物体的颜色，并没有加入光照因素。如果我们加入光照因素的话，该如何计算光照效果呢？</p>
+<p>加入光照因素后，会影响进入人眼的颜色，所以，我们仍然是通过设置物体的颜色来表达加入光照后的效果。</p>
+<p>当我们在计算机中创建一个光源时，需要给光源设置一个颜色（光源也是有颜色的哦），我们给光源设置为白色：</p>
+<blockquote>
+<p>以下的代码部分为 GLSL 语法。</p>
+</blockquote>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">light</span> = vec3(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+</code></pre><p>假设我们有一个物体是红色的：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">color</span> = vec3(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+</code></pre><p>在计算机领域中，将<code>光源颜色的各个分量</code>与<code>物体颜色的各个分量</code>相乘，得到的就是物体所反射的颜色，即该物体在该光源照射下进入人眼的颜色：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">resultColor</span> = light * color
+</code></pre><blockquote>
+<p>在 GLSL 语言中，vec3 与 vec3 相乘的实质是将两个 vec3 的分量分别相乘，得到一个新的 vec3。</p>
+</blockquote>
+<p>得到的结果是 <code>vec3(1 * 1, 1 * 0, 1 * 0) = vec3(1, 0, 0)</code>，很明显，是红色，这也和现实生活中的表现一致。</p>
+<p>前面讲了，如果蓝色的光线照射到红色的物体上，进入人眼的颜色是黑色，我们验证一下：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">light</span> = vec3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+vec3 <span class="hljs-attr">color</span> = vec3(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+vec3 <span class="hljs-attr">resultColor</span> = light * color<span class="hljs-comment">;</span>
+</code></pre><p>将光线的 rgb分量 和 物体颜色的 rgb 分量相乘：</p>
+<p><code>resultColor = (0 * 1, 0 * 0, 1 * 0) = (0, 0, 0)</code></p>
+<p>最终结果是黑色，很明显，和现实生活中的表现一致。</p>
+<p>这就是在计算机中光照作用下物体颜色的计算原理。</p>
+<h2 data-id="heading-3">环境光</h2>
+<p>在现实世界中，物体由于有本身材质的不同，对光线的反射效果也不同。材质粗糙的物体会将光线向各个方向进行反射，即漫反射，这也是现实生活中最为常见的反射类型，当漫反射的光线碰到另一个物体时，还会再次进行漫反射，所以，即使在没有光线照射到某个物体的情况下，其他物体的漫反射光也能照射到该物体，所以我们能够看到它。</p>
+<p>那么在计算机中，如果想真实地模拟现实生活中没有光源直接照射物体时，通过其他物体的漫反射我们仍然能够看到该物体的情况，耗费的算力特别大，所以定义一种<code>环境光</code>的概念，来近似模拟这种效果。</p>
+<blockquote>
+<p>请注意，虽然在环境光中多次提到了漫反射的概念，但是环境光要模拟的并不是有光线照射下的漫反射，而是多个物体的漫反射互相作用的光线效果。</p>
+</blockquote>
+<p>那么环境光，如何设置呢？</p>
+<p>通常，我们使用一个较小的常量乘以光的颜色来模拟环境光。</p>
+<h2 data-id="heading-4">环境光的计算</h2>
+<p>假设有一个光源，发出的光线是白色光：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">lightColor</span> = vec3(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+</code></pre><p>我们定义环境光的常量因子为 0.1</p>
+<pre><code lang="ini" class="hljs language-ini">float <span class="hljs-attr">ambientFactor</span> = <span class="hljs-number">0.1</span><span class="hljs-comment">;</span>
+</code></pre><p>那么环境光的计算如下：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">ambientColor</span> = ambientFactor * lightColor<span class="hljs-comment">;</span>
+</code></pre><blockquote>
+<p>GLSL中浮点数和 vec 向量相乘的实质是将该浮点数分别与vec向量的各个分量相乘，并返回新的 vec向量</p>
+</blockquote>
+<p>计算出的环境光是：
+<code>ambientColor = (1 * 0.1, 0.1 * 1, 0.1 * 1) = (0.1, 0.1, 0.1)</code></p>
+<h2 data-id="heading-5">给物体增加环境光</h2>
+<p>之前的章节例子中，我们并没有提到光的概念，事实上我们默认有一个白色的环境光在里面的，所以我们能够看到它们。</p>
+<p>看看我们之前的片元着色器</p>
+<pre><code lang="ini" class="hljs language-ini"><span class="hljs-attr">gl_FragColor</span> = v_Color<span class="hljs-comment">;</span>
+</code></pre><p>其实可以理解为一个强度因子为 1 的白色光源：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">ambientFactor</span> = <span class="hljs-number">1.0</span><span class="hljs-comment">;</span>
+vec3 <span class="hljs-attr">lightColor</span> = vec3(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+vec3 <span class="hljs-attr">ambientColor</span> = ambientFactor * lightColor<span class="hljs-comment">;</span>
+<span class="hljs-attr">gl_FragColor</span> = vec4(ambientColor, <span class="hljs-number">1</span>) * v_Color<span class="hljs-comment">;</span>
+</code></pre><p>那这次，我们要改变强度因子，同时改变光线颜色，所以我们要定义两个常量，强度因子<code>u_AmbientFactor</code>和光源颜色<code>u_LightColor</code>。</p>
+<p>增加了环境光的片元着色器如下：</p>
+<pre><code lang="ini" class="hljs language-ini"> precision mediump float<span class="hljs-comment">;</span>
+ varying vec4 v_Color<span class="hljs-comment">;</span>
+ //光源颜色
+ uniform vec3 u_LightColor<span class="hljs-comment">;</span>
+ //环境光强度因子
+ uniform float u_AmbientFactor<span class="hljs-comment">;</span>
+ void main(){
+ vec3 <span class="hljs-attr">ambientColor</span> = u_AmbientFactor * u_LightColor<span class="hljs-comment">;</span>
+ <span class="hljs-attr">gl_FragColor</span> = vec4(ambientColor, <span class="hljs-number">1</span>) * v_Color<span class="hljs-comment">;</span>
+ }
+</code></pre><p>接下来我们需要通过 JavaScript 给片元着色器传递这两个常量：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">u_AmbientFactor</span> = gl.getUniformLocation(program, <span class="hljs-string">'u_AmbientFactor'</span>)<span class="hljs-comment">;</span>
+var <span class="hljs-attr">u_LightColor</span> = gl.getUniformLocation(program, <span class="hljs-string">'u_LightColor'</span>)<span class="hljs-comment">;</span>
+</code></pre><p>找到这两个常量位置，我们需要为他们传递强度因子和光线颜色，这里我们使用滑块来改变强度因子，并使用颜色选择器改变光线颜色，强度因子默认值是 0.2，光线颜色默认是白色：</p>
+<pre><code lang="python" class="hljs language-python"><div>
+ 环境光因子：
+ <<span class="hljs-built_in">input</span> <span class="hljs-built_in">id</span>=<span class="hljs-string">"ambientFactor"</span> <span class="hljs-keyword">class</span>=<span class="hljs-string">"range"</span> <span class="hljs-built_in">type</span>=<span class="hljs-string">"range"</span> <span class="hljs-built_in">min</span>=<span class="hljs-string">"0"</span> <span class="hljs-built_in">max</span>=<span class="hljs-string">"1"</span> step=<span class="hljs-string">"0.01"</span> value=<span class="hljs-string">"0.2"</span> /> 
+</div>
+<div>
+ 	光线颜色：
+ 	<<span class="hljs-built_in">input</span> <span class="hljs-built_in">id</span>=<span class="hljs-string">"lightColor"</span> <span class="hljs-keyword">class</span>=<span class="hljs-string">"color"</span> <span class="hljs-built_in">type</span>=<span class="hljs-string">"color"</span> value=<span class="hljs-string">"#FFFFFF"</span> />
+</div>
+</code></pre><p>我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810101665d141d1c28518~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>大家可以通过调节 1 处的滑块来改变强度因子，观察台体的亮度变化，调节 2 处的颜色选块来改变光线颜色，观察台体的在不同颜色光线照射下的变化。</p>
+</blockquote>
+<p>为了便于观察，通过程序自动改变光线颜色：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810101665d30d064c856f~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，在不同颜色的光线照射下，人眼观察到的物体颜色也会不同。</p>
+<h2 data-id="heading-6">回顾</h2>
+<p>本节讲解了计算机如何模拟现实生活中的颜色以及如何给物体增加环境光，下一节我们学习如何在计算机中模拟真实世界中的光照效果。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

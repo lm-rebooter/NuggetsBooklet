@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # CLI 原理及不同端的运行机制
 
 taro-cli 负责 Taro 脚手架初始化和项目构建的的命令行工具，NPM 包的链接在这里：[@tarojs/cli](https://www.npmjs.com/package/@tarojs/cli) 。

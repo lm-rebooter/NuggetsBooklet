@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 3.2 把庞大的 npm script 拆到单独文件中
 
 当 npm script 不断累积、膨胀的时候，全部放在 package.json 里面可能并不是个好主意，因为这样会导致 package.json 糟乱，可读性降低。

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">静态魔方</h1>
+<h2 data-id="heading-1">前言</h2>
+<p>在这一章中你将学到以下知识点：</p>
+<ol>
+<li>如何在微信小游戏中利用 ThreeJS 框架构建一个静态的简易三阶魔方；</li>
+<li>解决使用 ThreeJS 框架开发微信小游戏可能会遇到的一些兼容性的问题；</li>
+<li>ThreeJS 框架中<code>Texture</code>纹理对象的相关知识；</li>
+<li>ThreeJS 框架中<code>Mesh</code>网格对象的相关知识；</li>
+<li>ThreeJS 框架中<code>BoxGeometry</code>盒子几何体对象的相关知识；</li>
+<li>ThreeJS 框架中<code>视角控制器</code>的相关知识。</li>
+</ol>
+<h2 data-id="heading-2">概述</h2>
+<p>魔方是<code>1974</code>年由匈牙利的<code>鲁比克</code>教授发明，因此魔方又被称为<code>Rubik's Cube</code>；</p>
+<p>魔方有很多类型但其中最经典的是<code>三阶魔方</code>；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc5ca1358d2e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<blockquote>
+<p>分为<code>上</code>、<code>中</code>、<code>下</code>三层，每层<code>3*3</code>个小方块，共<code>27</code>个小方块。</p>
+</blockquote>
+<p>示例代码在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Ftree%2Fmaster%2Flesson%2Fdemo2" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/tree/master/lesson/demo2" ref="nofollow noopener noreferrer">Threejs_rubik</a> 项目中；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc674d7abffc~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">项目初始化</h2>
+<p>如何快速上手微信小游戏可以看看官方的文档<a href="https://link.juejin.cn?target=https%3A%2F%2Fdevelopers.weixin.qq.com%2Fminigame%2Fdev%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://developers.weixin.qq.com/minigame/dev/" ref="nofollow noopener noreferrer">快速上手</a>；</p>
+<p>按照文档中的指引看到<code>飞机大战</code>示例小游戏的时候就说明开发环境已经准备好了。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc709c0c5295~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>小游戏只有两个必要文件，其它文件都可以删掉；</p>
+<ul>
+<li><code>game.js</code>入口文件；</li>
+<li><code>game.json</code>配置文件；</li>
+</ul>
+<p>ThreeJS 框架是基于 DOM 环境设计的，因此有些 API 在微信小游戏中没有；为了兼容那些基于浏览器环境设计的游戏引擎，微信小游戏官方提供了一个名叫<code>weapp-adapter.js</code>的脚本，但是可惜的是并没有对其进行进一步的更新和维护，因此<code>可靠性较差</code>，至少对于 ThreeJS 框架而言不能通过这个脚本顺利无缝的接入小游戏；</p>
+<blockquote>
+<p>进一步了解可以查看官方文档 <a href="https://link.juejin.cn?target=https%3A%2F%2Fdevelopers.weixin.qq.com%2Fminigame%2Fdev%2Ftutorial%2Fbase%2Fadapter.html" target="_blank" rel="nofollow noopener noreferrer" title="https://developers.weixin.qq.com/minigame/dev/tutorial/base/adapter.html" ref="nofollow noopener noreferrer">Adapter</a></p>
+</blockquote>
+<p>不过在<code>Github</code>上有人对其进行了改良, 针对 PixiJS、<code>ThreeJS</code>、Babylon 等流行框架做了<code>适配</code>，源代码在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Ffinscn%2Fweapp-adapter" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/finscn/weapp-adapter" ref="nofollow noopener noreferrer">finscn/weapp-adapter</a>，把源代码复制下来，放入到项目的<code>adapter</code>目录中。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc7a0cfa3d72~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>然后在入口文件<code>game.js</code>中引入；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> <span class="hljs-string">'/adapter/index.js'</span>
+</code></pre>
+<h2 data-id="heading-4">主逻辑初始化</h2>
+<p>在<code>js</code>目录中创建<code>threejs</code>目录并把 ThreeJS 框架源文件放入其中，然后新增<code>main.js</code>脚本，用来处理小游戏的主逻辑；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc8dede3e809~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在入口文件<code>game.js</code>中引入主逻辑脚本，然后执行。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> <span class="hljs-title class_">Main</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'./js/main'</span>
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">Main</span>()
+</code></pre>
+<p>然后在<code>main.js</code>中继续使用<code>ThreeJS基础程序结构</code>；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable constant_">THREE</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'threejs/three.js'</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Context</span> = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">'webgl'</span>);
+
+<span class="hljs-comment">/**
+ * 游戏主函数
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Main</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">context</span> = <span class="hljs-title class_">Context</span>;<span class="hljs-comment">//绘图上下文</span>
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">height</span> = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">devicePixelRatio</span> = <span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">viewCenter</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);<span class="hljs-comment">//原点</span>
+        
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">initRender</span>();
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">initCamera</span>();
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">initScene</span>();
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">initLight</span>();
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">initObject</span>();
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">render</span>();
+    }
+    
+    <span class="hljs-title function_">initRender</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+    
+    <span class="hljs-title function_">initCamera</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+    
+    <span class="hljs-title function_">initScene</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+    
+    <span class="hljs-title function_">initLight</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+    
+    <span class="hljs-title function_">initObject</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+    
+    <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>){
+        <span class="hljs-comment">//...</span>
+    }
+}
+</code></pre>
+<p>这里需要注意几点：</p>
+<ul>
+<li>ThreeJS 框架源代码通过<code>import * as THREE from 'threejs/three.js'</code>引入；</li>
+<li>在微信小游戏调用<code>wx.createCanvas()</code>接口可以创建一个 Canvas 对象，但是只有第一次调用该接口创建的 Canvas 对象中绘制的图形会显示到屏幕上，后续调用创建的都是<code>离屏Canvas</code>；由于引入的<code>adapter</code>脚本中已经调用了一次 wx.createCanvas() 而且把创建的 Canvas 对象作为全局变量暴露了出来，因此在代码中就可以直接使用了；这就解释了为什么代码明明没有定义却可以直接执行<code>const Context = canvas.getContext('webgl')</code>。</li>
+<li>因为在<code>ThreeJS基础</code>那一章中详细的讲解过了，因此这里省略了<code>initRender</code>、<code>initCamera</code>、<code>initScene</code>、<code>initLight</code>、<code>initObject</code>以及<code>render</code>等方法的具体实现。</li>
+</ul>
+<h2 data-id="heading-5">构建简易魔方</h2>
+<p>出于方便计算的考虑，我们假定魔方中心在坐标系原点；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bc993200062e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>根据示例图可知只需要确定<code>魔方左上角顶点A</code>以及<code>小方块边长len</code>就可以得到所有小方块的中心点；比如如果<code>点A</code>的坐标为<code>(x,y,z)</code>那么<code>左上角小方块中心点C</code>的坐标即为<code>(x+len/2,y-len/2,z-len/2)</code>;</p>
+<p>具体代码实现过程如下：</p>
+<ol>
+<li>首先在<code>js</code>目录中创建<code>object</code>目录，把小游戏中涉及的所有对象统一放入到这个目录中；</li>
+</ol>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bca60ba337eb~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<ol start="2">
+<li>新建<code>Rubik.js</code>魔方对象；</li>
+<li>引入<code>ThreeJS</code>框架代码；</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第1行 */</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable constant_">THREE</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'../threejs/three.js'</span>
+</code></pre>
+<ol start="4">
+<li>定义<code>基础模型参数</code>；</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第4行至第14行 */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">BasicParams</span> = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+	<span class="hljs-attr">y</span>: <span class="hljs-number">0</span>,
+	<span class="hljs-attr">z</span>: <span class="hljs-number">0</span>,
+	<span class="hljs-attr">num</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">len</span>: <span class="hljs-number">50</span>,
+	<span class="hljs-comment">//右、左、上、下、前、后</span>
+	<span class="hljs-attr">colors</span>: [<span class="hljs-string">'#ff6b02'</span>, <span class="hljs-string">'#dd422f'</span>,
+		<span class="hljs-string">'#ffffff'</span>, <span class="hljs-string">'#fdcd02'</span>,
+		<span class="hljs-string">'#3d81f7'</span>, <span class="hljs-string">'#019d53'</span>]
+};
+</code></pre>
+<p><code>阶数</code>为<code>3</code>，<code>小方块边长</code>为<code>50</code>，<code>魔方中心</code>在坐标系<code>原点</code>，<code>colors</code>为魔方六个面的颜色数组；</p>
+<ol start="5">
+<li>生成纹理；</li>
+</ol>
+<p>在<code>ThreeJS基础</code>那一章，我们使用<code>BoxGeometry</code>对象创建过<code>纯色</code>的正方体，但是在三阶魔方中需要用黑色的间隙区分同一个面的不同小方块，因此需要用到<code>Texture</code>纹理对象；</p>
+<p>在 ThreeJS 框架中既可以通过图片创建纹理对象，也可以直接使用<code>Canvas</code>元素创建；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第61行至第78行 */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">faces</span>(<span class="hljs-params">rgbaColor</span>) {
+	<span class="hljs-keyword">var</span> canvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">'canvas'</span>);
+	canvas.<span class="hljs-property">width</span> = <span class="hljs-number">256</span>;
+	canvas.<span class="hljs-property">height</span> = <span class="hljs-number">256</span>;
+	<span class="hljs-keyword">var</span> context = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">'2d'</span>);
+	<span class="hljs-comment">//画一个宽高都是256的黑色正方形</span>
+	context.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">'rgba(0,0,0,1)'</span>;
+	context.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">256</span>, <span class="hljs-number">256</span>);
+	<span class="hljs-comment">//在内部用某颜色的16px宽的线再画一个宽高为224的圆角正方形并用改颜色填充</span>
+	context.<span class="hljs-title function_">rect</span>(<span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">224</span>, <span class="hljs-number">224</span>);
+	context.<span class="hljs-property">lineJoin</span> = <span class="hljs-string">'round'</span>;
+	context.<span class="hljs-property">lineWidth</span> = <span class="hljs-number">16</span>;
+	context.<span class="hljs-property">fillStyle</span> = rgbaColor;
+	context.<span class="hljs-property">strokeStyle</span> = rgbaColor;
+	context.<span class="hljs-title function_">stroke</span>();
+	context.<span class="hljs-title function_">fill</span>();
+	<span class="hljs-keyword">return</span> canvas;
+}
+</code></pre>
+<p><code>faces</code>函数接收颜色参数然后返回如下图案的 Canvas 元素；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcb3b00205d3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<ol start="6">
+<li>构建简易魔方；</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第23行至第56行 */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">SimpleCube</span>(<span class="hljs-params">x, y, z, num, len, colors</span>) {
+	<span class="hljs-comment">//魔方左上角坐标</span>
+	<span class="hljs-keyword">var</span> leftUpX = x - num/<span class="hljs-number">2</span>*len;
+	<span class="hljs-keyword">var</span> leftUpY = y + num/<span class="hljs-number">2</span>*len;
+	<span class="hljs-keyword">var</span> leftUpZ = z + num/<span class="hljs-number">2</span>*len;
+
+	<span class="hljs-keyword">var</span> cubes = [];
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; num; i++) {
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">0</span>; j &lt; num * num; j++) {
+
+			<span class="hljs-keyword">var</span> myFaces = [];
+			<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">6</span>; k++) {
+				myFaces[k] = <span class="hljs-title function_">faces</span>(<span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">colors</span>[k]);
+			}
+
+			<span class="hljs-keyword">var</span> materials = [];
+			<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">6</span>; k++) {
+				<span class="hljs-keyword">var</span> texture = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Texture</span>(myFaces[k]);
+				texture.<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+				materials.<span class="hljs-title function_">push</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshLambertMaterial</span>({ <span class="hljs-attr">map</span>: texture}));
+			}
+
+			<span class="hljs-keyword">var</span> cubegeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BoxGeometry</span>(len, len, len);
+			<span class="hljs-keyword">var</span> cube = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(cubegeo, materials);
+
+			<span class="hljs-comment">//依次计算各个小方块中心点坐标</span>
+			cube.<span class="hljs-property">position</span>.<span class="hljs-property">x</span> = (leftUpX + len / <span class="hljs-number">2</span>) + (j % num) * len;
+			cube.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> = (leftUpY - len / <span class="hljs-number">2</span>) - <span class="hljs-built_in">parseInt</span>(j / num) * len;
+			cube.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> = (leftUpZ - len / <span class="hljs-number">2</span>) - i * len;
+			cubes.<span class="hljs-title function_">push</span>(cube)
+		}
+	}
+	<span class="hljs-keyword">return</span> cubes;
+}
+</code></pre>
+<p><code>SimpleCube</code>函数参数说明：</p>
+<ul>
+<li><code>x, y, z</code>表示魔方中心点；</li>
+<li><code>num</code>表示魔方阶数；</li>
+<li><code>len</code>表示小方块宽高；</li>
+<li><code>colors</code>表示魔方六个面颜色数组；</li>
+</ul>
+<p>先定义一个小方块数组<code>cubes</code>，然后在<code>i</code>、<code>j</code>两个 for 循环中创建小方块，创建小方块之前，先需要根据颜色数组<code>colors</code>生成小方块六个面的图案；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第35行 */</span>
+myFaces[k] = <span class="hljs-title function_">faces</span>(<span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">colors</span>[k]);
+</code></pre>
+<p>再然后根据 Canvas 图案生成<code>纹理</code>（把 Canvas 元素直接传入到<code>Texture</code>对象中即可）；另外<code>needsUpdate</code>属性需要设置为<code>true</code>才能保证创建纹理时 Canvas 内容已经加载完成了，如果不设置为<code>true</code>则会出现纹理一片漆黑的情况；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第40行至第41行 */</span>
+<span class="hljs-keyword">var</span> texture = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Texture</span>(myFaces[k]);
+texture.<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+</code></pre>
+<p>接着根据纹理生成<code>材质</code></p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第42行 */</span>
+materials.<span class="hljs-title function_">push</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshLambertMaterial</span>({ <span class="hljs-attr">map</span>: texture}));
+</code></pre>
+<blockquote>
+<p>这里还是使用<code>MeshLambertMaterial</code>兰伯特材质，需要注意的是创建纯色的兰伯特材质时设置的是<code>color</code>参数：<code>new THREE.MeshLambertMaterial( {color: 0xff0000} )</code>；但是通过纹理创建时需要设置其<code>map</code>参数：<code>new THREE.MeshLambertMaterial({ map: texture})</code>。</p>
+</blockquote>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第45、46行 */</span>
+<span class="hljs-keyword">var</span> cubegeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BoxGeometry</span>(len, len, len);
+<span class="hljs-keyword">var</span> cube = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(cubegeo, materials);
+</code></pre>
+<p>通过<code>Mesh</code>网格对象组合<code>轮廓</code>、<code>材质</code>即可得到小方块了；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第49行至51行 */</span>
+cube.<span class="hljs-property">position</span>.<span class="hljs-property">x</span> = (x + len / <span class="hljs-number">2</span>) + (j % <span class="hljs-number">3</span>) * len;
+cube.<span class="hljs-property">position</span>.<span class="hljs-property">y</span> = (y - len / <span class="hljs-number">2</span>) - <span class="hljs-built_in">parseInt</span>(j / <span class="hljs-number">3</span>) * len;
+cube.<span class="hljs-property">position</span>.<span class="hljs-property">z</span> = (z - len / <span class="hljs-number">2</span>) - i * len;
+</code></pre>
+<p>最后我们还需要根据推导的规律设置各个小方块的中心点，最终组成魔方。</p>
+<ol start="7">
+<li>定义魔方对象；</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第80行至92行 */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Rubik</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params">main</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span> = main;
+    }
+    
+    <span class="hljs-title function_">model</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span> = <span class="hljs-title class_">SimpleCube</span>(<span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">x</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">y</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">z</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">num</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">len</span>, <span class="hljs-title class_">BasicParams</span>.<span class="hljs-property">colors</span>);<span class="hljs-comment">//生成魔方小正方体</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span>.<span class="hljs-property">length</span>; i++) {
+          <span class="hljs-keyword">var</span> item = <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span>[i];
+          <span class="hljs-variable language_">this</span>.<span class="hljs-property">main</span>.<span class="hljs-property">scene</span>.<span class="hljs-title function_">add</span>(item);
+        }
+    }
+}
+</code></pre>
+<h2 data-id="heading-6">显示魔方</h2>
+<p>在<code>main.js</code>中引入简易魔方对象代码<code>Rubik.js</code>；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第3行 */</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">BasicRubik</span> <span class="hljs-keyword">from</span> <span class="hljs-string">'object/Rubik.js'</span>
+</code></pre>
+<p>然后在创建物体函数<code>initObject</code>中创建魔方；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第76行至第79行 */</span>
+<span class="hljs-title function_">initObject</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> rubik = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BasicRubik</span>(<span class="hljs-variable language_">this</span>);
+    rubik.<span class="hljs-title function_">model</span>();
+}
+</code></pre>
+<p>编译并执行程序会在模拟器中看到如下效果：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcc518439922~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>有人可能会纳闷了折腾这么久，就整出个这玩意吗？</p>
+<p>其实之所以会这样是因为<code>我们设置的相机的位置是在坐标系的Z轴，魔方的中心在坐标系原点，它们刚好处于同一条直线上，导致显示出来的是魔方的正面</code>。</p>
+<h2 data-id="heading-7">视角控制</h2>
+<p>为了解决只能看到魔方正面这个问题，我们需要改变视角；</p>
+<p>在 ThreeJS 框架中提供了很多视角控制对象，并有对应的例子演示：</p>
+<ul>
+<li>飞行控件<code>FlyControls</code>；</li>
+</ul>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcd160a85cb8~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>该控件可以用来进行飞行模拟，用键盘和鼠标控制相机的移动和旋转，官网提供了<code>示例程序</code>，链接为：<a href="https://link.juejin.cn?target=https%3A%2F%2Fthreejs.org%2Fexamples%2F%3Fq%3Dcontr%23misc_controls_fly" target="_blank" rel="nofollow noopener noreferrer" title="https://threejs.org/examples/?q=contr#misc_controls_fly" ref="nofollow noopener noreferrer">threejs.org/examples/?q…</a>，大致效果如图中所示，有兴趣可以去示例程序<code>体验</code>以及<code>查看用法</code>以及<code>具体实现</code>。</p>
+<ul>
+<li>第一人称控件<code>FirstPersonControls</code>；</li>
+</ul>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcda9d789802~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>喜欢玩游戏的同学对这种视角应该很熟悉，也是鼠标和键盘结合起来控制视角，示例程序链接为：<a href="https://link.juejin.cn?target=https%3A%2F%2Fthreejs.org%2Fexamples%2F%3Fq%3Dcont%23misc_controls_pointerlock" target="_blank" rel="nofollow noopener noreferrer" title="https://threejs.org/examples/?q=cont#misc_controls_pointerlock" ref="nofollow noopener noreferrer">threejs.org/examples/?q…</a>。</p>
+<ul>
+<li>轨道空间控件<code>OrbitControls</code>；</li>
+</ul>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bce4e990770d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>这种视角类似于轨道中的卫星围绕地球转动时的观察视角，在 PC 上可以用鼠标控制相机环绕观察，在移动端则是手指触摸控制，示例程序链接为：<a href="https://link.juejin.cn?target=https%3A%2F%2Fthreejs.org%2Fexamples%2F%3Fq%3Dcont%23misc_controls_orbit" target="_blank" rel="nofollow noopener noreferrer" title="https://threejs.org/examples/?q=cont#misc_controls_orbit" ref="nofollow noopener noreferrer">threejs.org/examples/?q…</a>。</p>
+<p><code>OrbitControls</code>控制器刚好可以用来观察上边创建的简易三阶魔方，用法很简单：</p>
+<ol>
+<li>首先得去 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmrdoob%2Fthree.js" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/mrdoob/three.js" ref="nofollow noopener noreferrer">ThreeJS框架的Github仓库</a> 下载该控制器的源代码，然后放入到项目中；</li>
+</ol>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcf35cc4e7f3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>红框中的<code>OrbitControls.js</code>文件即是，其它文件为其它控制器的源代码；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bcfb6b421118~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<ol start="2">
+<li>然后在小游戏主逻辑脚本<code>main.js</code>中引入；</li>
+</ol>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-built_in">require</span>(<span class="hljs-string">'threejs/OrbitControls.js'</span>)
+</code></pre>
+<p>这时编译项目会发现有报错：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd049aae7faa~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>这是因为<code>OrbitControls</code>控制器源代码中直接用<code>全局变量</code>的方式使用的 ThreeJS 框架的全局对象<code>THREE</code>，解决办法是在使用之前引入即可；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd0e2f656885~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<ol start="3">
+<li>初始化控制器</li>
+</ol>
+<p>因为控制器和相机有关，因此初始化代码放到<code>initCamera</code>方法中；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第45行至第56行 */</span>
+<span class="hljs-title function_">initCamera</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PerspectiveCamera</span>(<span class="hljs-number">45</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">width</span> / <span class="hljs-variable language_">this</span>.<span class="hljs-property">height</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1500</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">300</span> / <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-property">aspect</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-property">up</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);<span class="hljs-comment">//正方向</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>.<span class="hljs-title function_">lookAt</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">viewCenter</span>);
+    
+    <span class="hljs-comment">//轨道视角控制器</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">orbitController</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">OrbitControls</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">camera</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">renderer</span>.<span class="hljs-property">domElement</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">orbitController</span>.<span class="hljs-property">enableZoom</span> = <span class="hljs-literal">false</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">orbitController</span>.<span class="hljs-property">rotateSpeed</span> = <span class="hljs-number">2</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">orbitController</span>.<span class="hljs-property">target</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">viewCenter</span>;<span class="hljs-comment">//设置控制点</span>
+}
+</code></pre>
+<p><code>enableZoom</code>设置为<code>false</code>表示禁止缩放，<code>rotateSpeed</code>和环绕转动的速度有关，控制点<code>target</code>表示环绕中心，因为简易三阶魔方的中心在原点因此控制器的环绕中心也设置为原点。</p>
+<p>到这一步，按道理应该都准备就绪了，但是编译执行却发现页面空白一片；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd15673ff32a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>原因在于尽管我们已经引入了<code>适配器脚本</code>但是控制器代码还是不能完全兼容微信小游戏环境，需要再进行一些修改。</p>
+<ol start="4">
+<li>控制器源代码适配</li>
+</ol>
+<p><code>OrbitControls</code>控制器每次改变相机位置时都会调用其<code>update</code>方法；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd1cfbe36c67~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>打断点调试时会发现<code>sphericalDelta</code>变量的值有问题，这个变量是用来控制相机环绕时位置的<code>经度</code>和<code>纬度</code>的，如果有问题那么会导致相机位置的更新也出问题，从而页面就空白了；</p>
+<p>在源代码中搜索<code>sphericalDelta</code>变量会发现只有一个地方会对这个变量进行赋值；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd25546504b3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>而在赋值时就已经出现了问题，接着再查<code>rotateLeft</code>方法，在<code>handleTouchMoveRotate</code>和<code>handleMouseMoveRotate</code>方法中均有调用，前者是用于处理移动端手指触摸事件，后者是用于处理 PC 端鼠标事件，在微信小游戏中只需要考虑前者；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd2d2d160785~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><code>element</code>是初始化控制器时传入的<code>Canvas</code>元素，在微信小游戏中通过<code>clientHeight</code>是没办法获取其高度的，需要改为<code>height</code>属性。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* OrbitControls.js 第614行至第616行 */</span>
+<span class="hljs-title function_">rotateLeft</span>(<span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * rotateDelta.<span class="hljs-property">x</span> / element.<span class="hljs-property">height</span>);
+<span class="hljs-title function_">rotateUp</span>(<span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * rotateDelta.<span class="hljs-property">y</span> / element.<span class="hljs-property">height</span>);
+</code></pre>
+<p>到此应该是没有问题了，编译运行，手指滑动屏幕就可以观察简易三阶魔方的各个面了。</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673bd35078dcb95~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-8">总结</h2>
+<p>在这一章中我们学会了如何在微信小游戏中使用 ThreeJS 框架，并构建出一个静态的简易三阶魔方；</p>
+<p>另外<code>对于 ThreeJS 框架中不熟悉的知识点可以多去查看官方示例了解其作用以及使用方法；遇到问题需要调试源代码时也不需要慌，没必要了解其每一行代码，先把握整体结构然后逐步定位问题即可。</code></p></div>
+    </body>
+    </html>

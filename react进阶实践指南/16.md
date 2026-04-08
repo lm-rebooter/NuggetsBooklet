@@ -1,0 +1,254 @@
+## 一 前言
+
+在上一章节中，我们讲到了老版本的事件原理，老版本的事件原理有一个问题就是，捕获阶段和冒泡阶段的事件都是模拟的，本质上都是在冒泡阶段执行的，比如如下例子中：
+
+```js
+function Index(){
+    const refObj = React.useRef(null)
+    useEffect(()=>{
+        const handler = ()=>{
+            console.log('事件监听')
+        }
+        refObj.current.addEventListener('click',handler)
+        return () => {
+            refObj.current.removeEventListener('click',handler)
+        }
+    },[])
+    const handleClick = ()=>{
+       console.log('冒泡阶段执行')
+    }
+    const handleCaptureClick = ()=>{
+       console.log('捕获阶段执行')
+    }
+    return  <button ref={refObj} onClick={handleClick} onClickCapture={handleCaptureClick} >点击</button>
+}
+```
+
+如上通过 onClick，onClickCapture 和原生的 DOM 监听器给元素 button 绑定了三个事件处理函数，那么当触发一次点击事件的时候，处理函数的执行，老版本打印顺序为：
+
+老版本事件系统：事件监听 -> 捕获阶段执行 -> 冒泡阶段执行
+
+
+但是老版本的事件系统，一定程度上，不符合事件流的执行时机，但是在新版本 v18 的事件系统中，这个问题得以解决。
+
+新版本事件系统：捕获阶段执行 -> 事件监听 -> 冒泡阶段执行
+
+那么新版本事件系统有哪里改变呢？ 本章节我们来看一下新版本的事件系统原理。
+
+对于 React 事件原理挖掘，主要体现在两个方面，那就是**事件绑定**和**事件触发**。
+
+
+## 二 事件绑定——事件初始化
+
+在 React 新版的事件系统中，在 createRoot 会一口气向外层容器上注册完全部事件，我们来看一下具体的实现细节：
+
+
+> react-dom/client.js
+```js
+function createRoot(container, options) {
+    /* 省去和事件无关的代码，通过如下方法注册事件 */
+    listenToAllSupportedEvents(rootContainerElement);
+}
+```
+在 createRoot 中，通过 listenToAllSupportedEvents 注册事件，接下来看一下这个方法做了些什么：
+
+> react-dom/src/events/DOMPluginEventSystem.js
+```js
+function listenToAllSupportedEvents(rootContainerElement) {
+    /* allNativeEvents 是一个 set 集合，保存了大多数的浏览器事件 */
+    allNativeEvents.forEach(function (domEventName) {
+      if (domEventName !== 'selectionchange') {
+         /* nonDelegatedEvents 保存了 js 中，不冒泡的事件 */ 
+        if (!nonDelegatedEvents.has(domEventName)) {
+          /* 在冒泡阶段绑定事件 */ 
+          listenToNativeEvent(domEventName, false, rootContainerElement);
+        }
+        /* 在捕获阶段绑定事件 */
+        listenToNativeEvent(domEventName, true, rootContainerElement);
+      }
+    });
+}
+```
+listenToAllSupportedEvents 这个方法比较核心，主要目的就是通过 listenToNativeEvent 绑定浏览器事件，这里引出了两个常量，allNativeEvents 和 nonDelegatedEvents ，它们分别代表的意思如下：
+
+allNativeEvents：allNativeEvents 是一个 set 集合，保存了 81 个浏览器常用事件。
+nonDelegatedEvents ：这个也是一个集合，保存了浏览器中不会冒泡的事件，一般指的是媒体事件，比如 pause，play，playing 等，还有一些特殊事件，比如 cancel ，close，invalid，load，scroll 。
+
+接下来如果事件是不冒泡的，那么会执行一次，listenToNativeEvent，第二个参数为 true 。
+如果是常规的事件，那么会执行两次 listenToNativeEvent，分别在冒泡和捕获阶段绑定事件。
+
+那么 listenToNativeEvent 就是事件监听，这个函数这里给它精简化，listenToNativeEvent 主要逻辑如下
+
+```js
+var listener = dispatchEvent.bind(null,domEventName,...)
+if(isCapturePhaseListener){
+    target.addEventListener(eventType, dispatchEvent, true);
+}else{
+    target.addEventListener(eventType, dispatchEvent, false);
+}
+```
+如上代码是源代码精简后的，并不是源码，isCapturePhaseListener 就是 listenToNativeEvent 的第二个参数，target 为 DOM 对象。dispatchEvent 为统一的事件监听函数。
+
+如上可以看到 listenToNativeEvent 本质上就是向原生 DOM 中去注册事件，上面还有一个细节，就是 dispatchEvent 已经通过 bind 的方式将事件名称等信息保存下来了。经过这第一步，在初始化阶段，就已经注册了很多的事件监听器了。
+
+此时如果发生一次点击事件，就会触发两次 dispatchEvent ：
+
+* 第一次捕获阶段的点击事件；
+* 第二次冒泡阶段的点击事件；
+
+
+## 三 事件触发
+
+接下来就是重点，当触发一次点击事件，会发生什么，首先就是执行 dispatchEvent 事件，我们来看看这个函数做了些什么？
+
+dispatchEvent 保留核心的代码如下：
+```js
+batchedUpdates(function () {
+    return dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, ancestorInst);
+});
+```
+
+dispatchEvent 如果是正常的事件，就会通过 batchedUpdates 来处理 dispatchEventsForPlugins ，batchedUpdates 是批量更新的逻辑，在之前的章节中已经讲到通过这种方式来让更新变成可控的。所有的矛头都指向了 dispatchEventsForPlugins ，这个函数做了些什么呢？
+
+```js
+function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
+  /* 找到发生事件的元素——事件源 */  
+  var nativeEventTarget = getEventTarget(nativeEvent);
+  /* 待更新队列 */
+  var dispatchQueue = [];
+  /* 找到待执行的事件 */
+  extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags);
+  /* 执行事件 */
+  processDispatchQueue(dispatchQueue, eventSystemFlags);
+}
+```
+这个函数非常重要，首先通过 getEventTarget 找到发生事件的元素，也就是事件源。然后创建一个待更新的事件队列，这个队列做什么，马上会讲到，接下来通过 extractEvents 找到待更新的事件，然后通过 processDispatchQueue 执行事件。
+
+上面的信息量比较大，我们会逐一进行解析，先举一个例子如下：
+
+
+```js
+function Index(){
+    const handleClick = ()=>{
+       console.log('冒泡阶段执行')
+    }
+    const handleCaptureClick = ()=>{
+       console.log('捕获阶段执行')
+    }
+    const handleParentClick = () => {
+        console.log('div 点击事件')
+    }
+    return  <div onClick={handleParentClick} >
+        <button onClick={handleClick} onClickCapture={handleCaptureClick} >点击</button>
+    </div>
+}
+```
+如上的例子，有一个 div 和 button 均绑定了一个正常的点击事件 ，div 是 button 的父元素，除此之外 button 绑定了一个在捕获阶段执行的点击事件。
+
+当点击按钮，触发一次点击事件的时候，如果 nativeEventTarget 本质上就是发生点击事件的 button 对应的 DOM 元素。
+
+那么第一个问题就是 dispatchQueue 是什么？ extractEvents 有如何处理的 dispatchQueue。
+
+发生点击事件，通过上面我们知道，会触发两次 dispatchEvents，第一次是捕获阶段，第二次是冒泡阶段 ，两次我们分别打印一下 dispatchQueue ：
+
+第一次打印：
+
+
+![1.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a5087c32b043467eb5525731692b4a24~tplv-k3u1fbpfcp-watermark.image?)
+
+第一次打印：
+
+
+![10-8-2.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/20584f9179b24f9c8d9088b379d95f5b~tplv-k3u1fbpfcp-watermark.image?)
+
+如上可以看到两次 dispatchQueue 中只有一项元素，也就是在一次用户中，产生一次事件就会向 dispatchQueue 放入一个对象，对象中有两个状态，一个是 event ，一个是 listeners。那么这两个东西是如何来的呢？
+
+event 是通过事件插件合成的事件源 event，在 React 事件系统中，事件源也不是原生的事件源，而是 React 自己创建的事件源对象。对于不同的事件类型，会创建不同的事件源对象。本质上是在 extractEvents 函数中，有这么一段处理逻辑。
+
+```js
+ var SyntheticEventCtor = SyntheticEvent;
+ /* 针对不同的事件，处理不同的事件源 */
+ switch (domEventName) {
+    case 'keydown':
+    case 'keyup':
+      SyntheticEventCtor = SyntheticKeyboardEvent;
+      break;
+    case 'focusin':
+      reactEventType = 'focus';
+      SyntheticEventCtor = SyntheticFocusEvent;
+      break;
+    ....    
+ }
+/* 找到事件监听者，也就是我们 onClick 绑定的事件处理函数 */ 
+var _listeners = accumulateSinglePhaseListeners(targetInst, reactName, nativeEvent.type, inCapturePhase, accumulateTargetOnly);
+/* 向 dispatchQueue 添加 event 和 listeners  */
+if(_listeners.length > 0){
+    var _event = new SyntheticEventCtor(reactName, reactEventType, null, nativeEvent, nativeEventTarget);
+    dispatchQueue.push({
+        event: _event,
+        listeners: _listeners
+    });
+}
+```
+
+如上可以看到，首先根据不同事件类型，选用不同的构造函数，通过 new 的方式去合成不同事件源对象。上面还有一个细节就是 _listeners 是什么？ _listeners 本质上也是一个对象，里面有三个属性。
+
+currentTarget：发生事件的 DOM 元素。
+instance ： button 对应的 fiber 元素。
+listener ：一个数组，存放绑定的事件处理函数本身，上面 demo 中就是绑定给 onClick，onClickCapture 的函数。
+
+接下来可以通过 DOM 元素找到对应的 fiber，找到元素对应的 fiber 之后，也就能找到 props 事件了。但是这里有一个细节，就是 listener 可以有多个，比如如上捕获阶段的 listener 只有一个，而冒泡阶段的 listener 有两个，这是因为 div button 上都有 onClick 事件。
+
+如上可以总结为：
+
+**当发生一次点击事件，React 会根据事件源对应的 fiber 对象，根据 return指针向上遍历，收集所有相同的事件**，比如是 onClick，那就收集父级元素的所有  onClick 事件，比如是 onClickCapture，那就收集父级的所有 onClickCapture。
+
+得到了 dispatchQueue 之后，就需要 processDispatchQueue 执行事件了，这个函数的内部会经历两次遍历：
+
+* 第一次遍历 dispatchQueue，通常情况下，只有一个事件类型，所有 dispatchQueue 中只有一个元素。
+* 接下来会遍历每一个元素的 listener，执行 listener 的时候有一个特点：
+
+```js
+/* 如果在捕获阶段执行。 */
+if (inCapturePhase) {
+    for (var i = dispatchListeners.length - 1; i >= 0; i--) {
+      var _dispatchListeners$i = dispatchListeners[i],
+          instance = _dispatchListeners$i.instance,
+          currentTarget = _dispatchListeners$i.currentTarget,
+          listener = _dispatchListeners$i.listener;
+     
+      
+      if (instance !== previousInstance && event.isPropagationStopped()) {
+        return;
+      }
+      
+      /* 执行事件 */
+      executeDispatch(event, listener, currentTarget);
+      previousInstance = instance;
+    }
+  } else {
+    for (var _i = 0; _i < dispatchListeners.length; _i++) {
+      var _dispatchListeners$_i = dispatchListeners[_i],
+          _instance = _dispatchListeners$_i.instance,
+          _currentTarget = _dispatchListeners$_i.currentTarget,
+          _listener = _dispatchListeners$_i.listener;
+      
+      if (_instance !== previousInstance && event.isPropagationStopped()) {
+        return;
+      }
+      /* 执行事件 */
+      executeDispatch(event, _listener, _currentTarget);
+      previousInstance = _instance;
+    }
+  }
+```
+
+如上在 executeDispatch 会负责执行事件处理函数，也就是上面的 handleClick ，handleParentClick 等。这个有一个区别就是，如果是捕获阶段执行的函数，那么 listener 数组中函数，会从后往前执行，如果是冒泡阶段执行的函数，会从前往后执行，用这个模拟出冒泡阶段先子后父，捕获阶段先父后子。
+
+还有一个细节就是如果触发了阻止冒泡事件，上述讲到事件源是 React 内部自己创建的，所以如果一个事件中执行了 e.stopPropagation ，那么事件源中就能感知得到，接下来就可以通过 event.isPropagationStopped 来判断是否阻止冒泡，如果组织，那么就会退出，这样就模拟了事件流的执行过程，以及阻止事件冒泡。
+
+## 四 总结
+
+以上就是新版本事件系统的原理，这里用一幅图来总结，新老版本事件系统在每个阶段的区别。
+
+![8-6-3.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6f893c626a7048bd95c7a02046f3a047~tplv-k3u1fbpfcp-watermark.image?)

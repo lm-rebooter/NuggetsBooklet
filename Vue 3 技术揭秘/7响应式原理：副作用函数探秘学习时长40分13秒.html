@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>上一小节我们说到了 <code>Reactive</code> 会在 <code>proxy getter</code> 的时候收集 <code>effect</code> 依赖，在 <code>proxy setter</code> 的时候触发 <code>effect</code> 的执行。那么 <code>effect</code> 副作用函数到底是个什么？以及是如何被收集起来的呢？</p>
+<h2 data-id="heading-1">effect</h2>
+<p>找到源码中关于 <code>effect</code> 部分的定义：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">effect</span> (fn, options) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-comment">// 如果 fn 已经是一个 effect 函数了，则指向原始函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (fn.<span class="hljs-property">effect</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    fn = fn.<span class="hljs-property">effect</span>.<span class="hljs-property">fn</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">// 构造 _effect 实例</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">const</span> _effect = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReactiveEffect</span>(fn)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// options 初始化</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">if</span> (options) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-title function_">extend</span>(_effect, options)</span>
+<span class="code-block-extension-codeLine" data-line-num="12">    <span class="hljs-keyword">if</span> (options.<span class="hljs-property">scope</span>) <span class="hljs-title function_">recordEffectScope</span>(_effect, options.<span class="hljs-property">scope</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  </span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-comment">// 如有 options 或者 不是懒加载，执行 _effect.run()</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-keyword">if</span> (!options || !options.<span class="hljs-property">lazy</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    _effect.<span class="hljs-title function_">run</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">  </span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-comment">// 返回 _effect.run</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-keyword">const</span> runner = _effect.<span class="hljs-property">run</span>.<span class="hljs-title function_">bind</span>(_effect)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  runner.<span class="hljs-property">effect</span> = _effect</span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-keyword">return</span> runner</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<p>这个 <code>effect</code> 函数内部核心是通过 <code>ReactiveEffect</code> 类创建了一个 <code>_effect</code> 实例，从代码来看，<code>_effect</code> 上包含了一个 <code>run</code> 函数。默认 <code>effect</code> 是没有传入 <code>options</code> 参数的，所以这里直接执行了 <code>_effect.run()</code>。我们知道，<code>fn</code> 函数是在 <code>effect</code> 函数中的一个入参，比如：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>})</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(state.<span class="hljs-property">a</span>))</span>
+</code></pre>
+<p>根据上一小节，我们知道因为这里我们访问了 <code>state.a</code> 所以收集了副作用函数，但是需要知道的是这里的 <code>effect</code> 传入的是一个 <code>fn</code>，所以要想访问 <code>state.a</code> 那这个 <code>fn</code> 必须要执行才可以。那是在哪里执行的呢？接下来看一下 <code>ReactiveEffect</code> 的实现：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 用于记录位于响应上下文中的effect嵌套层次数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">let</span> effectTrackDepth = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-comment">// 二进制位，每一位用于标识当前effect嵌套层级的依赖收集的启用状态</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">export</span> left trackOpBit = <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// 表示最大标记的位数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-keyword">const</span> maxMarkerBits = <span class="hljs-number">30</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-comment">// 当前活跃的 effect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9"><span class="hljs-keyword">let</span> activeEffect;</span>
+<span class="code-block-extension-codeLine" data-line-num="10"></span>
+<span class="code-block-extension-codeLine" data-line-num="11"><span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ReactiveEffect</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 用于标识副作用函数是否位于响应式上下文中被执行</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  active = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-comment">// 副作用函数持有它所在的所有依赖集合的引用，用于从这些依赖集合删除自身</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  deps = []</span>
+<span class="code-block-extension-codeLine" data-line-num="16">  <span class="hljs-comment">// 指针为，用于嵌套 effect 执行后动态切换 activeEffect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="17">  parent = <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">  <span class="hljs-comment">// ...</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  <span class="hljs-title function_">run</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="20">    <span class="hljs-comment">// 若当前 ReactiveEffect 对象脱离响应式上下文</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-comment">// 那么其对应的副作用函数被执行时不会再收集依赖</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fn</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="24">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="25">    </span>
+<span class="code-block-extension-codeLine" data-line-num="26">    <span class="hljs-comment">// 缓存是否需要收集依赖</span></span>
+<span class="code-block-extension-codeLine" data-line-num="27">    <span class="hljs-keyword">let</span> lastShouldTrack = shouldTrack</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    </span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-keyword">try</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="30">      <span class="hljs-comment">// 保存上一个 activeEffect 到当前的 parent 上</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">      <span class="hljs-variable language_">this</span>.<span class="hljs-property">parent</span> = activeEffect</span>
+<span class="code-block-extension-codeLine" data-line-num="32">      <span class="hljs-comment">// activeEffect 指向当前的 effect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="33">      activeEffect = <span class="hljs-variable language_">this</span></span>
+<span class="code-block-extension-codeLine" data-line-num="34">      <span class="hljs-comment">// shouldTrack 置成 true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="35">      shouldTrack = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="36">      <span class="hljs-comment">// 左移操作符 &lt;&lt;&nbsp;将第一个操作数向左移动指定位数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="37">      <span class="hljs-comment">// 左边超出的位数将会被清除，右边将会补零。</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38">      <span class="hljs-comment">// trackOpBit 是基于 1 左移 effectTrackDepth 位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="39">      trackOpBit = <span class="hljs-number">1</span> &lt;&lt; ++effectTrackDepth</span>
+<span class="code-block-extension-codeLine" data-line-num="40">      </span>
+<span class="code-block-extension-codeLine" data-line-num="41">      <span class="hljs-comment">// 如果未超过最大嵌套层数，则执行 initDepMarkers</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">      <span class="hljs-keyword">if</span> (effectTrackDepth &lt;= maxMarkerBits) {</span>
+<span class="code-block-extension-codeLine" data-line-num="43">        <span class="hljs-title function_">initDepMarkers</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="44">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="45">        <span class="hljs-title function_">cleanupEffect</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="46">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="47">      <span class="hljs-comment">// 这里执行了 fn</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">      <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fn</span>()</span>
+<span class="code-block-extension-codeLine" data-line-num="49">    } <span class="hljs-keyword">finally</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="50">      <span class="hljs-keyword">if</span> (effectTrackDepth &lt;= maxMarkerBits) {</span>
+<span class="code-block-extension-codeLine" data-line-num="51">        <span class="hljs-comment">// 用于对曾经跟踪过，但本次副作用函数执行时没有跟踪的依赖采取删除操作。</span></span>
+<span class="code-block-extension-codeLine" data-line-num="52">        <span class="hljs-comment">// 新跟踪的 和 本轮跟踪过的都会被保留</span></span>
+<span class="code-block-extension-codeLine" data-line-num="53">        <span class="hljs-title function_">finalizeDepMarkers</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="54">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="55">      </span>
+<span class="code-block-extension-codeLine" data-line-num="56">      <span class="hljs-comment">// &lt;&lt; --effectTrackDepth 右移动 effectTrackDepth 位</span></span>
+<span class="code-block-extension-codeLine" data-line-num="57">      trackOpBit = <span class="hljs-number">1</span> &lt;&lt; --effectTrackDepth</span>
+<span class="code-block-extension-codeLine" data-line-num="58">      </span>
+<span class="code-block-extension-codeLine" data-line-num="59">      <span class="hljs-comment">// 返回上个 activeEffect</span></span>
+<span class="code-block-extension-codeLine" data-line-num="60">      activeEffect = <span class="hljs-variable language_">this</span>.<span class="hljs-property">parent</span></span>
+<span class="code-block-extension-codeLine" data-line-num="61">      <span class="hljs-comment">// 返回上个 shouldTrack</span></span>
+<span class="code-block-extension-codeLine" data-line-num="62">      shouldTrack = lastShouldTrack</span>
+<span class="code-block-extension-codeLine" data-line-num="63">      <span class="hljs-comment">// 情况本次的 parent 指向</span></span>
+<span class="code-block-extension-codeLine" data-line-num="64">      <span class="hljs-variable language_">this</span>.<span class="hljs-property">parent</span> = <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="65">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="66">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="67">}</span>
+</code></pre>
+<p>大致看一眼，我们可以看到在 <code>ReactiveEffect</code> 中是执行了 <code>this.fn()</code> 的，这也就解释了 <code>effect</code> 中的回调函数 <code>fn</code> 是在这里被调用的。接下来详细研究一下这个 <code>ReactiveEffect</code>。</p>
+<p>但这段代码看起来不是很长，但涉及了好几个概念，我们来一个个看。</p>
+<h3 data-id="heading-2">1. parent 的作用</h3>
+<p>为什么 <code>ReactiveEffect</code> 要设计一个 <code>parent</code> 这样一个看似没啥用的变量指针来存储上一次的 <code>activeEffect</code> 呢？如果改成下面这样不是更简单吗？</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-title function_">run</span>(<span class="hljs-params"></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fn</span>();</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-comment">// 初始化</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  shouldTrack = <span class="hljs-literal">true</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  activeEffect = <span class="hljs-variable language_">this</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="8"></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">const</span> result = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fn</span>();</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  </span>
+<span class="code-block-extension-codeLine" data-line-num="11">  <span class="hljs-comment">// 重置</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  shouldTrack = <span class="hljs-literal">false</span>;</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  </span>
+<span class="code-block-extension-codeLine" data-line-num="14">  <span class="hljs-keyword">return</span> result;</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<p>其实对于下面这样的代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>})</span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(state.<span class="hljs-property">a</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="4"></span>
+<span class="code-block-extension-codeLine" data-line-num="5">state.<span class="hljs-property">a</span>++</span>
+</code></pre>
+<p><code>effect</code> 函数内调用 <code>ReactiveEffect</code> 实例的 <code>run</code> 函数。<code>run</code> 函数执行的时候，把 <code>activeEffect</code> 指向 <code>this</code>。然后执行 <code>effect</code> 传入的 <code>fn</code> 函数，函数在执行的时候访问了 <code>state.a</code> 触发了 <code>getter</code> 钩子。回顾一下上一节的内容，<code>getter</code> 的时候有触发添加 <code>activeEffect</code> 的功能：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">csharp</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-csharp code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// 把 activeEffect 添加到 dep 中</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">dep.<span class="hljs-keyword">add</span>(activeEffect!)</span>
+</code></pre>
+<p>而 <code>activeEffect</code> 正是这里的 <code>this</code>。当执行 <code>state.a++</code> 时，访问了<code>state.a</code> 的 <code>setter</code>。上一节也说了，<code>setter</code> 的执行会调用 <code>effect.run</code> 函数：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// triggerEffects</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2">effect.<span class="hljs-title function_">run</span>();</span>
+</code></pre>
+<p>所以又会执行 <code>fn</code>。</p>
+<p>到这里看似很完美，那么我们再来看另外一个例子🌰：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">b</span>: <span class="hljs-number">2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">});</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-comment">// ef1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">// ef2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`b: <span class="hljs-subst">${state.b}</span>`</span>))</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`a: <span class="hljs-subst">${state.a}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="11">});</span>
+<span class="code-block-extension-codeLine" data-line-num="12"></span>
+<span class="code-block-extension-codeLine" data-line-num="13">state.<span class="hljs-property">a</span> ++</span>
+</code></pre>
+<p>按照上面的逻辑，在第一次 <code>effect</code> 执行的时候，<code>activeEffect = ef1</code> 然后再执行内部的 <code>effect</code>， 此时 <code>activeEffect = ef2</code> 然后 <code>ef2</code> 执行完成回到 <code>ef1</code> 函数体内，此时再访问 <code>state.a</code> 触发对 <code>a</code> 的依赖收集，但收集到的却是 <code>ef2</code>。那么最终打印的是：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-attr">b</span>: <span class="hljs-number">2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-attr">a</span>: <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-attr">b</span>: <span class="hljs-number">2</span></span>
+</code></pre>
+<p>很明显不符合我们的要求，我们期望的是输出：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-attr">b</span>: <span class="hljs-number">2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-attr">a</span>: <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-attr">b</span>: <span class="hljs-number">2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-attr">a</span>: <span class="hljs-number">2</span></span>
+</code></pre>
+<p>这时候 <code>parent</code> 就排上用场了，当为 <code>effect</code> 加上 <code>parent</code> 属性后，我们再来捋一下整体的流程。</p>
+<ol>
+<li>执行 <code>ef1</code> 的时候，<code>activeEffect</code> 指向 <code>ef1</code>，此时 <code>parent</code> 是 <code>undefined</code>。</li>
+<li>执行 <code>ef1 fn</code> 遇到了 <code>ef2</code>，调用 <code>ef2</code> 此时 <code>ef2</code> 的 <code>parent</code> 指向 <code>ef1</code>， <code>activeEffect</code> 指向 <code>ef2</code>。然后执行 <code>ef2 的 fn</code>。</li>
+<li><code>ef2 的 fn</code> 执行的时候，访问了 <code>state.b</code> 依赖收集 <code>ef2</code>。执行完成后，<code>activeEffect = this.parent</code> 又把 <code>activeEffect</code> 指向了 <code>ef1</code>。</li>
+<li>返回 <code>ef1</code> 的 <code>fn</code> 体继续执行，此时访问 <code>state.a</code> 依赖收集 <code>activeEffect</code> 为 <code>ef1</code>。</li>
+<li>触发 <code>state.a</code> 的 <code>setter</code>，调用 <code>a</code> 的副作用 <code>ef1</code>，依次打印……</li>
+</ol>
+<p>到这里相信各位小伙伴已经清楚了 <code>parent</code> 的作用了，那就是<strong>通过 <code>parent</code> 这个标记，来回切换 <code>activeEffect</code> 的指向，从而完成对嵌套 <code>effect</code> 的正确的依赖收集</strong>。</p>
+<h3 data-id="heading-3">2. 依赖清理</h3>
+<p>在说依赖清理之前，再来看一个有意思的例子：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">show</span>: <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">});</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">if</span> (state.<span class="hljs-property">show</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`a: <span class="hljs-subst">${state.a}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">});</span>
+<span class="code-block-extension-codeLine" data-line-num="11"></span>
+<span class="code-block-extension-codeLine" data-line-num="12">state.<span class="hljs-property">a</span> ++</span>
+<span class="code-block-extension-codeLine" data-line-num="13"></span>
+<span class="code-block-extension-codeLine" data-line-num="14"><span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  state.<span class="hljs-property">show</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  state.<span class="hljs-property">a</span> ++</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}, <span class="hljs-number">1000</span>)</span>
+</code></pre>
+<p>上面的例子中，我们在 <code>effect</code> 中完成了对 <code>show</code> 和 <code>a</code> 的依赖收集，然后 <code>1s</code> 后，我们改变了 <code>show</code> 的状态为 <code>false</code>。此时 <code>effect</code> 内的函数中的 <code>console.log</code> 将永远不会执行，然后再触发 <code>state.a++</code> 的动作，访问 <code>a</code> 的 <code>getter</code>，如果没有依赖清理，那么按照之前的做法，测试也会触发 <code>effect.fn</code> 的执行，但这个执行其实没意义的，因为 <code>a</code> 已经没有被使用了，是一个永远不会被访问到的变量，造成了性能浪费。所以我们需要删除 <code>a</code> 的副作用函数，让它不要执行。</p>
+<p>接下来一起来看看 <code>Vue</code> 是怎么做的吧！这里涉及到的内容有点多，我们先一个个解释，首先补习一下关于 <code>js</code> 的一些操作符的基础知识。</p>
+<p><strong>1.  左移（&lt;&lt;）</strong></p>
+<p>左移操作符 (<code>&lt;&lt;</code>)&nbsp;将第一个操作数转换成 2 进制后向左移动指定位数，左边超出的位数将会被清除，右边将会补零。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>;         <span class="hljs-comment">// 00000000000000000000000000000001</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> b = <span class="hljs-number">1</span>;       </span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(a &lt;&lt; b); <span class="hljs-comment">// 00000000000000000000000000000010</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// expected output: 2</span></span>
+</code></pre>
+<p><strong>2. 位或操作（|）</strong></p>
+<p>位或操作符（|）， 如果两位之一为 1，则设置每位为 1。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;        <span class="hljs-comment">// 00000000000000000000000000000101</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> b = <span class="hljs-number">3</span>;        <span class="hljs-comment">// 00000000000000000000000000000011</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(a | b); <span class="hljs-comment">// 00000000000000000000000000000111</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// expected output: 7</span></span>
+</code></pre>
+<p><strong>3. 按位与（&amp;）</strong></p>
+<p>按位与运算符 (<code>&amp;</code>) 在两个操作数对应的二进位都为&nbsp;<code>1</code>&nbsp;时，该位的结果值才为&nbsp;<code>1</code>，否则为&nbsp;<code>0</code>。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;        <span class="hljs-comment">// 00000000000000000000000000000101</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> b = <span class="hljs-number">3</span>;        <span class="hljs-comment">// 00000000000000000000000000000011</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(a &amp; b); <span class="hljs-comment">// 00000000000000000000000000000001</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// expected output: 1</span></span>
+</code></pre>
+<p><strong>4. 按位非（~）</strong></p>
+<p>按位非运算符（~），反转操作数的位。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;     <span class="hljs-comment">// 00000000000000000000000000000101</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> b = -<span class="hljs-number">3</span>;    <span class="hljs-comment">// 11111111111111111111111111111101</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(~a); <span class="hljs-comment">// 11111111111111111111111111111010</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-comment">// expected output: -6</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6"></span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(~b); <span class="hljs-comment">// 00000000000000000000000000000010</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8"><span class="hljs-comment">// expected output: 2</span></span>
+</code></pre>
+<p>有了这些基础的知识点后，再来认识几个变量。</p>
+<p><strong>1. effectTrackDepth</strong></p>
+<p>用于记录位于响应上下文中的 <code>effect</code> 嵌套层次数，默认值为 <code>0</code>。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-comment">// effectTrackDepth = 0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// effectTrackDepth = 1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {})</span>
+<span class="code-block-extension-codeLine" data-line-num="5">})</span>
+</code></pre>
+<p><strong>2. trackOpBit</strong></p>
+<p>二进制位，每一位用于标识当前 <code>effect</code> 嵌套层级的依赖收集的启用状态。默认值为 <code>1</code>，即 <code>00000000000000000000000000000001</code>。</p>
+<p><strong>3. maxMarkerBits</strong></p>
+<p>表示最大的 <code>effect</code> 嵌套的层次数，最大值为 <code>30</code>。</p>
+<p>好了，搞懂了这些操作符之后，我们来看看 <code>Vue</code> 的依赖清理是如何实现的，先来看不超过 <code>maxMarkerBits</code> 层级数的嵌套 <code>effect</code> 的依赖收集的过程，还以上面那个 <code>demo</code> 作为示例：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> state = <span class="hljs-title function_">reactive</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">show</span>: <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">});</span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-keyword">if</span> (state.<span class="hljs-property">show</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`a: <span class="hljs-subst">${state.a}</span>`</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">});</span>
+<span class="code-block-extension-codeLine" data-line-num="11"></span>
+<span class="code-block-extension-codeLine" data-line-num="12">state.<span class="hljs-property">a</span> ++</span>
+<span class="code-block-extension-codeLine" data-line-num="13"></span>
+<span class="code-block-extension-codeLine" data-line-num="14"><span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="15">  state.<span class="hljs-property">show</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  state.<span class="hljs-property">a</span> ++</span>
+<span class="code-block-extension-codeLine" data-line-num="17">}, <span class="hljs-number">1000</span>)</span>
+</code></pre>
+<p><strong>Step 1</strong>：<code>run</code> 函数执行的时候，<code>trackOpBit = 1 &lt;&lt; ++effectTrackDepth</code> 这个语句执行完成后，得到 <code>effectTrackDepth = 1</code>；<code>trackOpBit.toString(2) = 00000000000000000000000000000010</code>。</p>
+<p><strong>Step 2</strong>：因为 <code>effectTrackDepth &lt; maxMarkerBits</code> ，所以执行 <code>initDepMarkers</code> 函数，因为这里的 <code>deps</code> 在初始化的时候还是个空数组，所以此函数未执行。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">initDepMarkers</span> = (<span class="hljs-params">{ deps }</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">if</span> (deps.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; deps.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">      deps[i].<span class="hljs-property">w</span> |= trackOpBit <span class="hljs-comment">// set was tracked</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="7">}</span>
+</code></pre>
+<p><strong>Step 3</strong>：执行 <code>this.fn</code> 函数，先访问 <code>state.show</code>，触发了 <code>trackEffects</code>。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">trackEffects</span>(<span class="hljs-params">dep</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> shouldTrack = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (effectTrackDepth &lt;= maxMarkerBits) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-comment">// 如果本轮副作用函数执行过程中已经访问并收集过，则不用再收集该依赖</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">newTracked</span>(dep)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-comment">// 设置 dep.n</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">      dep.<span class="hljs-property">n</span> |= trackOpBit</span>
+<span class="code-block-extension-codeLine" data-line-num="8">      shouldTrack = !<span class="hljs-title function_">wasTracked</span>(dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="10">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-comment">// Full cleanup mode.</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">    shouldTrack = !dep.<span class="hljs-title function_">has</span>(activeEffect!)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="14"></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-keyword">if</span> (shouldTrack) {</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    dep.<span class="hljs-title function_">add</span>(activeEffect!)</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    activeEffect!.<span class="hljs-property">deps</span>.<span class="hljs-title function_">push</span>(dep)</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p>这里需要额外了解 2 个函数：<code>wasTracked</code>（已经被收集过，缩写是 <code>w</code>） 和 <code>newTracked</code>（新收集的依赖，缩写是 <code>n</code>）。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">wasTracked</span> = dep =&gt; (dep.<span class="hljs-property">w</span> &amp; trackOpBit) &gt; <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">newTracked</span> = dep =&gt; (dep.<span class="hljs-property">n</span> &amp; trackOpBit) &gt; <span class="hljs-number">0</span></span>
+</code></pre>
+<p>进入 <code>trackEffects</code> 时，因为此时还没有为 <code>dep.n</code> 进行或运算赋值，所以 <code>state.show</code> 的 <code>newTracked = false</code>，<code>wasTracked = false</code>。</p>
+<p>所以计算得到 <code>shouldTrack = true</code>，最后将 <code>activeEffect</code> 收集进入 <code>dep</code> 中，同时执行了 <code>activeEffect.deps.push(dep)</code> 将 <code>dep</code> 存入了 <code>activeEffect</code> 的 <code>deps</code> 中。然后访问 <code>state.a</code> 重复上述操作。上述步骤执行完成后的 <code>activeEffect.deps</code> 如下：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">[</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  {<span class="hljs-string">"w"</span>:<span class="hljs-number">0</span>,<span class="hljs-string">"n"</span>: <span class="hljs-number">00000000000000000000000000000010</span>, [effect]},</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  {<span class="hljs-string">"w"</span>:<span class="hljs-number">0</span>,<span class="hljs-string">"n"</span>: <span class="hljs-number">00000000000000000000000000000010</span>, [effect]}</span>
+<span class="code-block-extension-codeLine" data-line-num="4">]</span>
+</code></pre>
+<p><strong>Step 4</strong>：最后执行 <code>finalizeDepMarkers</code> 函数，根据第 3 步，此时 <code>effect</code> 中的 <code>deps</code> 包含了 2 个 <code>dep</code>，分别是 <code>state.show</code> 和 <code>state.a</code>。 <code>finalizeDepMarkers</code> 函数内部执行了 <code>wasTracked</code>（已经被收集过，缩写是 <code>w</code>） 和 <code>newTracked</code>（新收集的依赖，缩写是 <code>n</code>） 函数，因为 <code>dep.w = 0</code> 所以 <code>wasTracked = false</code>。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">finalizeDepMarkers</span> = (<span class="hljs-params">effect: ReactiveEffect</span>) =&gt; {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> { deps } = effect</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">if</span> (deps.<span class="hljs-property">length</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-keyword">let</span> ptr = <span class="hljs-number">0</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; deps.<span class="hljs-property">length</span>; i++) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-keyword">const</span> dep = deps[i]</span>
+<span class="code-block-extension-codeLine" data-line-num="7">      <span class="hljs-keyword">if</span> (<span class="hljs-title function_">wasTracked</span>(dep) &amp;&amp; !<span class="hljs-title function_">newTracked</span>(dep)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">        dep.<span class="hljs-title function_">delete</span>(effect)</span>
+<span class="code-block-extension-codeLine" data-line-num="9">      } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="10">        <span class="hljs-comment">// 缩小依赖集合的大小</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">        deps[ptr++] = dep</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="13">      <span class="hljs-comment">// clear bits</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">      dep.<span class="hljs-property">w</span> &amp;= ~trackOpBit</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      dep.<span class="hljs-property">n</span> &amp;= ~trackOpBit</span>
+<span class="code-block-extension-codeLine" data-line-num="16">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    deps.<span class="hljs-property">length</span> = ptr</span>
+<span class="code-block-extension-codeLine" data-line-num="18">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="19">}</span>
+</code></pre>
+<p>因为 <code>wasTracked = false</code>，因此 <code>finalizeDepMarkers</code> 处理后仍然将副作用函数保留在这两个属性对应的依赖集合中，同时把 <code>dep.w</code> 和 <code>dep.n</code> 重置回 0。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">[{<span class="hljs-string">"w"</span>:<span class="hljs-number">0</span>, <span class="hljs-string">"n"</span>:<span class="hljs-number">0</span>, [effect]},{<span class="hljs-string">"w"</span>:<span class="hljs-number">0</span>, <span class="hljs-string">"n"</span>:<span class="hljs-number">0</span>, [effect]}]</span>
+</code></pre>
+<p><strong>Step 5</strong>：当执行 <code>state.show = false</code> 的时候，触发 <code>effect.run</code> 的执行，此时执行 <code>initDepMarkers</code> 时，因为已经存在了 <code>dep</code>，所以先访问 <code>state.show</code>。</p>
+<p>当执行到 <code>trackEffects</code> 时，此时的 <code>newTracked = false</code>，执行逻辑和之前一致。只不过因为 <code>state.show = false</code>，所以没有触发 <code>state.a</code> 的这一部分逻辑的处理，最后得到的结果为：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">[</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  {</span>
+<span class="code-block-extension-codeLine" data-line-num="3">    <span class="hljs-string">"w"</span>: <span class="hljs-number">00000000000000000000000000000010</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">    <span class="hljs-string">"n"</span>: <span class="hljs-number">00000000000000000000000000000010</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    [effect]</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  },</span>
+<span class="code-block-extension-codeLine" data-line-num="7">  {</span>
+<span class="code-block-extension-codeLine" data-line-num="8">    <span class="hljs-string">"w"</span>: <span class="hljs-number">00000000000000000000000000000010</span>, </span>
+<span class="code-block-extension-codeLine" data-line-num="9">    <span class="hljs-string">"n"</span>: <span class="hljs-number">0</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    [effect]</span>
+<span class="code-block-extension-codeLine" data-line-num="11">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="12">]</span>
+</code></pre>
+<p><strong>Step 6</strong>：最后执行 <code>finalizeDepMarkers</code> 时，如下。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">if</span> (<span class="hljs-title function_">wasTracked</span>(dep) &amp;&amp; !<span class="hljs-title function_">newTracked</span>(dep)) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  dep.<span class="hljs-title function_">delete</span>(effect)</span>
+<span class="code-block-extension-codeLine" data-line-num="3">}</span>
+</code></pre>
+<p>因为这里的 <code>state.a</code> 的 <code>wasTracked = true</code> 且 <code>newTracked</code> 为 <code>false</code>，所以执行了 <code>dep.delete(effect)</code> 将 <code>effect</code> 从 <code>dep</code> 中踢掉。</p>
+<p><strong>Step 7</strong>：<code>1s</code> 后执行 <code>state.a++</code> 的操作，由于 <code>state.a</code> 中没有 <code>effect</code> 了，所以不会执行副作用函数。</p>
+<p><strong>总结</strong>： <code>Vue</code> 在组件的 <code>effect</code> 执行之前，会根据 <code>dep</code> 的收集标记位 <code>w</code> 和 <code>n</code> 来进行清理依赖，删除之前 <code>state.a</code> 收集的 <code>effect</code> 依赖。这样当我们修改 <code>state.a</code> 时，由于已经没有依赖了，就不会触发 <code>effect</code> 重新执行。</p>
+<p>另外，为了更容易帮助小伙伴们理解上述的流程，我也精心制作了一个动画演示上述流程和过程：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3cae5ea3287044dbabe2e2b400eb40c6~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="依赖清理过程.gif" loading="lazy" class="medium-zoom-image"></p>
+<blockquote>
+<p>注意，当 <code>effectTrackDepth</code> 大于 <code>30</code> 时，会调用 <code>cleanup</code> 来清理依赖，其实 <code>cleanup</code> 的原理就是依赖收集前全部删除所有的 <code>dep</code>，依赖收集时再一个个加进来，这个性能其实是比较差的，所以 <code>Vue 3.2</code> 改成了通过二进制标记位的方式来选择性删除和添加，提升了性能。关于这部分更多的细节，可以参考<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvuejs%2Fcore%2Fpull%2F4017" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vuejs/core/pull/4017" ref="nofollow noopener noreferrer">这个PR</a>。</p>
+</blockquote>
+<h2 data-id="heading-4">总结</h2>
+<p>到这里，我们基本上讲完了 <code>Vue 3</code> 的响应式原理基础，如果有小伙伴了解 <code>Vue 2</code> 的响应式原理，应该清楚 <code>Vue2</code> 的响应式原理可以理解成如下一幅图：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpd27092e7846c4a47909cbba07b852799~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>在 <code>Vue 2</code> 中，<code>Watcher</code> 就是依赖，有专门针对组件渲染的 <code>render watcher</code>。</p>
+<ol>
+<li>依赖收集：组件在 <code>render</code> 的时候会访问模板中的数据，触发 <code>getter</code> 把 <code>watcher</code> 作为依赖收集。</li>
+<li>触发渲染：当修改数据时，会触发 <code>setter</code>，通知 <code>watcher</code> 更新，进而触发了组件的重新渲染。</li>
+</ol>
+<p>相应地，在 <code>Vue 3</code> 中的响应式流程如下：</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpe9dd98a0d60447b3bcde4df4facb00af~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>可以看到，<code>Vue 3</code> 相对于 <code>Vue 2</code> 的响应式差别不大，主要就是劫持数据的方式改成用 <code>Proxy</code> 实现，以及收集的依赖由 <code>watcher</code> 实例变成了组件副作用函数 <code>effect</code>。另外，值得一提的是 <code>Vue 3</code> 在响应式设计上又多考虑了层级嵌套的依赖收集问题和不必要的依赖清理问题。</p></div>
+    </body>
+    </html>

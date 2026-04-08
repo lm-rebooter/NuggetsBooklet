@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">前言</h2>
+<p>计算属性接受一个 <code>getter</code> 函数，返回一个只读的响应式&nbsp;<a href="https://link.juejin.cn?target=https%3A%2F%2Fcn.vuejs.org%2Fapi%2Freactivity-core.html%23ref" target="_blank" rel="nofollow noopener noreferrer" title="https://cn.vuejs.org/api/reactivity-core.html#ref" ref="nofollow noopener noreferrer">ref</a>&nbsp;对象。该 <code>ref</code> 通过&nbsp;<code>.value</code>&nbsp;暴露 <code>getter</code> 函数的返回值。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> count = <span class="hljs-title function_">ref</span>(<span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> plusOne = <span class="hljs-title function_">computed</span>(<span class="hljs-function">() =&gt;</span> count.<span class="hljs-property">value</span> + <span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(plusOne.<span class="hljs-property">value</span>) <span class="hljs-comment">// 2</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5"></span>
+<span class="code-block-extension-codeLine" data-line-num="6">plusOne.<span class="hljs-property">value</span>++ <span class="hljs-comment">// 错误</span></span>
+</code></pre>
+<p>它也可以接受一个带有&nbsp;<code>get</code>&nbsp;和&nbsp;<code>set</code>&nbsp;函数的对象来创建一个可写的 ref 对象。</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> count = <span class="hljs-title function_">ref</span>(<span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-keyword">const</span> plusOne = <span class="hljs-title function_">computed</span>({</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-attr">get</span>: <span class="hljs-function">() =&gt;</span> count.<span class="hljs-property">value</span> + <span class="hljs-number">1</span>,</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-attr">set</span>: <span class="hljs-function">(<span class="hljs-params">val</span>) =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    count.<span class="hljs-property">value</span> = val - <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="7">})</span>
+<span class="code-block-extension-codeLine" data-line-num="8"></span>
+<span class="code-block-extension-codeLine" data-line-num="9">plusOne.<span class="hljs-property">value</span> = <span class="hljs-number">1</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(count.<span class="hljs-property">value</span>) <span class="hljs-comment">// 0</span></span>
+</code></pre>
+<p>接下来看看源码里是如何实现 <code>computed</code> 的 <code>API</code>。</p>
+<h2 data-id="heading-1">构造 setter 和 getter</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">computed</span>(<span class="hljs-params">getterOrOptions, debugOptions, isSSR = <span class="hljs-literal">false</span></span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">let</span> getter</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-keyword">let</span> setter</span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-comment">// 判断第一个参数是不是一个函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-keyword">const</span> onlyGetter = <span class="hljs-title function_">isFunction</span>(getterOrOptions)</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  </span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-comment">// 构造 setter 和 getter 函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">if</span> (onlyGetter) {</span>
+<span class="code-block-extension-codeLine" data-line-num="9">    getter = getterOrOptions</span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-comment">// 如果第一个参数是一个函数，那么就是只读的</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">    setter = __DEV__</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      ? <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="13">          <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">warn</span>(<span class="hljs-string">'Write operation failed: computed value is readonly'</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="14">        }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">      : <span class="hljs-variable constant_">NOOP</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">  } <span class="hljs-keyword">else</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    getter = getterOrOptions.<span class="hljs-property">get</span></span>
+<span class="code-block-extension-codeLine" data-line-num="18">    setter = getterOrOptions.<span class="hljs-property">set</span></span>
+<span class="code-block-extension-codeLine" data-line-num="19">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  <span class="hljs-comment">// 构造 ref 响应式对象</span></span>
+<span class="code-block-extension-codeLine" data-line-num="21">  <span class="hljs-keyword">const</span> cRef = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ComputedRefImpl</span>(getter, setter, onlyGetter || !setter, isSSR)</span>
+<span class="code-block-extension-codeLine" data-line-num="22">  <span class="hljs-comment">// 返回响应式 ref</span></span>
+<span class="code-block-extension-codeLine" data-line-num="23">  <span class="hljs-keyword">return</span> cRef</span>
+<span class="code-block-extension-codeLine" data-line-num="24">}</span>
+</code></pre>
+<p>可以看到，这段 <code>computed</code> 函数体最初就是需要格式化传入的参数，根据第一个参数入参的类型来构造统一的 <code>setter</code> 和 <code>getter</code> 函数，并传入 <code>ComputedRefImpl</code> 类中，进行实例化 <code>ref</code> 响应式对象。</p>
+<p>接下来一起看看 <code>ComputedRefImpl</code> 是如何构造 <code>cRef</code> 响应式对象的。</p>
+<h2 data-id="heading-2">构造 cRef 响应式对象</h2>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ComputedRefImpl</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  public dep = <span class="hljs-literal">undefined</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3"></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  private _value</span>
+<span class="code-block-extension-codeLine" data-line-num="5">  public readonly effect</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  <span class="hljs-comment">//表示 ref 类型</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  public readonly __v_isRef = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-comment">//是否只读</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">  public readonly [<span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_READONLY</span>] = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-comment">//用于控制是否进行值更新(代表是否脏值)</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">  public _dirty = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">  <span class="hljs-comment">// 缓存</span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">  public _cacheable</span>
+<span class="code-block-extension-codeLine" data-line-num="14"></span>
+<span class="code-block-extension-codeLine" data-line-num="15">  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">    getter,</span>
+<span class="code-block-extension-codeLine" data-line-num="17">    _setter,</span>
+<span class="code-block-extension-codeLine" data-line-num="18">    isReadonly,</span>
+<span class="code-block-extension-codeLine" data-line-num="19">    isSSR</span>
+<span class="code-block-extension-codeLine" data-line-num="20">  ) {</span>
+<span class="code-block-extension-codeLine" data-line-num="21">    <span class="hljs-comment">// 把 getter 作为响应式依赖函数 fn 参数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="22">    <span class="hljs-variable language_">this</span>.<span class="hljs-property">effect</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReactiveEffect</span>(getter, <span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="23">      <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">_dirty</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="24">        <span class="hljs-variable language_">this</span>.<span class="hljs-property">_dirty</span> = <span class="hljs-literal">true</span></span>
+<span class="code-block-extension-codeLine" data-line-num="25">        <span class="hljs-comment">// 触发更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="26">        <span class="hljs-title function_">triggerRefValue</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="27">      }</span>
+<span class="code-block-extension-codeLine" data-line-num="28">    })</span>
+<span class="code-block-extension-codeLine" data-line-num="29">    <span class="hljs-comment">// 标记 effect 的 computed 属性</span></span>
+<span class="code-block-extension-codeLine" data-line-num="30">    <span class="hljs-variable language_">this</span>.<span class="hljs-property">effect</span>.<span class="hljs-property">computed</span> = <span class="hljs-variable language_">this</span></span>
+<span class="code-block-extension-codeLine" data-line-num="31">    <span class="hljs-variable language_">this</span>.<span class="hljs-property">effect</span>.<span class="hljs-property">active</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">_cacheable</span> = !isSSR</span>
+<span class="code-block-extension-codeLine" data-line-num="32">    <span class="hljs-variable language_">this</span>[<span class="hljs-title class_">ReactiveFlags</span>.<span class="hljs-property">IS_READONLY</span>] = isReadonly</span>
+<span class="code-block-extension-codeLine" data-line-num="33">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="34"></span>
+<span class="code-block-extension-codeLine" data-line-num="35">  <span class="hljs-keyword">get</span> <span class="hljs-title function_">value</span>() {</span>
+<span class="code-block-extension-codeLine" data-line-num="36">    <span class="hljs-keyword">const</span> self = <span class="hljs-title function_">toRaw</span>(<span class="hljs-variable language_">this</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="37">    <span class="hljs-comment">// 依赖收集</span></span>
+<span class="code-block-extension-codeLine" data-line-num="38">    <span class="hljs-title function_">trackRefValue</span>(self)</span>
+<span class="code-block-extension-codeLine" data-line-num="39">    <span class="hljs-comment">// 脏值则进行更新</span></span>
+<span class="code-block-extension-codeLine" data-line-num="40">    <span class="hljs-keyword">if</span> (self.<span class="hljs-property">_dirty</span> || !self.<span class="hljs-property">_cacheable</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="41">      self.<span class="hljs-property">_dirty</span> = <span class="hljs-literal">false</span></span>
+<span class="code-block-extension-codeLine" data-line-num="42">      <span class="hljs-comment">// 更新值</span></span>
+<span class="code-block-extension-codeLine" data-line-num="43">      self.<span class="hljs-property">_value</span> = self.<span class="hljs-property">effect</span>.<span class="hljs-title function_">run</span>()!</span>
+<span class="code-block-extension-codeLine" data-line-num="44">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="45">    <span class="hljs-keyword">return</span> self.<span class="hljs-property">_value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="46">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="47">  <span class="hljs-comment">// 执行 setter</span></span>
+<span class="code-block-extension-codeLine" data-line-num="48">  <span class="hljs-keyword">set</span> <span class="hljs-title function_">value</span>(<span class="hljs-params">newValue</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="49">    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_setter</span>(newValue)</span>
+<span class="code-block-extension-codeLine" data-line-num="50">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="51">}</span>
+</code></pre>
+<p>简单看一下该类的实现：在构造函数的时候，创建了一个副作用对象 <code>effect</code>。并为 <code>effect</code> 额外定义了一个 <code>computed</code> 属性执行当前响应式对象 <code>cRef</code>。</p>
+<p>另外，定义了一个 <code>get</code> 方法，当我们通过 <code>ref.value</code> 取值的时候可以进行依赖收集，将定义的 <code>effect</code> 收集起来。</p>
+<p>其次，定义了一个 <code>set</code> 方法，该方法就是执行传入进来的 <code>setter</code> 函数。</p>
+<p>最后，熟悉&nbsp;<code>Vue</code>&nbsp;的开发者都知道&nbsp;<code>computed</code>&nbsp;的特性就在于能够缓存计算的值（提升性能），只有当&nbsp;<code>computed</code>&nbsp;的依赖发生变化时才会重新计算，否则读取&nbsp;<code>computed</code>&nbsp;的值则一直是之前的值。在源码这里，实现上述功能相关的变量分别是 <code>_dirty</code> 和 <code>_cacheable</code> 这 2 个，用来控制缓存的实现。</p>
+<p>有了上面的介绍，我们来看一个具体的例子，看看 <code>computed</code> 是如何执行的：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">html</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-html code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="3">    {{ plusOne }} </span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="5">  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"plus"</span>&gt;</span>plus<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="6"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="7"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"> </span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">  <span class="hljs-keyword">import</span> { ref, computed } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> { </span>
+<span class="code-block-extension-codeLine" data-line-num="10">    <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="11">      <span class="hljs-keyword">const</span> num = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>) </span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-keyword">const</span> plusOne = <span class="hljs-title function_">computed</span>(<span class="hljs-function">() =&gt;</span> { </span>
+<span class="code-block-extension-codeLine" data-line-num="13">        <span class="hljs-keyword">return</span> num.<span class="hljs-property">value</span> + <span class="hljs-number">1</span> </span>
+<span class="code-block-extension-codeLine" data-line-num="14">      }) </span>
+<span class="code-block-extension-codeLine" data-line-num="15"></span>
+<span class="code-block-extension-codeLine" data-line-num="16">      <span class="hljs-keyword">function</span> <span class="hljs-title function_">plus</span>(<span class="hljs-params"></span>) { </span>
+<span class="code-block-extension-codeLine" data-line-num="17">        num.<span class="hljs-property">value</span>++ </span>
+<span class="code-block-extension-codeLine" data-line-num="18">      } </span>
+<span class="code-block-extension-codeLine" data-line-num="19">      <span class="hljs-keyword">return</span> { </span>
+<span class="code-block-extension-codeLine" data-line-num="20">        plusOne, </span>
+<span class="code-block-extension-codeLine" data-line-num="21">        plus </span>
+<span class="code-block-extension-codeLine" data-line-num="22">      } </span>
+<span class="code-block-extension-codeLine" data-line-num="23">    } </span>
+<span class="code-block-extension-codeLine" data-line-num="24">  } </span>
+<span class="code-block-extension-codeLine" data-line-num="25"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</code></pre>
+<p><strong>Step 1</strong>：<code>setup</code> 函数体内，<code>computed</code> 函数执行，初始的过程中，生成了一个 <code>computed effect</code>。</p>
+<p><strong>Step 2</strong>：初始化渲染的时候，<code>render</code> 函数访问了 <code>plusOne.value</code>，触发了收集，此时收集的副作用为 <code>render effect</code>，因为是首次访问，所以此时的 <code>self._dirty = true</code> 执行 <code>effect.run()</code> 也就是执行了 <code>getter</code> 函数，得到 <code>_value = 1</code>。</p>
+<p><strong>Step 3</strong>：<code>getter</code> 函数体内访问了 <code>num.value</code> 触发了对 <code>num</code> 的依赖收集，此时收集到的依赖为 <code>computed effect</code>。</p>
+<p><strong>Step 4</strong>：点击按钮，此时 <code>num = 1</code> 触发了 <code>computed effect</code> 的 <code>schduler</code> 调度，因为 <code>_dirty = false</code>，所以触发了 <code>triggerRefValue</code> 的执行，同时，设置 <code>_dirty = true</code>。</p>
+<p><strong>Step 5</strong>：<code>triggerRefValue</code> 执行过程中，会执行 <code>computed effect.run()</code> 触发 <code>getter</code> 函数的执行。因为此时的 <code>_dirty = true</code>，所以 <code>get value</code> 会重新计算 <code>_value</code> 的值为 <code>plusOne.value = 2</code>。</p>
+<p><strong>Step 6</strong>：<code>plusOne.value</code> 值变化后，触发了 <code>render effect.run</code> 重新渲染。</p>
+<p>可以看到 <code>computed</code> 函数通过 <code>_dirty</code> 把 <code>computed</code> 的缓存特性表现得淋漓尽致，只有当 <code>_dirty = true</code> 的时候，才会进行重新计算求值，而 <code>_dirty = true</code> 只有在首次取值或者取值内部依赖发生变化时才会执行。</p>
+<h2 data-id="heading-3">计算属性的执行顺序</h2>
+<p>这里，我们介绍完了 <code>computed</code> 的核心流程，但是细心的同学可能发现，这里我们还漏了一个小的知识点没有介绍，就是在类 <code>ComputedRefImpl</code> 的构造函数中，执行了这样一行代码：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-variable language_">this</span>.<span class="hljs-property">effect</span>.<span class="hljs-property">computed</span> = <span class="hljs-variable language_">this</span></span>
+</code></pre>
+<p>那么这行代码的作用是什么呢？在说这个作用之前，我们先来看一个 <code>demo</code>:</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">const</span> { ref, effect, computed } = <span class="hljs-title class_">Vue</span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"></span>
+<span class="code-block-extension-codeLine" data-line-num="3"><span class="hljs-keyword">const</span> n = <span class="hljs-title function_">ref</span>(<span class="hljs-number">0</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="4"><span class="hljs-keyword">const</span> plusOne = <span class="hljs-title function_">computed</span>(<span class="hljs-function">() =&gt;</span> n.<span class="hljs-property">value</span> + <span class="hljs-number">1</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="5"><span class="hljs-title function_">effect</span>(<span class="hljs-function">() =&gt;</span> {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">  n.<span class="hljs-property">value</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(plusOne.<span class="hljs-property">value</span>)</span>
+<span class="code-block-extension-codeLine" data-line-num="8">})</span>
+<span class="code-block-extension-codeLine" data-line-num="9">n.<span class="hljs-property">value</span>++</span>
+</code></pre>
+<p>小伙伴们可以猜测一下上述代码的打印结果。</p>
+<p>可能有些小伙伴猜测应该是：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang"></span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">1</span>
+<span class="code-block-extension-codeLine" data-line-num="2">1</span>
+<span class="code-block-extension-codeLine" data-line-num="3">2</span>
+</code></pre>
+<p>首先是 <code>effect</code> 函数先执行，触发 <code>n</code> 的依赖收集，然后访问了 <code>plusOne.value</code>，再收集 <code>computed effect</code>。然后执行 <code>n.value++</code> 按照顺序触发 <code>effect</code> 执行，所以理论上先触发 <code>effect</code> 函数内部的回调，再去执行 <code>computed</code> 的重新求值。所以输出是上述结果。</p>
+<p>但事实确实：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang"></span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">1</span>
+<span class="code-block-extension-codeLine" data-line-num="2">2</span>
+<span class="code-block-extension-codeLine" data-line-num="3">2</span>
+</code></pre>
+<p>这就是因为上面那一行代码的作用。<code>effect.computed</code> 的标记保障了 <code>computed effect</code> 会优先于其他普通副作用函数先执行，关于具体的实现，可以看一下 <code>triggerEffects</code> 函数体内对 <code>computed</code> 的特殊处理：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">js</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-js code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-keyword">function</span> <span class="hljs-title function_">triggerEffects</span>(<span class="hljs-params">dep, debuggerEventExtraInfo</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="2">  <span class="hljs-keyword">const</span> effects = <span class="hljs-title function_">isArray</span>(dep) ? dep : [...dep]</span>
+<span class="code-block-extension-codeLine" data-line-num="3">  <span class="hljs-comment">// 确保执行完所有的 computed</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> effect <span class="hljs-keyword">of</span> effects) {</span>
+<span class="code-block-extension-codeLine" data-line-num="5">    <span class="hljs-keyword">if</span> (effect.<span class="hljs-property">computed</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="6">      <span class="hljs-title function_">triggerEffect</span>(effect, debuggerEventExtraInfo)</span>
+<span class="code-block-extension-codeLine" data-line-num="7">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="8">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="9">  <span class="hljs-comment">// 再执行其他的副作用函数</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> effect <span class="hljs-keyword">of</span> effects) {</span>
+<span class="code-block-extension-codeLine" data-line-num="11">    <span class="hljs-keyword">if</span> (!effect.<span class="hljs-property">computed</span>) {</span>
+<span class="code-block-extension-codeLine" data-line-num="12">      <span class="hljs-title function_">triggerEffect</span>(effect, debuggerEventExtraInfo)</span>
+<span class="code-block-extension-codeLine" data-line-num="13">    }</span>
+<span class="code-block-extension-codeLine" data-line-num="14">  }</span>
+<span class="code-block-extension-codeLine" data-line-num="15">}</span>
+</code></pre>
+<h2 data-id="heading-4">总结</h2>
+<p>总而言之，计算属性可以<strong>从状态数据中计算出新数据</strong>，<code>computed</code> 和 <code>methods</code> 的最大差异是它具备缓存性，如果依赖项不变时不会重新计算，而是直接返回缓存的值。</p>
+<p>搞懂了本小节关于 <code>computed</code> 函数的介绍后，相信你已经知道计算属性相对于普通函数的不同之处的原理，在以后的开发中，可以更合理地使用计算属性！</p></div>
+    </body>
+    </html>

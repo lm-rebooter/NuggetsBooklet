@@ -1,4 +1,3 @@
-### 本资源由 itjc8.com 收集整理
 # 进阶 1：HEAD、master 与 branch
 
 这一节主要是几个概念的解释：HEAD、master 以及 Git 中非常重要的一个概念： branch。

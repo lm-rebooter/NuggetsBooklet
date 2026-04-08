@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 冯氏光照模型：为物体增加漫反射效果</h1>
+<p>我们已经学会了给物体增加环境光，但现实世界中一个物体展示出来的颜色除了受环境光的影响，还要看该物体是否被光源直接照射，以及物体本身的材质。如果物体被光源直接照射，它会比没有光源直接照射的物体更亮一些。物体本身如果是光滑的，那么在被光源照射时会显得更加亮，甚至刺眼，比如一面镜子，不锈钢等。假设物体粗糙不平，那么它给人的感觉就平和一些。</p>
+<p>除了物体本身的因素会对最终进入人眼的颜色产生影响，人眼、物体、光源之间的位置也会决定进入人眼的颜色。一个很常见的例子就是光线照射在镜面时，当反射出来的光线没有进入人眼的时候，人眼看到的镜子是正常的。当我们移动自身位置，正好能够让镜子的反射光线进入人眼，此时看到的镜面就会很刺眼。</p>
+<p>现实生活中的光照效果如此复杂，而且受到很多因素的影响，即使在计算机硬件飞速发展的今天，也依然会消耗很大的算力，无法精确模拟这种效果，所以需要一种能够近似现实光照效果的简化模型。业界比较著名的是<code>冯氏光照模型</code>（Phong Lighting Model）。</p>
+<h2 data-id="heading-1">冯氏光照模型</h2>
+<p>冯氏光照模型模拟现实生活中的三种情况，分别是环境光(Ambient)、漫反射(Diffuse)和镜面高光(Specular)。</p>
+<ul>
+<li>环境光：环境光在上节已经讲过了，主要用来模拟晚上或者阴天时，在没有光源直接照射的情况下，我们仍然能够看到物体，只是偏暗一些，通常情况我们使用一个<code>较小的光线因子乘以光源颜色</code>来模拟。</li>
+<li>漫反射：漫反射是为了模拟<code>平行光源</code>对物体的方向性影响，我们都知道，如果光源正对着物体，那么物体正对着光源的部分会更明亮，反之，背对光源的部分会暗一些。在冯氏光照模型中，漫反射分量占主要比重。</li>
+<li>镜面高光：为了模拟光线照射在<code>比较光滑</code>的物体时，物体正对光源的部分会产生<code>高亮效果</code>。该分量颜色会和光源颜色更接近。</li>
+</ul>
+<p>有了冯氏光照模型，我们就可以通过这三个分量模拟出相对真实的光照效果了。</p>
+<p>环境光分量我们上节已经讲过了，本节将跳过，不再赘述，本节主要讲解漫反射分量。</p>
+<h2 data-id="heading-2">计算漫反射光照</h2>
+<p>我们知道，当一束光线照射到物体表面时，光线的入射角越小，该表面的亮度就越大，看上去也就越亮。反之，该表面的亮度就越小，看上去越暗。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181012166661b64f0983a6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这种现象我们该如何在计算机中表示呢？</p>
+<p>关键在于<code>入射角的表示</code>与<code>光线强度的计算</code>。</p>
+<h3 data-id="heading-3">入射角的表示与计算</h3>
+<p>我们需要定义一个类似<code>法线</code>的概念，即<code>法向量</code>，法向量垂直于物体表面，并且朝向平面外部，如下图：</p>
+<p>有了法向量，我们还需要光线照射方向，光线照射方向根据光源的不同有两种表示方法：</p>
+<ul>
+<li>平行光线
+<ul>
+<li>光线方向是全局一致的，与照射点的位置无关，不会随着照射点的不同而不同，不是很真实。</li>
+</ul>
+</li>
+<li>点光源。
+<ul>
+<li>向四周发射光线，光线方向与照射点的位置有关，越靠近光源的部分越亮，光照效果比较真实。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>接下来我们用这二种方式来演示。</p>
+</blockquote>
+<p>有了法向量以及光线照射方向，我们也就知道了入射角，有了入射角，那么反射光强度的计算就轻而易举了。</p>
+<h4 data-id="heading-4">计算反射光强度</h4>
+<p>因为入射角的大小与反射光的亮度成<code>反比</code>，所以我们使用<code>入射角的余弦值</code>来表示漫反射的<code>光线强</code>度。</p>
+<h4 data-id="heading-5">法向量</h4>
+<p>法向量是垂直于顶点所在平面，指向平面外部的向量，只有方向，没有大小，类比光学现象中的法线，如下所示：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018101516675cb83a87cba9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>法向量存储在顶点属性中，为了便于计算入射角的余弦值，法向量的长度通常设置为 1。</p>
+<p>除了<code>法向量</code>，我们还需要知道<code>光线的入射角</code>，即光源的照射方向向量和法向量的夹角，上图中 <img alt="\theta" src="https://juejin.cn/equation?tex=%5Ctheta" loading="lazy" class="medium-zoom-image"> 即是入射角。</p>
+<h4 data-id="heading-6">光源照射方向向量的计算</h4>
+<blockquote>
+<p>光源位置坐标是基于世界坐标系的，所以我们在计算光源入射方向向量的时候，需要将照射点的坐标也转换到世界坐标系中。</p>
+</blockquote>
+<p>在世界坐标系中，假设有一光源 p0 (x0, y0, z0)。</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">p0</span> = vec3(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)<span class="hljs-comment">;</span>
+</code></pre><p>光线照射到物体表面上的一点 p1 (x1, y1, z1)。</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">p1</span> = vec3(<span class="hljs-number">20</span>, <span class="hljs-number">25</span>, <span class="hljs-number">30</span>)<span class="hljs-comment">;</span>
+</code></pre><p>那么光线照射在该点的方向向量为：</p>
+<pre><code lang="ini" class="hljs language-ini">vec3 <span class="hljs-attr">light_Direction</span> = p1 - p0。
+</code></pre><blockquote>
+<p>GLSL中的 <code>+</code>、<code>-</code>、<code>*</code>、<code>/</code> 操作符的左右两个数如果是向量的话，得出的新向量的各个分量等于原有向量逐分量的相减结果。</p>
+</blockquote>
+<p>这样我们就得出了光源的照射方向向量。</p>
+<h4 data-id="heading-7">计算漫反射光照</h4>
+<p>有了入射角，我们的漫反射光照分量就可以求出来了。</p>
+<ul>
+<li>漫反射光照 = 光源颜色 * 漫反射光照强度因子</li>
+<li>漫反射光照强度因子 = 入射角的余弦值</li>
+</ul>
+<p>通常我们如果要求入射角的余弦值，需要首先知道入射角，然后再求入射角的余弦值。不过由于我们使用的是向量，根据向量的运算规则，我们可以使用向量之间的<code>点积</code>，再除以向量的长度之积，就可以得出余弦值。</p>
+<p>我们首先将两个向量<code>归一化</code>，转换成单位向量，然后进行点积计算求出夹角余弦。</p>
+<blockquote>
+<p>归一化向量的实质是将向量的长度转换成 1，得出的一个单位向量。</p>
+</blockquote>
+<p>所以我们需要两个数学方法来操作他们</p>
+<ul>
+<li>dot
+<ul>
+<li>求出两个向量的点积。</li>
+</ul>
+</li>
+<li>normalize
+<ul>
+<li>将向量转化为长度为 1 的向量。</li>
+</ul>
+</li>
+</ul>
+<p>所幸的是，GLSL 内置了这两个函数方便我们计算，一些有名的 3D 框架中也包含这两个方法。</p>
+<p>所以，我们的入射角余弦值就可以这样求出了：</p>
+<pre><code lang="scss" class="hljs language-scss"><span class="hljs-comment">//light_Direction表示光源照射方向向量。</span>
+<span class="hljs-comment">//normal 代表当前入射点的法向量</span>
+vec3 light_Color = <span class="hljs-built_in">vec3</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+<span class="hljs-attribute">float</span> diffuseFactor = <span class="hljs-built_in">dot</span>(normalize(light_Direction), <span class="hljs-built_in">normalize</span>(normal))
+vec4 lightColor = <span class="hljs-built_in">vec4</span>(light_Color * diffuseFactor, <span class="hljs-number">1</span>);
+</code></pre><p>这样我们就求出了漫反射光照的分量，接下来我们实际操作一下，比较一下物体在加入光照前后的效果。</p>
+<h4 data-id="heading-8">平行光漫反射</h4>
+<p>前面讲了那么多理论，是时候上手实践一下了。我们按照 WebGL 的编码流程，看看各个阶段需要做何处理。</p>
+<h5 data-id="heading-9">顶点着色器</h5>
+<p>顶点着色器需要接收顶点法向量，<code>插值化</code>后传递给片元着色器，所以我们需要定义一个<code>varying</code>类型的 3 维向量来表示法向量，完整的顶点着色器如下：</p>
+<pre><code lang="ini" class="hljs language-ini">// 顶点坐标
+attribute vec4 a_Position<span class="hljs-comment">;</span>
+// 顶点颜色
+attribute vec4 a_Color<span class="hljs-comment">;</span>
+// 顶点法向量
+attribute vec3 a_Normal<span class="hljs-comment">;</span>
+// 传递给片元着色器的法向量
+varying vec3 v_Normal<span class="hljs-comment">;</span>
+// 传递给片元着色器的颜色
+varying vec4 v_Color<span class="hljs-comment">;</span>
+// 模型视图投影变换矩阵。
+uniform mat4 u_Matrix<span class="hljs-comment">;</span>
+
+void main(){
+	// 将顶点坐标转化成裁剪坐标系下的坐标。
+	<span class="hljs-attr">gl_Position</span> = u_Matrix * vec4(a_Position, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+	// 将顶点颜色传递给片元着色器
+	<span class="hljs-attr">v_Color</span> = a_Color<span class="hljs-comment">;</span>
+	// 将顶点法向量传递给片元着色器
+	<span class="hljs-attr">v_Normal</span> = a_Normal<span class="hljs-comment">;</span>
+}
+</code></pre><p>细心的读者已经看到了，着色器中我们使用了 GLSL 中的矩阵容器类型 <code>mat4</code>，4 * 4 矩阵，用来表示模型视图投影变换。我们将 4 阶矩阵左乘 4 维向量，即可表示对 4 维向量所表示的点执行 4 阶矩阵所表示的变换。</p>
+<blockquote>
+<p>关于矩阵和向量的运算意义，我会在之后的章节讲解。这里大家只要了解了矩阵左乘向量的意义，并且学会使用就可以了。</p>
+</blockquote>
+<h5 data-id="heading-10">片元着色器</h5>
+<p>漫反射光照分量在片元着色器中计算，按照上面的计算公式，我们需要接收顶点着色器传递过来的插值后的法向量<code>v_Normal</code>和全局光源位置 <code>u_LightPosition</code>，以及光线的颜色<code>u_LightColor</code>。</p>
+<pre><code lang="ini" class="hljs language-ini">// 片元法向量
+varying vec3 v_Normal<span class="hljs-comment">;</span>
+// 片元颜色
+varying vec4 v_Color<span class="hljs-comment">;</span>
+// 光线颜色
+uniform vec3 u_LightColor<span class="hljs-comment">;</span>
+// 光源位置
+uniform vec3 u_LightPosition<span class="hljs-comment">;</span>
+void main(){
+ // 环境光分量
+ vec3 <span class="hljs-attr">ambient</span> = u_AmbientFactor * u_LightColor<span class="hljs-comment">; </span>
+ // 光源照射方向向量
+ vec3 <span class="hljs-attr">lightDirection</span> = u_LightPosition - vec3(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;</span>
+ // 漫反射因子
+ float <span class="hljs-attr">diffuseFactor</span> = dot(normalize(lightDirection), normalize(v_Normal))<span class="hljs-comment">;</span>
+ // 如果是负数，说明光线与法向量夹角大于 90 度，此时照不到平面上，所以没有光照，即黑色。
+ <span class="hljs-attr">diffuseFactor</span> = max(diffuseFactor, <span class="hljs-number">0.0</span>)<span class="hljs-comment">;</span>
+ // 漫反射光照 = 光源颜色 * 漫反射因子。
+ vec3 <span class="hljs-attr">diffuseLightColor</span> = u_LightColor * diffuseFactor<span class="hljs-comment">;</span>
+ // 物体在光照下的颜色 = （环境光照 + 漫反射光照） * 物体颜色。
+ <span class="hljs-attr">gl_FragColor</span> = v_Color * vec4((ambient + diffuseLightColor),<span class="hljs-number">1</span>)<span class="hljs-comment">; 	</span>
+}
+</code></pre><h5 data-id="heading-11">JavaScript部分</h5>
+<p>着色器的程序完成了，接下来我们需要给着色器传递数据了。和之前的例子相比，我们多了两个全局变量<code>光照颜色</code>、<code>光照位置</code>，以及一个顶点属性<code>法向量</code>。</p>
+<p>首先我们给顶点增加法向量：</p>
+<pre><code lang="less" class="hljs language-less"><span class="hljs-selector-tag">var</span> <span class="hljs-selector-tag">normalInput</span> = <span class="hljs-selector-attr">[ [0, 0, 1]</span>, <span class="hljs-comment">//前平面</span>
+ <span class="hljs-selector-attr">[0, 0, -1]</span>, <span class="hljs-comment">//后平面</span>
+ <span class="hljs-selector-attr">[-1, 0, 0]</span>, <span class="hljs-comment">//左平面</span>
+ <span class="hljs-selector-attr">[1, 0, 0]</span>, <span class="hljs-comment">//右平面</span>
+ <span class="hljs-selector-attr">[0, 1, 0]</span>, <span class="hljs-comment">//上平面</span>
+ <span class="hljs-selector-attr">[0, -1, 0]</span> <span class="hljs-comment">//下平面</span>
+];
+</code></pre><p>各个平面的法向量准备好后，我们就可以为组成平面的顶点设置法向量属性了，限于篇幅，此处不再展示源码，大家可以在此处查看完整源代码 <a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">光照演示源码</a>。</p>
+<p>接下来，创建立方体的顶点数据：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">cube</span> = createCube(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)<span class="hljs-comment">;</span>
+</code></pre><p>此处创建一个长、宽、高各位 10 的立方体，坐标原点在立方体中心。</p>
+<p>接下来，我们设置光源位置，我们希望将光源放在立方体前面 z 轴坐标正方向 10 的位置。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.uniform3f(u_LightPosition, 0, 0, 10)<span class="hljs-comment">;</span>
+</code></pre><p>设置光源颜色为白色：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.uniform3f(u_LightColor, 1, 1, 1)<span class="hljs-comment">;</span>
+</code></pre><p>按照这种放置，光源在立方体的正前方，它始终照亮前面。我们看下演示效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667aeaa119882d6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到我们设置的白色光源把立方体的前平面（红色面）照亮了。</p>
+<p>等等，好像有些不对劲。</p>
+<p>一个很大的问题是：立方体在转动时，转动到正对光源方向的平面并没有被照亮。</p>
+<p>大家考虑下为什么？</p>
+<h4 data-id="heading-12">动态计算法向量</h4>
+<p>其实是因为在转动的时候，各个顶点的法向量还是初始值，并没有随着物体的转动而更新，所以即使有平面转动到正对光源的位置，它的法向量还是原先的法向量，计算出来的漫反射光照仍然是 0。所以，我们需要在物体发生变换的时候，让法向量也跟着发生变换。</p>
+<p>我们来修正这个问题，解决办法很简单，只要将立方体的<code>模型变换矩阵</code>传递给<code>顶点着色器</code>，然后与<code>顶点的法向量</code>相乘，即可得到变换后的法向量。</p>
+<blockquote>
+<p>此处又提到了矩阵，可见矩阵的重要性非同一般，在后面的矩阵章节大家一定要认真学习。</p>
+</blockquote>
+<h5 data-id="heading-13">顶点着色器</h5>
+<p>顶点着色器需要做些改动，用来接收模型矩阵，然后将模型矩阵与法向量相乘，得到变换后的法向量，传递给片元着色器。</p>
+<pre><code lang="ini" class="hljs language-ini">// 顶点坐标
+attribute vec4 a_Position<span class="hljs-comment">;</span>
+// 顶点颜色
+attribute vec4 a_Color<span class="hljs-comment">;</span>
+// 顶点法向量
+attribute vec3 a_Normal<span class="hljs-comment">;</span>
+// 传递给片元着色器的法向量
+varying vec3 v_Normal<span class="hljs-comment">;</span>
+// 传递给片元着色器的颜色
+varying vec4 v_Color<span class="hljs-comment">;</span>
+// 模型视图投影变换矩阵。
+uniform mat4 u_Matrix<span class="hljs-comment">;</span>
+// 模型变换矩阵。
+uniform mat4 u_ModelMatrix<span class="hljs-comment">;</span>
+
+void main(){
+	<span class="hljs-attr">gl_Position</span> = u_Matrix * vec4(a_Position, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+	<span class="hljs-attr">v_Color</span> = a_Color<span class="hljs-comment">;</span>
+	<span class="hljs-attr">v_Normal</span> = mat3(u_ModelMatrix) * a_Normal<span class="hljs-comment">;</span>
+}
+</code></pre><h5 data-id="heading-14">片元着色器不需要修改。</h5>
+<h5 data-id="heading-15">JavaScript部分</h5>
+<p>JavaScript 部分需要为顶点着色器传入模型矩阵<code>u_ModelMatrix</code>的值，那么，模型矩阵如何计算呢？还好矩阵库为我们解决了这个问题。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">modelMatirx</span> = matrix.identity()<span class="hljs-comment">;</span>
+<span class="hljs-attr">modelMatrix</span> = matrix.rotateX(modelMatrix, Math.PI / <span class="hljs-number">180</span> * (uniforms[<span class="hljs-string">'xRotation'</span>]))<span class="hljs-comment">;</span>
+</code></pre><p>这里利用了矩阵库的两个方法<code>identity</code> 和 <code>rotateX</code>：</p>
+<ul>
+<li>identity 用来初始化一个 4 维矩阵，对角线分量均为1。</li>
+<li>rotateX 将原来的矩阵沿着 X 轴旋转，得到一个新的矩阵。</li>
+</ul>
+<blockquote>
+<p>关于矩阵的变换细节在后面章节有详细介绍，此处只讲如何使用。</p>
+</blockquote>
+<p>改造完成，我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667af87250c972b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，立方体正对光源的平面都能够被照亮了。</p>
+<h4 data-id="heading-16">点光源的漫反射</h4>
+<p>前面的平行光漫反射可以模拟遥远的光源，比如太阳光，由于太阳距离地球过于遥远，所以光线照射在物体各个点的方向还是可以近似平行的。</p>
+<p>但现实生活中还有很多人造光源，这些光源距离物体比较近，照在物体不同点时，入射角也会不一样，所以光照强度也有差别，在一个平面上产生距离光源近的部分比较亮，距离光源远的部分比较暗的效果。</p>
+<p>接下来我们模拟这种情况。</p>
+<p>我们在之前平行光漫反射的基础上进行改造，大家可以看到，之前的平行光漫反射计算入射角余弦时，是根据<code>光源位置</code>和世界坐标系的<code>原点</code>计算的入射角，只要我们不改变光源位置，那么光线方向就始终一致。</p>
+<p>但是，点光源需要根据光源位置和入射点位置计算入射角，所以我们需要计算出入射点的世界坐标系坐标。</p>
+<p>入射点的世界坐标系坐标的求法也比较简单，只需要左乘模型矩阵就可以了。</p>
+<p>我们对上面的例子加以升级。</p>
+<h5 data-id="heading-17">顶点着色器</h5>
+<p>顶点着色器需要定义一个入射点位置，插值化后传给片元着色器计算入射角的余弦。</p>
+<pre><code lang="ini" class="hljs language-ini">...略
+varying vec3 v_Position<span class="hljs-comment">;</span>
+void main(){
+	...略
+	<span class="hljs-attr">v_Position</span> = vec3(u_ModelMatrix * vec4(a_Position, <span class="hljs-number">1</span>))<span class="hljs-comment">;</span>
+}
+
+</code></pre><h5 data-id="heading-18">片元着色器</h5>
+<p>片元着色器部分的改变只有在计算光源入射方向时，用光源位置减去入射点位置：</p>
+<pre><code lang="ini" class="hljs language-ini">...略
+// 光源照射方向向量
+vec3 <span class="hljs-attr">lightDirection</span> = u_LightPosition - v_Position<span class="hljs-comment">;</span>
+...略
+</code></pre><p>JavaScript部分不需要改动，我们看下演示效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667b07af2e5471b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，在点光源的作用下，平面上的不同点也产生了明暗效果。</p>
+<h4 data-id="heading-19">物体缩放时的表现。</h4>
+<p>结束了吗？当然没有，我们还有一个问题没有解决。</p>
+<p>假设有一物体表面被光线照射：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667bde9ecd79a3d~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>当对物体执行非等比缩放时，顶点法向量也会执行非等比缩放，但是执行缩放后的法向量却不再垂直于顶点所在平面了，如下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667bdf9f3938115~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>法向量不正确带来的后果是光照计算不准，表现如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667c0384e2efd13~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，当我们队球体执行纵向放大的时候，放大的部分虽然正对着光源，但是没有光照。</p>
+<p>因此，我们不能使用简单的模型矩阵来变换顶点法向量了。为了解决这个问题，我们需要专门为法向量的变换定义一个单独的矩阵<code>法线矩阵</code>，法线矩阵可以用「模型矩阵左上角的3维矩阵的逆矩阵的转置矩阵」来代替。听起来比较复杂，其实很简单。</p>
+<ul>
+<li>1、对模型矩阵执行逆矩阵操作。</li>
+<li>2、对上一步得出的矩阵执行转置矩阵。</li>
+<li>3、取上一步得出的矩阵的前三阶矩阵。</li>
+</ul>
+<p>我们修改一下程序，顶点着色器和片元着色器部分不用改变，我们需要修改 JavaScript 部分。</p>
+<p>我们使用矩阵库的两个方法 transpose 和 inverse 来对模型矩阵执行转置操作和求逆操作。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">normalMatrix</span> = matrix.transpose(matrix.inverse(modelMatrix))<span class="hljs-comment">;</span>
+</code></pre><p>然后将该矩阵传递给顶点着色器即可，我们看下修改后的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201810161667bf6e4313e83e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h2 data-id="heading-20">回顾</h2>
+<p>至此，冯氏光照模型的漫反射部分就讲解完了，原理比较简单，但是计算量比较多，尤其是涉及到的一些矩阵运算知识，大家可能有些蒙，这是正常现象。大家只要会使用矩阵就可以了，至于为什么要用矩阵表示变换，之后的章节再向大家揭开这个谜团。</p>
+<p>下一节，我们学习冯氏光照模型的第三个分量，<code>镜面高光</code>。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

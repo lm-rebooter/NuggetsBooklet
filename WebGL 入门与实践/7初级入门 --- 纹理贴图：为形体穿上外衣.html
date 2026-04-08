@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 纹理贴图：为形体穿上外衣</h1>
+<p>之前章节我们学习了绘制单一和渐变颜色的三角形，但是在实际的建模中（游戏居多），模型表面往往都是丰富生动的图片。这就需要有一种机制，能够让我们把图片素材渲染到模型的一个或者多个表面上，这种机制叫做<code>纹理贴图</code>，本节我们学习如何使用 WebGL 进行纹理贴图。</p>
+<h2 data-id="heading-1">目标</h2>
+<p>本节我们的目标是要学会纹理贴图的步骤以及注意事项。</p>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson13.html" title="http://ifanqi.top/webgl/pages/lesson13.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson13.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson13.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>通过本节学习，你将掌握如下内容：</p>
+<ul>
+<li>为什么需要贴图？</li>
+<li>贴图的步骤？</li>
+<li>注意事项。</li>
+</ul>
+<h2 data-id="heading-2">为什么我们需要贴图？</h2>
+<p>之前章节的示例中，为图形增加色彩仅仅是用了简单的单色和渐变色，但是实际应用中往往需要一些丰富多彩的图案，我们不可能用代码来生成这些图案，费时费力，效果也不好。通常我们会借助一些图形软硬件（比如照相机、手机、PS等）准备好图片素材，然后在 WebGL 中把图片应用到图形表面。</p>
+<h2 data-id="heading-3">纹理图片格式</h2>
+<p>WebGL 对图片素材是有严格要求的，图片的宽度和高度必须是 2 的 N 次幂，比如 16 x 16，32 x 32，64 x 64 等。实际上，不是这个尺寸的图片也能进行贴图，但是这样会使得贴图过程更复杂，从而影响性能，所以我们在提供图片素材的时候最好参照这个规范。</p>
+<h2 data-id="heading-4">纹理坐标系统</h2>
+<p>纹理也有一套自己的坐标系统，为了和顶点坐标加以区分，通常把纹理坐标称为 <code>UV</code>，<code>U</code> 代表横轴坐标，<code>V</code> 代表纵轴坐标。</p>
+<ul>
+<li>
+<p>图片坐标系统的特点是：</p>
+<ul>
+<li>左上角为原点(0, 0)。</li>
+<li>向右为横轴正方向，横轴最大值为 1，即横轴坐标范围【1，0】。</li>
+<li>向下为纵轴正方向，纵轴最大值为 1，即纵轴坐标范围【0，1】。</li>
+</ul>
+</li>
+<li>
+<p>纹理坐标系统不同于图片坐标系统，它的特点是：</p>
+<ul>
+<li>左下角为原点(0, 0)。</li>
+<li>向右为横轴正方向，横轴最大值为 1，即横轴坐标范围【1，0】。</li>
+<li>向上为纵轴正方向，纵轴最大值为 1，即纵轴坐标范围【0，1】。</li>
+</ul>
+</li>
+</ul>
+<p>如下图所示：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20191251688415c89af299b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>纹理坐标系统可以理解为一个边长为 1 的正方形。</p>
+<h3 data-id="heading-5">贴图练习</h3>
+<p>接下来，我们学习一下贴图过程。</p>
+<h4 data-id="heading-6">准备图片</h4>
+<p>按照规范所讲，我们首先准备一张符合要求的图片，这里自己制作一个尺寸为宽高分别是 2 的 7 次方，即 128 x 128 的图片。</p>
+<h4 data-id="heading-7">着色器</h4>
+<p>本节片元着色器中，不再是接收单纯的颜色了，而是接收纹理图片对应坐标的颜色值，所以我们的着色器要能够做到如下几点：</p>
+<ul>
+<li>顶点着色器接收顶点的 <code>UV</code> 坐标，并将<code>UV</code>坐标传递给片元着色器。</li>
+<li>片元着色器要能够接收顶点插值后的<code>UV</code>坐标，同时能够在纹理资源找到对应坐标的颜色值。</li>
+</ul>
+<p>我们看下如何修改才能满足这两点：</p>
+<ul>
+<li>顶点着色器</li>
+</ul>
+<p>首先，增加一个名为 v_Uv 的 attribute 变量，接收 JavaScript 传递过来的 UV 坐标。<br>
+其次，增加一个 varying 变量 v_Uv，将 UV 坐标插值化，并传递给片元着色器。</p>
+<pre><code lang="ini" class="hljs language-ini"> precision mediump float<span class="hljs-comment">;</span>
+ // 接收顶点坐标 (x, y)
+ attribute vec2 a_Position<span class="hljs-comment">;</span>
+ // 接收 canvas 尺寸(width, height)
+ attribute vec2 a_Screen_Size<span class="hljs-comment">;</span>
+ // 接收JavaScript传递过来的顶点 uv 坐标。
+ attribute vec2 a_Uv<span class="hljs-comment">;</span>
+ // 将接收的uv坐标传递给片元着色器
+ varying vec2 v_Uv<span class="hljs-comment">;</span>
+ void main(){
+ vec2 <span class="hljs-attr">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">position</span> = position * vec2(<span class="hljs-number">1.0</span>,-<span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">gl_Position</span> = vec4(position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ // 将接收到的uv坐标传递给片元着色器
+ <span class="hljs-attr">v_Uv</span> = a_Uv<span class="hljs-comment">;</span>
+ }
+</code></pre><ul>
+<li>片元着色器
+首先，增加一个 <code>varying</code> 变量 <code>v_Uv</code>，接收顶点着色器插值过来的 <code>UV</code> 坐标。<br>
+其次，增加一个 <code>sampler2D</code> 类型的全局变量 <code>texture</code>，用来接收 JavaScript 传递过来的纹理资源（图片数据）。</li>
+</ul>
+<pre><code lang="csharp" class="hljs language-csharp">	precision mediump <span class="hljs-built_in">float</span>;
+	<span class="hljs-comment">// 接收顶点着色器传递过来的 uv 值。</span>
+	varying vec2 v_Uv;
+	<span class="hljs-comment">// 接收 JavaScript 传递过来的纹理</span>
+	uniform sampler2D texture;
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span>()</span>{
+		<span class="hljs-comment">// 提取纹理对应uv坐标上的颜色，赋值给当前片元（像素）。</span>
+ 		gl_FragColor = texture2D(texture, vec2(v_Uv.x, v_Uv.y));
+	}
+</code></pre><h4 data-id="heading-8">JavaScript 部分</h4>
+<p>我们首先要将纹理图片加载到内存中：</p>
+<pre><code lang="ini" class="hljs language-ini"> var <span class="hljs-attr">img</span> = new Image()<span class="hljs-comment">;</span>
+ <span class="hljs-attr">img.onload</span> = textureLoadedCallback<span class="hljs-comment">;</span>
+ <span class="hljs-attr">img.src</span> = <span class="hljs-string">""</span><span class="hljs-comment">;</span>
+</code></pre><p>图片加载完成之后才能执行纹理的操作，我们将纹理操作放在图片加载完成后的回调函数中，即<code>textureLoadedCallback</code>。</p>
+<p>需要注意的是，我们使用 canvas 读取图片数据是受浏览器跨域限制的，所以首先要解决跨域问题。</p>
+<p>那么，针对图片跨域问题我们可以采用三种方式来解决：</p>
+<p><strong>第一种方法：设置允许 Chrome 跨域加载资源</strong></p>
+<p>在本地开发阶段，我们可以设置 Chrome 浏览器允许加载跨域资源，这样就可以使用磁盘地址来访问页面了。</p>
+<p>mac 设置方法如下：</p>
+<pre><code lang="scss" class="hljs language-scss">open -n /Applications/Google\ Chrome<span class="hljs-selector-class">.app</span>/ <span class="hljs-attr">--args</span> <span class="hljs-attr">--disable-web-security</span> <span class="hljs-attr">--user-data-dir</span>(指定目录,例如 = /user/Documents)
+</code></pre><p><strong>第二种方法：图片资源和页面资源放在同一个域名下</strong></p>
+<p>除了设置 Chrome，我们还可以将图片资源和页面资源部署在同一域名下，这样就不存在跨域问题了。</p>
+<p><strong>第三种方法：为图片资源设置跨域响应头</strong></p>
+<p>实际生产环境中，图片资源往往部署在 CDN 上，图片和页面分属不同域，这种情况的跨域访问我们就需要正面解决了。</p>
+<p>假设我们的图片资源所属域名为：<code>https://cdn-pic.com</code>，页面所属域名为 <code>https://test.com</code>。</p>
+<p>解决方法如下：</p>
+<ul>
+<li>首先：为图片资源设置跨域响应头：</li>
+</ul>
+<pre><code lang="arduino" class="hljs language-arduino">Access-Control-Allow-Origin：`https:<span class="hljs-comment">//test.com`</span>
+</code></pre><ul>
+<li>其次：在图片加载时，为 img 设置 crossOrigin 属性。</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">img</span> = new Image()<span class="hljs-comment">;</span>
+<span class="hljs-attr">img.crossOrigin</span> = <span class="hljs-string">''</span><span class="hljs-comment">;</span>
+<span class="hljs-attr">img.src</span> = <span class="hljs-string">'https://cdn-pic.com/test.jpg'</span>
+</code></pre><p>做完这两步，我们就可以真正的加载跨域图片了。
+解决了图片加载跨域问题，我们就可以开始纹理贴图了。</p>
+<p>我们定义六个顶点，这六个顶点能够组成一个矩形，并为顶点指定纹理坐标。</p>
+<pre><code lang="csharp" class="hljs language-csharp"> <span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span> <span class="hljs-comment">//V3</span>
+ ]
+</code></pre><p>按照惯例，我们该为着色器传递数据了。</p>
+<blockquote>
+<p>经历过前面几个小节的练习，相信大家对操作 WebGL 的代码已经很熟悉了。</p>
+</blockquote>
+<p>加载图片</p>
+<pre><code lang="ini" class="hljs language-ini">	var <span class="hljs-attr">img</span> = new Image()<span class="hljs-comment">;</span>
+	<span class="hljs-attr">img.onload</span> = textureLoadedCallback<span class="hljs-comment">;</span>
+	<span class="hljs-attr">img.src</span>=<span class="hljs-string">""</span><span class="hljs-comment">;</span>
+</code></pre><blockquote>
+<p>您或许看到我并没有为 img 设置 <code>crossOrigin</code> 属性，原因是在我本地，图片和页面在同一个域名下，所以不需要额外设置。</p>
+</blockquote>
+<p>图片加载完成后，我们进行如下操作：</p>
+<p>首先：激活 0 号纹理通道<code>gl.TEXTURE0</code>，0 号纹理通道是默认值，本例也可以不设置。</p>
+<pre><code lang="ini" class="hljs language-ini">	gl.activeTexture(gl.TEXTURE0)<span class="hljs-comment">;</span>
+</code></pre><p>然后创建一个纹理对象：</p>
+<pre><code lang="ini" class="hljs language-ini">	var <span class="hljs-attr">texture</span> = gl.createTexture()<span class="hljs-comment">;</span>
+</code></pre><p>之后将创建好的纹理对象<code>texture</code>绑定 到<code>当前纹理绑定点</code>上，即 <code>gl.TEXTURE_2D</code>。绑定完之后对当前纹理对象的所有操作，都将基于 <code>texture</code> 对象，直到重新绑定。</p>
+<pre><code lang="ini" class="hljs language-ini">	gl.bindTexture(gl.TEXTURE_2D, texture)<span class="hljs-comment">;</span>
+</code></pre><p>为片元着色器传递图片数据：</p>
+<pre><code lang="css" class="hljs language-css">	gl<span class="hljs-selector-class">.texImage2D</span>(gl<span class="hljs-selector-class">.TEXTURE_2D</span>, <span class="hljs-number">0</span>, gl<span class="hljs-selector-class">.RGBA</span>, gl<span class="hljs-selector-class">.RGBA</span>, gl<span class="hljs-selector-class">.UNSIGNED_BYTE</span>, <span class="hljs-selector-tag">img</span>);
+</code></pre><p>gl.texImage2D 方法是一个重载方法，其中有一些参数可以省略：</p>
+<blockquote>
+<p>glTexImage2D(GLenum target, GLint level, GLint components, GLsizei width, glsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>target</td>
+<td>纹理类型，TEXTURE_2D代表2维纹理</td>
+</tr>
+<tr>
+<td>level</td>
+<td>表示多级分辨率的纹理图像的级数，若只有一种分辨率，则 level 设为 0，通常我们使用一种分辨率</td>
+</tr>
+<tr>
+<td>components</td>
+<td>纹理通道数，通常我们使用 RGBA 和 RGB 两种通道</td>
+</tr>
+<tr>
+<td>width</td>
+<td>纹理宽度，可省略</td>
+</tr>
+<tr>
+<td>height</td>
+<td>纹理高度，可省略</td>
+</tr>
+<tr>
+<td>border</td>
+<td>边框，通常设置为0，可省略</td>
+</tr>
+<tr>
+<td>format</td>
+<td>纹理映射的格式</td>
+</tr>
+<tr>
+<td>type</td>
+<td>纹理映射的数据类型</td>
+</tr>
+<tr>
+<td>pixels</td>
+<td>纹理图像的数据</td>
+</tr>
+</tbody>
+</table>
+<p>上面这段代码的意思是，我们将 img 变量指向的图片数据传递给片元着色器，取对应纹理坐标的 RGBA 四个通道值，赋给片元，每个通道的数据格式是无符号单字节整数。</p>
+<p>接下来，我们设置图片在放大或者缩小时采用的算法<code>gl.LINEAR</code>。</p>
+<blockquote>
+<p>gl.LINEAR 代表采用最靠近象素中心的四个象素的加权平均值，这种效果表现的更加平滑自然。
+gl.NEAREST 采用最靠近象素中心的纹素，该算法可能使图像走样，但是执行效率高，不需要额外的计算。</p>
+</blockquote>
+<pre><code lang="ini" class="hljs language-ini">gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)<span class="hljs-comment">;</span>
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)<span class="hljs-comment">;</span>
+</code></pre><p>之后为片元着色器传递 0 号纹理单元：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.uniform1i(uniformTexture, 0)<span class="hljs-comment">;</span>
+</code></pre><blockquote>
+<p>这里，我们为片元着色器的 texture 属性传递 0，此处应该与激活纹理时的通道值保持一致。</p>
+</blockquote>
+<p>图片作为纹理的渲染效果如下：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20191251688422a4034bef1~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>可以看到，我们绘制的矩形表面贴上了纹理。</p>
+<p>您或许有疑问，为什么我只是指定了三角形的顶点对应的 UV 坐标，GPU 就能够将纹理图片的其他坐标的颜色贴到三角形表面呢？</p>
+<p>这其实，就回归到了<code>渲染管线</code>这个概念上，在第一节我画了个图，大致阐述了渲染管线的工作方式，但其实在光栅化环节上有些细节没有说到。
+在光栅化阶段，GPU 处理两件事情：</p>
+<ul>
+<li>计算图元覆盖了哪些像素。</li>
+<li>根据顶点着色器的顶点位置计算每个像素的纹理坐标的插值。</li>
+</ul>
+<blockquote>
+<p>注：片元可以理解为像素。</p>
+</blockquote>
+<p>光栅化结束后，来到片元着色器，片元着色器此时知道每个像素对应的 <code>UV</code> 坐标，根据当前像素的 <code>UV</code> 坐标，找到纹理资源对应坐标的颜色信息，赋值给当前像素，从而能够为图元表面的每个像素贴上正确的纹理颜色。</p>
+<h2 data-id="heading-9">注意事项</h2>
+<p>我们总结一下贴图的注意点：</p>
+<ul>
+<li>图片最好满足 2^m x 2^n 的尺寸要求。</li>
+<li>图片数据首先加载到内存中，才能够在纹理中使用。</li>
+<li>图片资源加载前要先解决跨域问题。</li>
+</ul>
+<h2 data-id="heading-10">回顾</h2>
+<p>至此，我们使用 WebGL 绘制平面的课程就结束了，总结一下之前章节所学的知识点：</p>
+<ul>
+<li>GLSL：着色器
+<ul>
+<li>数据类型
+<ul>
+<li>vec2：2 维向量容器。</li>
+<li>vec4：4 维向量容器。</li>
+<li>运算法则：向量与向量、向量与浮点数的运算法则。</li>
+</ul>
+</li>
+<li>修饰符
+<ul>
+<li>attribute：属性修饰符。</li>
+<li>uniform：全局变量修饰符。</li>
+<li>varying：顶点着色器传递给片元着色器的属性修饰符。</li>
+</ul>
+</li>
+<li>precision：设置精度
+<ul>
+<li>highp：高精度。</li>
+<li>mediump：中等精度。</li>
+<li>lowp：低精度。</li>
+</ul>
+</li>
+<li>内置变量
+<ul>
+<li>gl_Position：顶点坐标。</li>
+<li>gl_FragColor：片元颜色。</li>
+<li>gl_PointSize：顶点大小。</li>
+</ul>
+</li>
+<li>屏幕坐标系到设备坐标系的转换。
+<ul>
+<li>屏幕坐标系左上角为原点，X 轴坐标向右为正，Y 轴坐标向下为正。</li>
+<li>坐标范围：
+<ul>
+<li>X轴：【0, canvas.width】</li>
+<li>Y轴：【0, canvas.height】</li>
+</ul>
+</li>
+<li>设备坐标系以屏幕中心为原点，X 轴坐标向右为正，Y 轴向上为正。</li>
+<li>坐标范围是
+<ul>
+<li>X轴：【-1, 1】。</li>
+<li>Y轴：【-1, 1】。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>WebGL API
+<ul>
+<li>shader：着色器对象
+<ul>
+<li>gl.createShader：创建着色器。</li>
+<li>gl.shaderSource：指定着色器源码。</li>
+<li>gl.compileShader：编译着色器。</li>
+</ul>
+</li>
+<li>program：着色器程序
+<ul>
+<li>gl.createProgram：创建着色器程序。</li>
+<li>gl.attachShader：链接着色器对象。</li>
+<li>gl.linkProgram：链接着色器程序。</li>
+<li>gl.useProgram：使用着色器程序。</li>
+</ul>
+</li>
+<li>attribute：着色器属性
+<ul>
+<li>gl.getAttribLocation：获取顶点着色器中的属性位置。</li>
+<li>gl.enableVertexAttribArray：启用着色器属性。</li>
+<li>gl.vertexAttribPointer：设置着色器属性读取 buffer 的方式。</li>
+<li>gl.vertexAttrib2f：给着色器属性赋值，值为两个浮点数。</li>
+<li>gl.vertexAttrib3f：给着色器属性赋值，值为三个浮点数。</li>
+</ul>
+</li>
+<li>uniform：着色器全局属性
+<ul>
+<li>gl.getUniformLocation：获取全局变量位置。</li>
+<li>gl.uniform4f：给全局变量赋值 4 个浮点数。</li>
+<li>gl.uniform1i：给全局变量赋值 1 个整数。</li>
+</ul>
+</li>
+<li>buffer：缓冲区
+<ul>
+<li>gl.createBuffer：创建缓冲区对象。</li>
+<li>gl.bindBuffer：将缓冲区对象设置为当前缓冲。</li>
+<li>gl.bufferData：向当前缓冲对象复制数据。</li>
+</ul>
+</li>
+<li>clear：清屏
+<ul>
+<li>gl.clearColor：设置清除屏幕的背景色。</li>
+<li>gl.clear：清除屏幕。</li>
+</ul>
+</li>
+<li>draw：绘制
+<ul>
+<li>gl.drawArrays：数组绘制方式。</li>
+<li>gl.drawElements：索引绘制方式。</li>
+</ul>
+</li>
+<li>图元
+<ul>
+<li>gl.POINTS：点。</li>
+<li>gl.LINE：基本线段。</li>
+<li>gl.LINE_STRIP：连续线段。</li>
+<li>gl.LINE_LOOP：闭合线段。</li>
+<li>gl.TRIANGLES：基本三角形。</li>
+<li>gl.TRIANGLE_STRIP：三角带。</li>
+<li>gl.TRIANGLE_FAN：三角扇。</li>
+</ul>
+</li>
+<li>纹理
+<ul>
+<li>gl.createTexture：创建纹理对象。</li>
+<li>gl.activeTexture：激活纹理单元。</li>
+<li>gl.bindTexture：绑定纹理对象到当前纹理。</li>
+<li>gl.texImage2D：将图片数据传递给 GPU。</li>
+<li>gl.texParameterf：设置图片放大缩小时的过滤算法。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>以上是截止到目前所涉及的知识点，大家可以按照自己的想法做些小例子，熟练掌握它们。</p>
+<p>接下来我们开始学习如何使用基本图元构建 3D 模型。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

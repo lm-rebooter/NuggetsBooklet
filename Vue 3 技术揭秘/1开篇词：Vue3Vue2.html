@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h2 data-id="heading-0">Vue 2 即将成为过去</h2>
+<p>自从 <strong>2020 年 9 月 18 日</strong> <code>Vue 3</code> 正式发布以来，已经有两年多时间了，终于在&nbsp;<strong>2022 年 2 月 7 日</strong> Vue 作者发布了一则消息：<strong><code>Vue 3</code> 将成为新的默认版本</strong>。与此同时，Vue 相关官方周边的核心库 <code>latest</code>&nbsp;发布标签将指向其 Vue 3 的兼容版本。</p>
+<p>另外，随着 Vue 2.7 的发布，<code>Vue 2.7</code> 已经成为 Vue 2.x 的最终次要版本。在这个版本之后，Vue 2 进入了 <code>LTS（长期支持）</code>，并且将不再接收新功能。这意味着 <code>Vue 2.x 将在 2023 年底结束其生命周期</code>。</p>
+<p>可以预见：在不久的将来，Vue 2.x 将会逐步淡出江湖，<code>Vue 3</code> 将会成为代替 Vue 2 的主流框架。</p>
+<p><code>Vue 3</code> 作为一个全球最顶尖的前端框架之一，整体的思想理念、程序设计、细节的取舍、API 设计、项目的工程考量都是非常优秀的！通过对源码的阅读，不仅仅可以让我们快速建立起对 <code>Vue 3</code> 运行机制的深入了解，还可以从中学习到很多程序设计的宝贵经验和架构思想！</p>
+<p>所以，让我们快人一步，现在就开始对 Vue 3 的深耕，去学习一下 Vue 3 的核心技术实现原理，以及一些相对于 Vue 2 的改变之处。</p>
+<h2 data-id="heading-1">全面拥抱 Vue 3</h2>
+<p><code>Vue 3</code> 整体的设计相对于 <code>Vue 2.x</code> 有着不小的变化，在开启 <code>Vue 3</code> 技术揭秘的旅途之前，我们先着重介绍几个相对于 <code>Vue 2.x</code> 而言较大的几个变化，这里的介绍不会深入到源码的细节，旨在帮助小伙伴们快速建立起对 <code>Vue 3</code> 的一些前置认知，更多的细节变化和设计原理我们将在接下来的课程中为大家渐进式地揭开面纱！</p>
+<h3 data-id="heading-2">1. 源码组织上的变化</h3>
+<p>在 <code>Vue 2</code> 中，所有的源码都存在在 <code>src</code> 目录下：</p>
+<img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpddc2d129b1664b31935609ae4e713856~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" width="80%" loading="lazy" class="medium-zoom-image">
+<p><code>Vue 3</code> 相对于 <code>Vue 2</code> 使用 <code>monorepo</code> 的方式<strong>进行包管理</strong>，使用 <code>monorepo</code> 的管理方式，使得 <code>Vue 3</code> 源码模块职责显得特别地清晰明了，每个包独立负责一块核心功能的实现，方便开发和测试。如下图：</p>
+<p><img src="p1-juejin.byteimg.comtos-cn-i-k3u1fbpfcpa0dd5ab8f7fe4d45929bdd734fd01a12~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>比如，<code>compiler-core</code> 专职负责与平台无关层的渲染器底层，对外提供统一调用函数，内部通过完整的测试用例保障功能的稳定性。而 <code>compiler-dom</code> 和 <code>compiler-ssr</code> 则依托于 <code>compiler-core</code> 分别实现浏览器和服务端侧的渲染器上层逻辑，模块核心职责清晰明了，提高了整体程序运行的健壮性！</p>
+<h3 data-id="heading-3">2. 引入 Composition API</h3>
+<p>在 <code>Vue 2.7</code> 之前，我们去开发 Vue 应用，都是通过 <code>data</code>、<code>computed</code>、<code>methods</code>……这样的选项分类的方式来实现一个组件的开发。其实这样对于没有大量状态逻辑维护、复用的组件来说，是比较直观的组织方式，但是一旦遇到需要大量维护、复用状态的组件来说，这无疑增加了维护的成本和风险。</p>
+<p>组合式 API (<code>Composition API</code>) 是一系列 API 的集合，使我们可以使用函数而不是声明选项的方式书写 Vue 组件。通过下图我们可以清晰地看出来二者的区别：</p>
+<p><img src="p6-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf13d16b31d3443ec9c29935870c9f7bb~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>但 <code>Composition API</code> 也并不是“银弹”，它也有自己适合的场景，所以 <code>Vue 3</code> 也是在实现层面做到了兼容 <code>Options API</code> 的写法。相对而言，<code>Composition API</code> 更适用于大型的项目，因为大型项目可能会产生大量状态逻辑的维护，甚至跨组件的逻辑复用；而对于中小型项目来说，<code>Options API</code> 可以在你写代码时减少思考组织状态逻辑的方式，也是一种不错的选择。</p>
+<h3 data-id="heading-4">3. 运作机制的变化</h3>
+<p>熟悉 Vue 2 源码的同学大致清楚 <code>Vue 2</code>的核心运作机制可以抽象为下图所示的样子：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfa72bab154fd45a7b793d6f33aaa3043~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p><code>Vue 3</code> 则在底层实现中，摒弃了 Vue 2 的部分实现，<strong>采用全新的响应式模型进行重写</strong>。这里我根据 Vue 3 的运行机制，也简单画了一张 Vue 3 的宏观草图，如下所示：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp4b410850bd4d4e2198e62e4c38bf8b92~tplv-k3u1fbpfcp-jj-mark1512000q75.awebp" alt="image.png" loading="lazy" class="medium-zoom-image"></p>
+<p>可以粗略地看到：</p>
+<ul>
+<li>首先，之前通过 <code>new Vue()</code> 来创建 Vue 对象的方式已经变成了 <code>createApp</code>；</li>
+<li>其次，在响应式部分也由原来的 <code>Object.defineProperty</code> 改成了现在的 <code>Proxy API</code> 实现；</li>
+<li>另外，针对响应式依赖收集的内容，在 Vue 2.x 版本中是收集了 <code>Watcher</code>，而到了 Vue 3 中则成了 <code>effect</code>。</li>
+</ul>
+<p>除了上面所说的这些变化外，Vue 3 不管是在编译时、还是在运行时都<strong>做了大量的性能优化</strong>。例如，在编译时，Vue 3 通过标记 <code>/*#__PURE__*/</code> 来为打包工具提供良好的 <code>Tree-Shaking</code> 机制，通过 <code>静态提升</code> 机制，避免了大量静态节点的重复渲染执行；在运行时，又通过批量队列更新机制优化了更新性能，通过 <code>PatchFlags</code> 和 <code>dynamicChildren</code> 进行了 <code>diff</code> 的靶向更新……</p>
+<p>上面的内容有些不理解了？没关系，等等，这里先卖个关子。相信你一定可以在学习本小册的过程中，得到你的答案！</p>
+<h2 data-id="heading-5">开启小册的前置准备</h2>
+<p>如果你已经迫不及待地想赶紧开始学习 Vue 3 的设计核心，请稍安勿躁，我们还需要做一些准备工作，以方便你在后续的学习中更容易理解文中的内容。</p>
+<p>首先，本小册中所有关于 Vue 的源码所依托的版本是 <strong><code>3.2.47</code></strong>。然后你也可以去 GitHub 上 clone 下来 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvuejs%2Fcore" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vuejs/core" ref="nofollow noopener noreferrer">Vue 3 源码</a>。</p>
+<p>clone 下来后，我们可以简单看一下项目的目录结构：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">bash</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-bash code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1">├── packages              </span>
+<span class="code-block-extension-codeLine" data-line-num="2">│   ├── compiler-core     <span class="hljs-comment"># 与平台无关的编译器实现的核心函数包</span></span>
+<span class="code-block-extension-codeLine" data-line-num="3">│   ├── compiler-dom      <span class="hljs-comment"># 浏览器相关的编译器上层内容</span></span>
+<span class="code-block-extension-codeLine" data-line-num="4">│   ├── compiler-sfc      <span class="hljs-comment"># 单文件组件的编译器</span></span>
+<span class="code-block-extension-codeLine" data-line-num="5">│   ├── compiler-ssr      <span class="hljs-comment"># 服务端渲染相关的编译器实现</span></span>
+<span class="code-block-extension-codeLine" data-line-num="6">│   ├── global.d.ts       <span class="hljs-comment"># ts 相关一些声明文件</span></span>
+<span class="code-block-extension-codeLine" data-line-num="7">│   ├── reactivity        <span class="hljs-comment"># 响应式核心包</span></span>
+<span class="code-block-extension-codeLine" data-line-num="8">│   ├── runtime-core      <span class="hljs-comment"># 与平台无关的渲染器相关的核心包</span></span>
+<span class="code-block-extension-codeLine" data-line-num="9">│   ├── runtime-dom       <span class="hljs-comment"># 浏览器相关的渲染器部分</span></span>
+<span class="code-block-extension-codeLine" data-line-num="10">│   ├── runtime-test      <span class="hljs-comment"># 渲染器测试相关代码</span></span>
+<span class="code-block-extension-codeLine" data-line-num="11">│   ├── server-renderer   <span class="hljs-comment"># 服务端渲染相关的包</span></span>
+<span class="code-block-extension-codeLine" data-line-num="12">│   ├── sfc-playground    <span class="hljs-comment"># 单文件组件演练场 </span></span>
+<span class="code-block-extension-codeLine" data-line-num="13">│   ├── shared            <span class="hljs-comment"># 工具库相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="14">│   ├── size-check        <span class="hljs-comment"># 检测代码体积相关</span></span>
+<span class="code-block-extension-codeLine" data-line-num="15">│   ├── template-explorer <span class="hljs-comment"># 演示模板编译成渲染函数相关的包</span></span>
+<span class="code-block-extension-codeLine" data-line-num="16">│   └── vue               <span class="hljs-comment"># 包含编译时和运行时的发布包</span></span>
+</code></pre>
+<p>本小册介绍的核心内容主要分布在 <code>compiler-core</code>、<code>compiler-dom</code>、<code>reactivity</code>、 <code>runtime-core</code>、<code>runtime-dom</code> 这几个包中，这些也是 Vue 的<strong>核心</strong>。</p>
+<p>另外，在阅读过程中，你也可以一边看、一边自己调试，Vue 为我们提供了很多开发使用的示例，我们可以通过下面的命令来运行它：</p>
+<pre><div class="code-block-extension-header" style="background-color: rgb(248, 248, 248);"><div class="code-block-extension-headerLeft"></div><div class="code-block-extension-headerRight"><span class="code-block-extension-lang">shell</span><div class="code-block-extension-copyCodeBtn">复制代码</div></div></div><code class="hljs language-shell code-block-extension-codeShowNum"><span class="code-block-extension-codeLine" data-line-num="1"><span class="hljs-meta prompt_">$ </span><span class="bash">npm run dev <span class="hljs-comment"># 开启 vue dev 环境 watch</span></span></span>
+<span class="code-block-extension-codeLine" data-line-num="2"><span class="hljs-meta prompt_">$ </span><span class="bash">npm run serve <span class="hljs-comment"># 启动 example 示例的服务器</span></span></span>
+</code></pre>
+<p>接着，我们只需要访问 <code>packages/vue/examples/**</code> 中的示例就可以在线调试 Vue 代码了。</p>
+<p>最后，让我们一起进入 Vue 3 的世界，探索其中的奥秘吧！</p></div>
+    </body>
+    </html>

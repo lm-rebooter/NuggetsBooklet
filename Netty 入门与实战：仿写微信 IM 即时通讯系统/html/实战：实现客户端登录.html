@@ -1,0 +1,145 @@
+<h1 class="heading">实战：Netty 实现客户端登录</h1>
+<blockquote>
+<p>本小节，我们来实现客户端登录到服务端的过程</p>
+</blockquote>
+<h2 class="heading">登录流程</h2>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/14/16535d7424e02d3a?w=1240&amp;h=426&amp;f=png&amp;s=54856"><figcaption></figcaption></figure><p></p>
+<p>从上图中我们可以看到，客户端连接上服务端之后</p>
+<ol>
+<li>客户端会构建一个登录请求对象，然后通过编码把请求对象编码为 ByteBuf，写到服务端。</li>
+<li>服务端接受到 ByteBuf 之后，首先通过解码把 ByteBuf 解码为登录请求响应，然后进行校验。</li>
+<li>服务端校验通过之后，构造一个登录响应对象，依然经过编码，然后再写回到客户端。</li>
+<li>客户端接收到服务端的之后，解码 ByteBuf，拿到登录响应响应，判断是否登陆成功</li>
+</ol>
+<h2 class="heading">逻辑处理器</h2>
+<p>接下来，我们分别实现一下上述四个过程，开始之前，我们先来回顾一下客户端与服务端的启动流程，客户端启动的时候，我们会在引导类 <code>Bootstrap</code> 中配置客户端的处理逻辑，本小节中，我们给客户端配置的逻辑处理器叫做 <code>ClientHandler</code></p>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ClientHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+}
+</code></pre><p>然后，客户端启动的时候，我们给 <code>Bootstrap</code> 配置上这个逻辑处理器</p>
+<pre><code class="hljs java" lang="java">bootstrap.handler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(SocketChannel ch)</span> </span>{
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> ClientHandler());
+            }
+        });
+
+</code></pre><p>这样，在客户端侧，Netty 中 IO 事件相关的回调就能够回调到我们的 <code>ClientHandler</code>。</p>
+<p>同样，我们给服务端引导类 <code>ServerBootstrap</code> 也配置一个逻辑处理器 <code>ServerHandler</code></p>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServerHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ChannelInboundHandlerAdapter</span> </span>{
+}
+
+
+serverBootstrap.childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+            <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+                ch.pipeline().addLast(<span class="hljs-keyword">new</span> ServerHandler());
+            }
+        }
+
+</code></pre><p>这样，在服务端侧，Netty 中 IO 事件相关的回调就能够回调到我们的 <code>ServerHandler</code>。</p>
+<p>接下来，我们就围绕这两个 Handler 来编写我们的处理逻辑。</p>
+<h2 class="heading">客户端发送登录请求</h2>
+<h3 class="heading">客户端处理登录请求</h3>
+<p>我们实现在客户端连接上服务端之后，立即登录。在连接上服务端之后，Netty 会回调到 <code>ClientHandler</code> 的 <code>channelActive()</code> 方法，我们在这个方法体里面编写相应的逻辑</p>
+<blockquote>
+<p>ClientHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelActive</span><span class="hljs-params">(ChannelHandlerContext ctx)</span> </span>{
+    System.out.println(<span class="hljs-keyword">new</span> Date() + <span class="hljs-string">": 客户端开始登录"</span>);
+
+    <span class="hljs-comment">// 创建登录对象</span>
+    LoginRequestPacket loginRequestPacket = <span class="hljs-keyword">new</span> LoginRequestPacket();
+    loginRequestPacket.setUserId(UUID.randomUUID().toString());
+    loginRequestPacket.setUsername(<span class="hljs-string">"flash"</span>);
+    loginRequestPacket.setPassword(<span class="hljs-string">"pwd"</span>);
+
+    <span class="hljs-comment">// 编码</span>
+    ByteBuf buffer = PacketCodeC.INSTANCE.encode(ctx.alloc(), loginRequestPacket);
+
+    <span class="hljs-comment">// 写数据</span>
+    ctx.channel().writeAndFlush(buffer);
+}
+</code></pre><p>这里，我们按照前面所描述的三个步骤来分别实现，在编码的环节，我们把 <code>PacketCodeC</code> 变成单例模式，然后把 <code>ByteBuf</code> 分配器抽取出一个参数，这里第一个实参 <code>ctx.alloc()</code> 获取的就是与当前连接相关的 <code>ByteBuf</code> 分配器，建议这样来使用。</p>
+<p>写数据的时候，我们通过 <code>ctx.channel()</code> 获取到当前连接（Netty 对连接的抽象为 Channel，后面小节会分析），然后调用 <code>writeAndFlush()</code> 就能把二进制数据写到服务端。这样，客户端发送登录请求的逻辑就完成了，接下来，我们来看一下，服务端接受到这个数据之后是如何来处理的。</p>
+<h3 class="heading">服务端处理登录请求</h3>
+<blockquote>
+<p>ServerHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> </span>{
+    ByteBuf requestByteBuf = (ByteBuf) msg;
+
+    <span class="hljs-comment">// 解码</span>
+    Packet packet = PacketCodeC.INSTANCE.decode(requestByteBuf);
+
+    <span class="hljs-comment">// 判断是否是登录请求数据包</span>
+    <span class="hljs-keyword">if</span> (packet <span class="hljs-keyword">instanceof</span> LoginRequestPacket) {
+        LoginRequestPacket loginRequestPacket = (LoginRequestPacket) packet;
+
+        <span class="hljs-comment">// 登录校验</span>
+        <span class="hljs-keyword">if</span> (valid(loginRequestPacket)) {
+            <span class="hljs-comment">// 校验成功</span>
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// 校验失败</span>
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">valid</span><span class="hljs-params">(LoginRequestPacket loginRequestPacket)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+}
+</code></pre><p>我们向服务端引导类 <code>ServerBootstrap</code> 中添加了逻辑处理器 <code>ServerHandler</code> 之后，Netty 在收到数据之后，会回调 <code>channelRead()</code> 方法，这里的第二个参数 <code>msg</code>，在我们这个场景中，可以直接强转为 <code>ByteBuf</code>，为什么 Netty 不直接把这个参数类型定义为 <code>ByteBuf</code> ？我们在后续的小节会分析到。</p>
+<p>拿到 <code>ByteBuf</code> 之后，首先要做的事情就是解码，解码出 java 数据包对象，然后判断如果是登录请求数据包 <code>LoginRequestPacket</code>，就进行登录逻辑的处理，这里，我们假设所有的登录都是成功的，<code>valid()</code> 方法返回 true。
+服务端校验通过之后，接下来就需要向客户端发送登录响应，我们继续编写服务端的逻辑。</p>
+<h2 class="heading">服务端发送登录响应</h2>
+<h3 class="heading">服务端处理登录响应</h3>
+<blockquote>
+<p>ServerHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">LoginResponsePacket loginResponsePacket = <span class="hljs-keyword">new</span> LoginResponsePacket();
+loginResponsePacket.setVersion(packet.getVersion());
+<span class="hljs-keyword">if</span> (valid(loginRequestPacket)) {
+    loginResponsePacket.setSuccess(<span class="hljs-keyword">true</span>);
+} <span class="hljs-keyword">else</span> {
+    loginResponsePacket.setReason(<span class="hljs-string">"账号密码校验失败"</span>);
+    loginResponsePacket.setSuccess(<span class="hljs-keyword">false</span>);
+}
+<span class="hljs-comment">// 编码</span>
+ByteBuf responseByteBuf = PacketCodeC.INSTANCE.encode(ctx.alloc(), loginResponsePacket);
+ctx.channel().writeAndFlush(responseByteBuf);
+</code></pre><p>这段逻辑仍然是在服务端逻辑处理器 <code>ServerHandler</code> 的 <code>channelRead()</code> 方法里，我们构造一个登录响应包 <code>LoginResponsePacket</code>，然后在校验成功和失败的时候分别设置标志位，接下来，调用编码器把 Java 对象编码成 <code>ByteBuf</code>，调用 <code>writeAndFlush()</code> 写到客户端，至此，服务端的登录逻辑编写完成，接下来，我们还有最后一步，客户端处理登录响应。</p>
+<h3 class="heading">客户端处理登录响应</h3>
+<blockquote>
+<p>ClientHandler.java</p>
+</blockquote>
+<p>客户端接收服务端数据的处理逻辑也是在 <code>ClientHandler</code> 的 <code>channelRead()</code> 方法</p>
+<pre><code class="hljs java" lang="java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead</span><span class="hljs-params">(ChannelHandlerContext ctx, Object msg)</span> </span>{
+    ByteBuf byteBuf = (ByteBuf) msg;
+
+    Packet packet = PacketCodeC.INSTANCE.decode(byteBuf);
+
+    <span class="hljs-keyword">if</span> (packet <span class="hljs-keyword">instanceof</span> LoginResponsePacket) {
+        LoginResponsePacket loginResponsePacket = (LoginResponsePacket) packet;
+
+        <span class="hljs-keyword">if</span> (loginResponsePacket.isSuccess()) {
+            System.out.println(<span class="hljs-keyword">new</span> Date() + <span class="hljs-string">": 客户端登录成功"</span>);
+        } <span class="hljs-keyword">else</span> {
+            System.out.println(<span class="hljs-keyword">new</span> Date() + <span class="hljs-string">": 客户端登录失败，原因："</span> + loginResponsePacket.getReason());
+        }
+    }
+}
+</code></pre><p>客户端拿到数据之后，调用 <code>PacketCodeC</code> 进行解码操作，如果类型是登录响应数据包，我们这里逻辑比较简单，在控制台打印出一条消息。</p>
+<p>至此，客户端整个登录流程到这里就结束了，这里为了给大家演示，我们的客户端和服务端的处理逻辑较为简单，但是相信大家应该已经掌握了使用 Netty 来做服务端与客户端交互的基本思路，基于这个思路，再运用到实际项目中，并不是难事。</p>
+<p>最后，我们再来看一下效果，下面分别是客户端与服务端的控制台输出，完整的代码参考 <a target="_blank" href="https://github.com/lightningMan/flash-netty/tree/%E5%AE%9E%E7%8E%B0%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%99%BB%E5%BD%95">GitHub</a>, 分别启动 <code>NettyServer.java</code> 与 <code>NettyClient.java</code> 即可看到效果。</p>
+<blockquote>
+<p>服务端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/14/16535d7424c10fa9?w=1240&amp;h=554&amp;f=png&amp;s=203021"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>客户端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/8/14/16535d7427d7e4f2?w=1196&amp;h=530&amp;f=png&amp;s=94727"><figcaption></figcaption></figure><p></p>
+<h2 class="heading">总结</h2>
+<p>本小节，我们们梳理了一下客户端登录的基本流程，然后结合上一小节的编解码逻辑，我们使用 Netty 实现了完整的客户端登录流程。</p>
+<h2 class="heading">思考</h2>
+<p>客户端登录成功或者失败之后，如果把成功或者失败的标识绑定在客户端的连接上？服务端又是如何高效避免客户端重新登录？
+欢迎留言讨论。</p>
+<div><script language="javascript">self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',25000);</script></div>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 画个矩形：用基本图形构建平面</h1>
+<p>上节带领大家学习了基本三角形图元的绘制方法，并讲解了如何使用缓冲区向着色器传递多种数据，本节我们开始学习如何使用三角形构建矩形。</p>
+<h2 data-id="heading-1">目标</h2>
+<p>上节我们通过创建多个 <code>buffer</code> 实现渐变三角形的绘制，本节我们以矩形为例，掌握用三角形构建平面的方法。</p>
+<blockquote>
+<p>本节示例较多，因此将<code>演示地址</code>和<code>源码地址</code>放在相应段落中，此处暂不列举。</p>
+</blockquote>
+<p>通过本节学习，你会掌握如下内容：</p>
+<ul>
+<li>通过基本三角形绘制矩形的思路。</li>
+<li>索引绘制的使用方法。</li>
+<li>使用三角带绘制矩形。</li>
+<li>使用三角扇绘制矩形。</li>
+<li>绘制圆形。</li>
+<li>绘制环形。</li>
+<li>顶点顺序的不同有什么影响。</li>
+</ul>
+<h2 data-id="heading-2">基本三角形构建矩形</h2>
+<p>我们知道，一个矩形其实可以由两个共线的三角形组成，即 <code>V0, V1, V2, V3</code>，其中 <code>V0 -> V1 -> V2</code> 代表三角形A，<code>V0 -> V2 -> V3</code>代表三角形B。</p>
+<img width="100%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018911165c77b134803832~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<blockquote>
+<p>请谨记，组成三角形的顶点要按照一定的顺序绘制。默认情况下，WebGL 会认为顶点顺序为逆时针时代表正面，反之则是背面，区分正面、背面的目的在于，如果开启了背面剔除功能的话，背面是不会被绘制的。当我们绘制 3D 形体的时候，这个设置很重要。关于背面剔除功能，我们在<a target="_blank" href="https://juejin.cn/book/6844733755580481543/section/6844733755924414477" title="https://juejin.cn/book/6844733755580481543/section/6844733755924414477">绘制立方体章节</a>再进行讲解。</p>
+</blockquote>
+<h3 data-id="heading-3">着色器</h3>
+<p>着色器部分和上节绘制三角形一样，没有变动。</p>
+<ul>
+<li>顶点着色器
+<ul>
+<li>a_Position</li>
+<li>a_Color</li>
+<li>a_Screen_Size</li>
+<li>v_Color</li>
+</ul>
+</li>
+<li>片元着色器
+<ul>
+<li>v_Color</li>
+</ul>
+</li>
+</ul>
+<h3 data-id="heading-4">JavaScript 部分</h3>
+<p>仍然从简单之处着手，绘制固定顶点的矩形。</p>
+<p>首先准备组成矩形的三角形，每个三角形由三个顶点组成，两个矩形共需要六个顶点。</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-keyword">var</span> positions = [
+	<span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+	<span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+	<span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+	<span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+	<span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+	<span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span> <span class="hljs-comment">//V3</span>
+]
+</code></pre><p>我们给两个三角形设置不同颜色，其中，<code>V0->V1->V2</code> 三角形设置为红色， <code>VO->V2->V3</code> 三角形设置为绿色。</p>
+<blockquote>
+<p>本节我们依然用单 buffer 来处理数据传递过程。</p>
+</blockquote>
+<p>代码和上节基本一致，只是我们的顶点数组 <code>positions</code> 不再是动态更新的，而是固定的。</p>
+<p>我们看下效果：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018911165c7aa32f1a98f9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>很简单，我们用两个基本三角形就实现了矩形的绘制。</p>
+<h3 data-id="heading-5">索引方式绘制</h3>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson7.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson7.html" ref="nofollow noopener noreferrer">示例代码</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson7.html" title="http://ifanqi.top/webgl/pages/lesson7.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+</ul>
+<p>不知道大家有没有发现，我们在绘制一个矩形的时候，实际上只需要 <code>V0, V1, V2, V3</code> 四个顶点即可，可是我们却存储了六个顶点，每个顶点占据 4 * 6 = 24 个字节，绘制一个简单的矩形我们就浪费了 24 * 2 = 48 字节的空间，那真正的 WebGL 应用都是由成百上千个，甚至几十万、上百万个顶点组成，这个时候，重复的顶点信息所造成的内存浪费就不容小觑了。</p>
+<p>那有没有其他的方式改进一下呢？</p>
+<p>答案当然是肯定的，WebGL 除了提供 <code>gl.drawArrays</code> 按顶点绘制的方式以外，还提供了一种按照<code>顶点索引</code>进行绘制的方法：<code>gl.drawElements</code>，使用这种方式，可以避免重复定义顶点，进而节省存储空间。我们看下 gl.drawElements 的使用方法，详细解释参见<a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fen-US%2Fdocs%2FWeb%2FAPI%2FWebGLRenderingContext%2FdrawElements" title="https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements" ref="nofollow noopener noreferrer">MDN</a>。</p>
+<blockquote>
+<p>void gl.drawElements(mode, count, type, offset);</p>
+</blockquote>
+<ul>
+<li>mode：指定绘制图元的类型，是画点，还是画线，或者是画三角形。</li>
+<li>count：指定绘制图形的顶点个数。</li>
+<li>type：指定索引缓冲区中的值的类型,常用的两个值：<code>gl.UNSIGNED_BYTE</code>和<code>gl.UNSIGNED_SHORT</code>，前者为无符号8位整数值，后者为无符号16位整数。</li>
+<li>offset：指定索引数组中开始绘制的位置，以字节为单位。</li>
+</ul>
+<p>举例来说：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, 0)<span class="hljs-comment">;</span>
+</code></pre><p>这段代码的意思是：采用<code>三角形图元</code>进行绘制，共绘制 <code>3</code> 个顶点，顶点索引类型是 <code>gl.UNSIGNED_BYTE</code>，从<code>顶点索引数组的开始位置</code>绘制。</p>
+<h3 data-id="heading-6">使用 drawElements 绘制矩形</h3>
+<p>纸上得来终觉浅，绝知此事要躬行，我们改进下绘制矩形的例子，来学习 drawElements 的用法。</p>
+<h4 data-id="heading-7">着色器</h4>
+<p>着色器部分依然不需要改动。</p>
+<h4 data-id="heading-8">JavaScript部分</h4>
+<p>我们的 JavaScript 部分要有所改变了，采用索引绘制方式，我们除了准备存储顶点信息的数组，还要准备存储顶点索引的数组。</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-comment">//存储顶点信息的数组</span>
+<span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span> <span class="hljs-comment">//V3</span>
+];
+<span class="hljs-comment">//存储顶点索引的数组</span>
+<span class="hljs-keyword">var</span> indices = [
+ <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-comment">//第一个三角形</span>
+ <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> <span class="hljs-comment">//第二个三角形</span>
+];
+</code></pre><p>除了多准备一个数组容器存储顶点索引以外，我们还需要将索引传递给 GPU，所以，仍然需要创建一个索引 <code>buffer</code>.</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">indicesBuffer</span> = gl.createBuffer()<span class="hljs-comment">;</span>
+</code></pre><p>按照惯例，创建完 buffer，我们需要绑定，这里要和 <code>ARRAY_BUFFER</code> 区分开来，索引 buffer 的绑定点是<code>gl.ELEMENT_ARRAY_BUFFER</code>。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer)<span class="hljs-comment">;</span>
+</code></pre><p>接下来，我们就可以往 indicesBuffer 中传入顶点索引了：</p>
+<pre><code lang="javascript" class="hljs language-javascript">gl.<span class="hljs-title function_">bufferData</span>(gl.<span class="hljs-property">ELEMENT_ARRAY_BUFFER</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint16Array</span>(indices), gl.<span class="hljs-property">STATIC_DRAW</span>);
+</code></pre><p>之后执行绘制操作：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0)<span class="hljs-comment">;</span>
+</code></pre><p>我们看下效果：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018911165c817552d7e47b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>矩形能够绘制出来，但是颜色和我们之前的矩形有些不同，第二个三角形从红到绿渐变。</p>
+<p>仔细回顾一下，我们用 drawArrays 进行绘制的时候，使用了六个顶点，每个三角形的顶点颜色一致，所以两个三角形的颜色都是单一的。
+当采用 <code>drawElements</code> 方法进行绘制的时候，使用了四个顶点，第二个三角形的两个顶点 V0、V2 是红色的，第三个顶点 V3 是绿色的，所以造成了从 V0、V2 向 V3 的红绿渐变。</p>
+<p>如果我们必须要实现两个不同颜色的单色三角形，还是应该用六个顶点来绘制，这时，使用 drawArrays 的方式更优一些。毕竟，不用创建索引数组和索引缓冲。</p>
+<h2 data-id="heading-9">使用三角带构建矩形</h2>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson8.html" title="http://ifanqi.top/webgl/pages/lesson8.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson8.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson8.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>我们学习了使用基本三角形绘制矩形的方法，接下来我们尝试一下使用三角带绘制矩形。</p>
+<p>前面我们讲过，三角带的绘制特点是前后两个三角形是共线的，并且我们知道顶点数量与绘制的三角形的数量之间的关系是：</p>
+<blockquote>
+<p>顶点数或者索引数 = 三角形数量 + 2</p>
+</blockquote>
+<p>仍然以绘制矩形为目标，如果采用基本三角形进行绘制的话，需要准备六个顶点，即两个三角形。那如果采用三角带进行绘制的话，利用三角带的特性，我们实际需要的顶点数为 2 + 2 = 4，即矩形的四个顶点位置。</p>
+<blockquote>
+<p>切记，顶点顺序不能乱哦。</p>
+</blockquote>
+<p>画图看下组成矩形的三角形顶点的顺序</p>
+<img width="100%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165cc89ab4b4a667~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>由上图可以看出，绘制三角带图元的时候，V0->V1->V2 组成第一个三角形，V2->V1->V3 组成第二个三角形。</p>
+<p>三角带与基本三角形绘制在代码上的区别有两点：</p>
+<ul>
+<li>顶点数组的数据不同。</li>
+<li>drawArrays 的第一个参数代表的图元类型不同。
+<ul>
+<li>基本三角形：TRIANGLES。</li>
+<li>三角带：TRIANGLE_STRIP。</li>
+<li>三角扇：TRIANGLE_FAN。</li>
+</ul>
+</li>
+</ul>
+<h4 data-id="heading-10">关键代码</h4>
+<p>先看顶点数组：</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0 </span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span> <span class="hljs-comment">//V3</span>
+]
+
+</code></pre><p>再看绘制方法：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.drawArrays(gl.TRIANGLE_STRIP, 0, )<span class="hljs-comment">;</span>
+</code></pre><p>绘制方法改动不大，我们看下效果：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165ccbd7f9d1c5ea~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>读者可能会问了，我能不能用 <code>V1->V2->V0</code> 绘制第一个三角形，<code>V0->V2->V3</code>绘制第二个三角形呢？</p>
+<p>如果按照这个顺序绘制的话，按照三角带的绘制特点，<code>V0->V2</code> 这条线段是第二个三角形和第一个三角形的共线。</p>
+<p>先不急着编码验证，我们画图看下效果：</p>
+<img width="100%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165ccc64b99747b5~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>如果你太确定，我们验证一下：</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span> <span class="hljs-comment">//V3</span>
+]
+
+</code></pre><p>我们把 V0 移到第三个位置，看下效果：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165ccc8edafdb9fa~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>这和我们推演的效果相同，可以看出，使用三角带进行绘制时，一定要注意顶点的顺序，顶点顺序稍有差错，绘制出来的效果就与实际期待的大不相同。</p>
+<h2 data-id="heading-11">三角扇绘制矩形</h2>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson9.html" title="http://ifanqi.top/webgl/pages/lesson9.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson9.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson9.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>基本三角形和三角带绘制矩形的原理讲完了，还有一种图元方式：三角扇，它是否也能绘制矩形？</p>
+<p>我们在<code>绘制三角形</code>章节讲到，三角扇是围绕着第一个顶点作为公共顶点绘制三角形的，并且使用<code>三角扇</code>绘制出来的三角形的数量和顶点数量之间的关系和<code>三角带</code>一样：</p>
+<blockquote>
+<p>顶点数或者索引数 = 三角形数量 + 2</p>
+</blockquote>
+<p>我们看下三角扇绘制矩形时的顶点分布以及顺序：</p>
+<img width="100%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165cce3f472a4f47~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>可以看出，使用三角扇需要绘制 4 个三角形，相应地顶点数量为 6 个：</p>
+<table>
+<thead>
+<tr>
+<th>三角形</th>
+<th>顶点组成</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>左边三角形</td>
+<td>V0 -> V1 -> V2</td>
+</tr>
+<tr>
+<td>上边三角形</td>
+<td>V0 -> V2 -> V3</td>
+</tr>
+<tr>
+<td>右边三角形</td>
+<td>V0 -> V3 -> V4</td>
+</tr>
+<tr>
+<td>下边三角形</td>
+<td>V0 -> V4 -> V1</td>
+</tr>
+</tbody>
+</table>
+<p>需要的顶点数组为</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">165</span>, <span class="hljs-number">165</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V3</span>
+ <span class="hljs-number">300</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V4</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+]
+</code></pre><p>绘制方式改为三角扇：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.drawArrays(gl.TRIANGLE_FAN, 0, positions.length / 6)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018912165cce8c33f5df5e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<blockquote>
+<p>可以很明显的看出四个三角形都以中心点为顶点。</p>
+</blockquote>
+<h4 data-id="heading-12">顶点顺序</h4>
+<p>其实不管是使用三角扇还是基本三角形，又或者是三角带绘制的时候，一定要保证顶点顺序是逆时针。如果三角形的顶点顺序不是逆时针，在开启背面剔除功能后，不是逆时针顺序的三角形是不会被绘制的。</p>
+<p>我们不妨试一下，改变顶点顺序，将他们之间的关系从逆时针改为顺时针：</p>
+<pre><code lang="csharp" class="hljs language-csharp"><span class="hljs-keyword">var</span> positions = [
+ <span class="hljs-number">165</span>, <span class="hljs-number">165</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V0</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">300</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V2</span>
+ <span class="hljs-number">30</span>, <span class="hljs-number">30</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-comment">//V1</span>
+]
+</code></pre><p>如果不开启背面提剔除功能，会发现三角形依然能够绘制，不受顺序的影响。</p>
+<p>开启背面剔除功能：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.enable(gl.CULL_FACE)<span class="hljs-comment">;</span>
+</code></pre><p>开启后，可以发现页面空空如也，三角形没有被绘制。</p>
+<p>当然，我们也可以更改面的显示方式，默认显示正面，我们可以通过如下方式，剔除正面，只显示背面：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.cullFace(gl.FRONT)<span class="hljs-comment">;</span>
+</code></pre><h2 data-id="heading-13">绘制圆形</h2>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson10.html" title="http://ifanqi.top/webgl/pages/lesson10.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson10.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson10.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>矩形比较简单，两个三角形拼接起来就可以了。那常见的圆形该如何绘制呢？聪明的同学可能已经想到了：将圆形分割成以圆心为共同顶点的若干个三角形，三角形数越多，圆形越平滑。</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018921165fb3037eeca21b~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>如上图所示，我们将圆形划分成 12 个三角形，13 个顶点，我们需要计算每个顶点的坐标，我们定义一个生成圆顶点的函数：</p>
+<ul>
+<li>x：圆心的 x 坐标</li>
+<li>y：圆心的 y 坐标</li>
+<li>radius：半径</li>
+<li>n：三角形的数量</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini"> var <span class="hljs-attr">sin</span> = Math.sin<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">cos</span> = Math.cos<span class="hljs-comment">;</span>
+ function createCircleVertex(x, y, radius, n) {
+ var <span class="hljs-attr">positions</span> = [x, y, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]<span class="hljs-comment">;</span>
+ for (let <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i <= n; i++) {</span>
+ var <span class="hljs-attr">angle</span> = i * Math.PI * <span class="hljs-number">2</span> / n<span class="hljs-comment">;</span>
+ positions.push(x + radius * sin(angle), y + radius * cos(angle), 255, 0, 0, 1)<span class="hljs-comment">;</span>
+ }
+ return positions<span class="hljs-comment">;</span>
+ }
+ var <span class="hljs-attr">positions</span> = createCircleVertex(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">50</span>, <span class="hljs-number">12</span>)<span class="hljs-comment">;</span>
+</code></pre><p>将圆划分成 12 个三角形的效果：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018921165fb489231ea726~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>有棱有角，不太自然，我们将圆切分成 50 个三角形试试：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">positions</span> = createCircleVertex(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018921165fb48a1462aded~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>可以看出， 50 个三角形组成的圆更加自然一些，三角形面数越多，画出的图形越自然越平滑，但是我们也不能无限划分，毕竟三角形的数量越多，顶点数量相应的变多，内存占用会变大。在绘制规则图形的时候，我们需要在图形显示效果与顶点数量之间做一个权衡。</p>
+<h2 data-id="heading-14">绘制环形</h2>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson11.html" title="http://ifanqi.top/webgl/pages/lesson11.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson11.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson11.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>再深入一下，我们看看环形如何绘制，动手画画图，应该能想到：</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181227167ed9b3702ca350~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>建立两个圆，一个内圆，一个外圆，划分n个近似于扇形的三角形，每个三角形的两条边都会和内圆和外圆相交，产生四个交点，这四个交点组成一个近似矩形，然后将近似矩形划分成两个三角形：</p>
+<pre><code lang="ini" class="hljs language-ini">function createRingVertex(x, y, innerRadius, outerRadius, n) {
+ var <span class="hljs-attr">positions</span> = []<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">color</span> = randomColor()<span class="hljs-comment">;</span>
+ for (var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i <= n; i++) {</span>
+ if (i % <span class="hljs-attr">2</span> == <span class="hljs-number">0</span>) {
+ <span class="hljs-attr">color</span> = randomColor()<span class="hljs-comment">;</span>
+ }
+ var <span class="hljs-attr">angle</span> = i * Math.PI * <span class="hljs-number">2</span> / n<span class="hljs-comment">;</span>
+ positions.push(x + innerRadius * sin(angle), y + innerRadius * cos(angle), color.r, color.g, color.b, color.a)<span class="hljs-comment">;</span>
+ positions.push(x + outerRadius * sin(angle), y + outerRadius * cos(angle), color.r, color.g, color.b, color.a)<span class="hljs-comment">;</span>
+ }
+ var <span class="hljs-attr">indices</span> = []<span class="hljs-comment">;</span>
+ for (var <span class="hljs-attr">i</span> = <span class="hljs-number">0</span><span class="hljs-comment">; i < n; i++) {</span>
+ var <span class="hljs-attr">p0</span> = i * <span class="hljs-number">2</span><span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p1</span> = i * <span class="hljs-number">2</span> + <span class="hljs-number">1</span><span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p2</span> = (i + <span class="hljs-number">1</span>) * <span class="hljs-number">2</span> + <span class="hljs-number">1</span><span class="hljs-comment">;</span>
+ var <span class="hljs-attr">p3</span> = (i + <span class="hljs-number">1</span>) * <span class="hljs-number">2</span><span class="hljs-comment">;</span>
+ if (<span class="hljs-attr">i</span> == n - <span class="hljs-number">1</span>) {
+ <span class="hljs-attr">p2</span> = <span class="hljs-number">1</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">p3</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+ }
+ indices.push(p0, p1, p2, p2, p3, p0)<span class="hljs-comment">;</span>
+ }
+ return { 
+ positions: positions, 
+ indices: indices 
+ }<span class="hljs-comment">;</span>
+}
+</code></pre><p>上面这个方法能够根据内圆半径和外圆半径以及三角形的数量返回顶点数组和索引数组，我们生成 100 个三角形的信息。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">geo</span> = createRingVertex(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>, <span class="hljs-number">100</span>)<span class="hljs-comment">;</span>
+</code></pre><p>为了节省空间，我们采用索引绘制：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.drawElements(gl<span class="hljs-section">[currentType]</span>, indices.length, gl.UNSIGNED_SHORT, 0)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<img width="60%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018921165fbbed2908c8cf~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<h2 data-id="heading-15">回顾</h2>
+<p>我们清楚了各种形状的平面其实都可以通过三角形图元组装而成，大家或许会说了，这样岂不是很累啊？确实很累，只不过实际应用中，我们往往都是通过 3D 建模软件为我们生成顶点、索引、颜色等信息。本节通过代码来生成模型顶点信息，是为了培养大家在绘制复杂图形时用三角形进行拆分的意识。</p>
+<p>本节我们学习了使用基本三角形、三角带、三角扇绘制矩形、圆形、环形的方法，以及它们之间的使用区别，同时还学习了使用索引绘制的技巧，了解了顶点顺序的重要性。</p>
+<p>下一节，我为大家介绍纹理贴图，学习如何将图片应用到平面上。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

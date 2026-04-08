@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">初级入门 --- 绘制渐变三角形：深入理解缓冲区</h1>
+<p>上节带领大家学习了基本三角形图元的绘制过程，以及如何使用<code>缓冲区</code>向着色器传递多个数据，但上节只演示了往着色器传递<code>坐标</code>这一种数据，本节通过绘制渐变三角形，讲解一下如何通过缓冲区向着色器传递多种数据。</p>
+<h2 data-id="heading-1">目标</h2>
+<p>本节通过一个鼠标每点击三次便会绘制一个渐变三角形的示例，带大家深入理解缓冲区的用法，最终效果如下图所示：
+</p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c2d31ba262d95~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson4.html" title="http://ifanqi.top/webgl/pages/lesson4.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson4.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson4.html" ref="nofollow noopener noreferrer">源码地址</a></li>
+</ul>
+<p>通过本节学习，你将会掌握如下内容：</p>
+<ul>
+<li>顶点数据在 <code>buffer</code> 中的排布方式。</li>
+<li>切换 <code>buffer</code> 时，<code>bindBuffer</code> 的重要性。</li>
+<li>使用多个 <code>buffer</code> 读取多种顶点数据。</li>
+<li>使用单个 <code>buffer</code> 读取多种顶点数据。</li>
+<li>如何实现渐变效果。</li>
+</ul>
+<h2 data-id="heading-2">渐变三角形</h2>
+<p>上节我们实现的是单色三角形，通过在片元着色器中定义一个 <code>uniform</code> 变量，接收 JavaScript 传递过去的颜色值来实现。那渐变三角形的处理与单色三角形有何不同呢？</p>
+<p>渐变三角形颜色不单一，在顶点与顶点之间进行颜色的渐变过渡，这就要求我们的顶点信息除了包含<code>坐标</code>，还要包含<code>颜色</code>。这样在顶点着色器之后，GPU 根据每个顶点的颜色对顶点与顶点之间的颜色进行插值，自动填补顶点之间像素的颜色，于是形成了渐变三角形。</p>
+<p>那既然我们需要为每个顶点传递坐标信息和颜色信息，因此需要在顶点着色器中额外增加一个 <code>attribute</code> 变量<code>a_Color</code>，用来接收顶点的颜色，同时还需要在顶点着色器和片元着色器中定义一个 varying 类型的变量<code>v_Color</code>，用来传递顶点颜色信息。</p>
+<h3 data-id="heading-3">着色器</h3>
+<ul>
+<li>依然从顶点着色器开始，顶点着色器新增一个 attribute 变量，用来接收顶点颜色。</li>
+</ul>
+<pre><code lang="ini" class="hljs language-ini"> //设置浮点数精度为中等精度。
+ precision mediump float<span class="hljs-comment">;</span>
+ //接收顶点坐标 (x, y)
+ attribute vec2 a_Position<span class="hljs-comment">;</span>
+ //接收浏览器窗口尺寸(width, height)
+ attribute vec2 a_Screen_Size<span class="hljs-comment">;</span>
+ //接收 JavaScript 传递的顶点颜色
+ attribute vec4 a_Color<span class="hljs-comment">;</span>
+ //传往片元着色器的颜色。
+ varying vec4 v_Color<span class="hljs-comment">;</span>
+ void main(){
+ vec2 <span class="hljs-attr">position</span> = (a_Position / a_Screen_Size) * <span class="hljs-number">2.0</span> - <span class="hljs-number">1.0</span><span class="hljs-comment">;</span>
+ <span class="hljs-attr">position</span> = position * vec2(<span class="hljs-number">1.0</span>,-<span class="hljs-number">1.0</span>)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">gl_Position</span> = vec4(position, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">v_Color</span> = a_Color<span class="hljs-comment">;</span>
+ }
+
+</code></pre><ul>
+<li>片元着色器</li>
+</ul>
+<p>片元着色器新增一个 varying 变量 <code>v_Color</code>，用来接收插值后的颜色。</p>
+<pre><code lang="ini" class="hljs language-ini"> //设置浮点数精度为中等。
+ precision mediump float<span class="hljs-comment">;</span>
+ //接收 JavaScript 传过来的颜色值（rgba）。
+ varying vec4 v_Color<span class="hljs-comment">;</span>
+ void main(){
+ vec4 <span class="hljs-attr">color</span> = v_Color / vec4(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">1</span>)<span class="hljs-comment">;</span>
+ <span class="hljs-attr">gl_FragColor</span> = color<span class="hljs-comment">;</span>
+ }
+</code></pre><p>我们的着色器部分还是和之前一样简单，只是在顶点着色器中增加了顶点颜色这一变量。</p>
+<p>接下来我们用 JavaScript 向着色器传递数据。</p>
+<h3 data-id="heading-4">JavaScript 部分</h3>
+<p>用缓冲区向着色器传递数据有两种方式：</p>
+<ul>
+<li>利用一个缓冲区传递多种数据。</li>
+<li>另一种是利用多个缓冲区传递多个数据。</li>
+</ul>
+<p>上节绘制三角形的时候我们给顶点着色器传递的只是坐标信息，并且只用了一个 <code>buffer</code>，本节示例，我们除了传递顶点的坐标数据，还要传递顶点颜色。
+按照正常思路，我们可以创建两个 <code>buffer</code>，其中一个 <code>buffer</code> 传递坐标，另外一个 <code>buffer</code> 传递颜色。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c29bb2b8976b7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>创建两个 <code>buffer</code>，将 <code>a_Position</code> 和 <code>positionBuffer</code> 绑定，<code>a_Color</code> 和 <code>colorBuffer</code> 绑定，然后设置各自读取 <code>buffer</code> 的方式。</p>
+<blockquote>
+<p>请谨记：程序中如果有多个 <code>buffer</code> 的时候，在切换 <code>buffer</code> 进行操作时，一定要通过调用 <code>gl.bindBuffer</code> 将要操作的 <code>buffer</code> 绑定到 <code>gl.ARRAY_BUFFER</code> 上，这样才能正确地操作 <code>buffer</code> 。您可以将 <code>bindBuffer</code> 理解为一个状态机，<code>bindBuffer</code> 之后的对 <code>buffer</code> 的一些操作，都是基于最近一次绑定的 <code>buffer</code> 来进行的。</p>
+</blockquote>
+<p>以下 <code>buffer</code> 的操作需要在绑定 <code>buffer</code> 之后进行：</p>
+<blockquote>
+<ul>
+<li>gl.bufferData：传递数据。</li>
+<li>gl.vertexAttribPointer：设置属性读取 buffer 的方式。</li>
+</ul>
+</blockquote>
+<h4 data-id="heading-5">方式一：多个 buffer 传递</h4>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson3.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson3.html" ref="nofollow noopener noreferrer">示例代码</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson3.html" title="http://ifanqi.top/webgl/pages/lesson3.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+</ul>
+<p>我们使用一个 buffer 传递坐标信息，另一个 buffer 传递颜色信息。</p>
+<pre><code lang="ini" class="hljs language-ini">// 创建 坐标信息 buffer
+var <span class="hljs-attr">positionBuffer</span> = gl.createBuffer()<span class="hljs-comment">;</span>
+// 将当前 buffer 设置为 postionBuffer，接下来对 buffer 的操作都是针对 positionBuffer 了。
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)<span class="hljs-comment">;</span>
+// 设置 a_Position 变量读取 positionBuffer 缓冲区的方式。
+var <span class="hljs-attr">size</span> = <span class="hljs-number">2</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">type</span> = gl.FLOAT<span class="hljs-comment">;</span>
+var <span class="hljs-attr">normalize</span> = <span class="hljs-literal">false</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">stride</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">offset</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+gl.vertexAttribPointer(
+ a_Position, size, type, normalize, stride, offset)<span class="hljs-comment">;</span>
+ 
+// 创建 颜色信息 buffer
+var <span class="hljs-attr">colorBuffer</span> = gl.createBuffer()<span class="hljs-comment">;</span>
+// 将当前 buffer 设置为 postionBuffer，接下来对 buffer 的操作都是针对 positionBuffer 了。
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)<span class="hljs-comment">;</span>
+// 设置 a_Position 变量读取 positionBuffer 缓冲区的方式。
+var <span class="hljs-attr">size</span> = <span class="hljs-number">4</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">type</span> = gl.FLOAT<span class="hljs-comment">;</span>
+var <span class="hljs-attr">normalize</span> = <span class="hljs-literal">false</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">stride</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+var <span class="hljs-attr">offset</span> = <span class="hljs-number">0</span><span class="hljs-comment">;</span>
+gl.vertexAttribPointer(
+ a_Color, size, type, normalize, stride, offset)<span class="hljs-comment">;</span>
+
+</code></pre><blockquote>
+<p>gl.vertexAttribPointer(
+a_Color, size, type, normalize, stride, offset)。这个方法比较重要，上节已经向大家详细介绍了，如果还不太明白的，可以再次回顾下上节内容。</p>
+</blockquote>
+<p>我们发现，上面代码对 <code>buffer</code> 的操作有些冗余，我们还是提取出一个方法 <code>createBuffer</code> 放到 <code>webgl-helper.js</code>，减少重复编码，之后我们对 <code>buffer</code> 的一系列调用只需要如下两句就可以了：</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">positionBuffer</span> = createBuffer(gl, a_Position, { size: <span class="hljs-number">2</span>})<span class="hljs-comment">;</span>
+var <span class="hljs-attr">colorBuffer</span> = createBuffer(gl, a_Color, { size: <span class="hljs-number">4</span>})<span class="hljs-comment">;</span>
+
+</code></pre><p>假如我们顶点坐标数组中有四个顶点 8 个元素【30, 30, 30, 40, 40, 30, 20, 0】，顶点着色器中的 <code>a_Position</code> 属性在读取顶点坐标信息时，以 2 个元素为一组进行读取：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c2c5f0e0528c1~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>又假如我们顶点颜色数组中有两个顶点 8 个元素 【244, 230, 100, 1, 125, 30, 206, 1】，那么顶点着色器中的 <code>a_Color</code> 属性在读取顶点颜色信息时，以 4 个元素（r, g, b, a）为一组进行读取，如下图所示。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c2c5fe4a7d8cf~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>以多少元素作为一个顶点信息进行读取的设置，是在调用 <code>gl.vertexAttribPointer</code> 时设置的 <code>size</code> 参数值。</p>
+</blockquote>
+<p>言归正传，接下来我们为 <code>canvas</code> 添加点击事件：</p>
+<pre><code lang="ini" class="hljs language-ini">canvas.addEventListener('click', <span class="hljs-attr">e</span> => {
+ var <span class="hljs-attr">x</span> = e.pageX<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = e.pageY<span class="hljs-comment">;</span>
+ positions.push(x, y)<span class="hljs-comment">;</span>
+ //随机一种颜色
+ var <span class="hljs-attr">color</span> = randomColor()<span class="hljs-comment">;</span>
+ //将随机颜色的 rgba 值添加到顶点的颜色数组中。
+ colors.push(color.r, color.g, color.b, color.a)<span class="hljs-comment">;</span>
+ //顶点的数量是 3 的整数倍时，执行绘制操作。
+ if (positions.length % <span class="hljs-attr">6</span> == <span class="hljs-number">0</span>) {
+ gl.bindBuffer(gl.ARRAY_BUFFER, buffer)<span class="hljs-comment">;</span>
+ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW)<span class="hljs-comment">;</span>
+ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)<span class="hljs-comment">;</span>
+ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW)<span class="hljs-comment">;</span>
+ render(gl)<span class="hljs-comment">;</span>
+ }
+})
+</code></pre><p>万事俱备，只欠绘制：</p>
+<pre><code lang="scss" class="hljs language-scss"> function <span class="hljs-built_in">render</span>(gl) {
+ <span class="hljs-comment">//用设置的清空画布颜色清空画布。</span>
+ gl<span class="hljs-selector-class">.clear</span>(gl.COLOR_BUFFER_BIT);
+ if (positions.length <= <span class="hljs-number">0</span>) {
+ return;
+ }
+ <span class="hljs-comment">//绘制图元设置为三角形。</span>
+ <span class="hljs-selector-tag">var</span> primitiveType = gl<span class="hljs-selector-class">.TRIANGLES</span>;
+ <span class="hljs-comment">//因为我们要绘制三个点，所以执行三次顶点绘制操作。</span>
+ gl<span class="hljs-selector-class">.drawArrays</span>(primitiveType, <span class="hljs-number">0</span>, positions.length / <span class="hljs-number">2</span>);
+ }
+</code></pre><p>至此，三角形的渐变效果就实现啦。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c2d31ba262d95~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h4 data-id="heading-6">另一种思路：使用 1 个 buffer 同时传递坐标和颜色信息</h4>
+<ul>
+<li><a target="_blank" href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Flucefer%2Fwebgl%2Fblob%2Fmaster%2Fpages%2Flesson4.html" title="https://github.com/lucefer/webgl/blob/master/pages/lesson4.html" ref="nofollow noopener noreferrer">示例代码</a></li>
+<li><a target="_blank" href="https://link.juejin.cn?target=http%3A%2F%2Fifanqi.top%2Fwebgl%2Fpages%2Flesson4.html" title="http://ifanqi.top/webgl/pages/lesson4.html" ref="nofollow noopener noreferrer">演示地址</a></li>
+</ul>
+<p>常规思路使用多个 <code>buffer</code> 传递多种数据（坐标和颜色），我们再演示另外一种思路：使用 1 个 <code>buffer</code> 同时传递多种数据。</p>
+<p>着色器部分的代码和上面的一样，无需改动，改动的主要部分是 JavaScript 程序。</p>
+<p>首先，我们依然是创建 <code>buffer</code>，只不过这次是创建一个 <code>buffer</code>。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">buffer</span> = gl.createBuffer()<span class="hljs-comment">;</span>
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer)<span class="hljs-comment">;</span>
+</code></pre><p>创建完 <code>buffer</code>，接下来设置读取 <code>buffer</code> 的方式，我们有两个属性 <code>a_Position</code>、<code>a_Color</code>，由于我们只有一个 <code>buffer</code>，该 <code>buffer</code> 中既存储坐标信息，又存储颜色信息，所以两个属性需要读取同一个 <code>buffer</code>：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018910165c2e171e604257~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>我们可以看到，一个顶点信息占用 6 个元素，前两个元素代表坐标信息，后四个元素代表颜色信息，所以在下面设置属性读取 <code>buffer</code> 方式时，<code>a_Color</code> 和 <code>a_Position</code> 的设置会有不同：</p>
+<ul>
+<li>
+<p>a_Position：坐标信息占用 2 个元素，故 size 设置为 2。
+坐标信息是从第一个元素开始读取，偏移值为 0 ，所以 offset 设置为 0.</p>
+</li>
+<li>
+<p>a_Color：由于 color 信息占用 4 个元素，所以 size 设置为 4 。
+color 信息是在坐标信息之后，偏移两个元素所占的字节（2 * 4 = 8）。所以，offset 设置为 8。</p>
+</li>
+<li>
+<p>stride：代表一个顶点信息所占用的字节数，我们的示例，一个顶点占用 6 个元素，每个元素占用 4 字节，所以，stride = 4 * 6 = 24 个字节。</p>
+</li>
+</ul>
+<pre><code lang="arduino" class="hljs language-arduino">gl.<span class="hljs-built_in">vertexAttribPointer</span>(
+ a_Color, <span class="hljs-number">4</span>, gl.FLOAT, <span class="hljs-literal">false</span>, <span class="hljs-number">24</span>, <span class="hljs-number">8</span>);
+ 
+gl.<span class="hljs-built_in">vertexAttribPointer</span>(
+ a_Position, <span class="hljs-number">2</span>, gl.FLOAT, <span class="hljs-literal">false</span>, <span class="hljs-number">24</span>, <span class="hljs-number">0</span>);
+
+</code></pre><p><code>canvas</code> 的点击事件也有所不同，一个顶点占用 6 个元素，三个顶点组成一个三角形，所以我们的 <code>positions</code> 的元素数量必须是 18 的整数倍，才能组成一个三角形：</p>
+<pre><code lang="ini" class="hljs language-ini"> canvas.addEventListener('click', <span class="hljs-attr">e</span> => {
+ var <span class="hljs-attr">x</span> = e.pageX<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">y</span> = e.pageY<span class="hljs-comment">;</span>
+ positions.push(x)<span class="hljs-comment">;</span>
+ positions.push(y)<span class="hljs-comment">;</span>
+ //随机出一种颜色
+ var <span class="hljs-attr">color</span> = randomColor()<span class="hljs-comment">;</span>
+ //将随机颜色的 rgba 值添加到顶点的颜色数组中。
+ positions.push(color.r, color.g, color.b, color.a)<span class="hljs-comment">;</span>
+ //顶点的数量是 18 的整数倍时，执行绘制操作。
+ if (positions.length % <span class="hljs-attr">18</span> == <span class="hljs-number">0</span>) {
+ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)<span class="hljs-comment">;</span>
+ render(gl)<span class="hljs-comment">;</span>
+ }
+ })
+</code></pre><p>实现效果和上面操作多缓冲区的方式一样，但是单缓冲区不仅减少了缓冲区的数量，而且减少了传递数据的次数以及复杂度。</p>
+<h2 data-id="heading-7">回顾</h2>
+<p>至此，我们对缓冲区的讲解就结束了，本节所讲知识点和上节基本类似，不同点在于用单个缓冲区传递多类数据时，<code>gl.vertexAttribPointer</code> 各个参数如何设置，理解这点对我们以后编程十分有用，希望大家课下多多练习，深刻理解它的用法。</p>
+<p>到目前为止，我们掌握了三角形的绘制方法，接下来学习怎样用三角形构建其他图形。</p>
+<p>下一节我们将从简单平面开始：先用三角形构建一个矩形。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

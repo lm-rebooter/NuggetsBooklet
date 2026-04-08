@@ -1,0 +1,411 @@
+小贴士：有一些同学反馈调和和调度的章节听着有点懵，不能很好的串联起来，那么笔者打算写本章节作为前两个章节的补充和完善。
+
+## 一 前言
+
+之前的**调度**和**调和**章节分别讲解了调度的本质（时间分片，请求帧）和调和的流程（两大阶段 render 和 commit ）。本章节将继续围绕着核心的两部分展开。
+
+那么首先来回顾一下两者的概念：
+
+* **调度**：
+
+用一段简单的例子描述调度到底做了什么事？假设每一个更新，可以看作一个人拿着材料去办事处办理业务。那么办事处处理每一个人的业务需要时间，并且工作人员，需要维护办事处的正常运转，不能全身心投入给顾客办理业务，那么办事处应该如何处理呢？
+
+1 首先需要所有来访的顾客排成一队。然后工作人员开始逐一受理业务，不能让工作人员一直办理业务，如果一直办理，假设任务过多的情况，那么会一直占用工作人员时间，前面说到办事处需要正常运转，如果这样就无法正常运转了。
+
+2 那么工作人员每次办理一个任务后，就先维持办事处的正常运转，等到工作人员有闲暇的时间，再来办理下一个业务。
+
+**那么调度的作用就显而易见了**，首先调度一定是在多个任务情况下，单个更新任务就没调度可言了；多个任务情况下，如果一口气执行完所有更新任务，那么就会阻塞浏览器的正常渲染，给用户体验上就是卡住了。那么调度任务就是每一次执行一个任务，然后先让浏览器完成后续的渲染操作，然后在空暇时间，再执行下一个任务。
+
+在 v18 调度任务还有一些调整。还是拿办理业务这个例子。
+
+`Legacy` 模式下：在 v17 及其以下版本，所有的任务都是紧急任务，那么所有来办理的人员都是平等的，所以工作人员只需要按序办理业务就可以了。
+
+`v18 Concurrent` 模式下：在 v18 模式下，正常紧急的任务都可以看作是会员，一些优先级低的任务比如 `transtion` 过渡任务，可以看作非会员。如果会员和非会员排列到一起，那么优先会办理会员的业务（正常的紧急优先任务），正常情况下，会办理完所有的会员业务，才开始办理非会员任务；但是在一些极端的情况下，怕会员一直办理，非会员无法办理（被饿死的情况），所以设置一个超时时间，达到超时时间，会破格执行一个非会员任务。
+
+* **调和**：
+
+**上面介绍了调度的本质，再来举一个例子描述一个调和流程。** 假设我们的应用看作一台设备，那么每一次更新，看作一次检修维护更新，那么维修师傅应该如何检修呢？ 维修师傅会用一个机器 （workLoop可以看作这个机器） ，依次检查每一个需要维护更新的零件（fiber可以看作零件），每一个需要检修的零件都会进入检查流程，如果需要更新，那么会更新，如果有子零件更新（子代 fiber），那么父代本身也会进入到机器运转（ workloop ）流程中。
+
+`Legacy` 模式下：在这个模式下，所有的零件维修，没有优先级的区分，所有的更新工作都被维修师傅依次检查执行。
+
+`Concurrent` 模式下：我们都清楚，对于设备的维修，实际有很多种类，比如影响设备运转的，那么这种维修任务迫在眉睫，还有一种就是相比不是那么重要的，比如机器打蜡，清理等，那么在 Concurrent 下的 workloop，就像师傅在用机器检修零件，但是遇到更高优先处理的任务，就会暂定当前零件的检修，而去检修更重要的任务一样。
+
+上面用两个例子描述了调度和调和的流程，那么两者之间的关系是什么呢？
+
+* **调度**：首先调度目的针对**多个更新任务**的情况，调度让多个任务井然有序的执行，执行任务的同时，也不要影响浏览器的绘制。调度决定着更新任务的执行时期。
+
+* **调和**：一旦更新任务执行，那么就会进入调和流程，说白了就是根据 state 的改变，去切实地更新视图。
+
+接下来将重点介绍一下 Legacy 模式下调度任务是如何衔接的。
+
+## 二 更新之溯源
+
+在 Legacy 下的 React 应用中，更新本质上有两种：
+
+* 第一种就是初始化的时候第一次页面的呈现。
+* 第二种就是初始化完毕，state 的更新，比如点击按钮，触发 `setState` 或者 `useState`。
+
+接下来一一分析上面两个流程。
+
+### 1 从 ReactDOM.render 看初始化流程
+
+假设现在开始初始化我们的应用，那么 Legacy 模式下是从 ReactDOM.render 开始的，一个传统的应用的开始应该是这个样子。
+
+```js
+import ReactDOM from 'react-dom'
+/* 通过 ReactDOM.render  */
+ReactDOM.render(
+    <App />,
+    document.getElementById('app')
+)
+```
+那么 ReactDOM.render 到底做了什么呢？ 在 ReactDOM.render 做的事情是形成一个 Fiber Tree 挂载到 app 上。来看一下主要流程。
+
+> react-dom/src/client/ReactDOMLegacy.js -> legacyRenderSubtreeIntoContainer
+```js
+function legacyRenderSubtreeIntoContainer(
+    parentComponent,  // null
+    children,         // <App/> 跟部组件
+    container,        // app dom 元素
+    forceHydrate,
+    callback          // ReactDOM.render 第三个参数回调函数。
+){
+    let root = container._reactRootContainer
+    let fiberRoot
+    if(!root){
+        /* 创建 fiber Root */
+        root = container._reactRootContainer = legacyCreateRootFromDOMContainer(container,forceHydrate);
+        fiberRoot = root._internalRoot;
+        /* 处理 callback 逻辑，这里可以省略 */
+        /* 注意初始化这里用的是 unbatch */
+        unbatchedUpdates(() => {
+            /*  开始更新  */
+            updateContainer(children, fiberRoot, parentComponent, callback);
+        });
+    }
+}
+```
+调用  ReactDOM.render 本质上就是 `legacyRenderSubtreeIntoContainer` 方法。这个方法的主要做的事情是：
+* 创建整个应用的 `FiberRoot` 。
+* 然后调用 `updateContainer` 开始初始化更新。
+* 这里注意⚠️的是，用的是 **`unbatch`** （非批量的情况），并不是批量更新的 `batchUpdate` 。
+
+那么所有更新流程矛头都指向了 updateContainer ，那么接下来看一下 `updateContainer` 主要做了哪些事。
+
+> react-reonciler/src/ReactFiberReconciler.js -> updateContainer
+```js
+export function updateContainer(element,container,parentComponent,callback){
+    /* 计算优先级，在v16及以下版本用的是 expirationTime ，在 v17 ,v18 版本，用的是 lane。  */
+    const lane = requestUpdateLane(current);
+    /* 创建一个 update */
+    const update = createUpdate(eventTime, lane);
+    enqueueUpdate(current, update, lane);
+    /* 开始调度更新 */
+    const root = scheduleUpdateOnFiber(current, lane, eventTime);
+}
+```
+通过上面代码的简化，可以清晰的看出来 updateContainer 做了哪些事。
+
+* 首先计算更新优先级 `lane` ，老版本用的是 `expirationTime`。
+* 然后创建一个 `update` ，通过 `enqueueUpdate` 把当前的 update 放入到待更新队列 `updateQueue` 中。
+* 接下来开始调用 `scheduleUpdateOnFiber` ，开始进入调度更新流程中。
+
+到此为止，可以总结出，初始化更新的时候，最后调用的是 scheduleUpdateOnFiber，开始进入更新流程。具体逻辑一会会讲到。
+
+### 2 从 useState | setState 看更新流程
+
+上面说到了初始化流程，接下来如果发生一次更新，比如一次点击事件带来的 state 的更新。我们这里分**类组件**和**函数组件**分别看一下：
+
+**类组件之 `setState`**：
+
+在 state 章节讲到过，当触发 setState 本质上是调用 `enqueueSetState`。
+
+> react-reconciler/src/ReactFiberClassComponent.js -> enqueueSetState
+```js
+enqueueSetState(inst,payload,callback){
+    const update = createUpdate(eventTime, lane);
+    enqueueUpdate(fiber, update, lane);
+    const root = scheduleUpdateOnFiber(fiber, lane, eventTime);
+}
+```
+
+可以看到 setState 流程和初始化的流程一样。那么再看一下 hooks 的 `useState`。
+
+
+**函数组件之 `useState`**
+
+> react-reconciler/src/ReactFiberHooks.js -> dispatchAction
+```js
+function dispatchAction(fiber, queue, action) {
+    var lane = requestUpdateLane(fiber);
+    scheduleUpdateOnFiber(fiber, lane, eventTime);
+}
+```
+上面只保留了 dispatchAction 的核心逻辑，可以清楚的发现，无论是初始化，useState，setState 最后都是调用 `scheduleUpdateOnFiber` 方法。那么这个就是整个更新的入口。那么这个方法做了些什么事情呢？
+
+### 3 更新入口 scheduleUpdateOnFiber
+
+
+> react-reconciler/src/ReactFiberWorkLoop.js -> scheduleUpdateOnFiber
+```js
+export function scheduleUpdateOnFiber(fiber,lane,eventTime){
+    if (lane === SyncLane) {
+        if (
+            (executionContext & LegacyUnbatchedContext) !== NoContext && // unbatch 情况，比如初始化
+            (executionContext & (RenderContext | CommitContext)) === NoContext) {
+            /* 开始同步更新，进入到 workloop 流程 */    
+            performSyncWorkOnRoot(root);
+         }else{
+               /* 进入调度，把任务放入调度中 */
+               ensureRootIsScheduled(root, eventTime);
+               if (executionContext === NoContext) {
+                   /* 当前的执行任务类型为 NoContext ，说明当前任务是非可控的，那么会调用 flushSyncCallbackQueue 方法。 */
+                   flushSyncCallbackQueue();
+               }
+         }
+    }
+}
+```
+scheduleUpdateOnFiber 的核心逻辑如上，正常情况下，大多数任务都是 `SyncLane`。即便在异步任务里面触发的更新，比如在 `Promise` 或者是 `setTimeout` 里面的更新，也是 `SyncLane`，两者之间没有太大的联系。所以上述核心代码中，只保留了 `SyncLane` 的逻辑。
+
+那么在 `scheduleUpdateOnFiber` 内部主要做的事情是：
+
+* 在 `unbatch` 情况下，会直接进入到 performSyncWorkOnRoot ，接下来会进入到 **调和流程**，比如 `render` ，`commit`。
+* 那么任务是 `useState` 和 `setState`，那么会进入到 `else` 流程，那么会进入到 `ensureRootIsScheduled` 调度流程。
+* 当前的执行任务类型为 `NoContext` ，说明当前任务是非可控的，那么会调用 `flushSyncCallbackQueue` 方法。
+
+通过上面知道了，**performSyncWorkOnRoot** ： 这个方法会直接进入到调和阶段，会从 rootFiber 开始向下遍历。 **ensureRootIsScheduled**  ：会进入到调度流程。 **flushSyncCallbackQueue** ：用于立即执行更新队列里面的任务。至于为什么，接下来会讲到，请细心阅读。 
+
+在介绍 `ReactDOM.render` 的时候，初始化的更新会通过 unbatchedUpdates 包裹，那么**初始化的更新会直接进入调和阶段同步更新，而不会放入到调度任务中**。
+
+**`legacy` 模式下的可控任务和非可控任务。**
+
+* 可控任务：在事件系统章节和 state 章节讲到过，对于 React 事件系统中发生的任务，会被标记 `EventContext`，在 batchUpdate api 里面的更新任务，会被标记成 `BatchedContext`，那么这些任务是 React 可以检测到的，所以 `executionContext !== NoContext`，那么不会执行 `flushSyncCallbackQueue`。
+
+* 非可控任务：如果在**延时器（timer）队列**或者是**微任务队列（microtask）**，那么这种更新任务，React 是无法控制执行时机的，所以说这种任务就是非可控的任务。比如 `setTimeout` 和 `promise` 里面的更新任务，那么 `executionContext === NoContext` ，接下来会执行一次 `flushSyncCallbackQueue` 。
+
+那么用流程图描述一下过程：
+
+
+![1.jpg](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/155f7112d254465abbdb951c0f3a9137~tplv-k3u1fbpfcp-watermark.image?)
+
+
+## 三 进入调度更新
+
+### 1 控制进入调度
+
+上面非初始化类型的更新任务，那么最终会走到 ensureRootIsScheduled 流程中，所以来分析一下这个方法。
+
+> react-reconciler/src/ReactFiberWorkLoop.js -> ensureRootIsScheduled
+```js
+function ensureRootIsScheduled(root,currentTime){
+    /* 计算一下执行更新的优先级 */
+    var newCallbackPriority = returnNextLanesPriority();
+    /* 当前 root 上存在的更新优先级 */
+    const existingCallbackPriority = root.callbackPriority;
+    /* 如果两者相等，那么说明是在一次更新中，那么将退出 */
+    if(existingCallbackPriority === newCallbackPriority){
+        return 
+    }
+    if (newCallbackPriority === SyncLanePriority) {
+        /* 在正常情况下，会直接进入到调度任务中。 */
+        newCallbackNode = scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
+    }else{
+        /* 这里先忽略 */
+    }
+    /* 给当前 root 的更新优先级，绑定到最新的优先级  */
+    root.callbackPriority = newCallbackPriority;
+}
+```
+ensureRootIsScheduled 主要做的事情有：
+
+* 首先会计算最新的调度更新优先级 `newCallbackPriority`，接下来获取当前 root 上的 `callbackPriority` 判断两者是否相等。如果两者相等，那么将直接退出不会进入到调度中。
+* 如果不想等那么会真正的进入调度任务 `scheduleSyncCallback` 中。注意的是放入调度中的函数就是**调和流程**的入口函数 `performSyncWorkOnRoot`。
+* 函数最后会将 newCallbackPriority 赋值给 callbackPriority。
+
+**什么情况下会存在 existingCallbackPriority === newCallbackPriority，退出调度的情况？**
+
+我们注意到在一次更新中最后 callbackPriority 会被赋值成 newCallbackPriority 。那么如果在正常模式下（非异步）一次更新中触发了多次 `setState` 或者 `useState` ，那么第一个 setState 进入到 ensureRootIsScheduled 就会有 root.callbackPriority = newCallbackPriority，那么接下来如果还有 setState | useState，那么就会退出，将不进入调度任务中，**原来这才是批量更新的原理，多次触发更新只有第一次会进入到调度中。**
+
+**对于整个批量更新和批量更新打破原理，在第四部分会讲到。**
+
+### 2 进入调度任务
+
+那么当进入到 scheduleSyncCallback 中会发生什么呢？顺着线索往下看：
+
+> react-reconciler/src/ReactFiberSyncTaskQueue.js -> scheduleSyncCallback
+```js
+function scheduleSyncCallback(callback) {
+    if (syncQueue === null) {
+        /* 如果队列为空 */
+        syncQueue = [callback];
+        /* 放入调度任务 */
+        immediateQueueCallbackNode = Scheduler_scheduleCallback(Scheduler_ImmediatePriority, flushSyncCallbackQueueImpl);
+    }else{
+        /* 如果任务队列不为空，那么将任务放入队列中。 */
+        syncQueue.push(callback);
+    }
+} 
+```
+
+`flushSyncCallbackQueueImpl` 会真正的执行 `callback` ，本质上就是调和函数 `performSyncWorkOnRoot`。 
+
+`Scheduler_scheduleCallback` 就是在调度章节讲的调度的执行方法，本质上就是通过 **`MessageChannel`** 向浏览器请求下一空闲帧，在空闲帧中执行更新任务。
+
+scheduleSyncCallback 做的事情如下：
+
+* 如果执行队列为空，那么把当前任务放入队列中。然后执行调度任务。
+* 如果队列不为空，此时已经在调度中，那么不需要执行调度任务，只需要把当前更新放入队列中就可以，调度中心会一个个按照顺序执行更新任务。
+
+到现在，已经知道了调和更新任务如何进入调度的。也知道了在初始化和改变 state 带来的更新原理。
+
+接下来有一个问题就是，**比如在浏览器空闲状态下发生一次 state 更新，那么最后一定会进入调度，等到下一次空闲帧执行吗？** 
+
+答案是否定的，如果这样，那么就是一种性能的浪费，因为正常情况下，发生更新希望的是在一次事件循环中执行完更新到视图渲染，如果在下一次事件循环中执行，那么更新肯定会延时。但是 `React` 是如何处理这个情况的呢？
+
+### 3 空闲期的同步任务
+
+在没有更新任务空闲期的条件下，为了让更新变成同步的，也就是本次更新不在调度中执行，那么 React 对于更新，会用 `flushSyncCallbackQueue` 立即执行更新队列，发起更新任务，**目的就是让任务不延时到下一帧**。但是此时调度会正常执行，不过调度中的任务已经被清空，
+
+那么有的同学可以会产生疑问，既然不让任务进入调度，而选择同步执行任务，那么调度意义是什么呢? 
+
+调度的目的是处理存在多个更新任务的情况，比如发生了短时间内的连续的点击事件，每次点击事件都会更新 state ，那么对于这种更新并发的情况，第一个任务以同步任务执行，那么接下来的任务将放入调度，等到调度完成后，在下一空闲帧时候执行。
+
+#### 可控更新任务
+
+那么知道了，发生一次同步任务之后，React 会让调度执行，但是会立即执行同步任务。原理就是通过 `flushSyncCallbackQueue` 方法。对于可控的更新任务，比如事件系统里的同步的 setState 或者 useState，再比如 batchUpdate，如果此时处理空闲状态，在内部都会触发一个 `flushSyncCallbackQueue`来立即更新。我们看一下:
+
+
+**事件系统中的**
+> react-reconciler/src/ReactFiberWorkLoop.js -> batchedEventUpdates
+```js
+function batchedEventUpdates(fn, a){
+     /* 批量更新流程，没有更新状态下，那么直接执行任务 */
+     var prevExecutionContext = executionContext;
+     executionContext |= EventContext;
+    try {
+        return fn(a) /* 执行事件本身，React 事件在这里执行，useState 和 setState 也会在这里执行 */
+    } finally {
+     /* 重置状态 */ 
+    executionContext = prevExecutionContext;
+    if (executionContext === NoContext) { 
+      /* 批量更新流程，没有更新状态下，那么直接执行任务 */
+      flushSyncCallbackQueue();
+    }
+  }
+}
+```
+
+**ReactDOM暴露的api `batchedUpdates`**
+> react-reconciler/src/ReactFiberWorkLoop.js -> batchedUpdates
+```js
+function batchedUpdates(fn, a) {
+    /* 和上述流程一样 */
+    if (executionContext === NoContext) {
+      flushSyncCallbackQueue();
+    }
+}
+```
+
+如上可以看到，如果浏览器没有调度更新任务，那么如果发生一次可控更新任务，最后会默认执行一次 `flushSyncCallbackQueue` 来让任务同步执行。
+
+
+#### 非可控更新任务
+
+如果是非可控的更新任务，比如在 `setTimeout` 或者 `Promise` 里面的更新，那么在 scheduleUpdateOnFiber 中已经讲过。
+
+```js
+if (executionContext === NoContext) {
+    /* 执行 flushSyncCallbackQueue ，立即执行更新 */
+    flushSyncCallbackQueue();
+}
+```
+综上这也就说明了，为什么在异步内部的 `setState` | `useState` 会打破批量更新的原则，本质上是因为，执行一次 `setState` | `useState` 就会触发一次 `flushSyncCallbackQueue` 立即触发更新，所以就会进入到调和阶段，去真正的更新 fiber 树。
+
+
+
+## 四 同步异步模式下的更新流程实践
+
+为了强化本章节的学习，接下来我们来一起研究一下 legacy 模式下的更新流程。
+
+### 初始化情况
+
+首先看一下初始化流程。
+
+
+![2.jpg](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4e763eb7b683487f847380c15a94656a~tplv-k3u1fbpfcp-watermark.image?)
+
+* ReactDOM.render -> unbatchContext 开关打开 -> updateContainer。
+* updateContainer：scheduleUpdateOnFiber -> performSyncWorkOnRoot -> renderRoot -> commitRoot -> 浏览器绘制。
+* unbatchContext 开关关闭。
+
+
+### 同步情况
+
+接下来一起看一下在同步（可控任务）和异步（非可控任务）下更新流程。
+
+首先看一下同步的情况
+
+```js
+function Test(){
+    const [ number , setNumber ] = React.useState(0)
+    const handleClick = ()=>{ /* 同步条件下 */
+        setNumber(1)
+        setNumber(2)
+    }
+    return <div>
+        {number}
+        <button onClick={handleClick} >点击</button>
+    </div>
+}
+```
+如上当点击按钮的时候，会触发两次 `setNumber` ，那么这两次 `setNumber` 都做了些什么呢？
+
+两次更新流程图如下：
+
+
+![3.jpg](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/93eead4ab14f42628cdd7ac4e0c00d25~tplv-k3u1fbpfcp-watermark.image?)
+
+整个流程过程：
+
+* **事件上下文**：开启事件开关 -> 进入第一次 `setNumber`。
+* **第一次 `setNumber` 上下文**： `scheduleUpdateOnFiber` -> `ensureRootIsScheduled` -> `scheduleSyncCallback` (放入回调函数 `performSyncWorkOnRoot` )。
+* **第二次 `setNumber` 上下文**： `scheduleUpdateOnFiber` -> `ensureRootIsScheduled` -> 退出。
+* **事件上下文**：关闭事件开关 -> `flushSyncCallbackQueue`。
+* **flushSyncCallbackQueue** -> 执行回调函数 `performSyncWorkOnRoot` -> 进入调和阶段 -> `renderRoot` -> `commitRoot` -> 浏览器绘制。
+
+### 异步情况
+
+```js
+const handleClick = ()=>{
+    setTimeout(() => { /* 异步条件下 */
+        setNumber(1)
+        setNumber(2)
+    },0)    
+}
+```
+
+两次更新流程图如下：
+
+
+![4.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2996f90757614edfbcd0230e02645d9c~tplv-k3u1fbpfcp-watermark.image?)
+
+整个流程过程：
+
+* **事件上下文**：开启事件开关 -> 关闭事件开关 -> flushSyncCallbackQueue (此时更新队列为空)。
+* **setTimeout上下文**：执行第一次 `setNumber`。
+* **第一次 `setNumber` 上下文**：`scheduleUpdateOnFiber` -> `ensureRootIsScheduled` -> `scheduleSyncCallback` (放入回调函数 `performSyncWorkOnRoot` ) -> `flushSyncCallbackQueue` -> 执行回调函数 `performSyncWorkOnRoot` -> 进入调和阶段 -> `renderRoot` -> `commitRoot`。
+* **回到 setTimeout 上下文**：执行第二次 `setNumber`。
+* **第二次 `setNumber` 上下文**：`scheduleUpdateOnFiber` -> `ensureRootIsScheduled` -> `scheduleSyncCallback` (放入回调函数 `performSyncWorkOnRoot` ) -> `flushSyncCallbackQueue` -> 执行回调函数 `performSyncWorkOnRoot` -> 进入调和阶段 -> `renderRoot` -> `commitRoot`。
+* js执行完毕，浏览器绘制。
+
+所以这种情况下 render 了两遍。到此为止 legacy 模式下更新流程真相大白。
+
+## 五 总结
+
+通过本章节的学习，收获的知识点如下：
+
+* 初始化和 `state` 改变的更新流程。
+* 可控任务和非可控任务的更新原理。
+* 如何进入调度任务。
+* 强化 state | 调度 ｜ 调和 章节的学习。

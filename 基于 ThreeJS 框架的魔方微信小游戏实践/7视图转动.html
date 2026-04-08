@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><style data-highlight="" data-highlight-key="juejin">.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style><h1 data-id="heading-0">视图转动</h1>
+<h2 data-id="heading-1">前言</h2>
+<p>在这一章中你将学到以下知识点：</p>
+<ol>
+<li>实现魔方视图转动功能；</li>
+<li>魔方整体转动分析及实现。</li>
+</ol>
+<h2 data-id="heading-2">概述</h2>
+<p><code>视图转动</code>如下图所示：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018113016764d8529c0d2d2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>示例代码在<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2FnewbieYoung%2FThreejs_rubik%2Ftree%2Fmaster%2Flesson%2Fdemo5" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/newbieYoung/Threejs_rubik/tree/master/lesson/demo5" ref="nofollow noopener noreferrer">Threejs_rubik</a>项目中；</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018113016764dd5626ed150~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">实现</h2>
+<p>视图转动也就是魔方整体转动和转动魔方某一层其实只有两点区别；</p>
+<ol>
+<li>转动魔方某一层的操作区域在魔方表面而魔方整体转动的操作区域在魔方外部；</li>
+<li>转动魔方某一层只涉及特定一层的小方块而魔方整体转动涉及组成魔方的全部小方块。</li>
+</ol>
+<p>兼容这两个差异之后，魔方整体转动和转动魔方某一层其实是等价的，如图：</p>
+<p><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181225167e5fcd7c6fb977~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在魔方区域外部的屏幕上操作时整个区域可以通过<code>X轴</code>和<code>Y轴</code>以及两条和 X 轴夹角为 30 度的<code>辅助虚线</code>划分为<code>a</code>、<code>b</code>、<code>e</code>、<code>f</code>、<code>g</code>、<code>d</code>六个区域，这六个区域分别对应魔方整体转动的六种类型；</p>
+<p>需要注意的是这六个区域并不是触摸点和滑动点的坐标区域而是触摸点和滑动点组成向量的区域，比如从<code>R点</code>滑动到<code>S点</code>，虽然两个点坐标都在<code>d</code>区域，但是它们组成的向量的区域在<code>a</code>区域，因此这个滑动也属于<code>a</code>区域滑动；</p>
+<p>在<code>a</code>区域，向右滑动，比如<code>OA</code>对应魔方的<code>HJ</code>转动；如果在<code>a</code>区域，向左滑动，比如<code>AO</code>则对应魔方的<code>JH</code>转动，屏幕滑动和魔方整体转动的对应关系如下：</p>
+<ul>
+<li><code>OA</code>:<code>HJ</code>；</li>
+<li><code>OD</code>:<code>HI</code>；</li>
+<li><code>OB</code>:<code>HK</code>；</li>
+<li><code>OF</code>:<code>LN</code>；</li>
+<li><code>OG</code>:<code>LM</code>；</li>
+<li><code>OE</code>:<code>LP</code>；</li>
+</ul>
+<p>对于魔方的<code>HJ</code>、<code>HI</code>、<code>HK</code>、<code>LN</code>、<code>LM</code>、<code>LP</code>的转动在上一章已经处理过了，接下来需要处理的是判断魔方区域外部屏幕上的滑动属于哪种情况，以<code>d</code>区域的<code>OD</code>滑动来说：</p>
+<p>当触摸点处于右半边屏幕且向斜上方滑动，对应代码：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第251行至第254行 */</span>
+<span class="hljs-keyword">var</span> direction;
+<span class="hljs-keyword">var</span> rad = <span class="hljs-number">30</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> / <span class="hljs-number">180</span>;
+<span class="hljs-keyword">var</span> lenX = movePoint.<span class="hljs-property">x</span> - startPoint.<span class="hljs-property">x</span>;
+<span class="hljs-keyword">var</span> lenY = movePoint.<span class="hljs-property">y</span> - startPoint.<span class="hljs-property">y</span>;
+
+<span class="hljs-comment">/* main.js 第256行至第270行 */</span>
+<span class="hljs-keyword">if</span>(startPoint.<span class="hljs-property">x</span>&gt;<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>/<span class="hljs-number">2</span>){
+    <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenY) &gt; <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenX) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(rad)){
+        <span class="hljs-keyword">if</span>(lenY&lt;<span class="hljs-number">0</span>){
+            direction = <span class="hljs-number">2.1</span>;
+        }<span class="hljs-keyword">else</span>{
+            direction = <span class="hljs-number">3.1</span>;
+        }
+    }
+}
+</code></pre>
+<p><code>movePoint</code>和<code>startPoint</code>表示滑动点和触摸点，<code>startPoint.x&gt;window.innerWidth/2</code>则表示触摸点处于右半边屏幕，<code>Math.abs(lenY) &gt; Math.abs(lenX) * Math.tan(30/180*Math.PI)</code>意味着滑动点和触摸点组成的向量和 X 轴的夹角大于 30 度，也就是此次滑动要么属于<code>d</code>区域，要么属于<code>b</code>区域；</p>
+<p>最后通过<code>lenY</code>也就是滑动点和触摸点 y 值的差的正负判断是向上还是向下，如果是向下则此次滑动属于<code>b</code>区域对应魔方的<code>HK</code>转动也就是<code>direction=2.1</code>，表示向 Y 轴正方向旋转 90 度，且触摸平面是 Z 轴正平面。</p>
+<p>获得视图转动方向函数完整代码如下：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第250行至第317行 */</span>
+<span class="hljs-title function_">getViewDirection</span>(<span class="hljs-params">type,startPoint,movePoint</span>){
+    <span class="hljs-keyword">var</span> direction;
+    <span class="hljs-keyword">var</span> rad = <span class="hljs-number">30</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">180</span>;
+    <span class="hljs-keyword">var</span> lenX = movePoint.<span class="hljs-property">x</span> - startPoint.<span class="hljs-property">x</span>;
+    <span class="hljs-keyword">var</span> lenY = movePoint.<span class="hljs-property">y</span> - startPoint.<span class="hljs-property">y</span>;
+    <span class="hljs-keyword">if</span>(type==<span class="hljs-variable language_">this</span>.<span class="hljs-property">frontViewName</span>){
+        <span class="hljs-keyword">if</span>(startPoint.<span class="hljs-property">x</span>&gt;<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>/<span class="hljs-number">2</span>){
+            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenY) &gt; <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenX) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(rad)){
+                <span class="hljs-keyword">if</span>(lenY&lt;<span class="hljs-number">0</span>){
+                    direction = <span class="hljs-number">2.1</span>;
+                }<span class="hljs-keyword">else</span>{
+                    direction = <span class="hljs-number">3.1</span>;
+                }
+            }<span class="hljs-keyword">else</span>{
+                <span class="hljs-keyword">if</span>(lenX&gt;<span class="hljs-number">0</span>){
+                    direction = <span class="hljs-number">0.3</span>;
+                }<span class="hljs-keyword">else</span>{
+                    direction = <span class="hljs-number">1.3</span>;
+                }
+            }
+        }<span class="hljs-keyword">else</span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenY) &gt; <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenX) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(rad)) {
+                <span class="hljs-keyword">if</span> (lenY &lt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">2.4</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">3.4</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (lenX &gt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">4.4</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">5.4</span>;
+                }
+            }
+        }
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">if</span> (startPoint.<span class="hljs-property">x</span> &gt; <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> / <span class="hljs-number">2</span>) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenY) &gt; <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenX) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(rad)) {
+                <span class="hljs-keyword">if</span> (lenY &lt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">2.2</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">3.2</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (lenX &gt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">1.4</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">0.4</span>;
+                }
+            }
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenY) &gt; <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(lenX) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">tan</span>(rad)) {
+                <span class="hljs-keyword">if</span> (lenY &lt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">2.3</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">3.3</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (lenX &gt; <span class="hljs-number">0</span>) {
+                    direction = <span class="hljs-number">5.3</span>;
+                } <span class="hljs-keyword">else</span> {
+                    direction = <span class="hljs-number">4.3</span>;
+                }
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> direction;
+}
+</code></pre>
+<p>处理完滑动方向的映射关系之后，还需要确定小方块序号，选取正视角魔方或者反视角魔方中水平方向的两个面相交处任意小方块均可；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第239行至第245行 */</span>
+<span class="hljs-title function_">getViewRotateCubeIndex</span>(<span class="hljs-params">type</span>){
+    <span class="hljs-keyword">if</span> (type == <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontViewName</span>){
+        <span class="hljs-keyword">return</span> <span class="hljs-number">10</span>;
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">65</span>;
+    }
+}
+</code></pre>
+<p>当我们把魔方区域外的滑动映射为魔方区域上的滑动，且明确了转动方向和小方块序号，就可以编写魔方整体转动函数了；</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* Rubik.js 第459行至第473行 */</span>
+<span class="hljs-title function_">rotateMoveWhole</span>(<span class="hljs-params">cubeIndex, direction, callback, totalTime</span>){
+    <span class="hljs-keyword">if</span>(cubeIndex!=<span class="hljs-literal">null</span>&amp;&amp;direction!=<span class="hljs-literal">null</span>){
+        <span class="hljs-keyword">var</span> self = <span class="hljs-variable language_">this</span>;
+        totalTime = totalTime ? totalTime : <span class="hljs-variable language_">this</span>.<span class="hljs-property">defaultTotalTime</span>;
+        <span class="hljs-keyword">var</span> elements = <span class="hljs-variable language_">this</span>.<span class="hljs-property">cubes</span>;
+        <span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">timestamp</span>) {
+            self.<span class="hljs-title function_">rotateAnimation</span>(elements, direction, timestamp, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+                self.<span class="hljs-title function_">updateCubeIndex</span>(elements);
+                <span class="hljs-keyword">if</span> (callback) {
+                    <span class="hljs-title function_">callback</span>();
+                }
+            }, totalTime);
+        });
+    }
+}
+</code></pre>
+<p>和转动魔方某一层函数唯一的区别就是转动元素为全部小方块<code>var elements = this.cubes</code>。</p>
+<p>魔方整体转动触摸点和滑动点坐标直接使用屏幕坐标就好了，因此需要在触摸开始事件回调函数<code>touchStart</code>以及触摸移动事件回调函数<code>touchMove</code>中和转动魔方某一层的触摸点以及滑动点坐标区分开：</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第125行至第127行 */</span>
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">isRotating</span> &amp;&amp; !<span class="hljs-variable language_">this</span>.<span class="hljs-property">intersect</span>){<span class="hljs-comment">//触摸点没在魔方上</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector2</span>(touch.<span class="hljs-property">clientX</span>, touch.<span class="hljs-property">clientY</span>);
+}
+
+<span class="hljs-comment">/* main.js 第149行至第154行 */</span>
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">isRotating</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span> &amp;&amp; !<span class="hljs-variable language_">this</span>.<span class="hljs-property">intersect</span>){<span class="hljs-comment">//触摸点没在魔方上</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">movePoint</span> = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector2</span>(touch.<span class="hljs-property">clientX</span>, touch.<span class="hljs-property">clientY</span>);
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">movePoint</span>.<span class="hljs-title function_">equals</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span>)) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rotateView</span>();
+    }
+}
+</code></pre>
+<p>当触摸点没在魔方上且魔方没有转动时，执行<code>rotateView</code>函数转动魔方整体，调整视图。</p>
+<pre><code class="hljs language-js" lang="js"><span class="hljs-comment">/* main.js 第193行至第213行 */</span>
+<span class="hljs-title function_">rotateView</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">var</span> self = <span class="hljs-variable language_">this</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span>.<span class="hljs-property">y</span> &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span>){
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">targetRubik</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">anotherRubik</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span>.<span class="hljs-property">y</span> &gt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">top</span> + <span class="hljs-variable language_">this</span>.<span class="hljs-property">touchLine</span>.<span class="hljs-property">screenRect</span>.<span class="hljs-property">height</span>){
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">targetRubik</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">endRubik</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">anotherRubik</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">frontRubik</span>;
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">targetRubik</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">anotherRubik</span>){
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">isRotating</span> = <span class="hljs-literal">true</span>;<span class="hljs-comment">//转动标识置为true</span>
+        <span class="hljs-comment">//计算整体转动方向</span>
+        <span class="hljs-keyword">var</span> targetType = <span class="hljs-variable language_">this</span>.<span class="hljs-property">targetRubik</span>.<span class="hljs-property">group</span>.<span class="hljs-property">childType</span>;
+        <span class="hljs-keyword">var</span> cubeIndex = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getViewRotateCubeIndex</span>(targetType);
+        <span class="hljs-keyword">var</span> direction = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getViewDirection</span>(targetType, <span class="hljs-variable language_">this</span>.<span class="hljs-property">startPoint</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">movePoint</span>);
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">targetRubik</span>.<span class="hljs-title function_">rotateMoveWhole</span>(cubeIndex, direction);
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">anotherRubik</span>.<span class="hljs-title function_">rotateMoveWhole</span>(cubeIndex, direction, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+            self.<span class="hljs-title function_">resetRotateParams</span>();
+        });
+    }
+}
+</code></pre>
+<p>整个流程为先判断目标魔方，然后把屏幕上魔方区域外的滑动映射为魔方上的滑动，兼容处理转动元素为全部小方块，然后执行转动动画即可。</p>
+<h2 data-id="heading-4">总结</h2>
+<p>在不支持视图转动之前，虽说也能看到魔方全部六个面，但是对于我这种空间想象能力不够的人来说，查看两种视图然后相互映射比转一下直接查看要慢很多，因此这里加上了视图转动；实现这个功能只需要想<code>清楚操作类型划分</code>以及<code>合理利用已有功能</code>就可以了。</p></div>
+    </body>
+    </html>

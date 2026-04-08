@@ -1,0 +1,413 @@
+## 一前言
+
+上节主要讲了 React 对组件渲染的控制方法以及原理，本章节将继续围绕 React 渲染话题，谈一谈整个 React 渲染过程中细节问题怎么解决。
+
+通过本章节，你将学会 Suspense 用法和原理，React.lazy 用法和配合 Suspense 实现代码分割，渲染错误边界、渲染异常的处理手段， 以及 diff 流程以及 key 的合理使用。
+
+## 二懒加载和异步渲染
+
+### 异步渲染
+
+Suspense 是 React 提出的一种同步的代码来实现异步操作的方案。Suspense 让组件‘等待’异步操作，异步请求结束后在进行组件的渲染，也就是所谓的异步渲染，但是这个功能目前还在实验阶段，相信不久这种异步渲染的方式就能和大家见面了。
+
+**Suspense 用法**
+
+Suspense 是组件，有一个 fallback 属性，用来代替当 Suspense 处于 loading 状态下渲染的内容，Suspense 的 children 就是异步组件。多个异步组件可以用 Suspense 嵌套使用。
+
+我写了一个异步渲染的例子如下。
+
+```js
+// 子组件
+function UserInfo() {
+  // 获取用户数据信息，然后再渲染组件。
+  const user = getUserInfo();
+  return <h1>{user.name}</h1>;
+}
+// 父组件
+export default function Index(){
+    return <Suspense fallback={<h1>Loading...</h1>}>
+        <UserInfo/>
+    </Suspense>
+}
+```
+* Suspense 包裹异步渲染组件 UserInfo ，当 UserInfo 处于数据加载状态下，展示 Suspense 中 fallback 的内容。
+
+如上所示，异步渲染的 UserInfo 组件可以直接通过 getUserInfo 请求数据，直接用数据 user 进行渲染，很显然现在是做不到的。现在的异步请求方式比较繁琐，主要是是通过类组件 componentDidMount 或者函数组件 useEffect 进行数据交互，获得数据后通过调用 setState 或 useState 改变 state 触发视图的更新。
+
+传统模式：挂载组件-> 请求数据 -> 再渲染组件。  
+异步模式：请求数据-> 渲染组件。
+
+那么异步渲染相比传统数据交互相比好处就是：
+* 不再需要 componentDidMount 或 useEffect 配合做数据交互，也不会因为数据交互后，改变 state 而产生的二次更新作用。
+* 代码逻辑更简单，清晰。
+
+
+### 动态加载（懒加载）
+现在的 Suspense 配合 React.lazy 可以实现动态加载功能。
+
+**React.lazy**
+```js
+const LazyComponent = React.lazy(()=>import('./text'))
+```
+React.lazy 接受一个函数，这个函数需要动态调用 `import()` 。它必须返回一个 Promise ，该 Promise 需要 resolve 一个 default export 的 React 组件。
+
+先来看一下基本使用：
+
+```js
+const LazyComponent = React.lazy(() => import('./test.js'))
+
+export default function Index(){
+   return <Suspense fallback={<div>loading...</div>} >
+       <LazyComponent />
+   </Suspense>
+}
+```
+* 用 React.lazy 动态引入 test.js 里面的组件，配合 Suspense 实现动态加载组件效果。**这样很利于代码分割，不会让初始化的时候加载大量的文件。**
+
+原理揭秘： **React.lazy和Suspense实现动态加载原理** 
+
+整个 render 过程都是同步执行一气呵成的，但是在 Suspense 异步组件情况下允许**调用 Render => 发现异步请求 => 悬停，等待异步请求完毕 => 再次渲染展示数据**。
+
+那么整个流程是如何实现的，逐步分析一下：  
+
+**Suspense原理：** <br/>
+
+Suspense 在执行内部可以通过 `try{}catch{}` 方式捕获异常，这个异常通常是一个 `Promise` ，可以在这个 Promise 中进行数据请求工作，Suspense 内部会处理这个 Promise ，Promise 结束后，Suspense 会再一次重新 render 把数据渲染出来，达到异步渲染的效果。  
+
+
+![5.jpg](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/60d20c4fad834541873697ead2ec6dda~tplv-k3u1fbpfcp-watermark.image)
+
+
+**React.lazy原理：**
+
+再看一下 React.lazy，lazy 内部模拟一个 promiseA 规范场景。完全可以理解 React.lazy 用 Promise 模拟了一个请求数据的过程，但是请求的结果不是数据，而是一个动态的组件。下一次渲染就直接渲染这个组件，所以是 React.lazy 利用 Suspense **接收 Promise ，执行 Promise ，然后再渲染**这个特性做到动态加载的。说到这可能有很多同学不明白什么意思，不要紧，接下来通过以下代码加深一下对 lazy + susponse 的理解。
+
+> react/src/ReactLazy.js
+```js
+function lazy(ctor){
+    return {
+         $$typeof: REACT_LAZY_TYPE,
+         _payload:{
+            _status: -1,  //初始化状态
+            _result: ctor,
+         },
+         _init:function(payload){
+             if(payload._status===-1){ /* 第一次执行会走这里  */
+                const ctor = payload._result;
+                const thenable = ctor();
+                payload._status = Pending;
+                payload._result = thenable;
+                thenable.then((moduleObject)=>{
+                    const defaultExport = moduleObject.default;
+                    resolved._status = Resolved; // 1 成功状态
+                    resolved._result = defaultExport;/* defaultExport 为我们动态加载的组件本身  */ 
+                })
+             }
+            if(payload._status === Resolved){ // 成功状态
+                return payload._result;
+            }
+            else {  //第一次会抛出Promise异常给Suspense
+                throw payload._result; 
+            }
+         }
+    }
+}
+```
+整个流程是这样的，React.lazy 包裹的组件会标记 `REACT_LAZY_TYPE` 类型的 element，在调和阶段会变成 LazyComponent 类型的 fiber ，React 对 LazyComponent 会有单独的处理逻辑：
+
+* 第一次渲染首先会执行 init 方法，里面会执行 lazy 的第一个函数，得到一个Promise，绑定 Promise.then 成功回调，回调里得到将要渲染组件 `defaultExport` ，这里要注意的是，如上面的函数当第二个 if 判断的时候，因为此时状态不是 Resolved ，所以会走 else ，抛出异常 Promise，抛出异常会让当前渲染终止。
+
+* 这个异常 Promise 会被 Suspense 捕获到，Suspense 会处理 Promise ，Promise 执行成功回调得到 defaultExport（将想要渲染组件），然后 Susponse 发起第二次渲染，第二次 init 方法已经是 Resolved 成功状态，那么直接返回 result 也就是真正渲染的组件。这时候就可以正常渲染组件了。
+
+
+![4.jpg](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6792d24862464d89b2034bfa4cf9e5a8~tplv-k3u1fbpfcp-watermark.image)
+ 
+## 三 渲染错误边界
+
+React 组件渲染过程如果有一个环节出现问题，就会导致整个组件渲染失败，那么整个组件的 UI 层都会显示不出来，这样造成的危害是巨大的，如果越靠近 APP 应用的根组件，渲染过程中出现问题造成的影响就越大，有可能直接造成白屏的情况。
+
+比如如下例子
+```js
+function ErrorTest(){
+    return 
+}
+function Test(){
+    return <div>let us learn React!</div>
+}
+
+ class Index extends React.Component{ 
+    componentDidCatch(...arg){
+       console.log(arg)
+    }
+   render(){  
+      return <div>
+          <ErrorTest />
+          <div> hello, my name is alien! </div>
+          <Test />
+      </div>
+   }
+}
+```
+* 造成错误，由于 ErrorTest 不是一个真正的组件但是却用来渲染，结果会造成整个 Index 组件渲染异常，Test 也会受到牵连，UI 都不能正常显示。 
+
+为了防止如上的渲染异常情况 React 增加了 `componentDidCatch` 和 `static getDerivedStateFromError()` 两个额外的生命周期，去挽救由于渲染阶段出现问题造成 UI 界面无法显示的情况。
+
+
+### componentDidCatch
+componentDidCatch 可以捕获异常，它接受两个参数：
+
+* 1 error —— 抛出的错误。
+* 2 info —— 带有 componentStack key 的对象，其中包含有关组件引发错误的栈信息。
+先来打印一下，生命周期 componentDidCatch 参数长什么样子？
+
+
+
+![2.jpg](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/17c55d44dfe94d2a9544030ce5c426c1~tplv-k3u1fbpfcp-watermark.image)
+
+那么 componentDidCatch 中可以再次触发 setState，来降级UI渲染，componentDidCatch() 会在commit阶段被调用，因此允许执行副作用。
+```js
+ class Index extends React.Component{
+   state={
+       hasError:false
+   }  
+   componentDidCatch(...arg){
+       uploadErrorLog(arg)  /* 上传错误日志 */
+       this.setState({  /* 降级UI */
+           hasError:true
+       })
+   }
+   render(){  
+      const { hasError } =this.state
+      return <div>
+          {  hasError ? <div>组件出现错误</div> : <ErrorTest />  }
+          <div> hello, my name is alien! </div>
+          <Test />
+      </div>
+   }
+}
+```
+效果：
+
+
+![3.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8e97c84689a4493d9f3c6e05b4723499~tplv-k3u1fbpfcp-watermark.image)
+componentDidCatch 作用：
+* 可以调用 setState 促使组件渲染，并做一些错误拦截功能。
+* 监控组件，发生错误，上报错误日志。
+
+### static getDerivedStateFromError
+React更期望用 getDerivedStateFromError 代替 componentDidCatch 用于处理渲染异常的情况。getDerivedStateFromError 是静态方法，内部不能调用 setState。getDerivedStateFromError 返回的值可以合并到 state，作为渲染使用。用 getDerivedStateFromError 解决如上的情况。
+
+```js
+ class Index extends React.Component{
+   state={
+       hasError:false
+   }  
+   static getDerivedStateFromError(){
+       return { hasError:true }
+   }
+   render(){  
+      /* 如上 */
+   }
+}
+```
+如上完美解决了 ErrorTest 错误的问题。注意事项： 如果存在 getDerivedStateFromError 生命周期钩子，那么将不需要 componentDidCatch 生命周期再降级 ui。
+
+## 四 从diff children看key的合理使用
+
+上述内容讲了异步渲染和渲染错误边界，都是对一些特殊情况下渲染的处理。上章节讲到，大部分优化环节 React 都自己在内部处理了。但是有一种情况也值得开发者注意，那就是列表中 key 的使用。合理的使用 key 有助于能精准的找到用于新节点复用的老节点。 React 是如何 diff children 的呢。
+
+我这里为了方便大家了解流程，就不放过多源码了，我用如下几个案例来描述 React diffChild 核心流程。之前做过一期 vue3.0 diff算法的文章，实际在处理手法上还是有一些相似之处的。首先 React 在一次更新中当发现通过 render 得到的 children 如果是一个数组的话。就会调用 reconcileChildrenArray 来调和子代 fiber ，整个对比的流程就是在这个函数中进行的。
+
+### diff children流程
+
+**第一步：遍历新 children ，复用 oldFiber**
+> react-reconciler/src/ReactChildFiber.js
+```js
+function reconcileChildrenArray(){
+    /* 第一步  */
+    for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {  
+        if (oldFiber.index > newIdx) {
+            nextOldFiber = oldFiber;
+            oldFiber = null;
+        } else {
+            nextOldFiber = oldFiber.sibling;
+        }
+        const newFiber = updateSlot(returnFiber,oldFiber,newChildren[newIdx],expirationTime,);
+        if (newFiber === null) { break }
+        // ..一些其他逻辑
+        }  
+        if (shouldTrackSideEffects) {  // shouldTrackSideEffects 为更新流程。
+            if (oldFiber && newFiber.alternate === null) { /* 找到了与新节点对应的fiber，但是不能复用，那么直接删除老节点 */
+                deleteChild(returnFiber, oldFiber);
+            }
+        }
+    }
+}
+```
+
+* 第一步对于 React.createElement 产生新的 child 组成的数组，首先会遍历数组，因为 fiber 对于同一级兄弟节点是用 sibling 指针指向，所以在遍历children 遍历，sibling 指针同时移动，找到与 child 对应的 oldFiber 。
+* 然后通过调用 updateSlot ，updateSlot 内部会判断当前的 tag 和 key 是否匹配，如果匹配复用老 fiber 形成新的 fiber ，如果不匹配，返回 null ，此时 newFiber 等于 null 。
+* 如果是处于更新流程，找到与新节点对应的老 fiber ，但是不能复用 `alternate === null `，那么会删除老 fiber 。
+
+**第二步：统一删除oldfiber**
+```js
+if (newIdx === newChildren.length) {
+    deleteRemainingChildren(returnFiber, oldFiber);
+    return resultingFirstChild;
+}
+```
+* 第二步适用于以下情况，当第一步结束完 `newIdx === newChildren.length` 此时证明所有 newChild 已经全部被遍历完，那么剩下没有遍历 oldFiber 也就没有用了，那么调用 deleteRemainingChildren 统一删除剩余 oldFiber 。
+
+情况一：节点删除
+* **oldChild: A B C D**
+* **newChild: A B**
+A , B 经过第一步遍历复制完成，那么 newChild 遍历完成，此时 C D 已经没有用了，那么统一删除 C D。
+
+**第三步：统一创建newFiber**
+
+```js
+if(oldFiber === null){
+   for (; newIdx < newChildren.length; newIdx++) {
+       const newFiber = createChild(returnFiber,newChildren[newIdx],expirationTime,)
+       // ...
+   }
+}
+```
+* 第三步适合如下的情况，当经历过第一步，oldFiber 为 null ， 证明 oldFiber 复用完毕，那么如果还有新的 children ，说明都是新的元素，只需要调用 createChild 创建新的 fiber 。
+
+情况二：节点增加
+* **oldChild: A B**
+* **newChild: A B C D**
+A B 经过第一步遍历复制完，oldFiber 没有可以复用的了，那么直接创建 C D。
+
+**第四步：针对发生移动和更复杂的情况**
+
+```js
+const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
+for (; newIdx < newChildren.length; newIdx++) {
+    const newFiber = updateFromMap(existingChildren,returnFiber)
+    /* 从mapRemainingChildren删掉已经复用oldFiber */
+}
+```
+
+* mapRemainingChildren 返回一个 map ，map 里存放剩余的老的 fiber 和对应的 key (或 index )的映射关系。
+* 接下来遍历剩下没有处理的 Children ，通过 updateFromMap ，判断 mapRemainingChildren 中有没有可以复用 oldFiber ，如果有，那么复用，如果没有，新创建一个 newFiber 。
+* 复用的 oldFiber 会从 mapRemainingChildren 删掉。
+
+情况三：节点位置改变
+
+* **oldChild: A B C D**
+* **newChild: A B D C**
+如上 A B 在第一步被有效复用，第二步和第三步不符合，直接进行第四步，C D 被完全复用，existingChildren 为空。
+
+**第五步：删除剩余没有复用的oldFiber**
+
+```js
+if (shouldTrackSideEffects) {
+    /* 移除没有复用到的oldFiber */
+    existingChildren.forEach(child => deleteChild(returnFiber, child));
+}
+```
+最后一步，对于没有复用的 oldFiber ，统一删除处理。
+
+情况四：复杂情况(删除 + 新增 + 移动)  
+* **oldChild: A B C D**
+* **newChild: A E D B** 
+
+首先 A 节点，在第一步被复用，接下来直接到第四步，遍历 newChild ，E被创建，D B 从 existingChildren 中被复用，existingChildren 还剩一个 C 在第五步会删除 C ，完成整个流程。
+
+### 关于diffChild思考和key的使用
+
+* 1  React diffChild 时间复杂度 O(n^3) 优化到 O(n)。
+* 2  React key 最好选择唯一性的id，如上述流程，如果选择 Index 作为 key ，如果元素发生移动，那么从移动节点开始，接下来的 fiber 都不能做得到合理的复用。 index 拼接其他字段也会造成相同的效果。
+
+## 五实践 - React.lazy + Susponse模拟异步组件功能
+接下来 React.lazy + Susponse 来完全模拟实现一个异步组件。
+
+**实现效果：**
+* 异步组件要实现的功能，异步请求数据，请求完数据再挂载组件。没有加载完数据显示 loading 效果。
+* 可量化生产。
+
+**主要思路：**
+* 可以使用 React.lazy 实现动态加载，那么可以先请求数据，然后再加载组件，这时候以 props 形式将数据传递给目标组件，实现异步效果。
+
+
+**编写：**
+```js
+/**
+ * 
+ * @param {*} Component  需要异步数据的component 
+ * @param {*} api        请求数据接口,返回Promise，可以再then中获取与后端交互的数据
+ * @returns 
+ */
+function AysncComponent(Component,api){
+    const AysncComponentPromise = () => new Promise(async (resolve)=>{
+          const data = await api()
+          resolve({
+              default: (props) => <Component rdata={data} { ...props}  />
+          })
+    })
+    return React.lazy(AysncComponentPromise)
+}
+```
+**思路：**
+* 用 AysncComponent 作为一个 HOC 包装组件，接受两个参数，第一个参数为当前组件，第二个参数为请求数据的 api 。
+* 声明一个函数给 React.lazy 作为回调函数，React.lazy 要求这个函数必须是返回一个 Promise 。在 Promise 里面通过调用 api 请求数据，然后根据返回来的数据 rdata 渲染组件，别忘了接受并传递 props 。
+
+**使用：** 
+
+```js
+/* 数据模拟 */
+const getData=()=>{
+    return new Promise((resolve)=>{
+        //模拟异步
+        setTimeout(() => {
+             resolve({
+                 name:'alien',
+                 say:'let us learn React!'
+             })
+        }, 1000)
+    })
+}
+/* 测试异步组件 */
+function Test({ rdata  , age}){
+    const { name , say } = rdata
+    console.log('组件渲染')
+    return <div>
+        <div> hello , my name is { name } </div>
+        <div>age : { age } </div>
+        <div> i want to say { say } </div>
+    </div>
+}
+/* 父组件 */
+export default class Index extends React.Component{
+    LazyTest = AysncComponent(Test,getData) /* 需要每一次在组件内部声明，保证每次父组件挂载，都会重新请求数据 ，防止内存泄漏。 */
+    render(){
+        const { LazyTest } = this
+        return <div>
+           <Suspense fallback={<div>loading...</div>} >
+              <LazyTest age={18}  />
+          </Suspense>
+        </div>
+    }
+}
+```
+
+**效果：**
+
+![1.gif](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/240879ad371f4031999dded287e27142~tplv-k3u1fbpfcp-watermark.image)
+
+* 如上 name 和 say 都是数据交互获取的数据。
+* 组件只渲染了一次，实现了异步渲染的效果。
+
+**总结：**
+
+这个demo仅供大家参考，加深以下对异步组件和 HOC 的理解，但是这种在真实的开发场景也会遇到一些问题。
+
+* 1 需要约定好接受数据格式rdata和数据交互形式api。
+* 2 因为数据本质是用闭包缓存的，所以绑定需要在在组件内部，这样才能保证每次父组件挂载，都会重新请求数据，另外也防止内存泄漏情况发生。
+* 3 数据源更新维护困难。
+
+## 六总结
+
+这节主要讲了 React 未来版本的异步组件，React.lazy + Susponse 动态加载原理，渲染的错误边界及其处理，diff 性能调优，以及用一个实践 demo ，lazy + susponse 模拟实现了异步组件。

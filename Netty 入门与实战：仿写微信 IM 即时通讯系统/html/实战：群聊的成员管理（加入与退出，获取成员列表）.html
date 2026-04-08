@@ -1,0 +1,267 @@
+<blockquote>
+<p>上一小节，我们已经学习了如何创建群聊并通知到群聊的各位成员。本小节，我们来实现群成员管理，包括群的加入退出，获取成员列表两大功能。有了前面两小节的基础，相信本小节的内容对你来说会比较简单。</p>
+</blockquote>
+<p>在开始之前，我们依然是先来看一下最终的效果。</p>
+<h2 class="heading">1. 最终效果</h2>
+<blockquote>
+<p>服务端</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/1664484871ef2aec?w=1240&amp;h=319&amp;f=png&amp;s=122094"><figcaption></figcaption></figure><p></p>
+<p>从服务端可以看到，闪电侠、逆闪、极速先后登录到服务器，然后随后，闪电侠创建一个群聊，接下来，萨维塔也登录了。这里，客户端我们只展示闪电侠和萨维塔的控制台界面</p>
+<blockquote>
+<p>客户端 - 闪电侠</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/1664484872148954?w=1240&amp;h=444&amp;f=png&amp;s=301020"><figcaption></figcaption></figure><p></p>
+<blockquote>
+<p>客户端 - 萨维塔</p>
+</blockquote>
+<p></p><figure><img alt="image.png" src="https://user-gold-cdn.xitu.io/2018/10/5/1664484871f648d4?w=1240&amp;h=386&amp;f=png&amp;s=184393"><figcaption></figcaption></figure><p></p>
+<p>我们可以看到最终效果是四位用户登录成功之后</p>
+<ol>
+<li>闪电侠先拉逆闪和极速加入了群聊，控制台输出群创建成功的消息。</li>
+<li>随后在萨维塔的控制台输入 "joinGroup" 之后再输入群聊的 id，加入群聊，控制台显示加入群成功。</li>
+<li>在闪电侠的控制台输入 "listGroupMembers" 之后再输入群聊的 id，展示了当前群聊成员包括了极速、萨维塔、闪电侠、逆闪。</li>
+<li>萨维塔的控制台输入 "quitGroup" 之后再输入群聊的 id，退出群聊，控制台显示退群成功。</li>
+<li>最后在闪电侠的控制台输入 "listGroupMembers" 之后再输入群聊的 ID，展示了当前群聊成员已无萨维塔。</li>
+</ol>
+<p>接下来，我们就来实现加入群聊，退出群聊，获取成员列表三大功能。</p>
+<h2 class="heading">2. 群的加入</h2>
+<h3 class="heading">2.1 控制台添加群加入命令处理器</h3>
+<blockquote>
+<p>JoinGroupConsoleCommand.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JoinGroupConsoleCommand</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">exec</span><span class="hljs-params">(Scanner scanner, Channel channel)</span> </span>{
+        JoinGroupRequestPacket joinGroupRequestPacket = <span class="hljs-keyword">new</span> JoinGroupRequestPacket();
+
+        System.out.print(<span class="hljs-string">"输入 groupId，加入群聊："</span>);
+        String groupId = scanner.next();
+
+        joinGroupRequestPacket.setGroupId(groupId);
+        channel.writeAndFlush(joinGroupRequestPacket);
+    }
+}
+</code></pre><p>按照前面两小节的套路，我们在控制台先添加群加入命令处理器 <code>JoinGroupConsoleCommand</code>，在这个处理器中，我们创建一个指令对象 <code>JoinGroupRequestPacket</code>，填上群 id 之后，将数据包发送至服务端。之后，我们将该控制台指令添加到 <code>ConsoleCommandManager</code>。</p>
+<blockquote>
+<p>ConsoleCommandManager.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsoleCommandManager</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+    
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ConsoleCommandManager</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        consoleCommandMap.put(<span class="hljs-string">"joinGroup"</span>, <span class="hljs-keyword">new</span> JoinGroupConsoleCommand());
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre><p>接下来，就轮到服务端来处理加群请求了。</p>
+<h3 class="heading">2.2 服务端处理群加入请求</h3>
+<p>服务端的 pipeline 中添加对应的 handler - <code>JoinGroupRequestHandler</code></p>
+<blockquote>
+<p>NettyServer.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">
+.childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// 添加加群请求处理器</span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> JoinGroupRequestHandler());
+        <span class="hljs-comment">// ..</span>
+    }
+});
+
+</code></pre><p><code>JoinGroupRequestHandler</code> 的具体逻辑为</p>
+<blockquote>
+<p>JoinGroupRequestHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JoinGroupRequestHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">JoinGroupRequestPacket</span>&gt; </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, JoinGroupRequestPacket requestPacket)</span> </span>{
+        <span class="hljs-comment">// 1. 获取群对应的 channelGroup，然后将当前用户的 channel 添加进去</span>
+        String groupId = requestPacket.getGroupId();
+        ChannelGroup channelGroup = SessionUtil.getChannelGroup(groupId);
+        channelGroup.add(ctx.channel());
+
+        <span class="hljs-comment">// 2. 构造加群响应发送给客户端</span>
+        JoinGroupResponsePacket responsePacket = <span class="hljs-keyword">new</span> JoinGroupResponsePacket();
+
+        responsePacket.setSuccess(<span class="hljs-keyword">true</span>);
+        responsePacket.setGroupId(groupId);
+        ctx.channel().writeAndFlush(responsePacket);
+    }
+}
+</code></pre><ol>
+<li>首先，通过 groupId 拿到对应的 <code>ChannelGroup</code>，之后，只需要调用 <code>ChannelGroup.add()</code> 方法，将加入群聊的用户的 channel 添加进去，服务端即完成了加入群聊的逻辑。</li>
+<li>然后，构造一个加群响应，填入 groupId 之后，调用 <code>writeAndFlush()</code> 发送给加入群聊的客户端。</li>
+</ol>
+<h3 class="heading">2.3 客户端处理群加入响应</h3>
+<p>我们在客户端的 pipeline 中添加对应的 handler - <code>JoinGroupResponseHandler</code> 来处理加群之后的响应</p>
+<blockquote>
+<p>NettyClient.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">.handler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() {
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(SocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// 添加加群响应处理器</span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> JoinGroupResponseHandler());
+        <span class="hljs-comment">// ...</span>
+    }
+});
+</code></pre><p><code>JoinGroupResponseHandler</code> 对应的逻辑为</p>
+<blockquote>
+<p>JoinGroupResponseHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JoinGroupResponseHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">JoinGroupResponsePacket</span>&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, JoinGroupResponsePacket responsePacket)</span> </span>{
+        <span class="hljs-keyword">if</span> (responsePacket.isSuccess()) {
+            System.out.println(<span class="hljs-string">"加入群["</span> + responsePacket.getGroupId() + <span class="hljs-string">"]成功!"</span>);
+        } <span class="hljs-keyword">else</span> {
+            System.err.println(<span class="hljs-string">"加入群["</span> + responsePacket.getGroupId() + <span class="hljs-string">"]失败，原因为："</span> + responsePacket.getReason());
+        }
+    }
+}
+</code></pre><p>该处理器的逻辑很简单，只是简单的将加群的结果输出到控制台，实际生产环境 IM 可能比这个要复杂，但是修改起来也是非常容易的。至此，加群相关的逻辑到这里就结束了。</p>
+<h2 class="heading">3. 群的退出</h2>
+<p>关于群的退出和群的加入逻辑非常类似，这里展示一下关键代码，完整代码请参考 <a target="_blank" href="https://github.com/lightningMan/flash-netty">github</a> <strong>对应本小节分支</strong></p>
+<p>服务端退群的核心逻辑为 <code>QuitGroupRequestHandler</code></p>
+<blockquote>
+<p>QuitGroupRequestHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QuitGroupRequestHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">QuitGroupRequestPacket</span>&gt; </span>{
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, QuitGroupRequestPacket requestPacket)</span> </span>{
+        <span class="hljs-comment">// 1. 获取群对应的 channelGroup，然后将当前用户的 channel 移除</span>
+        String groupId = requestPacket.getGroupId();
+        ChannelGroup channelGroup = SessionUtil.getChannelGroup(groupId);
+        channelGroup.remove(ctx.channel());
+
+        <span class="hljs-comment">// 2. 构造退群响应发送给客户端</span>
+        QuitGroupResponsePacket responsePacket = <span class="hljs-keyword">new</span> QuitGroupResponsePacket();
+
+        responsePacket.setGroupId(requestPacket.getGroupId());
+        responsePacket.setSuccess(<span class="hljs-keyword">true</span>);
+        ctx.channel().writeAndFlush(responsePacket);
+
+    }
+}
+</code></pre><p>从上面代码其实可以看到，<code>QuitGroupRequestHandler</code> 和 <code>JoinGroupRequestHandler</code> 其实是一个逆向的过程</p>
+<ol>
+<li>首先，通过 groupId 拿到对应的 <code>ChannelGroup</code>，之后，只需要调用 <code>ChannelGroup.remove()</code> 方法，将当前用户的 channel 删除，服务端即完成了退群的逻辑。</li>
+<li>然后，构造一个退群响应，填入 groupId 之后，调用 <code>writeAndFlush()</code> 发送给退群的客户端。</li>
+</ol>
+<p>至此，加群和退群的逻辑到这里就结束了，最后，我们来看一下获取成员列表的逻辑。</p>
+<h2 class="heading">4. 获取成员列表</h2>
+<h3 class="heading">4.1 控制台添加获取群列表命令处理器</h3>
+<blockquote>
+<p>ListGroupMembersConsoleCommand.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListGroupMembersConsoleCommand</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">exec</span><span class="hljs-params">(Scanner scanner, Channel channel)</span> </span>{
+        ListGroupMembersRequestPacket listGroupMembersRequestPacket = <span class="hljs-keyword">new</span> ListGroupMembersRequestPacket();
+
+        System.out.print(<span class="hljs-string">"输入 groupId，获取群成员列表："</span>);
+        String groupId = scanner.next();
+
+        listGroupMembersRequestPacket.setGroupId(groupId);
+        channel.writeAndFlush(listGroupMembersRequestPacket);
+    }
+}
+</code></pre><p>依旧按照一定的的套路，我们在控制台先添加获取群列表命令处理器 <code>ListGroupMembersConsoleCommand</code>，在这个处理器中，我们创建一个指令对象 <code>ListGroupMembersRequestPacket</code>，填上群 id 之后，将数据包发送至服务端。之后，我们将该控制台指令添加到 <code>ConsoleCommandManager</code>。</p>
+<blockquote>
+<p>ConsoleCommandManager.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsoleCommandManager</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConsoleCommand</span> </span>{
+    
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ConsoleCommandManager</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        consoleCommandMap.put(<span class="hljs-string">"listGroupMembers"</span>, <span class="hljs-keyword">new</span> ListGroupMembersConsoleCommand());
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</code></pre><p>接着，轮到服务端来处理获取成员列表请求。</p>
+<h3 class="heading">4.2 服务端处理获取成员列表请求</h3>
+<p>服务端的 pipeline 中添加对应的 handler - <code>ListGroupMembersRequestHandler</code></p>
+<blockquote>
+<p>NettyServer.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">
+.childHandler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;NioSocketChannel&gt;() {
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(NioSocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// 添加获取群成员请求处理器</span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> ListGroupMembersRequestHandler());
+        <span class="hljs-comment">// ..</span>
+    }
+});
+
+</code></pre><p><code>ListGroupMembersRequestHandler</code> 的具体逻辑为</p>
+<blockquote>
+<p>ListGroupMembersRequestHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListGroupMembersRequestHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">ListGroupMembersRequestPacket</span>&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, JoinGroupRequestPacket requestPacket)</span> </span>{
+        <span class="hljs-comment">// 1. 获取群的 ChannelGroup</span>
+        String groupId = requestPacket.getGroupId();
+        ChannelGroup channelGroup = SessionUtil.getChannelGroup(groupId);
+
+        <span class="hljs-comment">// 2. 遍历群成员的 channel，对应的 session，构造群成员的信息</span>
+        List&lt;Session&gt; sessionList = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
+        <span class="hljs-keyword">for</span> (Channel channel : channelGroup) {
+            Session session = SessionUtil.getSession(channel);
+            sessionList.add(session);
+        }
+
+        <span class="hljs-comment">// 3. 构建获取成员列表响应写回到客户端</span>
+        ListGroupMembersResponsePacket responsePacket = <span class="hljs-keyword">new</span> ListGroupMembersResponsePacket();
+
+        responsePacket.setGroupId(groupId);
+        responsePacket.setSessionList(sessionList);
+        ctx.channel().writeAndFlush(responsePacket);
+    }
+}
+</code></pre><ol>
+<li>首先，我们通过 groupId 拿到对应的 <code>ChannelGroup</code>。</li>
+<li>接着，我们创建一个 sessionList 用来装载群成员信息，我们遍历 channel 的每个 session，把对应的用户信息装到 sessionList 中，实际生产环境中，这里可能会构造另外一个对象来装载用户信息而非 Session，这里我们就简单粗暴点了，改造起来不难。</li>
+<li>最后，我们构造一个获取成员列表的响应指令数据包，填入 groupId 和群成员的信息之后，调用 <code>writeAndFlush()</code> 发送给发起获取成员列表的客户端。</li>
+</ol>
+<p>最后，就剩下客户端来处理获取群成员列表的响应了。</p>
+<h3 class="heading">4.3 客户端处理获取成员列表响应</h3>
+<p>套路和前面一样，我们在客户端的 pipeline 中添加一个 handler - <code>ListGroupMembersResponseHandler</code></p>
+<blockquote>
+<p>NettyClient.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java">.handler(<span class="hljs-keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() {
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChannel</span><span class="hljs-params">(SocketChannel ch)</span> </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-comment">// 添加获取群成员响应处理器</span>
+        ch.pipeline().addLast(<span class="hljs-keyword">new</span> ListGroupMembersResponseHandler());
+        <span class="hljs-comment">// ...</span>
+    }
+});
+</code></pre><p>而我们这里 <code>ListGroupMembersResponseHandler</code> 的逻辑也只是在控制台展示一下群成员的信息</p>
+<blockquote>
+<p>ListGroupMembersResponseHandler.java</p>
+</blockquote>
+<pre><code class="hljs java" lang="java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListGroupMembersResponseHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SimpleChannelInboundHandler</span>&lt;<span class="hljs-title">ListGroupMembersResponsePacket</span>&gt; </span>{
+    
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">channelRead0</span><span class="hljs-params">(ChannelHandlerContext ctx, ListGroupMembersResponsePacket responsePacket)</span> </span>{
+        System.out.println(<span class="hljs-string">"群["</span> + responsePacket.getGroupId() + <span class="hljs-string">"]中的人包括："</span> + responsePacket.getSessionList());
+    }
+}
+</code></pre><p>至此，群成员加入退出，获取群成员列表对应的逻辑到这里就全部实现了，其实从这小节和前面的一两个小节大家其实可以看到，我们添加一个新功能其实是有一定的套路的，我们在最后的总结给出这个套路。</p>
+<h2 class="heading">5. 总结</h2>
+<p>添加一个服务端和客户端交互的新功能只需要遵循以下的步骤：</p>
+<ol>
+<li>创建控制台指令对应的 <code>ConsoleCommand</code> 并添加到 <code>ConsoleCommandManager</code>。</li>
+<li>控制台输入指令和数据之后填入协议对应的指令数据包 - <code>xxxRequestPacket</code>，将请求写到服务端。</li>
+<li>服务端创建对应的 <code>xxxRequestPacketHandler</code> 并添加到服务端的 pipeline 中，在 <code>xxxRequestPacketHandler</code> 处理完之后构造对应的 <code>xxxResponsePacket</code> 发送给客户端。</li>
+<li>客户端创建对应的 <code>xxxResponsePacketHandler</code> 并添加到客户端的 pipeline 中，最后在 <code>xxxResponsePacketHandler</code> 完成响应的处理。</li>
+<li>最后，最容易忽略的一点就是，新添加 <code>xxxPacket</code> 别忘了完善编解码器 <code>PacketCodec</code> 中的 <code>packetTypeMap</code>！</li>
+</ol>
+<h2 class="heading">思考</h2>
+<ol>
+<li>实现以下功能：客户端加入或者退出群聊，将加入群聊的消息也通知到群聊中的其他客户端，这个消息需要和发起群聊的客户端区分开，类似 "xxx 加入群聊 yyy" 的格式。</li>
+<li>实现当一个群的人数为 0 的时候，清理掉内存中群相关的信息。</li>
+</ol>
+<p>欢迎留言讨论。</p>
+<div><script language="javascript">self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',25000);</script></div>

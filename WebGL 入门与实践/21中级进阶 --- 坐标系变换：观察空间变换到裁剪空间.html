@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">中级进阶 --- 投影变换：观察空间变换到裁剪空间</h1>
+<p>上节介绍了世界空间到观察空间（相机空间）的视图变换，本节介绍下一个转换步骤：观察空间到裁剪空间的投影变换。</p>
+<blockquote>
+<p>观察空间也称为相机空间。</p>
+</blockquote>
+<p>投影变换，顾名思义，就是将 3D 坐标投影到 2D 平面的过程。上节我们讲到，观察空间也沿用了右手坐标系，即 Z轴正向朝向屏幕外侧，但是裁剪坐标系是左手坐标系，即 Z 轴正向朝向屏幕内侧，那么在投影变换阶段，我们除了要将 3D 坐标投影到 2D 平面，还要将右手坐标系变换成左手坐标系。</p>
+<h2 data-id="heading-1">投影分类</h2>
+<p>业界有两种常用的投影方式：<code>正交投影</code>、<code>透视投影</code>。</p>
+<h3 data-id="heading-2">正交投影</h3>
+<p>正交投影，又名平行投影，常用在机械制图、施工图纸领域，投影后的比例和投影前的比例一致。</p>
+<h3 data-id="heading-3">透视投影</h3>
+<p>透视投影多用在成像领域，比如人看世界、相机拍照等场景，这个场景有一个特点就是投影后能够实现近大远小的效果。</p>
+<h2 data-id="heading-4">投影原理</h2>
+<p>正交投影和透视投影的原理大体相同，基本过程如下：</p>
+<ul>
+<li>首先指定可视范围，即什么范围内的物体能投影。此过程通过指定近平面和远平面来圈定范围。</li>
+<li>将可视范围内的所有物体坐标投影到近平面上，投影后的坐标根据相似三角形原理求得，比较简单。</li>
+</ul>
+<p>不同之处：</p>
+<ul>
+<li>正交投影的投影线是平行线，可视范围是一个立方体盒子。</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112716755ce8c1c5b8d9~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<ul>
+<li>透视投影的投影线是相交线，可视范围是一个棱锥体盒子，这样经过投影后才能达到近大远小的效果。</li>
+</ul>
+<p>如下图所示：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112716755c26a9777b94~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>上面两种投影坐标系原点均位于投影盒正中心位置，因为是左手坐标系，所以，Z轴朝向屏幕内侧。</p>
+<h2 data-id="heading-5">投影算法推导</h2>
+<p>接下来，我们推导一下投影变换算法。假设模型中有一点 P，且P的坐标为 （x,y,z），那么投影到近平面后的坐标P' = （x',y',z'）。那么 P'和P 之间的关系是什么呢？</p>
+<p>我们已知的条件有以下几个：</p>
+<ul>
+<li>近平面的 z 值 zNear。</li>
+<li>近平面的宽度 width 和高度 height。</li>
+<li>远平面的 z 值 zFar。</li>
+</ul>
+<p>zFar 和 zNear 是相机坐标系中的Z轴坐标，由于相机坐标系是右手坐标系，Z轴朝向屏幕外侧，所以 zNear 是大于 zFar 的，这点在做坐标转换时需要注意。</p>
+<p>接下来分析一下如何根据这些已知条件推导出 P'坐标，当推导出 P' 坐标之后，也就有了相应地投影矩阵。</p>
+<h3 data-id="heading-6">正交投影</h3>
+<p>通过上面的示意图，我们能看到，正交投影盒中的一点 P(x, y, z)，其中：</p>
+<ul>
+<li>x坐标在【-width/2, width / 2】之间，通常我们不指定width，而是指定相机坐标系下的投影盒的左右两侧坐标，left和right。</li>
+<li>y坐标在【-height/2， height/2】之间，通常我们不指定height，而是指定相机坐标系下的投影盒的左右两侧坐标，top和bottom。</li>
+<li>z坐标在【zNear，zFar】之间。</li>
+</ul>
+<p>投影后的点 P'（x',y',z'），其中：</p>
+<ul>
+<li>x' 在【-1，1】之间</li>
+<li>y' 在【-1，1】之间</li>
+<li>z' 在【-1，1】之间</li>
+</ul>
+<p>我们最终需要一个矩阵M，使用该矩阵左乘顶点向量 P，即可得到P'。</p>
+<p>按照惯例，我们还是找出P'和P之间的关系：</p>
+<h4 data-id="heading-7">x' 和 x 的关系：</h4>
+<figure><img alt="\begin{aligned}
+x'&= \frac{x - (left + right)/2} {(right - left)/2} \\\
+&= \frac{2x}{right - left} - \frac{right + left}{right - left}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax'%26%3D%20%5Cfrac%7Bx%20-%20(left%20%2B%20right)%2F2%7D%20%7B(right%20-%20left)%2F2%7D%20%5C%5C%5C%0A%26%3D%20%5Cfrac%7B2x%7D%7Bright%20-%20left%7D%20%20-%20%5Cfrac%7Bright%20%2B%20left%7D%7Bright%20-%20left%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-8">y'和y的关系</h4>
+<figure><img alt="\begin{aligned}
+y'&= \frac{y - (top + bottom)/2} {(top - bottom)/2} \\\
+&= \frac{2y}{top - bottom} - \frac{top + bottom}{top - bottom}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ay'%26%3D%20%5Cfrac%7By%20-%20(top%20%2B%20bottom)%2F2%7D%20%7B(top%20-%20bottom)%2F2%7D%20%5C%5C%5C%0A%26%3D%20%5Cfrac%7B2y%7D%7Btop%20-%20bottom%7D%20%20-%20%5Cfrac%7Btop%20%2B%20bottom%7D%7Btop%20-%20bottom%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h4 data-id="heading-9">z' 和 z 的关系</h4>
+<figure><img alt="\begin{aligned}
+z'&= \frac{z - (zFar + zNear)/2} {(zNear - zFar)/2} \\\
+&= \frac{2z}{zNear - zFar} - \frac{zFar + zNear}{zNear - zFar}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Az'%26%3D%20%5Cfrac%7Bz%20-%20(zFar%20%2B%20zNear)%2F2%7D%20%7B(zNear%20-%20zFar)%2F2%7D%20%5C%5C%5C%0A%26%3D%20%5Cfrac%7B2z%7D%7BzNear%20-%20zFar%7D%20%20-%20%5Cfrac%7BzFar%20%2B%20zNear%7D%7BzNear%20-%20zFar%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>找出 P'和P之间的关系之后，我们就能够将这个关系用矩阵表示出来，还记得我们的矩阵生成公式吗？</p>
+<figure><img alt="\begin{aligned}
+M = \begin{pmatrix}
+x'_x & y'_x & z'_x & t_x' \\\
+x'_y & y'_y & z'_y & t_y' \\\
+x'_z & y'_z & z'_z & t_z' \\\
+0 & 0 & 0 & 1 
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AM%20%3D%20%5Cbegin%7Bpmatrix%7D%0Ax'_x%20%26%20y'_x%20%26%20z'_x%20%26%20t_x'%20%5C%5C%5C%0Ax'_y%20%26%20y'_y%20%26%20z'_y%20%26%20t_y'%20%5C%5C%5C%0Ax'_z%20%26%20y'_z%20%26%20z'_z%20%26%20t_z'%20%5C%5C%5C%0A0%20%26%200%20%26%200%20%26%201%20%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>将上面的 x'、y'、z'代入上式，即可求出正交投影矩阵：</p>
+<figure><img alt="\begin{aligned}
+M = \begin{pmatrix}
+\frac{2}{right - left} & 0 & 0 & \frac{right + left}{left - right} \\\
+ 0 & \frac{2}{top - bottom} & 0 & \frac{top + bottom}{bottom - top} \\\
+ 0 & 0 & \frac{2}{zNear - zFar} & \frac{zFar + zNear}{zNear - zFar} \\\
+ 0 & 0 & 0 & 1 \\\
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AM%20%3D%20%5Cbegin%7Bpmatrix%7D%0A%5Cfrac%7B2%7D%7Bright%20-%20left%7D%20%26%200%20%26%200%20%26%20%5Cfrac%7Bright%20%2B%20left%7D%7Bleft%20-%20right%7D%20%5C%5C%5C%0A%200%20%26%20%5Cfrac%7B2%7D%7Btop%20-%20bottom%7D%20%26%200%20%26%20%5Cfrac%7Btop%20%2B%20bottom%7D%7Bbottom%20-%20top%7D%20%5C%5C%5C%0A%200%20%26%200%20%26%20%5Cfrac%7B2%7D%7BzNear%20-%20zFar%7D%20%26%20%5Cfrac%7BzFar%20%2B%20zNear%7D%7BzNear%20-%20zFar%7D%20%20%5C%5C%5C%0A%200%20%26%200%20%26%200%20%26%201%20%5C%5C%5C%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>以上就是正交投影变换矩阵的推导过程，很简单。</p>
+<p>那么，有了矩阵表示方式，正交投影算法就能够实现了。</p>
+<pre><code lang="ini" class="hljs language-ini">function ortho(left, right, bottom, top, near, far, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[0]</span> = 2 / (right - left)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = 2 / (top - bottom)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[8]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = 2 / (near - far)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[12]</span> = (left + right) / (left - right)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = (bottom + top) / (bottom - top)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = (near + far) / (near - far)<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 1<span class="hljs-comment">;</span>
+
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><h4 data-id="heading-10">实践</h4>
+<p>我们用一个立方体来演示一下，你会发现，无论远平面距离多远，立方体的大小是不会变的。</p>
+<p>我们将摄像机放在 Z 轴正向 20 个单位处，Y轴正向为上方，看向坐标系原点，同时将
+投影盒设置为一个上下左右边界坐标在【 -5，5】之间，近平面坐标为 20， 远平面坐标为 -20 的立方体。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">cube</span> = createCube(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>)<span class="hljs-comment">;</span>
+var <span class="hljs-attr">cameraPosition</span> = {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>, z: <span class="hljs-number">20</span>}<span class="hljs-comment">;</span>
+var <span class="hljs-attr">target</span> ={x: <span class="hljs-number">0</span>, y: <span class="hljs-number">0</span>, z: <span class="hljs-number">0</span>}<span class="hljs-comment">;</span>
+var <span class="hljs-attr">up</span> = {x: <span class="hljs-number">0</span>, y: <span class="hljs-number">1</span>, z: <span class="hljs-number">0</span>}<span class="hljs-comment">;</span>
+var <span class="hljs-attr">cameraMatrix</span> = matrix.lookAt(cameraPosition, target, up)<span class="hljs-comment">;</span>
+var <span class="hljs-attr">viewMatrix</span> = matrix.inverse(cameraMatrix)<span class="hljs-comment">;</span>
+var <span class="hljs-attr">projectionMatrix</span> = matrix.ortho(-<span class="hljs-number">5</span>, <span class="hljs-number">5</span>, -<span class="hljs-number">5</span>, <span class="hljs-number">5</span>, -<span class="hljs-number">20</span>，<span class="hljs-number">20</span>)<span class="hljs-comment">;</span>
+...略
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112816759b62a70afdc2~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，无论我们将镜头移到多远，物体投影后的大小始终不变。</p>
+<p>那么什么会影响物体投影后的大小呢？有的同学已经猜到了，投影盒的宽度和高度。</p>
+<p>我们试一下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018112816759b75066d50e1~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，将宽度和高度增大之后，物体投影后变小了。</p>
+<h3 data-id="heading-11">透视投影</h3>
+<p>透视投影是我们比较常用的投影方式，它能够实现现实生活中人眼看向世界产生的近大远小的效果。接下来我们推导一下透视算法。</p>
+<p>和正交投影类似，透视投影也接收近平面和远平面参数，不同的是，透视投影的投影盒是一个棱锥体。正因为如此，透视投影才可以实现近大远小的效果。</p>
+<p>通过上面透视投影示例图，根据相似三角形原理，我们可以知道如下关系：</p>
+<figure><img alt="\frac{zNear}{z} = \frac{y_1}{y} = \frac{x_1}{x}" src="https://juejin.cn/equation?tex=%5Cfrac%7BzNear%7D%7Bz%7D%20%3D%20%5Cfrac%7By_1%7D%7By%7D%20%3D%20%5Cfrac%7Bx_1%7D%7Bx%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>所以有</p>
+<figure><img alt="\begin{aligned}
+x_1 = \frac{zNear * x}{z} \\\
+y_1 = \frac{zNear * y}{z}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax_1%20%3D%20%5Cfrac%7BzNear%20*%20x%7D%7Bz%7D%20%5C%5C%5C%0Ay_1%20%3D%20%5Cfrac%7BzNear%20*%20y%7D%7Bz%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>其中 <img alt="x_1" src="https://juejin.cn/equation?tex=x_1" loading="lazy" class="medium-zoom-image">和<img alt="y_1" src="https://juejin.cn/equation?tex=y_1" loading="lazy" class="medium-zoom-image">是相机坐标系坐标经过视线看向物体后在近平面上的交点坐标，此时 <img alt="x_1" src="https://juejin.cn/equation?tex=x_1" loading="lazy" class="medium-zoom-image">和<img alt="y_1" src="https://juejin.cn/equation?tex=y_1" loading="lazy" class="medium-zoom-image">还是相机坐标系下坐标，并没有变换到裁剪坐标系，我们还要将<img alt="x_1" src="https://juejin.cn/equation?tex=x_1" loading="lazy" class="medium-zoom-image">和<img alt="y_1" src="https://juejin.cn/equation?tex=y_1" loading="lazy" class="medium-zoom-image">变换到【-1，1】之间。</p>
+<figure><img alt="\begin{aligned}
+x' = \frac{x_1} {z * width /2} = \frac{zNear * x} {z * width /2} \\\
+\\\
+y' = \frac{y_1} {z * height /2} = \frac{zNear * y} {z * height /2} \\\
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax'%20%3D%20%5Cfrac%7Bx_1%7D%20%20%7Bz%20*%20width%20%2F2%7D%20%3D%20%5Cfrac%7BzNear%20*%20x%7D%20%20%7Bz%20*%20width%20%2F2%7D%20%5C%5C%5C%0A%5C%5C%5C%0Ay'%20%3D%20%5Cfrac%7By_1%7D%20%20%7Bz%20*%20height%20%2F2%7D%20%3D%20%5Cfrac%7BzNear%20*%20y%7D%20%20%7Bz%20*%20height%20%2F2%7D%20%5C%5C%5C%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>又由于投影坐标系和相机坐标系 Z 轴相反，所以需要对Z轴坐标取反。</p>
+<figure><img alt="\begin{aligned}
+x' = - \frac{zNear * x} {z * width /2} \\\
+\\\
+y' = - \frac{zNear * y} {z * height /2} \\\
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax'%20%3D%20-%20%5Cfrac%7BzNear%20*%20x%7D%20%20%7Bz%20*%20width%20%2F2%7D%20%5C%5C%5C%0A%5C%5C%5C%0Ay'%20%3D%20-%20%5Cfrac%7BzNear%20*%20y%7D%20%20%7Bz%20*%20height%20%2F2%7D%20%5C%5C%5C%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>看到这里，你会发现，x' 和 y' 不仅和投影面的宽度和高度有关系，还和 z 轴坐标有关系，z 轴坐标越大，x'和 y' 越小，也就产生了近大远小的效果，我们将齐次坐标 w 分量设置为 z，此时 x' 和 y' 的值为</p>
+<figure><img alt="\begin{aligned}
+x' = - \frac{zNear * x} {width /2} \\\
+\\\
+y' = - \frac{zNear * y} {height /2} \\\
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax'%20%3D%20-%20%5Cfrac%7BzNear%20*%20x%7D%20%20%7Bwidth%20%2F2%7D%20%5C%5C%5C%0A%5C%5C%5C%0Ay'%20%3D%20-%20%5Cfrac%7BzNear%20*%20y%7D%20%20%7Bheight%20%2F2%7D%20%5C%5C%5C%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>接下来，我们看下 z' 和 z 之间的关系，因为是线性关系，所以：</p>
+<figure><img alt="z' = az + b;" src="https://juejin.cn/equation?tex=z'%20%3D%20az%20%2B%20b%3B" loading="lazy" class="medium-zoom-image"></figure>
+<p>又因为齐次坐标w分量为 z，所以有</p>
+<figure><img alt="z' = a + b / z" src="https://juejin.cn/equation?tex=z'%20%3D%20a%20%2B%20b%20%2F%20z" loading="lazy" class="medium-zoom-image"></figure>
+<p>其中 a和b 是常量，待求。</p>
+<p>我们还知道当 z 为 zNear 时，裁剪空间 z 轴坐标为 -1，当 z 为 zFar 时，z轴坐标为 1，所以有如下两个等式：</p>
+<figure><img alt="a + \frac {b} { zNear} = -1" src="https://juejin.cn/equation?tex=a%20%2B%20%5Cfrac%20%7Bb%7D%20%7B%20zNear%7D%20%3D%20-1" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="a + \frac {b} {zFar} = 1" src="https://juejin.cn/equation?tex=a%20%2B%20%5Cfrac%20%7Bb%7D%20%20%7BzFar%7D%20%3D%201" loading="lazy" class="medium-zoom-image"></figure>
+<p>解这两个方程，可以求出 a 和 b 的值：</p>
+<figure><img alt="a = \frac{zFar + zNear}{zFar - zNear}" src="https://juejin.cn/equation?tex=a%20%3D%20%5Cfrac%7BzFar%20%2B%20zNear%7D%7BzFar%20-%20zNear%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="b = \frac{2 \times zFar \times zNear}{zFar - zNear}" src="https://juejin.cn/equation?tex=b%20%3D%20%5Cfrac%7B2%20%5Ctimes%20zFar%20%5Ctimes%20zNear%7D%7BzFar%20-%20zNear%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>依然按照正交投影的参数，width 由 left和right决定，height 由top和bottom决定，
+根据上述推导过程，我们可以得出透视投影的变换矩阵 M</p>
+<figure><img alt="\begin{aligned}
+M = \begin{pmatrix}
+\frac{2 \times zNear}{right - left} & 0 & 0 & \frac{right + left}{left - right} \\\
+ 0 & \frac{2 \times zNear}{top - bottom} & 0 & \frac{top + bottom}{bottom - top} \\\
+ 0 & 0 & \frac{2(zFar + zNear)}{zNear - zFar} & \frac{2 \times zFar \times zNear}{zNear - zFar} \\\
+ 0 & 0 & -1 & 0 
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AM%20%3D%20%5Cbegin%7Bpmatrix%7D%0A%5Cfrac%7B2%20%5Ctimes%20zNear%7D%7Bright%20-%20left%7D%20%26%200%20%26%200%20%26%20%5Cfrac%7Bright%20%2B%20left%7D%7Bleft%20-%20right%7D%20%5C%5C%5C%0A%200%20%26%20%5Cfrac%7B2%20%5Ctimes%20zNear%7D%7Btop%20-%20bottom%7D%20%26%200%20%26%20%5Cfrac%7Btop%20%2B%20bottom%7D%7Bbottom%20-%20top%7D%20%5C%5C%5C%0A%200%20%26%200%20%26%20%5Cfrac%7B2(zFar%20%2B%20zNear)%7D%7BzNear%20-%20zFar%7D%20%26%20%5Cfrac%7B2%20%5Ctimes%20zFar%20%5Ctimes%20zNear%7D%7BzNear%20-%20zFar%7D%20%20%5C%5C%5C%0A%200%20%26%200%20%26%20-1%20%26%200%20%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>有了推导公式，算法的实现水到渠成：</p>
+<pre><code lang="ini" class="hljs language-ini">function makePerspective(left, right, top, bottom, zNear, zFar, target){
+ <span class="hljs-attr">target</span> = target || new Float32Array(<span class="hljs-number">16</span>)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">a</span> = (<span class="hljs-number">2</span> * near) / (right - left)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">b</span> = (<span class="hljs-number">2</span> * near) / (top - bottom)<span class="hljs-comment">;</span>
+
+ var <span class="hljs-attr">c</span> = (right + left) / (right - left)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">d</span> = (top + bottom) / (top - bottom)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">e</span> = (zFar + zNear) / (zNear - zFar)<span class="hljs-comment">;</span>
+ var <span class="hljs-attr">f</span> = (<span class="hljs-number">2</span> * zFar * zNear) / (zNear - zFar)<span class="hljs-comment">;</span>
+
+ target<span class="hljs-section">[0]</span> = a<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[1]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[2]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[3]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[4]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[5]</span> = b<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[6]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[7]</span> = 0<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[8]</span> = c<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[9]</span> = d<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[10]</span> = e<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[11]</span> = -1<span class="hljs-comment">;</span>
+ 
+ target<span class="hljs-section">[12]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[13]</span> = 0<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[14]</span> = f<span class="hljs-comment">;</span>
+ target<span class="hljs-section">[15]</span> = 0<span class="hljs-comment">;</span>
+
+ return target<span class="hljs-comment">;</span>
+}
+</code></pre><p>除了传递以left 、right、top、bottom 方式传递近平面参数以外，为了方便，业界往往用视角<code>fovy</code> 和宽高比 <code>aspect</code> 的方式代替它们，推导过程和上面几乎一样，只不过我们以aspect 和 fovy角度 θ 来代替 x' 和 y'</p>
+<figure><img alt="\begin{aligned}
+x' &= \frac {2 \times zNear} {width}\\\
+&=\frac{1}{aspect \times tan(\theta/2)}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax'%20%26%3D%20%5Cfrac%20%7B2%20%5Ctimes%20zNear%7D%20%7Bwidth%7D%5C%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Baspect%20%5Ctimes%20tan(%5Ctheta%2F2)%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<figure><img alt="\begin{aligned}
+y' &= \frac {2 \times zNear} {height}\\\
+&=\frac{1}{tan(\theta/2)}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ay'%20%26%3D%20%5Cfrac%20%7B2%20%5Ctimes%20zNear%7D%20%7Bheight%7D%5C%5C%5C%0A%26%3D%5Cfrac%7B1%7D%7Btan(%5Ctheta%2F2)%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>所以这种方式下的透视投影矩阵为：</p>
+<figure><img alt="\begin{aligned}
+M = \begin{pmatrix}
+\frac{2 \times zNear}{right - left} & 0 & 0 & \frac{right + left}{left - right} \\\
+ 0 & \frac{2 \times zNear}{top - bottom} & 0 & \frac{top + bottom}{bottom - top} \\\
+ 0 & 0 & \frac{2(zFar + zNear)}{zNear - zFar} & \frac{2 \times zFar \times zNear}{zNear - zFar} \\\
+ 0 & 0 & -1 & 0 \\\
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AM%20%3D%20%5Cbegin%7Bpmatrix%7D%0A%5Cfrac%7B2%20%5Ctimes%20zNear%7D%7Bright%20-%20left%7D%20%26%200%20%26%200%20%26%20%5Cfrac%7Bright%20%2B%20left%7D%7Bleft%20-%20right%7D%20%5C%5C%5C%0A%200%20%26%20%5Cfrac%7B2%20%5Ctimes%20zNear%7D%7Btop%20-%20bottom%7D%20%26%200%20%26%20%5Cfrac%7Btop%20%2B%20bottom%7D%7Bbottom%20-%20top%7D%20%5C%5C%5C%0A%200%20%26%200%20%26%20%5Cfrac%7B2(zFar%20%2B%20zNear)%7D%7BzNear%20-%20zFar%7D%20%26%20%5Cfrac%7B2%20%5Ctimes%20zFar%20%5Ctimes%20zNear%7D%7BzNear%20-%20zFar%7D%20%20%5C%5C%5C%0A%200%20%26%200%20%26%20-1%20%26%200%20%5C%5C%5C%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>算法实现：</p>
+<pre><code lang="css" class="hljs language-css">function <span class="hljs-attribute">perspective</span>(fovy, aspect, zNear, zFar, target){
+ <span class="hljs-selector-tag">var</span> <span class="hljs-attribute">top</span> = zNear * Math<span class="hljs-selector-class">.tan</span>((Math<span class="hljs-selector-class">.PI</span> / <span class="hljs-number">180</span>) * <span class="hljs-number">0.5</span> * fovy),
+ <span class="hljs-attribute">height</span> = <span class="hljs-number">2</span> * <span class="hljs-attribute">top</span>,
+ <span class="hljs-attribute">width</span> = aspect * <span class="hljs-attribute">height</span>,
+ <span class="hljs-attribute">left</span> = -<span class="hljs-number">0.5</span> * <span class="hljs-attribute">width</span>;
+ return perspective2(<span class="hljs-attribute">left</span>, <span class="hljs-attribute">left</span> + <span class="hljs-attribute">width</span>, <span class="hljs-attribute">top</span>, <span class="hljs-attribute">top</span> - <span class="hljs-attribute">height</span>, zNear, zFar, target);
+}
+</code></pre><h4 data-id="heading-12">实战演练</h4>
+<p>接下来，我们试试写的算法能不能正常工作。</p>
+<p>首先，将摄像机放在 z 轴正向 20 单位处，然后采用透视投影，视角为 60 度，宽高比设置为屏幕宽高比。</p>
+<pre><code lang="ini" class="hljs language-ini">var <span class="hljs-attr">aspect</span> = canvas.width / canvas.height<span class="hljs-comment">;</span>
+var <span class="hljs-attr">projectionMatrix</span> = matrix.perspective(<span class="hljs-number">60</span>, aspect, <span class="hljs-number">1</span>, <span class="hljs-number">1000</span>)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811281675ac519d6c0ef6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>大家可以点击<a target="_blank" href="https://link.juejin.cn?target=" title="" ref="nofollow noopener noreferrer">这里</a>查看演示。</p>
+<p>可以看到，影响投影的因素有如下几个：</p>
+<ul>
+<li>摄像机所在位置，距离越远，投影越小，反之，投影越大。</li>
+<li>投影盒宽高比会影响显示比例。</li>
+<li>视角会影响显示大小，视角越大，投影越小，反之，投影越大。</li>
+</ul>
+<h4 data-id="heading-13">CSS3 中的 perspective</h4>
+<p>不知道大家有没有发现，<code>perspective</code> 这个名词在 CSS3 中出现过，perspective 代表摄像机距离近平面的距离，增加了此属性，就能实现近大远小的透视效果。</p>
+<blockquote>
+<p>其实它们的底层实现大体也是基于上面的算法。</p>
+</blockquote>
+<h2 data-id="heading-14">回顾</h2>
+<p>以上就是投影矩阵的推导过程以及算法实现，建议大家拿笔在纸上推导一下，做到真正掌握，以后碰到一些坐标变换场合就能做到灵活运用。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

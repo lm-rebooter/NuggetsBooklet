@@ -1,0 +1,468 @@
+### 本资源由 itjc8.com 收集整理
+﻿上节我们过了一遍 Prisma Client 做 CRUD 的 api，但那只是针对单表的，这节我们把涉及到多表的 CRUD 的 api 过一遍。
+
+创建个新项目：
+
+```
+mkdir prisma-client-api2
+cd prisma-client-api2
+npm init -y
+```
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-1.png)
+
+进入项目，执行 init 命令：
+
+```
+npx prisma init
+```
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-2.png)
+
+生成了 .env 和 schema 文件：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-3.png)
+
+然后改下 .env 文件的数据库连接信息：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-4.png)
+
+```
+DATABASE_URL="mysql://root:guang@localhost:3306/prisma_test"
+```
+改一下 datasource 的 provider 为 mysql，并且添加 model
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-5.png)
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  id        Int    @id @default(autoincrement())
+  name      String  @db.VarChar(20)
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+  employees     Employee[]
+}
+
+model Employee {
+  id         Int       @id @default(autoincrement())
+  name      String     @db.VarChar(20)
+  phone     String     @db.VarChar(30)  
+
+  deaprtmentId Int
+  department     Department      @relation(fields: [deaprtmentId], references: [id])
+}
+```
+
+之后执行 migrate reset 重置下：
+
+```
+npx prisma migrate reset
+```
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-6.png)
+
+然后用 migrate dev 创建新的迁移：
+
+```
+npx prisma migrate dev --name aaa
+```
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-7.png)
+
+生成了 client 代码，还有 sql 文件。
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-8.png)
+
+数据库中也多了这 2 个表：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-9.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-10.png)
+
+然后来写下 client 的 crud 代码。
+
+首先安装 ts、ts-node 包：
+
+```
+npm install typescript ts-node @types/node --save-dev
+```
+创建 tsconfig.json
+
+```
+npx tsc --init
+```
+把注释删掉，保留这些配置就行：
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+创建 src/index.ts
+
+```javascript
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient({
+  log: [
+    {
+      emit: 'stdout',
+      level: 'query'
+    },
+  ],
+});
+
+async function main() {
+    
+}
+
+main();
+```
+
+然后分别做下 CRUD。
+
+首先是插入数据：
+
+```javascript
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient({
+  log: [
+    {
+      emit: 'stdout',
+      level: 'query'
+    },
+  ],
+});
+
+async function test1() {
+   await prisma.department.create({
+        data: {
+            name: '技术部',
+            employees: {
+                create: [
+                    {
+                        name: '小张',
+                        phone: '13333333333'
+                    },
+                    {
+                        name: '小李',
+                        phone: '13222222222'
+                    }
+                ]
+            }
+        }
+   })
+}
+
+test1();
+```
+插入关联 model 的数据的时候，也是用 create 指定：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-11.png)
+
+测试下：
+
+```
+npx ts-node ./src/index.ts
+```
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-12.png)
+
+在 mysql workbench 里看下结果：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-13.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-14.png)
+
+确实，数据都被正确插入了。
+
+当然，你也可以用这种写法：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-15.png)
+
+```javascript
+async function test2() {
+    await prisma.department.create({
+         data: {
+             name: '技术部',
+             employees: {
+                 createMany: {
+                    data: [
+                        {
+                            name: '小王',
+                            phone: '13333333333'
+                        },
+                        {
+                            name: '小周',
+                            phone: '13222222222'
+                        }
+                    ],
+
+                 }
+             }
+         }
+    })
+ }
+
+ test2();
+```
+跑一下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-16.png)
+
+效果一样：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-17.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-18.png)
+
+那如何关联查询呢？
+
+可以这样写：
+
+```javascript
+async function test3() {
+    const res1 = await prisma.department.findUnique({
+        where: {
+            id: 1
+        },
+        include: {
+            employees: true
+        }
+    });
+    console.log(res1);
+
+    const res2 = await prisma.department.findUnique({
+        where: {
+            id: 1
+        },
+        include: {
+            employees: {
+                where: {
+                    name: '小张'
+                },
+                select: {
+                    name: true
+                }
+            }
+        }
+    });
+    console.log(res2);
+
+    const res3 = await prisma.department.findUnique({
+        where: {
+            id: 1
+        }
+    }).employees();
+    console.log(res3);
+}
+
+test3();
+```
+查询 department 的时候，通过 include 指定关联查询出 employees。
+
+include 还可以指定 where 等查询的参数，进一步过滤。
+
+此外，你也可以在查出 department 后调用 empolyees() 方法来查询。
+
+可以看到，都能正确查出关联数据：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-19.png)
+
+再就是关联更新：
+
+```javascript
+async function test4() {
+    const res1 = await prisma.department.update({
+        where: {
+            id: 1
+        },
+        data: {
+            name: '销售部',
+            employees: {
+                create: [
+                    {
+                        name: '小刘',
+                        phone: '13266666666'
+                    }
+                ]
+            }
+        }
+    });
+    console.log(res1);
+}
+
+test4();
+```
+比如我在更新 department 的时候关联插入了一条 employee 的记录。
+
+跑一下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-20.png)
+
+在 mysql workbench 里可以看到，id 为 1 的 department 更新了：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-21.png)
+
+关联插入了一条 employee 的记录：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-22.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-23.png)
+
+更新 department 的时候，除了可以插入 empolyee 的数据，也可以和别的 empolyee 建立关联。
+
+比如 id 为 4 的 empolyee：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-24.png)
+
+现在他关联的是 id 为 2 的 department。
+
+我们 update 的时候使用 connect 和它关联：
+
+```javascript
+async function test5() {
+    const res1 = await prisma.department.update({
+        where: {
+            id: 1
+        },
+        data: {
+            name: '销售部',
+            employees: {
+                connect: [
+                    {
+                        id: 4
+                    }
+                ]
+            }
+        }
+    });
+    console.log(res1);
+}
+test5();
+```
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-25.png)
+
+跑一下：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-26.png)
+
+刷新可以看到，id 为 4 的 employee 关联的 department 就变了：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-27.png)
+
+如果是某个 id 的数据存在就 connect，不存在就 create 呢？
+
+可以这样写：
+
+```javascript
+async function test6() {
+    const res1 = await prisma.department.update({
+        where: {
+            id: 1
+        },
+        data: {
+            name: '销售部',
+            employees: {
+                connectOrCreate: {
+                    where: {
+                        id: 6
+                    },
+                    create: {
+                        id: 6,
+                        name: '小张',
+                        phone: '13256665555'
+                    }
+                }
+            }
+        }
+    });
+    console.log(res1);
+}
+test6();
+```
+第一次跑，执行的是 insert：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-28.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-29.png)
+
+第二次跑，就是 update 了：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-30.png)
+
+也就是说，update 的时候可以通过 create、connect、connectOrCreate 来插入新的关联 model 的记录或者关联已有的记录。
+
+当然，create 的时候也可以这样：
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-31.png)
+
+效果一样，就不一个个测试了。
+
+再就是删除：
+
+如果我们想删除 id 为 1 的 department 的所有 empolyee，可以这样写：
+
+```javascript
+async function test7() {
+    await prisma.employee.deleteMany({
+        where: {
+            department: {
+                id: 1
+            }
+        },
+    });
+}
+test7();
+```
+ 
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-32.png)
+
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-33.png)
+
+这就是多个 model 关联时的 CRUD。
+
+此外，Prisma 还可以直接执行 sql：
+
+```javascript
+async function test8() {
+    await prisma.$executeRaw`TRUNCATE TABLE Employee`;
+
+    const res = await prisma.$queryRaw`select * from Department`;
+    console.log(res);
+}
+test8();
+```
+![](//liushuaiyang.oss-cn-shanghai.aliyuncs.com/nest-docs/image/第118章-34.png)
+
+这样，当上面的 api 都不能满足需求的时候，你就可以直接执行 sql。
+
+案例代码在[小册仓库](https://github.com/QuarkGluonPlasma/nestjs-course-code/tree/main/prisma-client-api2)
+
+## 总结
+
+这节我们过了一遍多 model 关联的时候涉及到多个表的 CRUD 方法。
+
+还是 findXxx、updateXxx、deleteXxx、createXxx 那些方法，只不过查询的时候可以通过 include 包含关联记录，新增修改的时候可以通过 create、connect、connectOrCreate 来关联或者插入记录。
+
+此外，你还可以直接执行 sql。
+
+通过这些 api，我们就能完成各种 CRUD 需求了。
+

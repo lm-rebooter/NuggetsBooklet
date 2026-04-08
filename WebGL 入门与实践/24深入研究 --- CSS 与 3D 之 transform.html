@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- CSS 与 3D 之 transform</h1>
+<p>前面介绍了 3D 变换的原理和算法实现，并通过一些简单的 demo 演示了变换效果，但这些 demo 都是使用 WebGL 技术渲染。本节我们暂时不使用 WebGL，而是改用前端同学最熟悉的 CSS 技术来实现 3D 效果，并进一步了解 CSS 中的 3D 属性和 WebGL 中 3D 概念的异同之处。</p>
+<h2 data-id="heading-1">CSS 中的 3D 属性</h2>
+<p>下面是 CSS3 中的几个很重要的 3D 属性：</p>
+<ul>
+<li>transform：对 DOM 进行变换，相当于 WebGL 中对模型进行的变换。</li>
+<li>transform-origin：设置变换的中心点。</li>
+<li>perspective-origin：视点，相当于 WebGL 中摄像机的 X、Y 轴坐标。</li>
+<li>perspective：视距，启用该属性相当于在 WebGL 中设置摄像机和 DOM 元素之间在 Z 轴方向上的距离，设置该属性不等于 0 时会自动启用透视投影效果。</li>
+<li>transform-style：是否启用 3D 变换。</li>
+<li>backface-visibility：背面是否可见。</li>
+</ul>
+<p>本节我们主要讲述 CSS 中的变换属性<code>transform</code>，变换分为<code>基本变换</code>和<code>矩阵变换</code>，基本变换大家都比较熟悉了，本节不做过多介绍，我们主要介绍<code>矩阵变换</code>和<code>组合变换</code>。</p>
+<h3 data-id="heading-2">变换：transform</h3>
+<p><code>transform</code> 是大家最常用的一个属性，我们经常会使用它实现一像素的边框和以及容器或者内容的水平、垂直居中，又或者利用它实现强制 GPU 渲染，提升动画性能。</p>
+<p>transform 分为 2D 和 3D 变换，3D 变换只是在 2D 的基础上增加了 Z 轴方向的变换。</p>
+<p>一般情况下，如果对一个 DOM 施加变换，那么变换的中心往往是 DOM 的中心位置，类比到 WebGL 中，也就是模型的中心，我们可以把 CSS 中的 DOM 看做 WebGL 中的模型。</p>
+<p>transform 包含四个基本变换属性值：<code>translate</code>、<code>rotate</code>、<code>skew</code>、<code>scale</code>，对应的 3D 变换属性值为 <code>translate3d</code>、<code>rotate3d</code>、<code>scale3d</code>。</p>
+<blockquote>
+<p>注意，skew 没有对应的 3D 变换设置。</p>
+</blockquote>
+<p>基本变换大家应该都很熟悉了，后面重点要讲解的是 <code>matrix</code> 、<code>matrix3d</code>的计算与使用，以及<code>组合变换</code>的使用技巧。</p>
+<p>当然，下面我们还是先回顾一下 <code>transform</code> 的基本用法。</p>
+<h4 data-id="heading-3">平移</h4>
+<p>平移的使用方法：</p>
+<ul>
+<li>translate(tx, ty)</li>
+<li>translate3d(tx, ty, tz)</li>
+<li>translateX(tx)</li>
+<li>translateY(ty)</li>
+<li>translateZ(tz)</li>
+</ul>
+<p>将 dom 元素分别沿着 X、Y、Z 轴向平移 30 px。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-comment">/* 分别沿 X 轴和 Y 轴平移 30 px。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translate</span>(<span class="hljs-number">30px</span>, <span class="hljs-number">30px</span>);
+<span class="hljs-comment">/* 分别沿 X 轴、 Y 轴、Z 轴平移 30 px。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translate3d</span>(<span class="hljs-number">30px</span>, <span class="hljs-number">30px</span>, <span class="hljs-number">30px</span>);
+<span class="hljs-comment">/* 沿 X 轴平移 30 px。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateX</span>(<span class="hljs-number">30px</span>);
+<span class="hljs-comment">/* 沿 Y 轴平移 30 px。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(<span class="hljs-number">30px</span>);
+<span class="hljs-comment">/* 沿 Z 轴平移 30 px。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateZ</span>(<span class="hljs-number">30px</span>);
+</code></pre><h4 data-id="heading-4">旋转</h4>
+<p>旋转用法也比较简单，在此不做过多描述。</p>
+<ul>
+<li>rotate(angle)，绕 Z 轴旋转。</li>
+<li>rotate3d(x, y, z, angle)。绕轴<code>axis = {x:x, y:y, z:z}</code>旋转指定角度<code>angle</code>。</li>
+<li>rotateX(angle)，绕 X 轴旋转。</li>
+<li>rotateY(angle)，绕 Y 轴旋转。</li>
+<li>rotateZ(angle)，绕 Z 轴旋转。</li>
+</ul>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-comment">/*绕 X 轴旋转 45 deg。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate</span>(<span class="hljs-number">45deg</span>);
+<span class="hljs-comment">/* 将第一个参数设置为 1， 代表绕 X 轴旋转 45 deg。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate3d</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">45deg</span>);
+<span class="hljs-comment">/* 将第二个参数设置为 1， 代表绕 Y 轴旋转 45 deg。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate3d</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">45deg</span>);
+<span class="hljs-comment">/* 将第三个参数设置为 1， 代表绕 Y 轴旋转 45 deg。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate3d</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">45deg</span>);
+<span class="hljs-comment">/* 将三个参数都设置为 1， 代表绕 Y 轴旋转 45 deg。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateZ</span>(<span class="hljs-number">45deg</span>);
+</code></pre><h5 data-id="heading-5">绕任意轴的旋转。</h5>
+<p>关于旋转，我想说明一下<code>rotate3d</code> 的使用方式，它接收一个<code>轴向量</code>和一个<code>角度</code>，代表绕<code>轴向量</code>旋转某个<code>角度</code>。</p>
+<p>举个例子来说，我们想让模型绕轴 axis= {x: 1,y: 1,z: 1}进行旋转，那么用rotate3d表示如下：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.box</span>{
+ <span class="hljs-attribute">animation</span>: rotate <span class="hljs-number">3s</span> infinite linear;
+}
+<span class="hljs-keyword">@keyframes</span> rotate{
+ <span class="hljs-number">0%</span> {
+ <span class="hljs-attribute">transform</span>:<span class="hljs-built_in">rotate3d</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0deg</span>);
+ }
+ <span class="hljs-number">100%</span> {
+ <span class="hljs-attribute">transform</span>:<span class="hljs-built_in">rotate3d</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">360deg</span>);
+ }
+}
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181210167974020596bd07~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h5 data-id="heading-6">变换参照点 transform-origin</h5>
+<p>根据上图的例子，你会发现，默认的旋转是绕着模型的中心位置进行的，这个位置是浏览器默认的。但事实上，CSS 仍然提供了对变换中心的设置功能，通过设置 <code>transform-origin</code> 来实现。</p>
+<ul>
+<li>transform-origin 包含 X、Y、Z 轴坐标的设置。</li>
+<li>transform-origin 接收百分比数值时，是以自身尺寸为基准的。</li>
+</ul>
+<p>比如，我们让一个 DOM 元素沿着上边沿进行进行旋转，只需要将 transform-origin 的 Y 轴分量设置为 0% 或者 0 即可。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform-origin</span>: <span class="hljs-number">50%</span> <span class="hljs-number">0%</span>;
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">90deg</span>);
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018121016797ac6ac7cad17~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这个概念比较简单，但是很灵活。利用它我们能实现很多有意思的 3D 效果，比如 CSS 版的<code>魔方</code>。</p>
+<h3 data-id="heading-7">缩放</h3>
+<p>缩放的使用方法也很简单。</p>
+<ul>
+<li>scale(sx, sy)，沿 X 轴方向缩放 sx 倍，沿 Y 轴方向缩放 sy 倍。</li>
+<li>scale(sx)，沿 X 轴方向和 Y 轴方向缩放 sx 倍。</li>
+<li>scale3d(sx, sy, sz)，分别沿 X、Y、Z 轴方向缩放 sx、sy、sz 倍。</li>
+<li>scaleX(sx)，沿 X 轴方向缩放 sx 倍。</li>
+<li>scaleY(sy)，沿 Y 轴方向缩放 sy 倍。</li>
+</ul>
+<p>代码示例：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-comment">/* 沿 X 轴和 Y 轴 放大两倍。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">scale</span>(<span class="hljs-number">2</span>);
+<span class="hljs-comment">/* 沿 X 轴方向当大 3 倍，沿 Y 轴方向放大 2 倍。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">scale</span>(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>);
+<span class="hljs-comment">/* 分别在 X 、Y、 Z 轴方向放大 2倍、3倍、4倍。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">scale3d</span>(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>);
+<span class="hljs-comment">/* 在 X 轴方向放大两倍。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">scaleX</span>(<span class="hljs-number">2</span>);
+<span class="hljs-comment">/* 在 Y 轴方向放大两倍。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">scaleY</span>(<span class="hljs-number">2</span>);
+</code></pre><h3 data-id="heading-8">斜切</h3>
+<p>斜切的使用方法：</p>
+<ul>
+<li>skew(xAngle, yAngle)，DOM 元素沿着 X 方向切变 xAngle 度，沿 Y 轴方向切变 yAngle 度。</li>
+<li>skewX(xAngle)，沿 X 轴方向切变 xAngle 度。</li>
+<li>skewY(yAngle)，沿 Y 轴方向切变 yAngle 度。</li>
+</ul>
+<p>斜切可以理解为将 DOM 元素沿 X 轴或者 Y 轴拉伸，切变会改变物体的形状。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets2018126167817da6a38183a~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>代码示例：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-comment">/* 沿 X 轴切变 30 度。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">skew</span>(<span class="hljs-number">30deg</span>);
+<span class="hljs-comment">/* 沿 X 轴切变 30 度，沿 Y 轴切变 40 度。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">skew</span>(<span class="hljs-number">30deg</span>, <span class="hljs-number">40deg</span>);
+<span class="hljs-comment">/* 沿 X 轴方向切变 30 度。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">skewX</span>(<span class="hljs-number">30deg</span>);
+<span class="hljs-comment">/* 沿 Y 轴方向切变 40 度。*/</span>
+<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">skewY</span>(<span class="hljs-number">40deg</span>);
+</code></pre><p>以上就是 <code>transform</code> 的常见用法，接下来我们开始讲重点了：<code>组合变换</code>和 <code>matrix</code></p>
+<h3 data-id="heading-9">组合变换</h3>
+<p><code>组合变换</code>就是在 transform 的属性值中附加多个变换效果，而不只是单一的变换。</p>
+<p>比如下面这个变换样式：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">60deg</span>) <span class="hljs-built_in">rotateY</span>(<span class="hljs-number">60deg</span>);
+</code></pre><p>这个样式的作用是先让 DOM 元素绕着 X 轴旋转 60 度，注意此时 DOM 元素的坐标系改变了，再绕变换后的坐标系的 Y 轴旋转 60 度。</p>
+<p>需要谨记的是：</p>
+<ul>
+<li>transform 后的多个变换要用空格分开。</li>
+<li>从前往后理解这些变换，后一个变换都是基于前一个变换后的新坐标系进行，也称<code>动态坐标系变换</code>。</li>
+<li>从后往前理解，每一个变换都是按照 DOM 元素最开始的坐标轴（可以理解为世界坐标系）进行，也称为<code>静态坐标系变换</code>。</li>
+</ul>
+<p>至于多个变换是基于动态坐标系进行构思，还是基于静态的世界坐标系进行构思，取决于每个人的理解习惯，但最终的变换效果都是一样的。</p>
+<blockquote>
+<p>在欧拉角章节我们也讲过了多个矩阵相乘时，从前往后和从后往前理解变换所基于的坐标系是不同的。transform 多个变换理解顺序和前面所讲的保持一致。</p>
+</blockquote>
+<p>再举个比较明显的例子，我们先让 DOM 旋转 60 度，然后将其沿 X 轴平移 200 像素，大家觉得 DOM 会按照怎样的轨迹变换？</p>
+<p>我们看一下：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateX</span>(<span class="hljs-number">60</span>) <span class="hljs-built_in">translateX</span>(<span class="hljs-number">200px</span>);
+</code></pre><p>为了更方便观察 3D 组合变换的效果，我将图片外层容器的<code>视点</code>设置在了右上方：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-selector-class">.imgWrapper</span>{
+ <span class="hljs-attribute">perspective</span>: <span class="hljs-number">300px</span>;
+ <span class="hljs-attribute">margin-top</span>:<span class="hljs-number">300px</span>;
+ <span class="hljs-attribute">position</span>: relative;
+ <span class="hljs-attribute">perspective-origin</span>: <span class="hljs-number">100%</span> -<span class="hljs-number">100px</span>;
+}
+</code></pre><p>关于视点 <code>perspective-origin</code> 和 视距 <code>perspective</code> 我们放在下一节讲述。</p>
+<h4 data-id="heading-10">从前往后理解变换，需要按照<code>模型坐标系</code>理解：</h4>
+<p>下图，白色坐标轴是图片默认的坐标系，当图片绕 X 轴旋转 60 度后，坐标系变成红色坐标轴的指向。</p>
+<img width="80%" src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181261678241bcd2eb3a7~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image">
+<p>接着沿当前图片坐标系的红色 X' 轴平移 200 像素，此时，应该朝向屏幕里侧和右侧移动。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616782469359b66e3~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h4 data-id="heading-11">从后往前理解多个变换，需按照世界坐标系理解</h4>
+<p>请注意，<code>CSS</code> 中的<code>世界坐标系</code>就是 施加变换的 DOM 节点（本例为图片）最开始的坐标系，即图中的白色坐标轴。</p>
+<ul>
+<li>首先沿着 X 轴平移 200 像素。</li>
+<li>接着绕世界坐标系的 Y 轴旋转 60 度。</li>
+</ul>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616782664ef6d8d2e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看出，无论我们按照哪种坐标系理解，最终变换效果都是一样的，看下图：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616782681da82aeb6~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这就是<code>组合变换</code>要注意的地方，了解了组合变换的规律，我们才能做出很有意思的特效，比如照片墙：</p>
+<p>照片墙的核心原理就是先将图片沿着 Z 轴方向移动一定距离，之后绕世界坐标系的Y 轴旋转指定角度。</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotateY</span>(<span class="hljs-number">30deg</span>) <span class="hljs-built_in">translateX</span>(<span class="hljs-number">200px</span>);
+</code></pre><p>当然，这只是核心原理，事实上我们还需要做如下几步：</p>
+<ul>
+<li>让图片能够显示出 3D 效果，这一步需要让图片父容器的 <code>transform-style</code> 属性设置为 <code>preserve-3d</code>。</li>
+<li>为父容器加上透视属性<code>perspective</code>，设置为透视投影，并调整合适的视距 ，这样才能实现近大远小的效果。</li>
+</ul>
+<p>这几个属性我们下节细讲，先贴下照片墙的效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812416778c9cd6a5b210~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>具体的实现我们在讲视点和视距属性时再分析。</p>
+<p>又比如 3D 盒效果：
+</p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616783e9b138a5848~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>这是一个立方体盒子，每个面上都对应一张图片，当然，你也可以根据自己的需要往各个面上放置自己的内容。</p>
+<p>立方体盒子的原理也是利用组合变换实现的：</p>
+<ul>
+<li>前面：沿着 Z 轴往前（朝向屏幕外）平移指定像素。</li>
+<li>后面，沿着 Z 轴往后（朝向屏幕里）平移指定像素。</li>
+<li>上面，沿着 Y 轴往上平移，接着绕 X 轴旋转 90 度。</li>
+<li>下面，沿着 Y 轴往下平移，接着绕 X 轴旋转 90 度。</li>
+<li>左面，沿着 X 轴往左平移，接着绕 Y 轴旋转 90 度。</li>
+<li>右面，沿着 X 轴往右平移，接着绕 Y 轴旋转 90 度。</li>
+</ul>
+<p>当然，为了实现 3D 效果，也要在图片的父容器上设置 <code>transform-style</code> 为 <code>preserve-3d</code> 才可以。</p>
+<p>这里主要展示组合变换顺序的理解与强大，不对实现做分析，<code>实现过程</code>留在下一节和<code>视点</code>以及<code>视距</code>一起介绍。</p>
+<p>我们还是先把变换讲完，接下来介绍 <code>transform</code> 的另一个重要用法，<code>matrix</code> 和 <code>matrix3d</code>。</p>
+<h3 data-id="heading-12">matrix</h3>
+<p>transform 除了提供一些基本变换，还提供了 <code>matrix</code> 和 <code>matrix3d</code> 属性值，这两个属性值是做什么的呢？</p>
+<p><code>matrix</code> 是矩阵的意思，transform 是变换属性，所以 matrix 就是对 DOM 执行变换的矩阵，这和我们前面讲的 WebGL 的变换矩阵概念相同。</p>
+<p>根据前面的学习，我们知道 2 维平面的变换矩阵，是一个 3 阶矩阵，包含 9 个数字：</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+x0 & y0 & tx \\\
+x1 & y1 & ty \\\
+0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0Ax0%20%26%20y0%20%26%20tx%20%5C%5C%5C%0Ax1%20%26%20y1%20%26%20ty%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>按照我们之前章节坐标系变换的原理分析：</p>
+<ul>
+<li>x0、x1 代表变换之后的 X 轴基向量在原坐标系中的表示。</li>
+<li>y0、y1 代表变换之后的 Y 轴基向量在原坐标系中的表示。</li>
+<li>tx、ty 代表坐标原点的偏移量。</li>
+</ul>
+<p>如果没有看之前章节的话，可能不太理解基向量的含义以及坐标系的概念，大家可以去看一下，理解一下坐标系变换的原理。</p>
+<p>你会看到第三行的数值是固定的<code>0 0 1</code>，所以，浏览器为了简化赋值，规定 transform 中的 matrix 只接受 3 阶矩阵的前两行参数，共 6 个数字。</p>
+<p>请记住，matrix 的参数顺序对应上面的矩阵元素如下：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">matrix</span>(x0, x1, y0, y1, tx, ty);
+</code></pre><p>前面章节我们推导过基本变换的矩阵表示：</p>
+<ul>
+<li>平移</li>
+</ul>
+<p>沿 X 轴平移 tx 像素，沿 Y 轴平移 ty 像素：</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+1 & 0 & tx \\\
+0 & 1 & ty \\\
+0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0A1%20%26%200%20%26%20tx%20%5C%5C%5C%0A0%20%26%201%20%26%20ty%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>缩放</li>
+</ul>
+<p>沿 X 轴方向缩放 sx 倍， 沿 Y 轴缩放 sy 倍：</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+sx & 0 & 0 \\\
+0 & sy & 0 \\\
+0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0Asx%20%26%200%20%26%200%20%5C%5C%5C%0A0%20%26%20sy%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>也就是说基本变换我们都可以用 <code>matrix</code> 来表示。</p>
+<ul>
+<li>斜切
+沿着 X 轴倾斜 α 度，沿着 Y 轴倾斜 θ 度：</li>
+</ul>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+1 & tan\alpha & 0 \\\
+tan\theta & 1 & 0 \\\
+0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0A1%20%26%20tan%5Calpha%20%26%200%20%5C%5C%5C%0Atan%5Ctheta%20%26%201%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>旋转</li>
+</ul>
+<p>绕 Z 轴旋转 θ 角度：</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+cos\theta & -sin\theta & 0 \\\
+sin\theta & cos\theta & 0 \\\
+0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0Acos%5Ctheta%20%26%20-sin%5Ctheta%20%26%200%20%5C%5C%5C%0Asin%5Ctheta%20%26%20cos%5Ctheta%20%26%200%20%5C%5C%5C%0A0%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<ul>
+<li>绕 Z 轴旋转 60 度。</li>
+</ul>
+<p>用 rotateZ 表示上面的旋转很简单，我们看下用 matrix 如何表示：</p>
+<p><img alt="cos(60) = 0.5" src="https://juejin.cn/equation?tex=cos(60)%20%3D%200.5" loading="lazy" class="medium-zoom-image"></p>
+<p><img alt="sin60 = \frac{\sqrt3}{2} = 0.866（约等）" src="https://juejin.cn/equation?tex=sin60%20%3D%20%5Cfrac%7B%5Csqrt3%7D%7B2%7D%20%3D%200.866%EF%BC%88%E7%BA%A6%E7%AD%89%EF%BC%89" loading="lazy" class="medium-zoom-image"></p>
+<p>将这两个数字代入 matrix 公式，得出变换样式为：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">matrix</span>(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.866</span>, -<span class="hljs-number">0.866</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+</code></pre><p>你会发现无论我们是用 rotateZ 表示，还是用 matrix 表示，变换效果都是一样的。</p>
+<h3 data-id="heading-13">matrix3d</h3>
+<p>matrix3d，顾名思义，代表 3 维变换，它是一个 4 阶矩阵，需要 16 个数字来表示。</p>
+<figure><img alt="\begin{aligned}
+\begin{pmatrix}
+x0 & y0 & z0 & tx \\\
+x1 & y1 & z1 & ty \\\
+x2 & y2 & z2 & tz \\\
+0 & 0 & 0 & 1
+\end{pmatrix}
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%5Cbegin%7Bpmatrix%7D%0Ax0%20%26%20y0%20%26%20z0%20%26%20tx%20%5C%5C%5C%0Ax1%20%26%20y1%20%26%20z1%20%26%20ty%20%5C%5C%5C%0Ax2%20%26%20y2%20%26%20z2%20%26%20tz%20%5C%5C%5C%0A0%20%26%200%20%26%200%20%26%201%0A%5Cend%7Bpmatrix%7D%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>可以看到，每一个基向量都增加了一个 Z 轴方向分量 x2、y2、z2、tz。</p>
+<p>事实上，3D 的基本变换都可以用 matrix 或者 matrix3d 来表示，但是一些复杂变换只能使用 matrix 或者 matrix3d 来实现。</p>
+<h3 data-id="heading-14">matrix 对我们来说有什么用呢？</h3>
+<p>这是一个很关键的问题，大家会觉得，基本变换的用法更容易理解，更方便书写，matrix 需要的参数太多，而且参数值需要计算，更糟糕的是，我们往往不知道怎么计算，那 matrix 有什么用呢？</p>
+<p>这是个好问题，但我想说的是 matrix 能完成基本变换不能完成的变换，能做出基本变换完成不了的效果。</p>
+<p>这时你就该考虑使用 matrix 了。</p>
+<p>紧跟而来的问题是，matrix 如何求得呢？</p>
+<p>我们前面章节讲述了 matrix 矩阵的求法，一旦你确定了需要的变换，你就可以计算变换后的基向量，然后将基向量的各个分量代入矩阵的各个位置即可求出变换矩阵，有了变换矩阵，也就有了 matrix 所需要的各个元素，将矩阵转化成 matrix 或者 matrix3d 所需要的字符串就轻而易举了。</p>
+<ul>
+<li>镜像效果</li>
+</ul>
+<p>镜像效果，采用基本变换是实现不了的，只能借助于矩阵。
+比如左右镜像，左右镜像无非就是 Y 轴基向量不变，X 轴坐标对调，原坐标与新坐标关系如下：</p>
+<figure><img alt="\begin{aligned}
+x^{'} &= -x \\\
+y^{'} &= y
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax%5E%7B'%7D%20%26%3D%20-x%20%5C%5C%5C%0Ay%5E%7B'%7D%20%26%3D%20y%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>所以有：</p>
+<figure><img alt="\begin{aligned}
+x0 &= -1 \\\
+x1 &= 0 \\\
+y0 &= 0 \\\
+y1 &= 1
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0Ax0%20%26%3D%20-1%20%5C%5C%5C%0Ax1%20%26%3D%200%20%5C%5C%5C%0Ay0%20%26%3D%200%20%5C%5C%5C%0Ay1%20%26%3D%201%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>将这些值，代入 matrix公式中，可以得出变换：</p>
+<pre><code lang="css" class="hljs language-css"><span class="hljs-attribute">transform</span>: <span class="hljs-built_in">matrix</span>(-<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>);
+</code></pre><p>我们看下效果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616783fcc8bcfd906~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>当然大家也可以举一反三，比如上下镜像：</p>
+<pre><code lang="css" class="hljs language-css">transfom: <span class="hljs-built_in">matrix</span>(<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,-<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>)
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616783fea86654f76~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<ul>
+<li>绕任意轴旋转。</li>
+</ul>
+<p>绕任意轴的旋转，除了可以使用 rotate3d 来实现，还可以使用 matrix3d。这个旋转矩阵该如何计算呢？</p>
+<p>还记得基本变换章节我们推导出的绕固定轴旋转的矩阵方法<code>axisRotation</code>吗？</p>
+<p><code>axisRotation(axis, angle)</code>，其中 axis 是一个三维向量，angle 是一个弧度值。</p>
+<p>这里我不准备举绕基本轴旋转的例子，因为它们不需要matrix3d 出手，我们想绕<code>{x:1, y: 1, z: 1}</code>的倾斜轴旋转，上面的 axisRotation 方法该出场了，它会为我们提供变换矩阵，但是我们还需要将变换矩阵转化为 css 样式，我们先封装一个矩阵转 css 的方法：</p>
+<pre><code lang="ini" class="hljs language-ini">function matrix2css(mt){
+ var <span class="hljs-attr">transformStyle</span> = <span class="hljs-string">'matrix('</span><span class="hljs-comment">;</span>
+ if(<span class="hljs-attr">mt.length</span> == <span class="hljs-number">16</span>){
+ <span class="hljs-attr">css</span> = <span class="hljs-string">'matrix3d('</span>
+ }
+ for(let <span class="hljs-attr">i</span> =<span class="hljs-number">0</span><span class="hljs-comment">; i< mt.length; i++){</span>
+ transformStyle += mt<span class="hljs-section">[i]</span><span class="hljs-comment">;</span>
+ if(i !== mt.length - 1){
+ transformStyle += ','
+ }else{
+ transformStyle +=')'
+ }
+ }
+ return transformStyle<span class="hljs-comment">;</span>
+}
+</code></pre><p>接着可以通过 axisRotation 方法计算出变换矩阵了，比如旋转 90 度。</p>
+<pre><code lang="php" class="hljs language-php">let mt = matrix.<span class="hljs-title function_ invoke__">axisRotation</span>({<span class="hljs-attr">x</span>:<span class="hljs-number">1</span>, <span class="hljs-attr">y</span>:<span class="hljs-number">1</span>, <span class="hljs-attr">z</span>:<span class="hljs-number">1</span>}, Math.PI / <span class="hljs-number">180</span> * <span class="hljs-number">90</span>)
+</code></pre><p>在这里我用绕轴向量 axis = {x:1, y:1, z:1} 不停旋转的动画演示：</p>
+<pre><code lang="ini" class="hljs language-ini">function render(){
+ if(!playing){
+ return<span class="hljs-comment">;</span>
+ }
+ angle ++<span class="hljs-comment">;</span>
+ <span class="hljs-attr">mt</span> = matrix.axisRotation({x: <span class="hljs-number">1</span>,y: <span class="hljs-number">1</span>,z: <span class="hljs-number">1</span>}, Math.PI / <span class="hljs-number">180</span> * angle)<span class="hljs-comment">;</span>
+ let <span class="hljs-attr">css</span> = matrix2css(mt)<span class="hljs-comment">;</span>
+ ?('.box')<span class="hljs-section">[0]</span>.<span class="hljs-attr">style.transform</span> = css<span class="hljs-comment">;</span>
+ requestAnimationFrame(render)<span class="hljs-comment">;</span>
+}
+document.body.addEventListener('click',function(){
+ <span class="hljs-attr">playing</span> = !playing<span class="hljs-comment">;</span>
+ render()<span class="hljs-comment">;</span>
+})
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201812616784262a1dc9805~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>是不是很简单呢？</p>
+<h3 data-id="heading-15">总结</h3>
+<p>transform 中的基本变换都可以使用 matrix 和 matrix3d 来表示，只有当基本变换表示不了我们的变换时，我们才考虑使用 matrix 或者 matrix3d 。</p>
+<p>可见，即使不做 WebGL 开发，我们之前学到的内容也会对普通开发者大有帮助，掌握变换原理，配合 CSS3 中的 3D 属性，照样可以做出很酷炫的 3D 动画效果。</p>
+<h2 data-id="heading-16">回顾</h2>
+<p>本节讲述了 CSS 中的 3D 变换，以及它们与 WebGL 变换的相同之处。总的来说，基本原理都是一样的，之前封装的数学矩阵库，不仅可以用在 WebGL 领域，也可以用在 css 领域。</p>
+<p>下一节，我们讲述 CSS 中 3D 变换 的其它几个重要属性，<code>变换类型(transform-style)</code>、<code>视点(perspective-origin)</code>、<code>视距(perspective)</code>。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

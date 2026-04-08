@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body html"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><h1 data-id="heading-0">深入研究 --- 混合特效</h1>
+<p>到现在为止，我们还没有接触过如何为模型增加透明度效果，大家也许会说，在模型的顶点缓冲信息中，改变颜色的 <code>alpha</code> 值不就是增加透明度了吗？没错，透明度信息是这么传入着色器中的，但是仅仅有透明度信息，并不能实现透过前面透明物体看到后面物体的效果，我们只能改变前面物体的颜色，后面的物体在深度检测阶段会检测失败，相应的片段就会被抛弃，不被渲染。</p>
+<h2 data-id="heading-1">片元舍弃</h2>
+<p>片元是像素的前置阶段，片元在成为屏幕像素之前要经历一些检测过程，如果检测失败的话 GPU 会舍弃该片元，从而不被渲染。也就是说片元要么显示，要么不显示，不存在片元混合的现象。比如前后两个物体，处于后面的物体，由于被前面物体遮挡，深度测试就会失败，GPU 便会舍弃该片元不再进行渲染。</p>
+<h3 data-id="heading-2">深度检测</h3>
+<p>下面这个例子：</p>
+<pre><code lang="ini" class="hljs language-ini">let <span class="hljs-attr">face1</span> = createFace(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, [<span class="hljs-number">255</span>，<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">125</span>])<span class="hljs-comment">;</span>
+let <span class="hljs-attr">face2</span> = createFace(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>])<span class="hljs-comment">;</span>
+</code></pre><p>创建了两个矩形，<code>face1</code> 为世界空间下深度值为 1 的半透明红色矩形，<code>face2</code> 为世界空间下深度值为 0 的不透明绿色矩形，此时 face1 在face2 的前面。当开启深度检测的时候，<code>face1</code> 会遮挡住 <code>face2</code>，大家猜猜看能不能透过红色矩形看到后面的绿色矩形？</p>
+<p>下图是显示结果：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811231673fd14a34bb7cb~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>事实上，由于深度检测，尽管 face1 的颜色信息包含半透明，但是 GPU 检测到 face2 的片元在 face1 的后面，基于深度检测机制，GPU 舍弃了 face2 的片元，使得我们只能看到红色的face1。</p>
+<h3 data-id="heading-3">主动舍弃片元</h3>
+<p>舍弃片元的时机除了深度测试不通过以外，我们还可以用编程的手段来主动舍弃。
+这涉及到一个着色器命令<code>discard</code>。</p>
+<p>下面这段代码演示了舍弃片元操作：</p>
+<pre><code lang="ini" class="hljs language-ini">varying vec4 v_Color<span class="hljs-comment">;</span>
+uniform bool u_Discard<span class="hljs-comment">;</span>
+void main(){
+ if(v_Color.r < 0.8){
+ if(u_Discard)
+ discard<span class="hljs-comment">;</span>
+ }
+ <span class="hljs-attr">gl_FragColor</span> = v_Color<span class="hljs-comment">;</span>
+}
+</code></pre><p>当我们启用 discard 命令时候，片元着色器就会判断当前片元颜色的 r 分量是否小于 0.8 ，小于 0.8 的话，就将该片元舍弃不再渲染。</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811221673b15f67a7f119~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>那么，如何实现真正的透明效果呢？这就是本节要讲的混合<code>Blending</code>技巧，混合的实质就是将前后多个重叠模型的颜色混合成一种新的颜色，该颜色包含前后多个模型的颜色信息。换句话说，这种技术能够实现透过透明物体（也可以是其他有透明度的物体）看到后面的物体效果。</p>
+<h2 data-id="heading-4">透明度</h2>
+<p>我们知道，透明度是一个从 0 到 1 之间的浮点数，0 代表全透明，1 代表不透明，介于 0 和 1 之间的数值代表半透明。</p>
+<p>全透明的特点是能够让后面物体的颜色完全体现出来，半透明效果体现的颜色则是透明物体和后面物体颜色的混合颜色，比如当透明度为 0.5 时，显示的颜色由自身颜色的一半和后面物体颜色的一半混合而成，不透明则是完全不显示后面物体的颜色成分。</p>
+<h2 data-id="heading-5">如何实现混合</h2>
+<p>那么，如何实现颜色的混合呢？</p>
+<p>首先我们需要开启混合特效。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.enable(gl.BLEND)<span class="hljs-comment">;</span>
+</code></pre><p>接下来我们需要告诉 GPU 如何混合两种颜色。</p>
+<p>下面是 WebGL 混合两种颜色的方式之一：</p>
+<figure><img alt="Result = C_{source} * F_{source} + C_{dest} * F_{dest}" src="https://juejin.cn/equation?tex=Result%20%3D%20C_%7Bsource%7D%20*%20F_%7Bsource%7D%20%2B%20C_%7Bdest%7D%20*%20F_%7Bdest%7D" loading="lazy" class="medium-zoom-image"></figure>
+<blockquote>
+<p>此处我们以相加的方式来混合两种颜色，事实上，WebGL 可以设置运算方式，不一定是相加，也可以是相减、取两者中较大值、取两者中较小值、以及一些逻辑运算等。</p>
+</blockquote>
+<p>思考如下一个场景，有一个绿色物体，在它前面放一个透明度为 0.6 的红色玻璃，那么透过红色玻璃看到绿色物体的颜色是什么呢？我们找出公式中四个参数：</p>
+<ul>
+<li>
+<p><img alt="C_{source}" src="https://juejin.cn/equation?tex=C_%7Bsource%7D" loading="lazy" class="medium-zoom-image">：源颜色，代表将要绘制的RGBA 颜色信息，用向量（Rs, Gs, Bs, As） 来表示，此处即红色玻璃的颜色RGBA（1， 0，0 ，0.6）。</p>
+</li>
+<li>
+<p><img alt="F_{source}" src="https://juejin.cn/equation?tex=F_%7Bsource%7D" loading="lazy" class="medium-zoom-image">：源因子，代表将要绘制的颜色的透明度，用向量（Sr, Sg, Sb, Sa）来表示，此处代表红色玻璃使用的透明度因子，我们可以采用玻璃自身的透明度，也可以重新设置。</p>
+</li>
+<li>
+<p><img alt="C_{dest}" src="https://juejin.cn/equation?tex=C_%7Bdest%7D" loading="lazy" class="medium-zoom-image">：目标颜色的颜色信息，用向量（Rd, Gd, Bd, Ad）来表示，此处代表绿色物体的RGBA颜色。</p>
+</li>
+<li>
+<p><img alt="F_{source}" src="https://juejin.cn/equation?tex=F_%7Bsource%7D" loading="lazy" class="medium-zoom-image">：目标（绿色物体）颜色的透明度因子，用向量（Dr, Dg, Db, Da）来表示。通常我们用 1 减去源颜色（即玻璃）的透明度因子作为目标颜色的透明度因子，即(1- Sr, 1- Sg, 1- Sb, 1- Sa)。</p>
+</li>
+</ul>
+<p>需要记住的是，这四个参数都是 4 维向量，分别代表 RGBA 对应位置的信息。</p>
+<h4 data-id="heading-6">因子设置</h4>
+<p>那么，源颜色和目标颜色是已知的，我们只需要设置好源因子和目标因子就可以了，WebGL 为我们内置了一些因子：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gl.ZERO</td>
+<td>(0,0,0,0)</td>
+</tr>
+<tr>
+<td>gl.ONE</td>
+<td>(1,1,1,1)</td>
+</tr>
+<tr>
+<td>gl.SRC_COLOR</td>
+<td>(Rs, Gs, Bs, As)</td>
+</tr>
+<tr>
+<td>gl.DST_COLOR</td>
+<td>(Rd, Gd, Bd, Ad)</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_SRC_COLOR</td>
+<td>(1- Rs, 1- Gs, 1- Bs, 1- As)</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_DST_COLOR</td>
+<td>(1- Rd, 1- Gd, 1- Bd, 1- Ad)</td>
+</tr>
+<tr>
+<td>gl.SRC_ALPHA</td>
+<td>(As, As, As, As)</td>
+</tr>
+<tr>
+<td>gl.DST_ALPHA</td>
+<td>(Ad,Ad, Ad, Ad)</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_SRC_ALPHA</td>
+<td>(1-As, 1- As, 1- As, 1- As)</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_DST_ALPHA</td>
+<td>（1-Ad, 1- Ad, 1- Ad, 1- Ad）</td>
+</tr>
+<tr>
+<td>gl.CONSTANT_COLOR</td>
+<td>常量颜色的RGBA值</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_CONSTANT_COLOR</td>
+<td>1 减去常量颜色的 RGBA值</td>
+</tr>
+<tr>
+<td>gl.CONSTANT_ALPHA</td>
+<td>常量透明度</td>
+</tr>
+<tr>
+<td>gl.ONE_MINUS_CONSTANT_ALPHA</td>
+<td>1减去常量透明度</td>
+</tr>
+</tbody>
+</table>
+<p>以上就是内置的因子系数，这些系数都是包含 4 个分量的向量。</p>
+<blockquote>
+<p>请一定要分清源颜色和目标颜色：</p>
+<ul>
+<li>源颜色：将要绘制的颜色，通常指将要绘制的拥有透明度物体的颜色。</li>
+<li>目标颜色：已经绘制的颜色，通常指被透明度物体盖住的后面物体的颜色。</li>
+</ul>
+</blockquote>
+<p>有了这四个参数，GPU 就会按照如下公式替我们计算像素的最终颜色了：</p>
+<figure><img alt="\begin{aligned}
+Result &= (1, 0, 0, 0.6) * (0.6, 0.6, 0.6, 0.6)\\\ \\\ &+ (0,1,0, 1) * (0.4,0.4,0.4,0.4) \\\
+\\\
+&=(0.6, 0.4, 0, 0.76)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0AResult%20%26%3D%20(1%2C%200%2C%200%2C%200.6)%20*%20(0.6%2C%200.6%2C%200.6%2C%200.6)%5C%5C%5C%20%5C%5C%5C%20%20%26%2B%20(0%2C1%2C0%2C%201)%20*%20(0.4%2C0.4%2C0.4%2C0.4)%20%5C%5C%5C%0A%5C%5C%5C%0A%26%3D(0.6%2C%20%200.4%2C%20%200%2C%200.76)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<blockquote>
+<p>源颜色因子和目标颜色因子也都是 4 维向量，也就是(0.6, 0.6, 0.6, 0.6)和(0.4, 0.4, 0.4，0.4）</p>
+</blockquote>
+<p>上面我们是将源颜色和目标颜色的RGBA 信息乘以一个固定的向量因子，事实上，WebGL 允许我们单独为 RGB 和 Alpha 设置对应的因子，使用 <code>gl.blendFuncSeparate</code>函数可完成该功能。</p>
+<pre><code lang="scss" class="hljs language-scss">gl<span class="hljs-selector-class">.blendFuncSeparate</span>(src_rgb_factor, des_rgb_factor, src_alpha_factor, des_alpha_factor)
+</code></pre><p>其中：</p>
+<ul>
+<li>src_rgb_factor: 代表源颜色的 RGB 因子。</li>
+<li>des_rgb_factor: 代表目标颜色的RGB 因子。</li>
+<li>src_alpha_factor：代表源颜色的透明度部分的因子。</li>
+<li>des_alpha_factor：代表目标颜色的透明度部分的因子。</li>
+</ul>
+<p>假设我们需要将源颜色的 RGB 因子设置为源颜色的透明度，源颜色的透明度因子采用自身的透明度，目标颜色的 RGB 因子设置为 1，目标颜色的透明度因子设置为 0，那么我们可以这样设置：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ZERO)<span class="hljs-comment">;</span>
+</code></pre><h4 data-id="heading-7">混合公式设置</h4>
+<p>上面我们以源颜色和混合颜色的加法公式来计算，WebGL 还提供了减法、逻辑运算等方式来计算最终颜色。使用gl.blendEquation来指定运算规则，规则有以下几种：</p>
+<ul>
+<li>gl.FUNC_ADD：相加。
+<ul>
+<li>源颜色 * 源因子 + 目标颜色 * 目标因子</li>
+</ul>
+</li>
+<li>gl.FUNC_SUBTRACT：相减。
+<ul>
+<li>源颜色 * 源因子 - 目标颜色 * 目标因子</li>
+</ul>
+</li>
+<li>gl.FUNC_REVERSE_SUBTRACT：反减。
+<ul>
+<li>目标颜色 - 源颜色。</li>
+</ul>
+</li>
+</ul>
+<h2 data-id="heading-8">混合实战</h2>
+<p>以上就是混合的理论，比较简单，主要是针对颜色和透明度的设置，接下来，我们就要进入实战阶段了。</p>
+<h3 data-id="heading-9">混合前的注意事项</h3>
+<p>在写代码之前，我们再回顾一下深度测试的概念。</p>
+<p>深度测试是这样的，GPU 绘制一个像素点的时候，会先检测当前位置是否存在片元，如果存在片元，则比较即将绘制的片元与已经存在的片元之间的 Z 值深度，距离屏幕远的片元会被舍弃，保留距离近的片元，同时将深度缓存值更新为最近保留的片元深度，如此循环测试，最终保留离屏幕最近的片元，完成遮挡效果。</p>
+<p>在混合之前，我们需要考虑这个问题。因为场景中透明物体和不透明物体的顺序是不确定的，那如何绘制才能保证正确的混合和正确的遮挡呢？</p>
+<p>记住下面这两个准则：</p>
+<ul>
+<li>透明物体在不透明物体前面时，混合颜色。</li>
+<li>透明物体在不透明物体后面时，不混合颜色，采用深度检测遮挡。</li>
+</ul>
+<p>对应的策略是：</p>
+<ul>
+<li>将透明物体和不透明物体区分开。</li>
+<li>首先开启深度更新功能<code>gl.depthMask(true)</code>，关闭混合功能<code>gl.disable(gl.BLEND)</code>。绘制所有不透明物体，绘制完后，深度缓存里保留的是离屏幕最近的物体的深度信息。</li>
+<li>对透明物体由远及近进行排序。</li>
+<li>开启混合功能，关闭深度更新功能，按照顺序对透明物体绘制。</li>
+</ul>
+<h3 data-id="heading-10">绘制两个物体</h3>
+<p>准备两个物体，第一个物体是一个红色玻璃，透明度为 0.5，第二个物体是一个不透明的绿色箱子，红色玻璃在前，绿色箱子在后面。</p>
+<pre><code lang="ini" class="hljs language-ini">//开启混合功能
+gl.enable(gl.BLENDING)<span class="hljs-comment">;</span>
+let <span class="hljs-attr">face1</span> = createFace(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, [<span class="hljs-number">255</span>，<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">125</span>])<span class="hljs-comment">;</span>
+let <span class="hljs-attr">face2</span> = createFace(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>])<span class="hljs-comment">;</span>
+</code></pre><p>源透明因子采用源目标的透明度，目标透明因子用 1减去源透明因子。</p>
+<pre><code lang="ini" class="hljs language-ini">gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)<span class="hljs-comment">;</span>
+</code></pre><h4 data-id="heading-11">混合相加</h4>
+<p>设置成混合相加，这也是默认的混合方式：</p>
+<pre><code lang="ini" class="hljs language-ini">gl.blendEquation(gl.FUNC_ADD)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811231673fdcfcc0079d5~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<h4 data-id="heading-12">混合相减</h4>
+<pre><code lang="ini" class="hljs language-ini">gl.blendEquation(gl.FUNC_SUBTRACT)<span class="hljs-comment">;</span>
+</code></pre><p>效果如下：</p>
+<p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets201811231673fe5af8bbf2ce~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>可以看到，中间相交部分的颜色变成了黑色，大家用上面的公式算一下就会理解。</p>
+<figure><img alt="\begin{aligned}
+
+C_{result} &= (1 * 0.5 - 0 * 0.5, 0 * 0.5 - 1 * 0.5, 0 * 0.5 - 0 * 0.5, 0.5 * 0.5 - 0.5 * 1 )
+\\\
+& = (0.5, -0.5, 0, -0.25) \\\
+& = (0.5, 0, 0, 0)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%0AC_%7Bresult%7D%20%26%3D%20(1%20*%200.5%20-%200%20*%200.5%2C%200%20*%200.5%20-%201%20*%200.5%2C%200%20*%200.5%20-%200%20*%200.5%2C%200.5%20*%200.5%20-%200.5%20*%201%20)%0A%5C%5C%5C%0A%26%20%3D%20(0.5%2C%20-0.5%2C%200%2C%20-0.25)%20%5C%5C%5C%0A%26%20%3D%20(0.5%2C%200%2C%200%2C%200)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<p>透明度是 0 ，所以显示黑色。</p>
+<h4 data-id="heading-13">混合反减</h4>
+<pre><code lang="ini" class="hljs language-ini">gl.blendEquation(gl.FUNC_SUBTRACT)<span class="hljs-comment">;</span>
+</code></pre><p></p><figure><img src="p1-jj.byteimg.comtos-cn-i-t2oaga2asxgold-user-assets20181123167413c1cafef45e~tplv-t2oaga2asx-zoom-in-crop-mark3024000.awebp" loading="lazy" class="medium-zoom-image"><figcaption></figcaption></figure><p></p>
+<p>红色相间部分为半透明绿色，验证步骤如下：</p>
+<figure><img alt="\begin{aligned}
+
+C_{result} &= ( 0 * 0.5 - 1 * 0.5 , 1 * 0.5 - 0 * 0.5, 0 * 0.5 - 0 * 0.5, 0.5 * 1 - 0.5 * 0.5 )
+\\\
+& = (-0.5, 0.5, 0, 0.25) \\\
+& = (0, 0.5, 0, 0.25)
+\end{aligned}" src="https://juejin.cn/equation?tex=%5Cbegin%7Baligned%7D%0A%0AC_%7Bresult%7D%20%26%3D%20(%200%20*%200.5%20%20-%201%20*%200.5%20%2C%20%201%20*%200.5%20-%20%200%20*%200.5%2C%20%20%200%20*%200.5%20-%200%20*%200.5%2C%20%20%200.5%20*%201%20-%200.5%20*%200.5%20)%0A%5C%5C%5C%0A%26%20%3D%20(-0.5%2C%200.5%2C%200%2C%200.25)%20%5C%5C%5C%0A%26%20%3D%20(0%2C%200.5%2C%200%2C%200.25)%0A%5Cend%7Baligned%7D" loading="lazy" class="medium-zoom-image"></figure>
+<h3 data-id="heading-14">回顾</h3>
+<p>本节，我们讲述了混合的使用技巧，学习了透明颜色的计算方式，并进一步理解了深度测试与深度保持的意义。</p>
+<p>下一节，我们学习 WebGL 的另一个重要技术：<code>帧缓冲</code>。</p>
+</div><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style>
+    </body>
+    </html>

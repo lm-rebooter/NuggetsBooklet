@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+    </head>
+    <body>
+    <div class="markdown-body"><style>.markdown-body{word-break:break-word;line-height:1.75;font-weight:400;font-size:16px;overflow-x:hidden;color:#252933}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{line-height:1.5;margin-top:35px;margin-bottom:10px;padding-bottom:5px}.markdown-body h1{font-size:24px;line-height:38px;margin-bottom:5px}.markdown-body h2{font-size:22px;line-height:34px;padding-bottom:12px;border-bottom:1px solid #ececec}.markdown-body h3{font-size:20px;line-height:28px}.markdown-body h4{font-size:18px;line-height:26px}.markdown-body h5{font-size:17px;line-height:24px}.markdown-body h6{font-size:16px;line-height:24px}.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}.markdown-body img{max-width:100%}.markdown-body hr{border:none;border-top:1px solid #ddd;margin-top:32px;margin-bottom:32px}.markdown-body code{word-break:break-word;border-radius:2px;overflow-x:auto;background-color:#fff5f5;color:#ff502c;font-size:.87em;padding:.065em .4em}.markdown-body code,.markdown-body pre{font-family:Menlo,Monaco,Consolas,Courier New,monospace}.markdown-body pre{overflow:auto;position:relative;line-height:1.75}.markdown-body pre>code{font-size:12px;padding:15px 12px;margin:0;word-break:normal;display:block;overflow-x:auto;color:#333;background:#f8f8f8}.markdown-body a{text-decoration:none;color:#0269c8;border-bottom:1px solid #d1e9ff}.markdown-body a:active,.markdown-body a:hover{color:#275b8c}.markdown-body table{display:inline-block!important;font-size:12px;width:auto;max-width:100%;overflow:auto;border:1px solid #f6f6f6}.markdown-body thead{background:#f6f6f6;color:#000;text-align:left}.markdown-body tr:nth-child(2n){background-color:#fcfcfc}.markdown-body td,.markdown-body th{padding:12px 7px;line-height:24px}.markdown-body td{min-width:120px}.markdown-body blockquote{color:#666;padding:1px 23px;margin:22px 0;border-left:4px solid #cbcbcb;background-color:#f8f8f8}.markdown-body blockquote:after{display:block;content:""}.markdown-body blockquote>p{margin:10px 0}.markdown-body ol,.markdown-body ul{padding-left:28px}.markdown-body ol li,.markdown-body ul li{margin-bottom:0;list-style:inherit}.markdown-body ol li .task-list-item,.markdown-body ul li .task-list-item{list-style:none}.markdown-body ol li .task-list-item ol,.markdown-body ol li .task-list-item ul,.markdown-body ul li .task-list-item ol,.markdown-body ul li .task-list-item ul{margin-top:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:3px}.markdown-body ol li{padding-left:6px}.markdown-body .contains-task-list{padding-left:0}.markdown-body .task-list-item{list-style:none}@media (max-width:720px){.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.markdown-body h3{font-size:18px}}</style><p>大家好，我们是蚂蚁集团体验技术部的可视化团队。今天，我们想和大家一起聊聊数据可视化。</p>
+<p>提到数据可视化，大家脑海里面可能会出现下面这些图表。的确，在很多人的印象里，数据可视化就等于制作美丽的图表，但其实数据可视化远不如此：“It's not just about making pretty pictures”。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp8a19825311de4b33a8fab2fd6cf2a1ef~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>那么接下来就给大家简单地介绍一下数据可视化这个年轻却又古老的领域，希望大家“宝山一游，不会空手而归”。</p>
+<h2 data-id="heading-0">数据可视化是什么？</h2>
+<p>首先我们来通过一个经典的挑战来认识数据可视化：观察下面的表格数据，你能在短时间内判断出每一组数据的关系吗？</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2282434dc2524929bad00dd627f40653~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>相信直接看这些数据，大家内心或多或少都会有点崩溃；如果大家碰巧懂得统计学的一些知识，估计会更加崩溃：它们的单维度均值、最小二乘法回归线方程、误差的平方和、方差的回归和、均方误差的误差和、相关系数等统计属性均相同！</p>
+<p>但如果我们将上面的数据分布情况用下面这张图表示的话，相信大家可以迅速的从数据中发现它们不同的模式。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2e554437a22b4bda9032b082885ff014~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>上面这种“<strong>将不可见或难以直接显示的数据转化为可感知的图形、符号、颜色、 纹理等，增强数据识别效率，传递有效信息</strong>”的手段就是数据可视化。</p>
+<p>浙江大学陈为教授的《数据可视化》这部书中是这样定义数据可视化的：<strong>利用人眼的感知能力对数据进行交互的可视表达以增强认知的技术</strong> 。接下来我们就深入了解一下定义中的“人眼的感知能力”和“增强认知”。</p>
+<h3 data-id="heading-1">人眼的感知能力</h3>
+<p>“人眼的感知能力”，也就是我们平常说的视觉。不知道大家会不会和我有相同的疑问：视觉只是我们众多感觉中的一种，是什么让它脱颖而出，可以用来分析数据呢？这里列出两点比较重要的原因。</p>
+<p><strong>第一，在几种感官系统中，视觉系统获得信息是最高效的。</strong> 因为它可以并行处理视觉信息，比如你可以很迅速地从一片蓝色的点中找到一个红色的点。相比之下，耳朵只能线性地获得信息，而我们也从来没有听说过人的鼻子和嘴巴可以感知大量的复杂信息，对它们的探索还在一个很初始的阶段。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp6360d8f8b8d9487a89c2e7f719235313~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>第二，图片可以加速人们查找和识别信息，因为信息会和空间信息相关联。</strong> 比如说，如果将有关联的事物放在一起，在不借助任何标签的情况下，我们也能轻易找到和识别这些事物，下面提到的元素周期表就是很好的例子。同时图片也很易于理解，就像很少有人能一眼看出一组数据的模式，但是小孩都能看懂条形图。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp8d4fc0e517164b4f9dbde3092dc5a434~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-2">增强认知</h3>
+<p>基于这两个特点，我们可以把数据和视觉元素关联起来，通过视觉去高效获得视觉元素的特点，从而了解对应数据的特点，达到增强认知的效果。</p>
+<p>提到增强认知，这里就不得不注意了：<strong>不是所有的数据可视化都能到达增强认知的效果</strong>。比如下面两张图都是用折线图可视化任天堂游戏销售趋势，但是第一张图给人的感觉是他们的趋势异常稳定，第二张图却反映出在2016年6月左右他们有极高的提升。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp1b468dc48d724b4b93b0c7cc19005877~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>出现这个问题的原因就是第一张图的 y 轴的范围设置的远远超过了数据的范围，出现了视觉上的偏差，这种可视化设计就是不好的：不仅仅没有达到增强认知的效果，还给大家带来了错误的认知。</p>
+<p>所以到底什么样的数据可视化才是能帮助我们增强认知的呢？更形象一点：什么样的数据可视化才能算的上是美丽的？在《Beautiful Visualization》里面将归纳了美丽的数据可视化的四个特点：新颖，充实，高效和美感。下面我们将用下面伦敦地铁图这个经典的案例来解释这4个特点：</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpfeeaab3c5feb47d8bc0c3e9f28fb2ede~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>伦敦地铁图的最大改变就是：<strong>把地图从准确代表地理特征的束缚释放出来了，线条不再是歪歪扭扭的，只有简单的直线和角度。</strong> 从传统歪歪扭扭的线条这种旧的风格，到直线和角度这种新的角度看数据，就是<strong>新颖</strong>。着重展示地铁站之间相对的逻辑关系，弱化地理关系，让人们弄明白下一步自己怎么走，而不是这条地铁线路到底是如何修的，简介的突出关键信息，这就是<strong>充实</strong>和<strong>高效。</strong> 合理利用简单的直线和角度来引导用户，揭示关系，这就是“美感”。</p>
+<p>当然上面的原则也不是绝对的。根据上面的高效原则我们需要尽量避免过多的装饰，但是<strong>信息图（Infographics)</strong> 的出现，让大家意识到装饰能提高用户的参与感，让用户更难忘。</p>
+<p>比如在下面展示世界上最高的建筑的信息图中，用建筑的图片替代了本来的条，虽然降低人们获得信息的效率，但是能让大家感到更有意思，印象更加深刻：也许多年以后你在回忆起这本小册子的时候，你啥都忘了，但是这张图还深深的印在你的脑海里！</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpf70666191177462596ec0bc623798fe8~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-3">为什么要学习数据可视化</h2>
+<p>聊了这么多数据可视化是什么，那么我们为什么要学习数据可视化呢？数据可视化到底对我们的生活，工作和世界的发展到底有什么用？</p>
+<h3 data-id="heading-4">时代背景</h3>
+<p>了解任何一个东西的作用都不应该脱离它的时代背景，毕竟俗话说的好：“时势造英雄”，所以我们首先在了解一下我们的时代背景。</p>
+<p>随着科技的发展，更多的数据被收集、存储和感知，我们真正进入了<strong>大数据时代</strong>。而大数据时代最值钱的是什么？当然是数据，更准确地说：应该是数据背后的信息，这些信息进行整理，又会形成知识和经验，从而帮助我们做决策。</p>
+<p>这个时候，也许就有人就要问了：在人工智能家喻户晓的时代，直接把数据分析交给机器不就好了吗？为什么还需要人的参与？这是因为在大多数情况下，人们面对数据不知道提出什么样的问题，甚至不能提前知道自己提的问题是否正确。这种时候，统计学和机器学习也无能为力。</p>
+<p>因此，在数据分析中，我们首先可以通过可视化提出需要研究的问题。在分析过程中，再用可视化去发现算法的问题以及参数对结果的影响，从而改进算法和任务。最后，我们还可以用可视化去展现分析结果，并且判断根据这个结果做的决策是否正确。</p>
+<p>在大数据时代的背景下，针对不同的数据类型和研究目的，数据可视化分为了三个主要分支：科学可视化、信息可视化和可视化分析学。</p>
+<p>接下来我们就分别来了解一下它们，看看我们日常生活中主要是在哪个分支上以及每个分支在工作中的主要应用场景，从而了解更多学习数据可视化的理由。</p>
+<h3 data-id="heading-5">科学可视化</h3>
+<p>首先我们来看看可视化领域最早、最成熟的一个跨学科研究与应用的领域：<strong>科学可视化(scientifc visualization)</strong>。</p>
+<p>科学可视化主要可视化的是自然科学领域中一些具体的、非抽象的东西，比如医学领域的骨骼等影像数据，气象气候的洋流流动数据等。这些数据主要带有几何和空间信息，比如形状、位置等，重点探索如何有效地呈现其中的几何、拓扑和形状特征。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp09c1beb4762c40ca93dec9da7656bc24~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>在日常生活中，我们都接触的比较少，接触它的更多是一些科学家和相关研究人员。</p>
+<h3 data-id="heading-6">信息可视化</h3>
+<p>相对于科学可视化面向抽象数据数据，<strong>信息可视化(information visualization)</strong> 处理的对象是抽象的、非结构化数据。这些数据往往来源我们的日常生活：社交网络数据，疫情数据，销量数据，平常我们接触到的数据可视化几乎都是信息可视化。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpeaa9fd0e0b5f4cb38b6c2a2def24bc20~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>工作中信息可视化的具体场景这里提以下三个：移动端可视化，图可视化和地理可视化。</p>
+<p><strong>移动端可视化</strong>是在手机 APP、H5 或者小程序做数据可视化图表。移动端是大势所趋，几乎所有的线上应用，都有其对应的移动端，如何让用户更好的了解自己的数据或者在使用产品时产生的数据，这个就是移动端可视化需要考虑的问题了。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp34ed10315d734deb913467fc871ddc0e~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>图可视化</strong>主要是对网络数据的可视化，主要分为<strong>图分析</strong>和<strong>图编辑。</strong> 图分析用于风控、安全、营销场景中的关系发现，对图的一些基本概念进行业务上解读，环、关键链路、连通量等。<strong>图编辑</strong>用于图建模（ER图、UML图）、流程图、脑图等，需要用户深入参与关系的创建、编辑和删除的场景。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp25b1c687760341adac1435032cc47ff9~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>地理数据可视化</strong>主要是对空间数据域的可视化，主要有四大方向：</p>
+<ul>
+<li>信息图：主要用于展示位置相关的报表，信息图，路径变化等等。</li>
+</ul>
+
+<ul>
+<li>大屏应用：大屏展示一般以地理数据为载体，如建筑，道路，轨迹等数据可视化。</li>
+</ul>
+
+<ul>
+<li>地理分析应用:这类应用往往是海量地理数据的交互分析，用户基于位置的用户推荐，拉新，促活等业务运营系统，或者选址，风险监控等系统。</li>
+</ul>
+
+<ul>
+<li>移动端地图应用：路径规划，位置导航，一般是需要和PC联动，PC端地图侧重规划指挥，移动侧重作业执行。</li>
+</ul>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcpaf095aac7d75495b8be1973fe1f3f224~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h3 data-id="heading-7">可视分析学</h3>
+<p>由于上面提到的在大数据时代数据分析的重要性，<strong>可视分析学(Visual Analytics)</strong> 就诞生了：可视化和分析结合的新领域，同时也涉及到图形学、数据挖掘和人机交互等领域。它往往以可视交互界面的形式给用户提供分析和可视化的能力，帮助用户做决策。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp5a9b0ff040d74f6d88e7194e03f92778~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p>而可视分析在工作的运用场景主要有两个：BI 工具和大屏可视化。</p>
+<p>所谓的 <strong>BI 工具</strong>就是商业智能分析工具，是指使用一套方法和技术来准备、呈现和帮助分析数据的工具。比如有名的 PowerPI，Tableau 等等。对于 BI 工具来说，其中85% 以上的需求都是做通用报表的需求。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp2d008b9d774749dba5556d619b07c107~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<p><strong>大屏可视化</strong>聚焦于会议展览、业务监控、风险预警、地理信息分析等多种业务的展示，在图形渲染、可视化设计方面都有很高的要求。比较有名的就是双十一时候的可视化大屏。</p>
+<p><img src="p3-juejin.byteimg.comtos-cn-i-k3u1fbpfcp3ca47411d566495294c622a211d015e6~tplv-k3u1fbpfcp-zoom-in-crop-mark3024000.awebp" alt="" loading="lazy" class="medium-zoom-image"></p>
+<h2 data-id="heading-8">数据可视化学习的难点</h2>
+<p>讲到这里，大家应该对学习数据可视化很感兴趣了，但是学习数据可视化却不是一件容易的事情。一个比较完整的数据分析流程主要分为两大部分：<strong>设计和实现</strong>，每一部分都有对应的挑战。</p>
+<p><strong>设计</strong>的主要由认识数据，确认任务和设计方案构成。主要是根据数据提出想要探索的问题，并且提出解决方案。这个部分的挑战在于：什么样的数据适合讨论什么样的问题？众多设计方案之中哪一个才是最好的？</p>
+<p><strong>实现</strong>的主要由数据转换和数据绘制构成。首先需要抽象的数据转换成绘制需要的视觉形式数据，然后将视觉形式的数据绘制到屏幕上。这个部分的挑战在于有太多的工具可以选择，什么样的工具才是真正适合当前设计方案的？</p>
+<p>一方面来讲，国内高校传统的数据可视化课程更偏理论，更侧重设计，但是对实现却讲解甚少。这导致某些学生学习完成之后，面对市面上各种各样的数据可视化工具，不知道如何学习和选择。</p>
+<ul>
+<li><a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fd3%2Fd3" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/d3/d3" ref="nofollow noopener noreferrer">D3</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fecharts.apache.org%2Fzh%2Findex.html" target="_blank" rel="nofollow noopener noreferrer" title="https://echarts.apache.org/zh/index.html" ref="nofollow noopener noreferrer">ECharts</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fg2.antv.vision%2Fzh" target="_blank" rel="nofollow noopener noreferrer" title="https://g2.antv.vision/zh" ref="nofollow noopener noreferrer">G2</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvega%2Fvega" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vega/vega" ref="nofollow noopener noreferrer">Vega</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fvega%2Fvega-lite" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/vega/vega-lite" ref="nofollow noopener noreferrer">Vega-lite</a> 都可以做可视化，到底选择哪个？</li>
+<li>D3 学习曲线那么高，怎么入门？</li>
+<li>ECharts 和 G2 一个是配置式的 API，一个是函数式 API，到底有哪些区别？</li>
+</ul>
+<p>另一方面现有的网课对理论的讲解比较薄弱，侧重于讲解实现部分，但也不完整。课程中数据绘制这部分占比较多，比如浏览器的绘制技术，性能优化的方法等。这导致学习完成之后，面对数据和任务也不知道选择什么可视化方法，一些基础概念也不清楚：比例尺，数据映射，分箱操作等等。</p>
+<p>比如我们在开发迭代 G2 的过程中，发现了许多用户有许多问题，就是因为对数据可视化中的图形语法不了解所导致的。</p>
+<ul>
+<li>Quantile，Threshold，Quantize 比例尺有啥区别？</li>
+<li>希望生成的坐标刻度是6个，但是为什么却生成了8个？</li>
+<li>nice 操作到底有什么用？</li>
+</ul>
+<p>为了图形语法能够普罗大众，所以我们简化了 API，增加了 G2Plot 项目。但是，从另一方面，我们也希望提升社区同学的可视化的理解广度，这是小册子的初衷。</p>
+<h2 data-id="heading-9">小册子的优势</h2>
+<p>针对上面的问题，我们团队设计了这本小册子。为了保证内容能形象生动，不停留在理论，我们设计了一个真实的数据分析任务：<strong>可视化苏菲的世界</strong>。这个任务的具体细节会在后面讲解，小册子的内容分为三个部分，都围绕着“通过可视化苏菲的世界学习可视化”这个目的展开：</p>
+<ul>
+<li><strong>基础篇</strong>：首先会了解什么是“苏菲的世界”和数据可视化的流程（确定数据种类，任务等），然后基于此提出我们想要通过数据可视化解决的问题。这之后我们会不借助任何工具，学习如何基于浏览器的 Canvas 和 SVG 绘图技术绘制一个条形图，从而解决上面的其中一个问题。在这个过程中我们会发现开发一个简单的条形图就会很麻烦，于是我们会介绍图形语法以及它如何去简化这个流程。</li>
+<li><strong>实战篇：</strong> 为了提高我们解决问题的效率，这里会带大家从 0 到 1 不使用任何第三方库开发一个基于图形语法的图表库：<a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fsparrow-vis%2Fsparrow" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/sparrow-vis/sparrow" ref="nofollow noopener noreferrer">Sparrow</a>。从搭建开发环境开始，到一些低层级的可视化模块（比例尺，坐标系等）的开发，最后在它们的基础上完成图形语法图表库。</li>
+<li><strong>分析篇</strong>：开发完了 Sparrow，我们将用它去解决上面的问题。但是在这个过程中我们会发现 Sparrow 的能力不足，有些问题它没有办法解决。于是这个时候我们就会用 AntV 里面一些成熟的图表库去解决剩余的问题，来看看一个图表库从 1 到 2 有哪些地方需要增强。</li>
+</ul>
+<p>除了丰富且完整的内容之外，我们有强大的写作阵容：基础篇和实战篇主要由由逍为和万木完成。两者除了都是 G2 的核心维护者之外，前者还是 <a href="https://link.juejin.cn?target=https%3A%2F%2Fantv.vision%2Fzh%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://antv.vision/zh/" ref="nofollow noopener noreferrer">AntV </a>的总架构师，在 BI 开发领域有丰富的开发经验；后者在 <a href="https://link.juejin.cn?target=https%3A%2F%2Fvast-challenge.github.io%2F2021%2Fdescription.html" target="_blank" rel="nofollow noopener noreferrer" title="https://vast-challenge.github.io/2021/description.html" ref="nofollow noopener noreferrer">Vast Challenge</a>，<a href="https://link.juejin.cn?target=http%3A%2F%2Fchinavis.org%2F2020%2Fchallenge.html" target="_blank" rel="nofollow noopener noreferrer" title="http://chinavis.org/2020/challenge.html" ref="nofollow noopener noreferrer">ChinaVis Challenge</a> 等挑战赛中多次获得不错成绩。分析篇由新茗，福晋和云极完成，三人分别是 <a href="https://link.juejin.cn?target=https%3A%2F%2Fg2plot.antv.vision%2Fzh%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://g2plot.antv.vision/zh/" ref="nofollow noopener noreferrer">G2Plot</a>，<a href="https://link.juejin.cn?target=https%3A%2F%2Fcharts.ant.design%2F" target="_blank" rel="nofollow noopener noreferrer" title="https://charts.ant.design/" ref="nofollow noopener noreferrer">Ant Desgin Charts</a> 和 <a href="https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fantvis%2FL7Plot" target="_blank" rel="nofollow noopener noreferrer" title="https://github.com/antvis/L7Plot" ref="nofollow noopener noreferrer">L7Plot</a> 的作者和核心维护者。</p>
+<p>学习理论最好的方法就是去动手解决一个实际的问题，了解一个“轮子”的最好方式就是去写一个“轮子”。如果你满足下面任何一点，那么这本小册子将是你最好的选择：</p>
+<ul>
+<li>对可视化和数据分析感兴趣，在日常学习或者工作中常常和它们接触，想深入了解。</li>
+<li>对前端或者前端工程化感兴趣，想开发一个完整的前端工具来练练手，熟悉其中的主要流程。</li>
+<li>想参与 G2 等开源社区的建设，却不知道从哪开始看代码。</li>
+<li>想参加 Vast Challenge ，ChinaVis Challenge 等数据分析的挑战赛，但是无从下手。</li>
+<li>想加入我们，但是怕通不过面试。</li>
+</ul>
+<p>那么，接下来就让我们从认识苏菲的世界和了解数据可视化的基本流程开始，一起加入这段有意思的旅程吧！</p>
+<blockquote>
+<p>参考资料</p>
+<ul>
+<li>数据可视化，陈为</li>
+<li>Visualization Analysis &amp; Design，Tamara Munzner</li>
+<li>Beautiful.Visualization，Julie Steele/&nbsp;Noah Iliinsky</li>
+<li>Data-Driven Guides: Supporting Expressive Design for Information Graphics，Nam Wook Kim, Eston Schweickart, Zhicheng Liu, Mira Dontcheva, Wilmot Li, Jovan Popovic, and Hanspeter Pfister</li>
+</ul>
+</blockquote><style>.markdown-body pre,.markdown-body pre>code.hljs{color:#333;background:#f8f8f8}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333;font-weight:700}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999;font-weight:700}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}</style></div>
+    </body>
+    </html>
